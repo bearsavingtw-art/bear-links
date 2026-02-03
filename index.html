@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bear.saving | 讓平凡的生活更有底氣</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #fefae0;
+            --text-color: #5f4b32;
+            --accent-color: #d4a373;
+            --button-text: #ffffff;
+            --font-serif: "Playfair Display", "Times New Roman", serif;
+            --font-sans: "Montserrat", "PingFang TC", "Microsoft JhengHei", sans-serif;
+        }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--font-sans);
+            margin: 0; padding: 0;
+            display: flex; flex-direction: column; align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            width: 100%; max-width: 480px;
+            padding: 40px 20px; box-sizing: border-box; text-align: center;
+        }
+        header h1 {
+            font-family: var(--font-serif); font-size: 1.8rem;
+            letter-spacing: 2px; margin-bottom: 10px;
+        }
+        header p { font-size: 0.9rem; opacity: 0.8; margin-bottom: 30px; }
+        .video-container {
+            width: 100%; max-width: 350px;
+            margin: 0 auto 30px auto; border-radius: 20px;
+            overflow: hidden; box-shadow: 0 10px 30px rgba(95,75,50,0.1);
+            background: #ffffff; min-height: 450px;
+        }
+        .instagram-media {
+            margin: 0 !important; border: none !important;
+            border-radius: 20px !important; width: 100% !important;
+        }
+        .links-container {
+            display: flex; flex-direction: column; gap: 15px; margin-bottom: 30px;
+        }
+        .link-card {
+            background-color: var(--accent-color); color: var(--button-text);
+            text-decoration: none; padding: 18px; border-radius: 12px;
+            font-size: 1rem; font-weight: 500; letter-spacing: 1px;
+            transition: transform 0.2s; display: block;
+        }
+        .link-card:hover { transform: translateY(-2px); }
+        .gift-section {
+            background-color: rgba(255, 255, 255, 0.5);
+            border: 1.5px dashed var(--accent-color);
+            border-radius: 15px; padding: 25px 20px; margin-top: 10px;
+        }
+        .gift-section h3 { font-family: var(--font-serif); font-size: 1.2rem; margin-top: 0; margin-bottom: 15px; }
+        .gift-item { font-size: 0.85rem; margin-bottom: 15px; line-height: 1.6; }
+        .keyword { color: var(--accent-color); font-weight: 600; background: #fff; padding: 2px 6px; border-radius: 4px; }
+        .social-links { margin-top: 30px; display: flex; justify-content: center; }
+        .social-icon { color: var(--text-color); font-size: 1.8rem; text-decoration: none; }
+        footer { padding: 40px 0; font-size: 0.75rem; opacity: 0.5; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Bear.saving</h1>
+            <p>在理財的邏輯裡，找回生活的餘裕。</p>
+        </header>
+        <div class="video-container">
+            <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/p/DUStl0QEmYI/" data-instgrm-version="14"></blockquote>
+        </div>
+        <div class="links-container">
+            <a href="https://myship.7-11.com.tw/general/detail/GM2502152714662?utm_source=ig&utm_medium=social" class="link-card" target="_blank">Bear.saving 存錢工具賣場</a>
+            <a href="https://black-timothea-81.tiiny.site/" class="link-card" target="_blank">🐻 Bear.saving 財務診斷室 6.1</a>
+        </div>
+        <div class="gift-section">
+            <h3>Bear 私訊小禮物</h3>
+            <div class="gift-item">私訊 <span class="keyword">財務/ 2026</span> 可獲原創存錢系統 PDF</div>
+            <div class="gift-item">私訊 <span class="keyword">蓄水池</span> 可獲離職底氣計算機</div>
+            <div class="gift-item">私訊 <span class="keyword">［表格］</span> 獲預算分配/盤點/年度預算表</div>
+        </div>
+        <div class="social-links">
+            <a href="https://www.instagram.com/bear.saving/" class="social-icon" target="_blank"><i class="fab fa-instagram"></i></a>
+        </div>
+        <footer>© Bear.saving | 平凡生活的底氣實踐</footer>
+    </div>
+    <script async src="//www.instagram.com/embed.js"></script>
+    <script>
+        window.onload = function() { if (window.instgrm) { window.instgrm.Embeds.process(); } };
+    </script>
+</body>
+</html>
