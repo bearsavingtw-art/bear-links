@@ -85,6 +85,24 @@
             color: rgba(176, 141, 133, 0.2); position: absolute; top: -40px; left: 50%; transform: translateX(-50%);
         }
 
+        /* 影片 */
+        .video-container {
+            width: 100%; max-width: 380px; margin: 0 auto 50px;
+            border-radius: 20px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+            position: relative; min-height: 500px; background: #fff;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .fallback-link { position: absolute; text-align: center; z-index: 1; color: var(--text-secondary); text-decoration: none; font-size: 0.9rem; }
+        .instagram-media { position: relative; z-index: 2; min-width: 100% !important; margin: 0 !important; }
+
+        /* 系統樹狀圖容器 */
+        .system-tree-container {
+            width: 100%; overflow-x: auto;
+            padding: 20px 0; -webkit-overflow-scrolling: touch;
+            display: flex; justify-content: center;
+        }
+        .mermaid { background-color: transparent; min-width: 600px; }
+
         /* 商品櫥窗 */
         .product-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 30px; margin-top: 40px; }
         .product-card {
@@ -100,23 +118,21 @@
         .p-desc { font-size: 0.85rem; color: var(--text-secondary); font-family: sans-serif; }
         .p-price { margin-top: 10px; font-weight: 600; color: var(--accent); font-size: 0.9rem; }
 
-        /* [NEW] 見證牆 (Review Wall) */
+        /* 見證牆 */
         .reviews-container {
             display: flex; gap: 20px; overflow-x: auto; padding: 20px 10px 40px;
             scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;
         }
-        .reviews-container::-webkit-scrollbar { display: none; } /* 隱藏捲軸 */
-        
+        .reviews-container::-webkit-scrollbar { display: none; }
         .review-card {
-            flex: 0 0 280px; /* 卡片寬度 */
-            scroll-snap-align: center;
+            flex: 0 0 280px; scroll-snap-align: center;
             border-radius: 15px; overflow: hidden;
             box-shadow: 0 5px 15px rgba(0,0,0,0.05); transition: 0.3s;
         }
         .review-card:hover { transform: translateY(-5px); }
         .review-img { width: 100%; height: auto; display: block; }
 
-        /* [NEW] 常見問題 (FAQ) */
+        /* FAQ */
         .faq-container { text-align: left; max-width: 700px; margin: 0 auto; }
         .faq-item { border-bottom: 1px solid #eee; margin-bottom: 15px; padding-bottom: 10px; }
         .faq-question {
@@ -131,17 +147,6 @@
         }
         .faq-item.active .faq-answer { max-height: 300px; padding-bottom: 15px; }
         .faq-item.active .faq-icon { transform: rotate(180deg); }
-
-
-        /* 影片 */
-        .video-container {
-            width: 100%; max-width: 380px; margin: 0 auto 50px;
-            border-radius: 20px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.08);
-            position: relative; min-height: 500px; background: #fff;
-            display: flex; justify-content: center; align-items: center;
-        }
-        .fallback-link { position: absolute; text-align: center; z-index: 1; color: var(--text-secondary); text-decoration: none; font-size: 0.9rem; }
-        .instagram-media { position: relative; z-index: 2; min-width: 100% !important; margin: 0 !important; }
 
         /* 服務與禮物 */
         .service-card {
@@ -231,12 +236,23 @@
     </header>
 
     <section class="section fade-in">
-        <div class="philosophy-text">
-            <p>存錢不是為了限制渴望，<br>而是為了讓未來的選擇更有底氣。<br><br>
-            Bear.saving 陪妳一起，<br>用最溫柔的方式，找回對金錢的掌控感。</p>
+        <p style="margin-bottom:25px; font-weight:600; color:var(--text-primary); letter-spacing:1px;">
+            (必看!) 存錢工具介紹影片 👇
+        </p>
+        <div class="video-container">
+            <a href="https://www.instagram.com/p/DUStl0QEmYI/" target="_blank" class="fallback-link">
+                <i class="fab fa-instagram" style="font-size: 2rem; display:block; margin-bottom:10px;"></i>
+                影片載入中...<br>若無畫面請點此前往 IG 觀看
+            </a>
+            <blockquote class="instagram-media" 
+                data-instgrm-permalink="https://www.instagram.com/p/DUStl0QEmYI/?utm_source=ig_embed&amp;utm_campaign=loading" 
+                data-instgrm-version="14">
+            </blockquote>
         </div>
+    </section>
 
-        <h2 style="font-family:'Playfair Display'; margin-top:60px; margin-bottom:10px;">Selected Tools</h2>
+    <section class="section fade-in" style="padding-top: 0;">
+        <h2 style="font-family:'Playfair Display'; margin-top:20px; margin-bottom:10px;">Selected Tools</h2>
         <div class="product-grid">
             <a href="https://myship.7-11.com.tw/general/detail/GM2502152714662?utm_source=ig&utm_medium=social" target="_blank" class="product-card">
                 <img src="product1.jpg" alt="Bear 原創記帳本" class="p-image">
@@ -268,7 +284,6 @@
     <section class="section fade-in" style="padding-bottom: 20px;">
         <h2 style="font-family:'Playfair Display'; margin-bottom:10px;">Love Letters</h2>
         <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:30px;">來自粉絲的真實回饋，也是我持續前進的動力。</p>
-        
         <div class="reviews-container">
             <div class="review-card"><img src="review1.jpg" alt="Review 1" class="review-img"></div>
             <div class="review-card"><img src="review2.jpg" alt="Review 2" class="review-img"></div>
@@ -278,25 +293,58 @@
         </div>
     </section>
 
-    <section class="section fade-in" style="padding-top: 0;">
-        <p style="margin-bottom:25px; font-weight:600; color:var(--text-primary); letter-spacing:1px;">
-            (必看!) 存錢工具介紹影片 👇
-        </p>
-        <div class="video-container">
-            <a href="https://www.instagram.com/p/DUStl0QEmYI/" target="_blank" class="fallback-link">
-                <i class="fab fa-instagram" style="font-size: 2rem; display:block; margin-bottom:10px;"></i>
-                影片載入中...<br>若無畫面請點此前往 IG 觀看
-            </a>
-            <blockquote class="instagram-media" 
-                data-instgrm-permalink="https://www.instagram.com/p/DUStl0QEmYI/?utm_source=ig_embed&amp;utm_campaign=loading" 
-                data-instgrm-version="14">
-            </blockquote>
+    <section class="section fade-in" style="padding-bottom: 0;">
+        <div class="philosophy-text">
+            <p>存錢不是為了限制渴望，<br>而是為了讓未來的選擇更有底氣。<br><br>
+            Bear.saving 陪妳一起，<br>用最溫柔的方式，找回對金錢的掌控感。</p>
         </div>
+    </section>
+
+    <section class="section fade-in" style="padding-top: 20px; padding-bottom: 20px;">
+        <h2 style="font-family:'Playfair Display'; margin-bottom:10px;">The Bear System</h2>
+        <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:30px;">不只是表格，而是一套完整的底氣生態系。</p>
+        
+        <div class="system-tree-container">
+            <div class="mermaid">
+                graph TD
+                %% --- 風格設定 ---
+                classDef root fill:#5a4d41,stroke:#5a4d41,color:#fff,font-weight:bold,font-size:16px;
+                classDef trunk fill:#b08d85,stroke:#b08d85,color:#fff,font-weight:bold;
+                classDef branch fill:#fcfbf9,stroke:#b08d85,color:#5a4d41,stroke-width:2px,stroke-dasharray: 5 5;
+                classDef leaf fill:#fff,stroke:#968c83,color:#5a4d41;
+                classDef ritual fill:#eaddd7,stroke:#b08d85,color:#5a4d41,font-style:italic;
+
+                %% --- 樹根：核心理念 ---
+                Root[核心根基：建立生活的「底氣」]:::root --> Trunk(Bear 動態財務系統 V6.1):::trunk
+
+                %% --- 樹幹：三大支柱 ---
+                Trunk --> B1[第一階段：釐清・診斷]:::branch
+                Trunk --> B2[第二階段：策略・佈局]:::branch
+                Trunk --> B3[第三階段：儀式・落地]:::branch
+
+                %% --- 分支 ---
+                B1 --> L1_1(財務診斷室 V6.1):::leaf
+                
+                B2 --> L2_1(蓄水池計算機):::leaf
+                B2 --> L2_2(離職底氣計算機):::leaf
+                B2 --> L2_3(照顧好、愛自己):::leaf
+
+                B3 --> L3_1(Bear 原創記帳本):::ritual
+                B3 --> L3_2(韓系質感書衣):::ritual
+                B3 --> L3_3(實體存錢工具):::ritual
+                
+                %% --- 成果 ---
+                L3_1 -. 書寫帶來平靜 .-> Outcome(拿回生活選擇權):::root
+                L3_3 -. 視覺化累積感 .-> Outcome
+
+                style Outcome fill:#5a4d41,stroke:#5a4d41,color:#fff,font-weight:bold;
+            </div>
+        </div>
+        <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:10px;">( ← 左右滑動查看完整系統 → )</p>
     </section>
 
     <section class="section fade-in">
         <h2 style="font-family:'Playfair Display'; margin-bottom:20px;">Free Resources</h2>
-        
         <a href="https://black-timothea-81.tiiny.site/" target="_blank" class="service-card">
             <div class="service-icon"><i class="fas fa-chart-pie"></i></div>
             <div>
@@ -305,7 +353,6 @@
             </div>
             <i class="fas fa-chevron-right" style="margin-left:auto; color:#ddd;"></i>
         </a>
-
         <div class="gift-section">
             <div class="gift-title">Bear's Secret</div>
             <p style="font-size:0.9rem; color:var(--text-secondary); margin-bottom:30px;">
@@ -332,72 +379,42 @@
 
     <section class="section fade-in" style="padding-top: 0;">
         <h2 style="font-family:'Playfair Display'; margin-bottom:30px;">Q & A</h2>
-        
         <div class="faq-container">
             <div class="faq-item">
-                <div class="faq-question">
-                    理財新手適合使用這套工具嗎？ <i class="fas fa-chevron-down faq-icon"></i>
-                </div>
+                <div class="faq-question">Bear 的系統跟一般理財表格有什麼不同？<i class="fas fa-chevron-down faq-icon"></i></div>
                 <div class="faq-answer">
-                    非常適合！Bear 的設計初衷就是為了讓「害怕數字」的人也能輕鬆上手。不用懂複雜的會計，只要跟著書寫與分配，就能找回對金錢的掌控感。
+                    最大的不同在於「診斷」與「動態計算」。一般的表格只是紀錄過去的數字，但 Bear 的系統（如蓄水池計算機）能幫妳預測未來、應對收入不穩，讓妳真正擁有掌控權，而不只是填空題。
                 </div>
             </div>
-
             <div class="faq-item">
-                <div class="faq-question">
-                    財務診斷室 6.1 真的是免費的嗎？ <i class="fas fa-chevron-down faq-icon"></i>
-                </div>
-                <div class="faq-answer">
-                    是的，這是我送給所有正在為錢煩惱的人的禮物。這是一套線上自我檢測系統，希望能幫妳看見自己的財務盲點。
-                </div>
+                <div class="faq-question">理財新手適合使用這套工具嗎？<i class="fas fa-chevron-down faq-icon"></i></div>
+                <div class="faq-answer">非常適合！Bear 的設計初衷就是為了讓「害怕數字」的人也能輕鬆上手。不用懂複雜的會計，只要跟著書寫與分配，就能找回對金錢的掌控感。</div>
             </div>
-
             <div class="faq-item">
-                <div class="faq-question">
-                    下單後大約多久會收到商品？ <i class="fas fa-chevron-down faq-icon"></i>
-                </div>
-                <div class="faq-answer">
-                    現貨商品通常會在下單後7個工作天內出貨，預購商品為7-30天（不含假日）。我們會盡快，將這份儀式感送到妳手中。
-                </div>
+                <div class="faq-question">財務診斷室 6.1 真的是免費的嗎？<i class="fas fa-chevron-down faq-icon"></i></div>
+                <div class="faq-answer">是的，這是我送給所有正在為錢煩惱的人的禮物。這是一套線上自我檢測系統，希望能幫妳看見自己的財務盲點。</div>
             </div>
-
             <div class="faq-item">
-                <div class="faq-question">
-                    如果我有更深入的理財問題怎麼辦？ <i class="fas fa-chevron-down faq-icon"></i>
-                </div>
-                <div class="faq-answer">
-                    歡迎到 IG 或 Email 與我聯繫！雖然私訊量大不一定能即時回覆，但我會持續產出內容來回答大家的疑問。
-                </div>
+                <div class="faq-question">下單後大約多久會收到商品？<i class="fas fa-chevron-down faq-icon"></i></div>
+                <div class="faq-answer">現貨商品通常會在下單後 2-3 個工作天內出貨（不含假日）。我們會用最快的速度，將這份儀式感送到妳手中。</div>
             </div>
         </div>
     </section>
 
     <section class="section fade-in" style="padding-top: 20px;">
         <h2 style="font-family:'Playfair Display'; margin-bottom:30px;">Connect</h2>
-        
         <div class="social-container">
             <div class="social-row">
-                <a href="https://www.instagram.com/bear.saving/" target="_blank" class="social-btn">
-                    <i class="fab fa-instagram"></i> Instagram (最活躍!)
-                </a>
-                <a href="https://www.threads.com/@bear.saving" target="_blank" class="social-btn">
-                    <i class="fa-brands fa-threads"></i> Threads
-                </a>
-                <a href="https://www.facebook.com/profile.php?id=61580631092861" target="_blank" class="social-btn">
-                    <i class="fab fa-facebook-f"></i> Facebook
-                </a>
+                <a href="https://www.instagram.com/bear.saving/" target="_blank" class="social-btn"><i class="fab fa-instagram"></i> Instagram (最活躍!)</a>
+                <a href="https://www.threads.com/@bear.saving" target="_blank" class="social-btn"><i class="fa-brands fa-threads"></i> Threads</a>
+                <a href="https://www.facebook.com/profile.php?id=61580631092861" target="_blank" class="social-btn"><i class="fab fa-facebook-f"></i> Facebook</a>
             </div>
-
             <div class="email-box">
                 <div style="font-weight:600; color:var(--text-primary); margin-bottom:5px;">
                     <i class="far fa-envelope" style="margin-right:5px;"></i> 合作邀約 (Business Only)
                 </div>
-                <div style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:10px;">
-                    請直接來信，私訊容易被吃訊息，無法回覆。
-                </div>
-                <a href="mailto:bearsavingtw@gmail.com" class="email-link">
-                    bearsavingtw@gmail.com
-                </a>
+                <div style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:10px;">請直接來信，私訊恕不回覆。</div>
+                <a href="mailto:bearsavingtw@gmail.com" class="email-link">bearsavingtw@gmail.com</a>
             </div>
         </div>
     </section>
@@ -408,6 +425,10 @@
     </footer>
 
     <script async src="//www.instagram.com/embed.js"></script>
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'base' });
+    </script>
     <script>
         window.addEventListener('scroll', () => {
             const nav = document.getElementById('navbar');
@@ -424,7 +445,6 @@
             });
         }
 
-        // FAQ Toggle Logic
         document.querySelectorAll('.faq-question').forEach(item => {
             item.addEventListener('click', () => {
                 const parent = item.parentNode;
