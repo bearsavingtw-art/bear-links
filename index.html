@@ -4,208 +4,305 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bear.saving | 讓平凡的生活更有底氣</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&family=Playfair+Display:ital,wght@0,600;1,500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <style>
         :root {
             --bg-color: #fefae0;
-            --text-color: #5f4b32;
-            --accent-color: #d4a373;
-            --button-text: #ffffff;
-            --font-serif: "Playfair Display", "Times New Roman", serif;
-            --font-sans: "Montserrat", "PingFang TC", "Microsoft JhengHei", sans-serif;
+            --text-primary: #5f4b32;
+            --text-secondary: #8c7b66;
+            --accent: #d4a373;
+            --accent-light: #faedcd;
+            --white: #ffffff;
+            --shadow: 0 10px 30px rgba(95, 75, 50, 0.08);
         }
 
-        /* 漸層動態背景 */
+        * { box-sizing: border-box; }
         body {
-            background: linear-gradient(-45deg, #fefae0, #faedcd, #fefae0);
-            background-size: 400% 400%;
-            animation: gradient 15s ease infinite;
-            color: var(--text-color);
-            font-family: var(--font-sans);
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: 'Montserrat', sans-serif;
             margin: 0; padding: 0;
-            display: flex; flex-direction: column; align-items: center;
-            min-height: 100vh;
+            overflow-x: hidden;
         }
 
-        @keyframes gradient {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+        /* 背景流動特效 */
+        .bg-decoration {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+            background: radial-gradient(circle at 10% 20%, rgba(212, 163, 115, 0.1) 0%, transparent 40%),
+                        radial-gradient(circle at 90% 80%, rgba(95, 75, 50, 0.05) 0%, transparent 40%);
+            animation: breathe 10s infinite alternate;
         }
+        @keyframes breathe { from { transform: scale(1); } to { transform: scale(1.1); } }
+
+        /* 導覽列 */
+        nav {
+            position: fixed; top: 0; left: 0; width: 100%;
+            padding: 15px 20px;
+            background: rgba(254, 250, 224, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+        }
+        .nav-logo {
+            font-family: 'Playfair Display', serif;
+            font-weight: 600; font-size: 1.2rem;
+            color: var(--text-primary); text-decoration: none;
+        }
+        .nav-icon { color: var(--text-primary); font-size: 1.2rem; margin-left: 15px; transition: 0.3s; }
+        .nav-icon:hover { color: var(--accent); }
 
         .container {
-            width: 100%; max-width: 480px;
-            padding: 40px 20px; box-sizing: border-box; text-align: center;
+            max-width: 600px; margin: 0 auto;
+            padding: 90px 20px 40px;
+            display: flex; flex-direction: column; gap: 35px;
         }
 
-        header h1 {
-            font-family: var(--font-serif); font-size: 2.2rem;
-            letter-spacing: 3px; margin-bottom: 5px;
+        /* Hero Section */
+        .hero {
+            text-align: center; padding: 20px 0 10px;
+            animation: fadeUp 1s ease forwards;
         }
-
-        header p { font-size: 0.95rem; opacity: 0.8; margin-bottom: 35px; font-style: italic; }
-
-        /* 主按鈕特效 */
-        .primary-link {
-            background-color: var(--accent-color); color: var(--button-text);
-            text-decoration: none; padding: 22px; border-radius: 16px;
-            font-size: 1.1rem; font-weight: 600; letter-spacing: 1px;
-            display: block; margin-bottom: 25px;
-            box-shadow: 0 8px 20px rgba(212, 163, 115, 0.3);
+        h1 {
+            font-family: 'Playfair Display', serif; font-size: 2.2rem;
+            margin: 0 0 10px; color: var(--text-primary); letter-spacing: -1px;
+        }
+        .subtitle {
+            font-size: 0.95rem; color: var(--text-secondary);
+            font-weight: 500; line-height: 1.6; margin-bottom: 30px;
+        }
+        
+        /* 按鈕優化 */
+        .hero-btn {
+            display: inline-block; background: var(--text-primary); color: var(--white);
+            padding: 16px 30px; border-radius: 50px; text-decoration: none;
+            font-weight: 600; letter-spacing: 1px;
+            box-shadow: 0 10px 20px rgba(95, 75, 50, 0.2);
             transition: all 0.3s ease;
-            animation: pulse 2s infinite;
+            border: 2px solid var(--text-primary);
         }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.02); }
-            100% { transform: scale(1); }
-        }
-
-        .primary-link:hover {
+        .hero-btn:hover {
+            background: var(--accent); border-color: var(--accent);
             transform: translateY(-3px);
-            box-shadow: 0 12px 25px rgba(212, 163, 115, 0.4);
+            box-shadow: 0 15px 30px rgba(212, 163, 115, 0.3);
         }
 
-        .guide-text {
-            font-size: 1rem; margin-bottom: 15px; font-weight: 500;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
+        .section-title {
+            text-align: center; font-family: 'Playfair Display', serif;
+            font-size: 1.5rem; margin-bottom: 20px; position: relative;
+        }
+        .section-title::after {
+            content: ''; display: block; width: 40px; height: 2px;
+            background: var(--accent); margin: 8px auto 0;
         }
 
-        .video-container {
-            width: 100%; max-width: 350px;
-            margin: 0 auto 35px auto; border-radius: 25px;
-            overflow: hidden; box-shadow: 0 15px 40px rgba(95,75,50,0.15);
-            background: #ffffff; min-height: 450px;
+        .card {
+            background: var(--white); border-radius: 24px;
+            padding: 25px; box-shadow: var(--shadow);
+            opacity: 0; transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+        .card.visible { opacity: 1; transform: translateY(0); }
+
+        /* 影片區塊修正 */
+        .video-wrapper {
+            width: 100%; border-radius: 16px; overflow: hidden;
+            background: #fff; min-height: 480px; position: relative;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .fallback-link {
+            position: absolute; text-align: center; z-index: 1;
+            color: var(--text-secondary); text-decoration: none; font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        .instagram-media { 
+            position: relative; z-index: 2; min-width: 100% !important; margin: 0 !important; 
         }
 
-        /* 理財金句區 */
-        .quote-box {
-            margin: 30px 0; padding: 20px;
-            font-size: 0.9rem; line-height: 1.6;
-            border-left: 3px solid var(--accent-color);
-            background: rgba(255,255,255,0.3);
-            text-align: left;
+        /* 服務連結 */
+        .service-link {
+            display: flex; align-items: center; justify-content: space-between;
+            background: var(--white); color: var(--text-primary);
+            padding: 20px; border-radius: 16px; text-decoration: none;
+            border: 1px solid rgba(212, 163, 115, 0.2);
+            transition: 0.3s;
         }
-
-        /* 連結卡片 */
-        .link-card {
-            background: white; color: var(--text-color);
-            border: 1px solid rgba(212, 163, 115, 0.3);
-            text-decoration: none; padding: 18px; border-radius: 12px;
-            font-size: 1rem; font-weight: 500;
-            transition: all 0.2s ease; display: block; margin-bottom: 15px;
-        }
-
-        .link-card:hover {
-            background: var(--accent-color); color: white;
+        .service-link:hover {
+            border-color: var(--accent); background: #fffcf5;
             transform: translateX(5px);
         }
-
-        /* 禮物區塊升級 */
-        .gift-section {
-            background: rgba(255, 255, 255, 0.6);
-            backdrop-filter: blur(5px);
-            border: 2px dashed var(--accent-color);
-            border-radius: 20px; padding: 30px 20px; margin-top: 20px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+        .service-icon {
+            width: 40px; height: 40px; background: var(--accent-light);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            color: var(--text-primary); margin-right: 15px;
         }
 
-        .gift-section h3 { font-family: var(--font-serif); margin-top: 0; color: var(--accent-color); }
-
-        .gift-item {
-            font-size: 0.88rem; margin-bottom: 18px; line-height: 1.5;
-            display: flex; flex-direction: column; align-items: center; gap: 8px;
+        /* 禮物區 */
+        .gift-ticket {
+            background: radial-gradient(circle at top right, #fffcf5, #fff);
+            border: 2px dashed var(--accent); border-radius: 20px;
+            padding: 30px 20px; text-align: center;
+            position: relative; overflow: hidden;
         }
-
-        .keyword-box {
-            background: white; border: 1px solid var(--accent-color);
-            padding: 8px 15px; border-radius: 8px; font-weight: 600;
-            cursor: pointer; position: relative; transition: all 0.2s;
+        .gift-ticket::before {
+            content: 'SECRET'; position: absolute; top: -10px; right: -10px;
+            font-size: 4rem; color: var(--accent); opacity: 0.1;
+            font-family: 'Playfair Display', serif; font-weight: bold; transform: rotate(15deg);
         }
-
-        .keyword-box:active { transform: scale(0.95); }
-
-        .keyword-box::after {
-            content: "點擊複製"; font-size: 0.6rem; color: var(--accent-color);
-            position: absolute; bottom: -15px; left: 50%; transform: translateX(-50%);
-            opacity: 0; transition: 0.3s;
+        
+        .keyword-group { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+        
+        .keyword-btn {
+            background: var(--white); border: 1px solid var(--accent);
+            padding: 12px 15px; border-radius: 12px; cursor: pointer;
+            font-weight: 600; color: var(--text-primary);
+            display: flex; justify-content: space-between; align-items: center;
+            transition: 0.2s; font-size: 0.9rem;
         }
+        .keyword-btn:active { transform: scale(0.98); background: var(--accent-light); }
+        .keyword-btn i { color: var(--accent); }
 
-        .keyword-box:hover::after { opacity: 1; }
+        .toast {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px);
+            background: var(--text-primary); color: white;
+            padding: 12px 25px; border-radius: 50px; font-size: 0.9rem;
+            opacity: 0; transition: 0.4s; z-index: 2000; box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
-        .social-links { margin-top: 40px; }
-        .social-icon { color: var(--text-color); font-size: 2rem; transition: 0.3s; }
-        .social-icon:hover { color: var(--accent-color); transform: rotate(10deg); }
-
-        footer { padding: 50px 0; font-size: 0.75rem; opacity: 0.5; letter-spacing: 1px; }
+        footer {
+            text-align: center; font-size: 0.8rem; color: var(--text-secondary);
+            margin-top: 20px; padding-bottom: 20px; opacity: 0.6;
+        }
+        
+        @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
+
+    <div class="bg-decoration"></div>
+
+    <nav>
+        <a href="#" class="nav-logo">Bear.saving</a>
+        <div>
+            <a href="https://myship.7-11.com.tw/general/detail/GM2502152714662?utm_source=ig&utm_medium=social" target="_blank" class="nav-icon"><i class="fas fa-shopping-cart"></i></a>
+            <a href="https://www.instagram.com/bear.saving/" target="_blank" class="nav-icon"><i class="fab fa-instagram"></i></a>
+        </div>
+    </nav>
+
+    <div id="toast" class="toast"><i class="fas fa-check-circle"></i> 關鍵字已複製！</div>
+
     <div class="container">
-        <header>
-            <h1>Bear.saving</h1>
-            <p>讓平凡的生活，也能擁有不凡的底氣。</p>
-        </header>
-
-        <a href="https://myship.7-11.com.tw/general/detail/GM2502152714662?utm_source=ig&utm_medium=social" class="primary-link" target="_blank">
-            🛒 前往Bear原創存錢工具賣場(點我!)
-        </a>
-
-        <div class="guide-text">
-            <span>介紹影片往下看</span> <i class="fas fa-chevron-down" style="color: var(--accent-color);"></i>
-        </div>
-
-        <div class="video-container">
-            <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/p/DUStl0QEmYI/" data-instgrm-version="14"></blockquote>
-        </div>
-
-        <div class="quote-box">
-            理財不是為了限制生活，而是為了在想做選擇時，我們能更有底氣地說出心裡的聲音。
-        </div>
-
-        <div class="links-container">
-            <a href="https://black-timothea-81.tiiny.site/" class="link-card" target="_blank">🔍 體驗財務診斷室 6.1(免費的!點我!)</a>
-        </div>
-
-        <div class="gift-section">
-            <h3>🎁 Bear 私訊小禮物</h3>
-            <p style="font-size: 0.8rem; opacity: 0.7; margin-bottom: 20px;">點擊下方關鍵字即可複製，去 IG 私訊我領取吧！</p>
+        
+        <div class="hero">
+            <h1>Make Ordinary<br>Life Confident.</h1>
+            <p class="subtitle">在理財的邏輯裡，找回生活的餘裕。<br>平凡的生活，也能擁有不凡的底氣。</p>
             
-            <div class="gift-item">
-                <span>獲取原創「存錢系統 PDF」</span>
-                <div class="keyword-box" onclick="copyText('財務/ 2026')">財務/ 2026</div>
+            <a href="https://myship.7-11.com.tw/general/detail/GM2502152714662?utm_source=ig&utm_medium=social" class="hero-btn" target="_blank">
+                點我！前往存錢工具賣場 <i class="fas fa-arrow-right" style="margin-left: 8px;"></i>
+            </a>
+        </div>
+
+        <div class="card scroll-element">
+            <div class="section-title" style="font-size: 1.2rem; border:none; margin-bottom: 5px;">
+                (必看!)存錢工具介紹影片 👇
             </div>
-            <div class="gift-item">
-                <span>獲取「離職底氣計算機」</span>
-                <div class="keyword-box" onclick="copyText('預備金')">預備金</div>
-            </div>
-            <div class="gift-item">
-                <span>獲取收入不穩專用「蓄水池計算機」</span>
-                <div class="keyword-box" onclick="copyText('蓄水池')">蓄水池</div>
-            </div>
-            <div class="gift-item">
-                <span>獲取各類「預算/盤點表格」</span>
-                <div class="keyword-box" onclick="copyText('表格')">表格</div>
+            
+            <div class="video-wrapper">
+                <a href="https://www.instagram.com/p/DUStl0QEmYI/" target="_blank" class="fallback-link">
+                    <i class="fab fa-instagram" style="font-size: 2rem; display:block; margin-bottom:10px;"></i>
+                    影片載入中...<br>若無畫面請點此前往 IG 觀看
+                </a>
+
+                <blockquote class="instagram-media" 
+                    data-instgrm-permalink="https://www.instagram.com/p/DUStl0QEmYI/?utm_source=ig_embed&amp;utm_campaign=loading" 
+                    data-instgrm-version="14">
+                </blockquote>
             </div>
         </div>
 
-        <div class="social-links">
-            <a href="https://www.instagram.com/bear.saving/" class="social-icon" target="_blank"><i class="fab fa-instagram"></i></a>
+        <div class="card scroll-element">
+            <div class="section-title">Free System</div>
+            
+            <a href="https://black-timothea-81.tiiny.site/" class="service-link" target="_blank">
+                <div style="display:flex; align-items:center;">
+                    <div class="service-icon"><i class="fas fa-chart-pie"></i></div>
+                    <div>
+                        <div style="font-weight:600;">財務診斷室 6.1</div>
+                        <div style="font-size:0.85rem; color:var(--text-secondary);">免費使用 Bear 原創財務系統</div>
+                    </div>
+                </div>
+                <i class="fas fa-chevron-right" style="color:#ddd;"></i>
+            </a>
         </div>
 
-        <footer>© 2026 Bear.saving | 理財邏輯｜系統實踐</footer>
+        <div class="card scroll-element" style="padding: 0; background: transparent; box-shadow: none;">
+            <div class="gift-ticket">
+                <h3>Bear's Secret Gift</h3>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 5px;">點擊關鍵字複製，至 IG 私訊領取：</p>
+                
+                <div class="keyword-group">
+                    <div class="keyword-btn" onclick="copyText('財務/ 2026')">
+                        <span>💰 原創存錢系統 PDF</span> <i class="far fa-copy"></i>
+                    </div>
+                    
+                    <div class="keyword-btn" onclick="copyText('預備金')">
+                        <span>💧 獲取離職底氣計算機</span> <i class="far fa-copy"></i>
+                    </div>
+
+                    <div class="keyword-btn" onclick="copyText('蓄水池')">
+                        <span>🌊 獲取收入不穩專用「蓄水池計算機」</span> <i class="far fa-copy"></i>
+                    </div>
+
+                    <div class="keyword-btn" onclick="copyText('［表格］')">
+                        <span>📊 各類預算盤點表格</span> <i class="far fa-copy"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            &copy; 2026 Bear.saving. All Rights Reserved.
+        </footer>
+
     </div>
 
     <script async src="//www.instagram.com/embed.js"></script>
     <script>
-        window.onload = function() { if (window.instgrm) { window.instgrm.Embeds.process(); } };
+        window.onload = function() {
+            if (window.instgrm) { 
+                window.instgrm.Embeds.process(); 
+            } else {
+                setTimeout(function(){
+                    if (window.instgrm) window.instgrm.Embeds.process();
+                }, 1000);
+            }
+        };
 
         function copyText(text) {
             navigator.clipboard.writeText(text).then(() => {
-                alert('關鍵字已複製！快去 IG 私訊我吧：' + text);
+                const toast = document.getElementById('toast');
+                toast.innerHTML = `<i class="fas fa-check-circle"></i> 已複製：${text}`;
+                toast.classList.add('show');
+                setTimeout(() => { toast.classList.remove('show'); }, 2500);
             });
         }
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.scroll-element').forEach((el) => {
+            observer.observe(el);
+        });
     </script>
 </body>
 </html>
