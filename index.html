@@ -4,10 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bear.saving | 讓平凡的生活更有底氣</title>
+    
+    <link rel="icon" href="favicon.png" type="image/png">
+    <link rel="apple-touch-icon" href="favicon.png">
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Noto+Serif+TC:wght@400;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     
     <style>
         :root {
@@ -16,6 +20,7 @@
             --text-secondary: #968c83;
             --accent: #b08d85;
             --white: #ffffff;
+            --card-shadow: 0 5px 20px rgba(0,0,0,0.03);
         }
 
         * { box-sizing: border-box; }
@@ -31,11 +36,9 @@
 
         /* 導覽列 */
         nav {
-            position: fixed; top: 0; left: 0; width: 100%;
-            padding: 20px 30px;
+            position: fixed; top: 0; left: 0; width: 100%; padding: 20px 30px;
             display: flex; justify-content: space-between; align-items: center;
-            z-index: 1000;
-            transition: 0.3s;
+            z-index: 1000; transition: 0.3s;
         }
         nav.scrolled { background: rgba(252, 251, 249, 0.95); box-shadow: 0 2px 20px rgba(0,0,0,0.05); padding: 15px 30px; }
         
@@ -46,46 +49,33 @@
         .nav-icons a { color: var(--text-primary); margin-left: 20px; font-size: 1.1rem; transition: 0.3s; }
         .nav-icons a:hover { color: var(--accent); }
 
-        /* 1. Hero Section：首頁大圖區 (影片版) */
+        /* Hero Section */
         .hero {
-            position: relative;
-            width: 100%;
-            height: 85vh; /* 佔據螢幕 85% 高度 */
-            display: flex; align-items: center; justify-content: center; text-align: center;
-            overflow: hidden;
+            position: relative; width: 100%; height: 85vh;
+            display: flex; align-items: center; justify-content: center; text-align: center; overflow: hidden;
         }
-
-        /* 新增：影片樣式設定 */
         .hero-video {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            object-fit: cover; /* 讓影片填滿不變形 */
-            z-index: -1;
-            filter: brightness(0.9); /* 稍微調暗，讓白字更清楚 */
+            object-fit: cover; z-index: -1; filter: brightness(0.9);
         }
-
         .hero-content { opacity: 0; transform: translateY(30px); animation: fadeUp 1.5s ease forwards 0.5s; padding: 20px; }
-        
         .hero h1 {
             font-family: 'Playfair Display', serif; font-size: 2.5rem; color: #fff;
             margin-bottom: 10px; text-shadow: 0 2px 10px rgba(0,0,0,0.2); letter-spacing: 1px;
         }
-        .hero p {
-            color: rgba(255,255,255,0.95); font-size: 1rem; margin-bottom: 35px; font-weight: 400;
-        }
+        .hero p { color: rgba(255,255,255,0.95); font-size: 1rem; margin-bottom: 35px; font-weight: 400; }
 
         .btn-elegant {
             display: inline-block; padding: 14px 35px;
             background: rgba(255,255,255,0.95); color: var(--text-primary);
             text-decoration: none; border-radius: 50px; font-size: 0.95rem; letter-spacing: 1px; font-weight: 600;
-            transition: all 0.3s; backdrop-filter: blur(5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s; backdrop-filter: blur(5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1);
         }
         .btn-elegant:hover { background: var(--text-primary); color: #fff; transform: translateY(-3px); }
 
         /* 通用區塊 */
         .section { padding: 80px 20px; max-width: 900px; margin: 0 auto; text-align: center; }
         
-        /* 2. 品牌哲學 */
         .philosophy-text {
             font-size: 1.1rem; color: var(--text-secondary);
             margin-bottom: 20px; position: relative; max-width: 600px; margin: 0 auto 40px;
@@ -95,49 +85,67 @@
             color: rgba(176, 141, 133, 0.2); position: absolute; top: -40px; left: 50%; transform: translateX(-50%);
         }
 
-        /* 3. 明星商品櫥窗 */
-        .product-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 30px;
-            margin-top: 40px;
-        }
-
+        /* 商品櫥窗 */
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 30px; margin-top: 40px; }
         .product-card {
             background: #fff; border-radius: 12px; overflow: hidden;
             text-decoration: none; color: var(--text-primary);
-            transition: 0.4s; box-shadow: 0 5px 20px rgba(0,0,0,0.03);
+            transition: 0.4s; box-shadow: var(--card-shadow);
             display: flex; flex-direction: column;
         }
         .product-card:hover { transform: translateY(-8px); box-shadow: 0 15px 30px rgba(0,0,0,0.08); }
-
-        .p-image {
-            width: 100%; aspect-ratio: 1 / 1; object-fit: cover;
-            background-color: #f4f1ea;
-        }
-
+        .p-image { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; background-color: #f4f1ea; }
         .p-info { padding: 20px; text-align: left; }
         .p-title { font-family: 'Noto Serif TC', serif; font-weight: 600; font-size: 1.1rem; margin-bottom: 5px; }
         .p-desc { font-size: 0.85rem; color: var(--text-secondary); font-family: sans-serif; }
         .p-price { margin-top: 10px; font-weight: 600; color: var(--accent); font-size: 0.9rem; }
 
-        /* 4. 影片區塊 */
+        /* [NEW] 見證牆 (Review Wall) */
+        .reviews-container {
+            display: flex; gap: 20px; overflow-x: auto; padding: 20px 10px 40px;
+            scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;
+        }
+        .reviews-container::-webkit-scrollbar { display: none; } /* 隱藏捲軸 */
+        
+        .review-card {
+            flex: 0 0 280px; /* 卡片寬度 */
+            scroll-snap-align: center;
+            border-radius: 15px; overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05); transition: 0.3s;
+        }
+        .review-card:hover { transform: translateY(-5px); }
+        .review-img { width: 100%; height: auto; display: block; }
+
+        /* [NEW] 常見問題 (FAQ) */
+        .faq-container { text-align: left; max-width: 700px; margin: 0 auto; }
+        .faq-item { border-bottom: 1px solid #eee; margin-bottom: 15px; padding-bottom: 10px; }
+        .faq-question {
+            font-weight: 600; cursor: pointer; display: flex; justify-content: space-between; align-items: center;
+            padding: 15px 0; color: var(--text-primary); transition: 0.3s;
+        }
+        .faq-question:hover { color: var(--accent); }
+        .faq-icon { font-size: 0.9rem; transition: transform 0.3s; color: var(--accent); }
+        .faq-answer {
+            max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out;
+            color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6;
+        }
+        .faq-item.active .faq-answer { max-height: 300px; padding-bottom: 15px; }
+        .faq-item.active .faq-icon { transform: rotate(180deg); }
+
+
+        /* 影片 */
         .video-container {
             width: 100%; max-width: 380px; margin: 0 auto 50px;
             border-radius: 20px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.08);
             position: relative; min-height: 500px; background: #fff;
             display: flex; justify-content: center; align-items: center;
         }
-        .fallback-link {
-            position: absolute; text-align: center; z-index: 1;
-            color: var(--text-secondary); text-decoration: none; font-size: 0.9rem;
-        }
+        .fallback-link { position: absolute; text-align: center; z-index: 1; color: var(--text-secondary); text-decoration: none; font-size: 0.9rem; }
         .instagram-media { position: relative; z-index: 2; min-width: 100% !important; margin: 0 !important; }
 
-        /* 5. 服務列表 */
+        /* 服務與禮物 */
         .service-card {
-            display: flex; align-items: center;
-            background: #fff; padding: 20px; border-radius: 15px;
+            display: flex; align-items: center; background: #fff; padding: 20px; border-radius: 15px;
             text-decoration: none; color: var(--text-primary);
             box-shadow: 0 5px 15px rgba(0,0,0,0.03); transition: 0.3s;
             border: 1px solid transparent; text-align: left; margin-bottom: 20px;
@@ -148,27 +156,36 @@
             display: flex; align-items: center; justify-content: center;
             color: var(--accent); font-size: 1.2rem; margin-right: 20px; flex-shrink: 0;
         }
-
-        /* 6. 秘密禮物 */
-        .gift-section {
-            background: #fff; border: 1.5px dashed var(--accent); border-radius: 20px;
-            padding: 40px 30px; margin-top: 20px;
-        }
+        .gift-section { background: #fff; border: 1.5px dashed var(--accent); border-radius: 20px; padding: 40px 30px; margin-top: 20px; }
         .gift-title { font-family: 'Playfair Display'; color: var(--accent); font-size: 1.5rem; margin-bottom: 25px; }
-        
-        .keyword-item {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 12px 0; border-bottom: 1px solid #f0f0f0;
-            font-size: 0.9rem; text-align: left;
-        }
+        .keyword-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f0f0f0; font-size: 0.9rem; text-align: left; }
         .keyword-item:last-child { border-bottom: none; }
-        
         .keyword-btn {
             background: #fdfbf7; color: var(--text-primary); border: 1px solid #e0e0e0;
             padding: 6px 14px; border-radius: 8px; font-weight: 600; cursor: pointer;
             transition: 0.2s; font-size: 0.85rem; white-space: nowrap; margin-left: 10px;
         }
         .keyword-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+        /* 聯絡區塊 */
+        .social-container { display: flex; flex-direction: column; gap: 20px; align-items: center; }
+        .social-row { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; }
+        .social-btn {
+            display: flex; align-items: center; gap: 8px;
+            background: #fff; padding: 12px 25px; border-radius: 50px;
+            text-decoration: none; color: var(--text-primary);
+            box-shadow: var(--card-shadow); transition: 0.3s; font-size: 0.9rem;
+        }
+        .social-btn:hover { transform: translateY(-3px); background: var(--accent); color: #fff; }
+        .social-btn i { font-size: 1.1rem; }
+        
+        .email-box {
+            background: #fff; width: 100%; max-width: 500px;
+            padding: 25px; border-radius: 15px; margin-top: 15px;
+            border-left: 4px solid var(--accent); text-align: left;
+        }
+        .email-link { color: var(--text-primary); text-decoration: none; font-weight: 500; display: block; margin-top: 5px; word-break: break-all; }
+        .email-link:hover { color: var(--accent); }
 
         .toast {
             position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px);
@@ -203,9 +220,7 @@
     <header class="hero">
         <video class="hero-video" autoplay muted loop playsinline poster="hero.jpg">
             <source src="hero.mp4" type="video/mp4">
-            您的瀏覽器不支援影片標籤，請升級瀏覽器。
         </video>
-        
         <div class="hero-content">
             <h1>Make Ordinary<br>Life Confident.</h1>
             <p>在理財的邏輯裡，找回生活的餘裕。</p>
@@ -223,7 +238,6 @@
 
         <h2 style="font-family:'Playfair Display'; margin-top:60px; margin-bottom:10px;">Selected Tools</h2>
         <div class="product-grid">
-            
             <a href="https://myship.7-11.com.tw/general/detail/GM2502152714662?utm_source=ig&utm_medium=social" target="_blank" class="product-card">
                 <img src="product1.jpg" alt="Bear 原創記帳本" class="p-image">
                 <div class="p-info">
@@ -232,7 +246,6 @@
                     <div class="p-price">View Details <i class="fas fa-arrow-right" style="font-size:0.8em;"></i></div>
                 </div>
             </a>
-
             <a href="https://myship.7-11.com.tw/general/detail/GM2502152714662?utm_source=ig&utm_medium=social" target="_blank" class="product-card">
                 <img src="product2.jpg" alt="韓系質感書衣" class="p-image">
                 <div class="p-info">
@@ -241,7 +254,6 @@
                     <div class="p-price">View Details <i class="fas fa-arrow-right" style="font-size:0.8em;"></i></div>
                 </div>
             </a>
-
             <a href="https://myship.7-11.com.tw/general/detail/GM2502152714662?utm_source=ig&utm_medium=social" target="_blank" class="product-card">
                 <img src="product3.jpg" alt="雙扣手帳本" class="p-image">
                 <div class="p-info">
@@ -250,7 +262,19 @@
                     <div class="p-price">View Details <i class="fas fa-arrow-right" style="font-size:0.8em;"></i></div>
                 </div>
             </a>
+        </div>
+    </section>
 
+    <section class="section fade-in" style="padding-bottom: 20px;">
+        <h2 style="font-family:'Playfair Display'; margin-bottom:10px;">Love Letters</h2>
+        <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:30px;">來自粉絲的真實回饋，也是我持續前進的動力。</p>
+        
+        <div class="reviews-container">
+            <div class="review-card"><img src="review1.jpg" alt="Review 1" class="review-img"></div>
+            <div class="review-card"><img src="review2.jpg" alt="Review 2" class="review-img"></div>
+            <div class="review-card"><img src="review3.jpg" alt="Review 3" class="review-img"></div>
+            <div class="review-card"><img src="review4.jpg" alt="Review 4" class="review-img"></div>
+            <div class="review-card"><img src="review5.jpg" alt="Review 5" class="review-img"></div>
         </div>
     </section>
 
@@ -287,25 +311,93 @@
             <p style="font-size:0.9rem; color:var(--text-secondary); margin-bottom:30px;">
                 點擊右側按鈕複製關鍵字，<br>至 IG 私訊領取專屬資源。
             </p>
-
             <div class="keyword-item">
                 <span>💰 原創存錢系統 PDF</span>
                 <button class="keyword-btn" onclick="copyText('財務/ 2026')">財務/ 2026</button>
             </div>
-            
             <div class="keyword-item">
                 <span>💧 獲取離職底氣計算機</span>
                 <button class="keyword-btn" onclick="copyText('預備金')">預備金</button>
             </div>
-            
             <div class="keyword-item">
-                <span>🌊 獲取收入不穩專用「蓄水池計算機」</span>
+                <span>🌊 收入不穩專用「蓄水池」</span>
                 <button class="keyword-btn" onclick="copyText('蓄水池')">蓄水池</button>
             </div>
-            
             <div class="keyword-item">
                 <span>📊 各類預算盤點表格</span>
                 <button class="keyword-btn" onclick="copyText('［表格］')">［表格］</button>
+            </div>
+        </div>
+    </section>
+
+    <section class="section fade-in" style="padding-top: 0;">
+        <h2 style="font-family:'Playfair Display'; margin-bottom:30px;">Q & A</h2>
+        
+        <div class="faq-container">
+            <div class="faq-item">
+                <div class="faq-question">
+                    理財新手適合使用這套工具嗎？ <i class="fas fa-chevron-down faq-icon"></i>
+                </div>
+                <div class="faq-answer">
+                    非常適合！Bear 的設計初衷就是為了讓「害怕數字」的人也能輕鬆上手。不用懂複雜的會計，只要跟著書寫與分配，就能找回對金錢的掌控感。
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    財務診斷室 6.1 真的是免費的嗎？ <i class="fas fa-chevron-down faq-icon"></i>
+                </div>
+                <div class="faq-answer">
+                    是的，這是我送給所有正在為錢煩惱的人的禮物。這是一套線上自我檢測系統，希望能幫妳看見自己的財務盲點。
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    下單後大約多久會收到商品？ <i class="fas fa-chevron-down faq-icon"></i>
+                </div>
+                <div class="faq-answer">
+                    現貨商品通常會在下單後7個工作天內出貨，預購商品為7-30天（不含假日）。我們會盡快，將這份儀式感送到妳手中。
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    如果我有更深入的理財問題怎麼辦？ <i class="fas fa-chevron-down faq-icon"></i>
+                </div>
+                <div class="faq-answer">
+                    歡迎到 IG 或 Email 與我聯繫！雖然私訊量大不一定能即時回覆，但我會持續產出內容來回答大家的疑問。
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section fade-in" style="padding-top: 20px;">
+        <h2 style="font-family:'Playfair Display'; margin-bottom:30px;">Connect</h2>
+        
+        <div class="social-container">
+            <div class="social-row">
+                <a href="https://www.instagram.com/bear.saving/" target="_blank" class="social-btn">
+                    <i class="fab fa-instagram"></i> Instagram (最活躍!)
+                </a>
+                <a href="https://www.threads.com/@bear.saving" target="_blank" class="social-btn">
+                    <i class="fa-brands fa-threads"></i> Threads
+                </a>
+                <a href="https://www.facebook.com/profile.php?id=61580631092861" target="_blank" class="social-btn">
+                    <i class="fab fa-facebook-f"></i> Facebook
+                </a>
+            </div>
+
+            <div class="email-box">
+                <div style="font-weight:600; color:var(--text-primary); margin-bottom:5px;">
+                    <i class="far fa-envelope" style="margin-right:5px;"></i> 合作邀約 (Business Only)
+                </div>
+                <div style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:10px;">
+                    請直接來信，私訊容易被吃訊息，無法回覆。
+                </div>
+                <a href="mailto:bearsavingtw@gmail.com" class="email-link">
+                    bearsavingtw@gmail.com
+                </a>
             </div>
         </div>
     </section>
@@ -332,20 +424,21 @@
             });
         }
 
+        // FAQ Toggle Logic
+        document.querySelectorAll('.faq-question').forEach(item => {
+            item.addEventListener('click', () => {
+                const parent = item.parentNode;
+                parent.classList.toggle('active');
+            });
+        });
+
         window.onload = function() {
-            if (window.instgrm) { 
-                window.instgrm.Embeds.process(); 
-            } else {
-                setTimeout(function(){
-                    if (window.instgrm) window.instgrm.Embeds.process();
-                }, 1000);
-            }
+            if (window.instgrm) { window.instgrm.Embeds.process(); }
+            else { setTimeout(function(){ if (window.instgrm) window.instgrm.Embeds.process(); }, 1000); }
         };
 
         const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) entry.target.classList.add('visible');
-            });
+            entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
         }, { threshold: 0.1 });
         document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
     </script>
