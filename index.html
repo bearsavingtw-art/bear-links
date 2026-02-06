@@ -85,6 +85,36 @@
             color: rgba(176, 141, 133, 0.2); position: absolute; top: -40px; left: 50%; transform: translateX(-50%);
         }
 
+        /* [NEW] 最新消息區塊樣式 */
+        .news-box {
+            background: #fff;
+            border-left: 4px solid var(--accent);
+            padding: 30px 25px;
+            border-radius: 0 12px 12px 0;
+            box-shadow: var(--card-shadow);
+            text-align: left;
+            max-width: 700px;
+            margin: 0 auto 20px;
+        }
+        .news-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 18px;
+            border-bottom: 1px dashed #eee;
+            padding-bottom: 18px;
+        }
+        .news-item:last-child { margin-bottom: 0; border-bottom: none; padding-bottom: 0; }
+        .news-icon {
+            color: var(--accent);
+            font-size: 1.1rem;
+            margin-right: 15px;
+            margin-top: 3px; /* 微調對齊 */
+            flex-shrink: 0;
+        }
+        .news-content strong { color: var(--accent); font-weight: 600; }
+        .news-title-text { font-weight: 600; display: block; margin-bottom: 3px; color: var(--text-primary); }
+        .news-desc { font-size: 0.9rem; color: var(--text-secondary); }
+
         /* 影片 */
         .video-container {
             width: 100%; max-width: 380px; margin: 0 auto 50px;
@@ -235,6 +265,50 @@
         </div>
     </header>
 
+    <section class="section fade-in" style="padding-bottom: 0;">
+        <h2 style="font-family:'Playfair Display'; margin-bottom: 25px;">Latest News</h2>
+        <div class="news-box">
+            
+            <div class="news-item">
+                <i class="fas fa-book news-icon"></i>
+                <div>
+                    <span class="news-title-text">原創記帳本</span>
+                    <span class="news-desc">已售完，年後印刷中，預計 <strong>3月中</strong> 補貨上架！</span>
+                </div>
+            </div>
+
+            <div class="news-item">
+                <i class="fas fa-star news-icon"></i>
+                <div>
+                    <span class="news-title-text">質感書衣系列</span>
+                    <span class="news-desc">
+                        • 黑星星：約 <strong>2月中</strong> 補貨 (+新款白星星現貨!)<br>
+                        • 黑/奶油愛心：約 <strong>3月底</strong> 補貨
+                    </span>
+                </div>
+            </div>
+
+            <div class="news-item">
+                <i class="fas fa-rabbit news-icon"></i>
+                <div>
+                    <span class="news-title-text">Little Bunny's Farm 聯名挑戰</span>
+                    <span class="news-desc">下批補貨時間：<strong>3月中</strong>。</span>
+                </div>
+            </div>
+
+            <div class="news-item">
+                <i class="fas fa-bag-shopping news-icon"></i>
+                <div>
+                    <span class="news-title-text">真皮包 / 錢包快閃團</span>
+                    <span class="news-desc">2月份開團時間待定，請密切鎖定 IG 限動「重要公告」。<br>
+                    <a href="https://www.instagram.com/bear.saving/" target="_blank" style="color:var(--accent); text-decoration: underline;">👉 點此追蹤 IG 不漏接</a>
+                    </span>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
     <section class="section fade-in">
         <p style="margin-bottom:25px; font-weight:600; color:var(--text-primary); letter-spacing:1px;">
             (必看!) 存錢工具介紹影片 👇
@@ -257,7 +331,7 @@
             <a href="https://myship.7-11.com.tw/general/detail/GM2502152714662?utm_source=ig&utm_medium=social" target="_blank" class="product-card">
                 <img src="product1.jpg" alt="Bear 原創記帳本" class="p-image">
                 <div class="p-info">
-                    <div class="p-title">Bear 原創記帳本</div>
+                    <div class="p-title"> Bear原創記帳本</div>
                     <div class="p-desc">用書寫釐清思緒，紀錄每一筆生活的軌跡。</div>
                     <div class="p-price">View Details <i class="fas fa-arrow-right" style="font-size:0.8em;"></i></div>
                 </div>
@@ -295,7 +369,7 @@
 
     <section class="section fade-in" style="padding-bottom: 0;">
         <div class="philosophy-text">
-            <p>存錢不是為了限制渴望，<br>而是為了讓未來的選擇更有底氣。<br><br>
+            <p>存錢不是為了「限制渴望」，<br>而是為了讓未來的選擇更有底氣。<br><br>
             Bear.saving 陪妳一起，<br>用最溫柔的方式，找回對金錢的掌控感。</p>
         </div>
     </section>
@@ -315,7 +389,7 @@
                 classDef ritual fill:#eaddd7,stroke:#b08d85,color:#5a4d41,font-style:italic;
 
                 %% --- 樹根：核心理念 ---
-                Root[核心根基：建立生活的「底氣」]:::root --> Trunk(Bear 動態財務系統):::trunk
+                Root[核心根基：建立生活的「底氣」]:::root --> Trunk(Bear 動態財務系統 ):::trunk
 
                 %% --- 樹幹：三大支柱 ---
                 Trunk --> B1[第一階段：釐清・診斷]:::branch
@@ -327,9 +401,9 @@
                 
                 B2 --> L2_1(蓄水池計算機):::leaf
                 B2 --> L2_2(離職底氣計算機):::leaf
-                B2 --> L2_3(照顧好、愛自己):::leaf
+                B2 --> L2_3(照顧自己、愛自己):::leaf
 
-                B3 --> L3_1(Bear 原創記帳本):::ritual
+                B3 --> L3_1(原創記帳本):::ritual
                 B3 --> L3_2(韓系質感書衣):::ritual
                 B3 --> L3_3(實體存錢工具):::ritual
                 
@@ -396,7 +470,7 @@
             </div>
             <div class="faq-item">
                 <div class="faq-question">下單後大約多久會收到商品？<i class="fas fa-chevron-down faq-icon"></i></div>
-                <div class="faq-answer">現貨商品通常會在下單後 2-3 個工作天內出貨（不含假日）。我們會用最快的速度，將這份儀式感送到妳手中。</div>
+                <div class="faq-answer">現貨商品通常會在下單後7個工作天內出貨，預購商品則為7-30天（不含假日）。我們會盡速將這份儀式感送到妳手中。</div>
             </div>
         </div>
     </section>
@@ -413,7 +487,7 @@
                 <div style="font-weight:600; color:var(--text-primary); margin-bottom:5px;">
                     <i class="far fa-envelope" style="margin-right:5px;"></i> 合作邀約 (Business Only)
                 </div>
-                <div style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:10px;">請直接來信，私訊恕不回覆。</div>
+                <div style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:10px;">請直接來信，IG小盒子容易吃訊息，無法回覆請見諒。</div>
                 <a href="mailto:bearsavingtw@gmail.com" class="email-link">bearsavingtw@gmail.com</a>
             </div>
         </div>
