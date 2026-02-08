@@ -3,212 +3,285 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>財務診斷室 6.1 | Bear.saving</title>
+    <title>Bear 理財診療室 - 離職底氣計算機</title>
     <link rel="icon" href="favicon.png" type="image/png">
     
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Noto+Serif+TC:wght@400;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    
+
     <style>
         :root {
-            --bg-color: #fcfbf9;
-            --text-primary: #5a4d41;
-            --text-secondary: #968c83;
-            --accent: #b08d85;
+            /* Bear.saving 品牌色系 */
+            --bg-color: #fcfbf9;        /* 米白背景 */
+            --text-primary: #5a4d41;    /* 深棕文字 */
+            --text-secondary: #968c83;  /* 淺棕副標 */
+            --accent: #b08d85;          /* 乾燥玫瑰色 (強調色) */
+            --input-bg: #fdfbf7;        /* 輸入框底色 */
             --white: #ffffff;
-            --input-bg: #fdfbf7;
+            --shadow: 0 10px 30px rgba(90, 77, 65, 0.08);
         }
 
-        * { box-sizing: border-box; }
         body {
-            background-color: var(--bg-color); color: var(--text-primary);
             font-family: 'Montserrat', 'Noto Serif TC', serif;
-            margin: 0; padding: 0; line-height: 1.8;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0; padding: 0;
+            min-height: 100vh;
+            display: flex; flex-direction: column;
         }
 
-        /* 導覽列 */
+        /* 導覽列 (新增：讓使用者可以回首頁) */
         nav {
             padding: 20px 30px; display: flex; justify-content: space-between; align-items: center;
-            background: rgba(252, 251, 249, 0.95); border-bottom: 1px solid #eee;
+            background: rgba(252, 251, 249, 0.95); position: fixed; top: 0; width: 100%; z-index: 100;
         }
-        .nav-logo { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 600; color: var(--text-primary); text-decoration: none; }
-        .nav-back { font-size: 0.9rem; color: var(--text-secondary); text-decoration: none; display: flex; align-items: center; gap: 5px; }
+        .nav-logo { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 600; color: var(--text-primary); text-decoration: none; }
+        .nav-back { font-size: 0.9rem; color: var(--text-secondary); text-decoration: none; display: flex; align-items: center; gap: 5px; transition: 0.3s; }
         .nav-back:hover { color: var(--accent); }
 
         /* 主容器 */
-        .container { max-width: 600px; margin: 40px auto; padding: 0 20px; }
-        
-        h1 { font-family: 'Playfair Display', serif; text-align: center; margin-bottom: 10px; color: var(--accent); }
-        .subtitle { text-align: center; color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 40px; }
-
-        /* 卡片樣式 */
-        .card {
-            background: #fff; padding: 30px; border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.03); margin-bottom: 20px;
+        .main-wrapper {
+            flex: 1; display: flex; justify-content: center; align-items: center;
+            padding: 80px 20px 40px; /* 避開導覽列 */
         }
 
-        /* 輸入框群組 */
-        .input-group { margin-bottom: 20px; text-align: left; }
-        .input-label { display: block; font-size: 0.95rem; font-weight: 600; margin-bottom: 8px; color: var(--text-primary); }
-        .input-desc { font-size: 0.8rem; color: #aaa; margin-bottom: 8px; display: block; }
-        .input-field {
-            width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;
-            font-size: 1rem; background: var(--input-bg); color: var(--text-primary);
-            font-family: 'Montserrat', sans-serif; transition: 0.3s;
+        .container {
+            background-color: var(--white);
+            padding: 40px 30px;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            width: 100%; max-width: 480px;
+            text-align: center;
+            position: relative;
+            border: 1px solid rgba(176, 141, 133, 0.1);
         }
-        .input-field:focus { outline: none; border-color: var(--accent); background: #fff; }
 
-        /* 按鈕 */
-        .btn-calc {
-            width: 100%; padding: 15px; background: var(--text-primary); color: #fff;
-            border: none; border-radius: 50px; font-size: 1rem; font-weight: 600; cursor: pointer;
-            transition: 0.3s; margin-top: 10px; box-shadow: 0 5px 15px rgba(90,77,65,0.2);
+        h1 { 
+            font-family: 'Playfair Display', serif; 
+            font-size: 1.8rem; margin-bottom: 10px; color: var(--accent); 
         }
-        .btn-calc:hover { background: var(--accent); transform: translateY(-2px); }
+        .subtitle { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 30px; }
 
-        /* 結果區塊 (預設隱藏) */
-        #result-section { display: none; animation: fadeIn 0.8s ease; }
-        
-        .result-card {
-            background: #fff; border: 2px solid var(--accent); border-radius: 15px;
-            padding: 30px; text-align: center; position: relative; overflow: hidden;
-        }
-        .result-title { font-size: 1rem; color: var(--text-secondary); margin-bottom: 5px; }
-        .result-value { font-family: 'Playfair Display', serif; font-size: 2.5rem; color: var(--accent); font-weight: 600; margin-bottom: 20px; }
-        
-        .detail-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.9rem; border-bottom: 1px dashed #eee; padding-bottom: 10px; }
-        .detail-row:last-child { border: none; }
-        
-        .highlight-box {
-            background: var(--input-bg); padding: 15px; border-radius: 10px; margin-top: 20px;
-            text-align: left; border-left: 4px solid var(--accent);
-        }
-        .highlight-text { font-size: 0.9rem; line-height: 1.6; color: var(--text-primary); }
-
+        /* 動畫切換 */
+        .step { display: none; }
+        .step.active { display: block; animation: fadeIn 0.6s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        footer { text-align: center; margin-top: 50px; color: var(--text-secondary); font-size: 0.8rem; padding-bottom: 30px; }
+        /* 輸入區塊優化 */
+        .input-group { margin-bottom: 25px; text-align: left; }
+        label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 1rem; color: var(--text-primary); }
+        .sub-text { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 10px; line-height: 1.5; }
+
+        input[type="number"] {
+            width: 100%; padding: 15px;
+            border: 1px solid #e0e0e0; border-radius: 12px;
+            box-sizing: border-box; font-size: 1.1rem;
+            background-color: var(--input-bg); color: var(--text-primary);
+            outline: none; transition: 0.3s; font-family: 'Montserrat', sans-serif;
+        }
+        input[type="number"]:focus { border-color: var(--accent); background: #fff; box-shadow: 0 0 0 3px rgba(176, 141, 133, 0.1); }
+
+        /* 選項卡片 */
+        .options { display: flex; gap: 12px; margin-top: 10px; }
+        .option-card {
+            flex: 1; padding: 15px 10px;
+            border: 1px solid #e0e0e0; border-radius: 12px;
+            cursor: pointer; transition: all 0.3s;
+            background-color: var(--input-bg);
+            color: var(--text-secondary);
+        }
+        .option-card b { display: block; margin-bottom: 4px; font-size: 1rem; color: var(--text-primary); }
+        .option-card small { font-size: 0.8rem; }
+        
+        /* 選中狀態 - 變成品牌色 */
+        .option-card.selected {
+            background-color: var(--accent);
+            border-color: var(--accent);
+        }
+        .option-card.selected b, .option-card.selected small { color: var(--white); }
+
+        /* 主要按鈕 */
+        button.main-btn {
+            background-color: var(--text-primary);
+            color: var(--white); border: none;
+            padding: 16px; border-radius: 50px;
+            font-size: 1rem; font-weight: 600; cursor: pointer;
+            width: 100%; margin-top: 10px; transition: 0.3s; letter-spacing: 1px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        button.main-btn:hover { background-color: var(--accent); transform: translateY(-2px); }
+
+        /* --- 結果頁面樣式 --- */
+        .result-box {
+            background: var(--input-bg);
+            padding: 30px 20px; border-radius: 15px; margin: 20px 0;
+            border: 1px dashed var(--accent);
+        }
+        .result-label { font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 5px; }
+        .result-amount { font-family: 'Playfair Display', serif; font-size: 2.5rem; font-weight: 600; color: var(--accent); margin: 5px 0 15px; }
+        .result-detail { font-size: 0.9rem; color: var(--text-primary); line-height: 1.6; }
+        
+        .timeline-box {
+            background-color: #fff;
+            border-left: 4px solid var(--accent);
+            padding: 20px; margin-top: 20px;
+            text-align: left; border-radius: 0 10px 10px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.03);
+        }
+        .timeline-text { font-size: 0.95rem; line-height: 1.6; color: var(--text-primary); }
+        .timeline-highlight { color: var(--accent); font-weight: 600; }
+
+        .btn-outline {
+            background: transparent; color: var(--text-secondary);
+            border: 1px solid var(--text-secondary);
+            padding: 10px 25px; border-radius: 50px; cursor: pointer;
+            font-size: 0.9rem; margin-top: 30px; transition: 0.3s;
+        }
+        .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+
+        .footer-note { font-size: 0.8rem; margin-top: 20px; color: #ccc; }
     </style>
 </head>
 <body>
 
     <nav>
         <a href="index.html" class="nav-back"><i class="fas fa-arrow-left"></i> 回首頁</a>
-        <a href="#" class="nav-logo">Bear.saving</a>
-        <div style="width: 60px;"></div> </nav>
+        <a href="index.html" class="nav-logo">Bear.saving</a>
+        <div style="width: 70px;"></div> </nav>
 
-    <div class="container">
-        <h1>Financial Diagnosis</h1>
-        <p class="subtitle">財務診斷室 6.1 | 算出妳的離職底氣</p>
-
-        <div class="card">
-            <div class="input-group">
-                <label class="input-label">1. 平均月收入 (Income)</label>
-                <input type="number" id="income" class="input-field" placeholder="例如：45000">
-            </div>
-
-            <div class="input-group">
-                <label class="input-label">2. 固定生存低消 (Fixed Cost)</label>
-                <span class="input-desc">一定要付的錢：房租、水電、保險、貸款...</span>
-                <input type="number" id="fixedCost" class="input-field" placeholder="例如：15000">
-            </div>
-
-            <div class="input-group">
-                <label class="input-label">3. 浮動生活預算 (Variable Budget)</label>
-                <span class="input-desc">可以控制的錢：吃飯、交通、購物、娛樂...</span>
-                <input type="number" id="variableCost" class="input-field" placeholder="例如：12000">
-            </div>
-
-            <div class="input-group">
-                <label class="input-label">4. 目前總存款 (Current Savings)</label>
-                <span class="input-desc">這筆錢是妳的底氣來源 (若無可填 0)</span>
-                <input type="number" id="savings" class="input-field" placeholder="例如：300000">
-            </div>
-
-            <button class="btn-calc" onclick="calculate()">開始診斷 <i class="fas fa-stethoscope" style="margin-left:5px;"></i></button>
-        </div>
-
-        <div id="result-section">
-            <div class="result-card">
-                <div class="result-title">妳的離職底氣 (生存月數)</div>
-                <div class="result-value" id="runwayMonths">0 個月</div>
+    <div class="main-wrapper">
+        <div class="container">
+            
+            <div id="step1" class="step active">
+                <h1>Financial Diagnosis</h1>
+                <p class="subtitle">財務診斷室 6.1 | 離職底氣計算機</p>
                 
-                <div class="detail-row">
-                    <span>每月生存成本 (低消+生活)</span>
-                    <span id="totalCostDisplay" style="font-weight:600;">$0</span>
-                </div>
-                <div class="detail-row">
-                    <span>每月潛在儲蓄 (現金流)</span>
-                    <span id="cashFlowDisplay" style="color:var(--accent); font-weight:600;">$0</span>
-                </div>
-                <div class="detail-row">
-                    <span>儲蓄率 (Savings Rate)</span>
-                    <span id="savingsRateDisplay">0%</span>
+                <div class="input-group">
+                    <label>1. 每月基本生存金額 (Fixed Cost)</label>
+                    <p class="sub-text">房租、水電、吃飯、保險...沒花會死掉的錢。</p>
+                    <input type="number" id="monthlyExpense" placeholder="例如：25000" min="0">
                 </div>
 
-                <div class="highlight-box">
-                    <div id="diagnosisText" class="highlight-text">
-                        請輸入資料以獲取診斷結果...
+                <div class="input-group">
+                    <label>2. 妳的工作收入性質？</label>
+                    <div class="options">
+                        <div class="option-card selected" onclick="selectType('stable')" id="type-stable">
+                            <b>穩定收入</b><br><small>一般上班族</small>
+                        </div>
+                        <div class="option-card" onclick="selectType('unstable')" id="type-unstable">
+                            <b>不穩定收入</b><br><small>業務 / 接案 / SOHO</small>
+                        </div>
                     </div>
                 </div>
-            </div>
-            
-            <p style="text-align:center; margin-top:20px; font-size:0.9rem;">
-                想讓底氣更穩固？<br>
-                <a href="index.html" style="color:var(--accent); font-weight:600; text-decoration:none;">前往選購 Bear 存錢系統工具 <i class="fas fa-arrow-right"></i></a>
-            </p>
-        </div>
 
+                <div class="input-group">
+                    <label>3. 每月預計能存多少？(Saving)</label>
+                    <p class="sub-text">算出妳需要多久可以獲得「自由」。</p>
+                    <input type="number" id="monthlySaving" placeholder="例如：5000" min="0">
+                </div>
+
+                <button class="main-btn" onclick="calculate()">開始診斷 <i class="fas fa-calculator" style="margin-left:5px;"></i></button>
+            </div>
+
+            <div id="step2" class="step">
+                <h1>Diagnosis Report</h1>
+                <p class="subtitle">妳的專屬財務診斷報告</p>
+                
+                <div class="result-box">
+                    <div class="result-label">妳需要的離職底氣 (預備金總額)</div>
+                    <div class="result-amount" id="totalAmount">$0</div>
+                    <div class="result-detail" id="resultDetail"></div>
+                </div>
+
+                <div id="timelineResult" class="timeline-box" style="display:none;">
+                    </div>
+
+                <button class="btn-outline" onclick="reset()">重新檢測</button>
+                <div style="margin-top: 15px;">
+                    <a href="index.html" style="color:var(--accent); text-decoration:none; font-size:0.9rem; font-weight:600;">
+                        去逛逛 Bear 的存錢工具 <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                <p class="footer-note">存好這筆錢，妳就擁有了拒絕的權力。💪</p>
+            </div>
+        </div>
     </div>
 
-    <footer>
-        &copy; 2026 Bear.saving Financial Diagnosis V6.1
-    </footer>
-
     <script>
+        let selectedType = 'stable';
+
+        function selectType(type) {
+            selectedType = type;
+            document.getElementById('type-stable').classList.remove('selected');
+            document.getElementById('type-unstable').classList.remove('selected');
+            document.getElementById('type-' + type).classList.add('selected');
+        }
+
         function calculate() {
-            // 1. 獲取輸入值
-            const income = parseFloat(document.getElementById('income').value) || 0;
-            const fixedCost = parseFloat(document.getElementById('fixedCost').value) || 0;
-            const variableCost = parseFloat(document.getElementById('variableCost').value) || 0;
-            const savings = parseFloat(document.getElementById('savings').value) || 0;
+            const expense = document.getElementById('monthlyExpense').value;
+            const saving = document.getElementById('monthlySaving').value;
 
-            // 2. 基礎計算
-            const totalCost = fixedCost + variableCost; // 總生存成本
-            const cashFlow = income - totalCost; // 每月可存金額
-            const savingsRate = income > 0 ? Math.round((cashFlow / income) * 100) : 0; // 儲蓄率
-            
-            // 3. 離職底氣計算 (總存款 / 總生存成本)
-            let runway = 0;
-            if (totalCost > 0) {
-                runway = (savings / totalCost).toFixed(1); // 保留一位小數
+            if (!expense || expense <= 0) {
+                alert('請輸入生活基本金額喔！這樣 Bear 才能幫妳診斷。');
+                return;
             }
 
-            // 4. 顯示結果
-            document.getElementById('totalCostDisplay').innerText = `$${totalCost.toLocaleString()}`;
-            document.getElementById('cashFlowDisplay').innerText = `$${cashFlow.toLocaleString()}`;
-            document.getElementById('savingsRateDisplay').innerText = `${savingsRate}%`;
-            document.getElementById('runwayMonths').innerText = `${runway} 個月`;
+            // 穩定工作 = 6個月預備金；不穩定 = 12個月 (蓄水池理論)
+            const multiplier = (selectedType === 'stable') ? 6 : 12;
+            const totalNeeded = expense * multiplier;
+            const typeText = (selectedType === 'stable') ? '穩定工作' : '收入浮動';
 
-            // 5. 診斷評語 (Bear 的靈魂)
-            let diagnosis = "";
+            // 更新結果金額
+            document.getElementById('totalAmount').innerText = '$' + Number(totalNeeded).toLocaleString();
+            document.getElementById('resultDetail').innerHTML = 
+                `基於妳是 <b>${typeText}</b>，建議準備 <b>${multiplier} 個月</b> 的生存金。<br>
+                 這筆錢能讓妳在沒有收入時，也能安心生活半年以上。`;
+
+            // 計算存錢天數/月份
+            const timelineDiv = document.getElementById('timelineResult');
             
-            if (cashFlow < 0) {
-                diagnosis = "⚠️ <strong>警報：</strong> 妳目前的開銷大於收入！建議先檢視「浮動預算」，看看哪裡可以稍微縮減，或者尋找開源的機會。不要灰心，看見問題就是解決的開始。";
-            } else if (runway < 3) {
-                diagnosis = "🌱 <strong>起步階段：</strong> 妳已經有正向現金流了！但目前的存款底氣稍顯不足（小於3個月）。建議將「蓄水池」存滿至 6 個月生存金，這會讓妳工作起來更不焦慮。";
-            } else if (runway >= 3 && runway < 6) {
-                diagnosis = "🐻 <strong>穩健成長：</strong> 妳做得很好！擁有 3-6 個月的底氣，已經能應對大部分的突發狀況。繼續保持這個節奏，妳正在拿回生活的選擇權。";
+            if (saving && saving > 0) {
+                const monthsToGoal = Math.ceil(totalNeeded / saving);
+                const years = Math.floor(monthsToGoal / 12);
+                const remainMonths = monthsToGoal % 12;
+                
+                let timeString = "";
+                if (years > 0) {
+                    timeString = `${years} 年 ${remainMonths} 個月`;
+                } else {
+                    timeString = `${remainMonths} 個月`;
+                }
+                
+                timelineDiv.style.display = 'block';
+                timelineDiv.innerHTML = 
+                    `<div class="timeline-text">
+                        ⏳ <b>存錢進度預測：</b><br>
+                        如果每個月堅持存 <span class="timeline-highlight">$${Number(saving).toLocaleString()}</span>，
+                        大約需要 <span class="timeline-highlight">${timeString}</span>，
+                        妳就能存到這筆讓妳帥氣轉身的底氣！
+                    </div>`;
             } else {
-                diagnosis = "✨ <strong>底氣十足：</strong> 恭喜妳！妳擁有超過半年的離職底氣。這筆錢讓妳有資格隨時按下暫停鍵，去追求妳真正想做的事，或是給自己一段長假。這就是存錢的意義！";
+                timelineDiv.style.display = 'none';
             }
 
-            document.getElementById('diagnosisText').innerHTML = diagnosis;
+            // 切換頁面
+            document.getElementById('step1').classList.remove('active');
+            document.getElementById('step2').classList.add('active');
             
-            // 6. 顯示結果區塊
-            document.getElementById('result-section').style.display = 'block';
-            document.getElementById('result-section').scrollIntoView({ behavior: 'smooth' });
+            // 滾動到頂部
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function reset() {
+            document.getElementById('step2').classList.remove('active');
+            document.getElementById('step1').classList.add('active');
+            
+            // 清空輸入
+            document.getElementById('monthlyExpense').value = '';
+            document.getElementById('monthlySaving').value = '';
+            selectType('stable');
         }
     </script>
+
 </body>
 </html>
