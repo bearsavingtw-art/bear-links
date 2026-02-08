@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bear 財務診斷室 6.1</title>
+    <title>Bear 財務診斷室 6.2</title>
     <link rel="icon" href="favicon.png" type="image/png">
     
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Noto+Serif+TC:wght@400;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         :root {
@@ -53,7 +54,7 @@
             padding: 40px 30px;
             border-radius: 20px;
             box-shadow: var(--shadow);
-            width: 100%; max-width: 600px; /* 稍微加寬以容納表格 */
+            width: 100%; max-width: 600px;
             text-align: center;
             position: relative;
             border: 1px solid rgba(176, 141, 133, 0.1);
@@ -61,7 +62,7 @@
 
         h1 { 
             font-family: 'Playfair Display', serif; 
-            font-size: 1.8rem; margin-bottom: 25px; color: var(--accent); 
+            font-size: 1.8rem; margin-bottom: 10px; color: var(--accent); 
         }
 
         /* 輸入區塊 */
@@ -125,10 +126,17 @@
         .summary-label { font-size: 0.85rem; opacity: 0.8; margin-bottom: 5px; }
         .summary-value { font-size: 1.4rem; font-weight: 600; color: #f5efe6; font-family: 'Playfair Display', serif; }
 
-        /* 預算卡片 */
+        /* 預算卡片與圖表 */
         .budget-card { 
             background: var(--input-bg); border-radius: 15px; 
             padding: 25px; margin-top: 20px; text-align: left; 
+        }
+        .chart-container {
+            position: relative; 
+            height: 250px; 
+            width: 100%; 
+            margin: 20px 0;
+            display: flex; justify-content: center;
         }
         .budget-row { 
             display: flex; justify-content: space-between; 
@@ -136,7 +144,7 @@
             align-items: center; font-size: 0.95rem;
         }
         .budget-row:last-child { border-bottom: none; }
-        .budget-row b { color: var(--text-primary); }
+        .budget-row b { color: var(--text-primary); font-weight: 600; }
 
         /* 行動按鈕 */
         .action-container { display: flex; flex-direction: column; gap: 10px; margin-top: 25px; align-items: center; }
@@ -159,6 +167,14 @@
         .debt-table th { background: var(--input-bg); text-align: left; padding: 10px; border-bottom: 2px solid var(--accent); color: var(--text-primary); }
         .debt-table td { padding: 10px; border-bottom: 1px solid #eee; color: var(--text-secondary); }
         .save-money { color: var(--success); font-weight: bold; }
+        
+        /* 推薦處方籤 */
+        .prescription-box {
+            margin-top: 20px; padding: 15px; border-radius: 12px;
+            background: #fff0f0; border: 1px solid #ffcdd2;
+            text-align: left; font-size: 0.9rem; color: #b71c1c;
+        }
+        .prescription-title { font-weight: bold; margin-bottom: 5px; display: flex; align-items: center; gap: 5px; }
 
     </style>
 </head>
@@ -174,7 +190,7 @@
         
         <div class="container" id="page1">
             <h1>Financial Diagnosis</h1>
-            <p style="color:var(--text-secondary); margin-bottom:30px; font-size:0.9rem;">財務診斷室 6.1 | 深度負債與預算檢測</p>
+            <p style="color:var(--text-secondary); margin-bottom:30px; font-size:0.9rem;">Bear 財務診斷室 6.2 | 視覺化深度檢測</p>
 
             <div id="quiz-form">
                 <div class="question">
@@ -213,12 +229,13 @@
                     <input type="number" id="monthlyIncome" placeholder="請輸入金額">
                 </div>
 
-                <button class="btn" onclick="processDiagnosis()">開始診斷 <i class="fas fa-stethoscope" style="margin-left:5px;"></i></button>
+                <button class="btn" onclick="processDiagnosis()">開始診斷 <i class="fas fa-chart-pie" style="margin-left:5px;"></i></button>
             </div>
 
             <div id="result" class="hidden">
                 <div id="debt-overview-area"></div>
                 <div id="diagnosis-area"></div>
+                
                 <div id="budget-area"></div>
                 
                 <button id="over50-btn" class="btn btn-warning" onclick="showSurvivalPage()">🆘 固定支出 > 總收入 50%？點此處</button>
@@ -263,6 +280,7 @@
 
     <script>
         let globalIncome = 0, userHasDebt = 'no', userHasFund = 'no', debtData = [];
+        let budgetChart = null; // 圖表實例
         const IG_VIDEO_URL = "https://www.instagram.com/reel/DTP7iSMgagR/?utm_source=ig_web_button_share_sheet&igsh=MzRlODBiNWFlZA==";
 
         function toggleDebtSection() {
@@ -300,6 +318,7 @@
             if (userHasDebt === 'no') {
                 diagArea.innerHTML = `<div class="diag-box low-debt-info">✨ <b>恭喜你目前沒有負債！</b><br>這是一個非常棒的開始。持續依照下方的「理想預算」分配，妳很快就能累積出厚實的財富底氣。</div>`;
                 renderBudget(globalIncome, budgetArea, userHasFund, false, false);
+                // 推薦處方籤：存錢工具
                 actionArea.innerHTML = `<a href="https://drive.google.com/drive/folders/1uPoV-RN33p4hZY11cD_rFo2x-Fv4jkjG?usp=drive_link" target="_blank" class="action-btn">🎁 領取財富底氣 PDF</a><a href="${IG_VIDEO_URL}" target="_blank" class="action-btn video-btn">📺 觀看教學影片</a>`;
             } else {
                 summaryBtn.classList.remove('hidden');
@@ -320,38 +339,89 @@
                 
                 if (highDebts.length > 0) {
                     diagArea.innerHTML += `<div class="diag-box high-debt-warning">🏥 <b>診斷結果：偵測到高利負債 Bug！</b><br>針對 <span style="font-weight:bold; color:var(--danger);">${highDebts.join('、')}</span>，請優先全力還款，避免利息吃掉妳的底氣！</div>`;
-                    actionArea.innerHTML = `<a href="https://myship.7-11.com.tw/general/detail/GM2502152714662" target="_blank" class="action-btn">📚 取得原創記帳本・精準止血</a>`;
+                    
+                    // Bear 處方籤：推薦記帳本
+                    actionArea.innerHTML = `
+                        <div class="prescription-box">
+                            <div class="prescription-title"><i class="fas fa-medkit"></i> Bear 醫師處方籤</div>
+                            檢測到高利債務！建議立刻使用【原創記帳本】的債務雪球頁面來止血。
+                        </div>
+                        <a href="https://myship.7-11.com.tw/general/detail/GM2502152714662" target="_blank" class="action-btn">📚 取得原創記帳本・精準止血</a>`;
                 } else {
                     renderBudget(globalIncome, budgetArea, 'no', true, true);
                     actionArea.innerHTML = `<a href="https://drive.google.com/drive/folders/1uPoV-RN33p4hZY11cD_rFo2x-Fv4jkjG?usp=drive_link" target="_blank" class="action-btn">🎁 領取財富底氣 PDF</a><a href="${IG_VIDEO_URL}" target="_blank" class="action-btn video-btn">📺 觀看教學影片</a>`;
                 }
             }
-            // 滾動到結果
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function renderBudget(income, container, hasFund, isDebtMode, isLowDebt) {
             let f, v, pre, e, s, i;
-            // 修正變數宣告邏輯
+            let labels = [], data = [], colors = [];
+
             if (isDebtMode && isLowDebt) {
-                // 有負債但低利率 (優先還債與生活)
                 f = 0.60; v = 0.20; pre = 0.10; e = 0.05; s = 0; i = 0.05;
             } else if (hasFund === 'no') {
-                // 無負債但沒預備金 (存預備金優先)
                 f = 0.5; v = 0.2; pre = 0.1; e = 0.1; s = 0.05; i = 0.05;
             } else {
-                // 健康狀態 (全力儲蓄投資)
                 f = 0.5; v = 0.2; pre = 0.1; e = 0; s = 0.15; i = 0.05;
             }
             
-            let html = `<div class="budget-card"><div style="font-weight:600; font-size:1.1rem; margin-bottom:15px; color:var(--text-primary);">💡 Bear 的理想預算分配</div>`;
-            html += `<div class="budget-row"><span>固定支出 (${(f*100)}%)</span><b>$${Math.round(income*f).toLocaleString()}</b></div>`;
-            html += `<div class="budget-row"><span>變動支出 (${(v*100)}%)</span><b>$${Math.round(income*v).toLocaleString()}</b></div>`;
-            html += `<div class="budget-row"><span>預存支出 (${(pre*100)}%)</span><b>$${Math.round(income*pre).toLocaleString()}</b></div>`;
-            if (e > 0) html += `<div class="budget-row"><span>緊急預備金 (${(e*100)}%)</span><b>$${Math.round(income*e).toLocaleString()}</b></div>`;
-            if (s > 0) html += `<div class="budget-row"><span>儲蓄投資 (${(s*100)}%)</span><b>$${Math.round(income*s).toLocaleString()}</b></div>`;
-            html += `<div class="budget-row"><span>投資自己 (${(i*100)}%)</span><b>$${Math.round(income*i).toLocaleString()}</b></div></div>`;
+            // 準備圖表數據
+            const categories = [
+                { label: '固定支出', pct: f, color: '#5a4d41' },
+                { label: '變動支出', pct: v, color: '#b08d85' },
+                { label: '預存支出', pct: pre, color: '#d4a373' },
+                { label: '緊急預備', pct: e, color: '#e57373' },
+                { label: '儲蓄投資', pct: s, color: '#81c784' },
+                { label: '投資自己', pct: i, color: '#ffd54f' }
+            ];
+
+            let html = `<div class="budget-card"><div style="font-weight:600; font-size:1.1rem; margin-bottom:5px; color:var(--text-primary);">💡 Bear 的理想預算分配</div>
+            <div class="chart-container"><canvas id="budgetChart"></canvas></div>`;
+            
+            categories.forEach(cat => {
+                if (cat.pct > 0) {
+                    html += `<div class="budget-row"><span style="display:flex; align-items:center;"><span style="display:inline-block; width:10px; height:10px; background:${cat.color}; border-radius:50%; margin-right:8px;"></span>${cat.label} (${Math.round(cat.pct*100)}%)</span><b>$${Math.round(income*cat.pct).toLocaleString()}</b></div>`;
+                    labels.push(cat.label);
+                    data.push(Math.round(income * cat.pct));
+                    colors.push(cat.color);
+                }
+            });
+            html += `</div>`;
             container.innerHTML = html;
+
+            // 繪製圖表
+            setTimeout(() => {
+                const ctx = document.getElementById('budgetChart').getContext('2d');
+                if (budgetChart) budgetChart.destroy();
+                
+                budgetChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: data,
+                            backgroundColor: colors,
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }, // 隱藏內建圖例，使用下方自定義列表
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return ` $${context.raw.toLocaleString()}`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }, 100);
         }
 
         function showFullReport() {
