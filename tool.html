@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>財務診斷室 6.1 | Bear.saving</title>
+    <link rel="icon" href="favicon.png" type="image/png">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Noto+Serif+TC:wght@400;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-color: #fcfbf9;
+            --text-primary: #5a4d41;
+            --text-secondary: #968c83;
+            --accent: #b08d85;
+            --white: #ffffff;
+            --input-bg: #fdfbf7;
+        }
+
+        * { box-sizing: border-box; }
+        body {
+            background-color: var(--bg-color); color: var(--text-primary);
+            font-family: 'Montserrat', 'Noto Serif TC', serif;
+            margin: 0; padding: 0; line-height: 1.8;
+        }
+
+        /* 導覽列 */
+        nav {
+            padding: 20px 30px; display: flex; justify-content: space-between; align-items: center;
+            background: rgba(252, 251, 249, 0.95); border-bottom: 1px solid #eee;
+        }
+        .nav-logo { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 600; color: var(--text-primary); text-decoration: none; }
+        .nav-back { font-size: 0.9rem; color: var(--text-secondary); text-decoration: none; display: flex; align-items: center; gap: 5px; }
+        .nav-back:hover { color: var(--accent); }
+
+        /* 主容器 */
+        .container { max-width: 600px; margin: 40px auto; padding: 0 20px; }
+        
+        h1 { font-family: 'Playfair Display', serif; text-align: center; margin-bottom: 10px; color: var(--accent); }
+        .subtitle { text-align: center; color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 40px; }
+
+        /* 卡片樣式 */
+        .card {
+            background: #fff; padding: 30px; border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.03); margin-bottom: 20px;
+        }
+
+        /* 輸入框群組 */
+        .input-group { margin-bottom: 20px; text-align: left; }
+        .input-label { display: block; font-size: 0.95rem; font-weight: 600; margin-bottom: 8px; color: var(--text-primary); }
+        .input-desc { font-size: 0.8rem; color: #aaa; margin-bottom: 8px; display: block; }
+        .input-field {
+            width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;
+            font-size: 1rem; background: var(--input-bg); color: var(--text-primary);
+            font-family: 'Montserrat', sans-serif; transition: 0.3s;
+        }
+        .input-field:focus { outline: none; border-color: var(--accent); background: #fff; }
+
+        /* 按鈕 */
+        .btn-calc {
+            width: 100%; padding: 15px; background: var(--text-primary); color: #fff;
+            border: none; border-radius: 50px; font-size: 1rem; font-weight: 600; cursor: pointer;
+            transition: 0.3s; margin-top: 10px; box-shadow: 0 5px 15px rgba(90,77,65,0.2);
+        }
+        .btn-calc:hover { background: var(--accent); transform: translateY(-2px); }
+
+        /* 結果區塊 (預設隱藏) */
+        #result-section { display: none; animation: fadeIn 0.8s ease; }
+        
+        .result-card {
+            background: #fff; border: 2px solid var(--accent); border-radius: 15px;
+            padding: 30px; text-align: center; position: relative; overflow: hidden;
+        }
+        .result-title { font-size: 1rem; color: var(--text-secondary); margin-bottom: 5px; }
+        .result-value { font-family: 'Playfair Display', serif; font-size: 2.5rem; color: var(--accent); font-weight: 600; margin-bottom: 20px; }
+        
+        .detail-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.9rem; border-bottom: 1px dashed #eee; padding-bottom: 10px; }
+        .detail-row:last-child { border: none; }
+        
+        .highlight-box {
+            background: var(--input-bg); padding: 15px; border-radius: 10px; margin-top: 20px;
+            text-align: left; border-left: 4px solid var(--accent);
+        }
+        .highlight-text { font-size: 0.9rem; line-height: 1.6; color: var(--text-primary); }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        footer { text-align: center; margin-top: 50px; color: var(--text-secondary); font-size: 0.8rem; padding-bottom: 30px; }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="index.html" class="nav-back"><i class="fas fa-arrow-left"></i> 回首頁</a>
+        <a href="#" class="nav-logo">Bear.saving</a>
+        <div style="width: 60px;"></div> </nav>
+
+    <div class="container">
+        <h1>Financial Diagnosis</h1>
+        <p class="subtitle">財務診斷室 6.1 | 算出妳的離職底氣</p>
+
+        <div class="card">
+            <div class="input-group">
+                <label class="input-label">1. 平均月收入 (Income)</label>
+                <input type="number" id="income" class="input-field" placeholder="例如：45000">
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">2. 固定生存低消 (Fixed Cost)</label>
+                <span class="input-desc">一定要付的錢：房租、水電、保險、貸款...</span>
+                <input type="number" id="fixedCost" class="input-field" placeholder="例如：15000">
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">3. 浮動生活預算 (Variable Budget)</label>
+                <span class="input-desc">可以控制的錢：吃飯、交通、購物、娛樂...</span>
+                <input type="number" id="variableCost" class="input-field" placeholder="例如：12000">
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">4. 目前總存款 (Current Savings)</label>
+                <span class="input-desc">這筆錢是妳的底氣來源 (若無可填 0)</span>
+                <input type="number" id="savings" class="input-field" placeholder="例如：300000">
+            </div>
+
+            <button class="btn-calc" onclick="calculate()">開始診斷 <i class="fas fa-stethoscope" style="margin-left:5px;"></i></button>
+        </div>
+
+        <div id="result-section">
+            <div class="result-card">
+                <div class="result-title">妳的離職底氣 (生存月數)</div>
+                <div class="result-value" id="runwayMonths">0 個月</div>
+                
+                <div class="detail-row">
+                    <span>每月生存成本 (低消+生活)</span>
+                    <span id="totalCostDisplay" style="font-weight:600;">$0</span>
+                </div>
+                <div class="detail-row">
+                    <span>每月潛在儲蓄 (現金流)</span>
+                    <span id="cashFlowDisplay" style="color:var(--accent); font-weight:600;">$0</span>
+                </div>
+                <div class="detail-row">
+                    <span>儲蓄率 (Savings Rate)</span>
+                    <span id="savingsRateDisplay">0%</span>
+                </div>
+
+                <div class="highlight-box">
+                    <div id="diagnosisText" class="highlight-text">
+                        請輸入資料以獲取診斷結果...
+                    </div>
+                </div>
+            </div>
+            
+            <p style="text-align:center; margin-top:20px; font-size:0.9rem;">
+                想讓底氣更穩固？<br>
+                <a href="index.html" style="color:var(--accent); font-weight:600; text-decoration:none;">前往選購 Bear 存錢系統工具 <i class="fas fa-arrow-right"></i></a>
+            </p>
+        </div>
+
+    </div>
+
+    <footer>
+        &copy; 2026 Bear.saving Financial Diagnosis V6.1
+    </footer>
+
+    <script>
+        function calculate() {
+            // 1. 獲取輸入值
+            const income = parseFloat(document.getElementById('income').value) || 0;
+            const fixedCost = parseFloat(document.getElementById('fixedCost').value) || 0;
+            const variableCost = parseFloat(document.getElementById('variableCost').value) || 0;
+            const savings = parseFloat(document.getElementById('savings').value) || 0;
+
+            // 2. 基礎計算
+            const totalCost = fixedCost + variableCost; // 總生存成本
+            const cashFlow = income - totalCost; // 每月可存金額
+            const savingsRate = income > 0 ? Math.round((cashFlow / income) * 100) : 0; // 儲蓄率
+            
+            // 3. 離職底氣計算 (總存款 / 總生存成本)
+            let runway = 0;
+            if (totalCost > 0) {
+                runway = (savings / totalCost).toFixed(1); // 保留一位小數
+            }
+
+            // 4. 顯示結果
+            document.getElementById('totalCostDisplay').innerText = `$${totalCost.toLocaleString()}`;
+            document.getElementById('cashFlowDisplay').innerText = `$${cashFlow.toLocaleString()}`;
+            document.getElementById('savingsRateDisplay').innerText = `${savingsRate}%`;
+            document.getElementById('runwayMonths').innerText = `${runway} 個月`;
+
+            // 5. 診斷評語 (Bear 的靈魂)
+            let diagnosis = "";
+            
+            if (cashFlow < 0) {
+                diagnosis = "⚠️ <strong>警報：</strong> 妳目前的開銷大於收入！建議先檢視「浮動預算」，看看哪裡可以稍微縮減，或者尋找開源的機會。不要灰心，看見問題就是解決的開始。";
+            } else if (runway < 3) {
+                diagnosis = "🌱 <strong>起步階段：</strong> 妳已經有正向現金流了！但目前的存款底氣稍顯不足（小於3個月）。建議將「蓄水池」存滿至 6 個月生存金，這會讓妳工作起來更不焦慮。";
+            } else if (runway >= 3 && runway < 6) {
+                diagnosis = "🐻 <strong>穩健成長：</strong> 妳做得很好！擁有 3-6 個月的底氣，已經能應對大部分的突發狀況。繼續保持這個節奏，妳正在拿回生活的選擇權。";
+            } else {
+                diagnosis = "✨ <strong>底氣十足：</strong> 恭喜妳！妳擁有超過半年的離職底氣。這筆錢讓妳有資格隨時按下暫停鍵，去追求妳真正想做的事，或是給自己一段長假。這就是存錢的意義！";
+            }
+
+            document.getElementById('diagnosisText').innerHTML = diagnosis;
+            
+            // 6. 顯示結果區塊
+            document.getElementById('result-section').style.display = 'block';
+            document.getElementById('result-section').scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
