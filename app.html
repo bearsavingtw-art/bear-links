@@ -2,9 +2,14 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Bear 財務駕駛艙 | Financial Cockpit</title>
-    <link rel="icon" href="favicon.png" type="image/png">
+    
+    <link rel="icon" href="logo.png" type="image/png">
+    <link rel="apple-touch-icon" href="logo.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Bear記帳">
     
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Noto+Serif+TC:wght@400;600&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
@@ -26,12 +31,13 @@
         body {
             font-family: 'Montserrat', 'Noto Serif TC', sans-serif;
             background-color: var(--bg-color); color: var(--text-primary);
-            margin: 0; padding: 0; padding-bottom: 80px; /* 避開底部導覽 */
+            margin: 0; padding: 0; padding-bottom: 90px; /* 避開底部導覽 */
+            overscroll-behavior-y: none; /* 防止在那邊彈來彈去 */
         }
 
         /* 頂部導覽 */
         header {
-            background: var(--bg-color); padding: 20px;
+            background: var(--bg-color); padding: 20px 20px 10px;
             text-align: center; position: sticky; top: 0; z-index: 10;
             border-bottom: 1px solid rgba(0,0,0,0.05);
         }
@@ -65,6 +71,7 @@
         input, select {
             width: 100%; padding: 12px; border: 1px solid #eee; border-radius: 10px;
             font-size: 1rem; background: var(--bg-color); outline: none; color: var(--text-primary);
+            appearance: none; -webkit-appearance: none; /* iOS 樣式修正 */
         }
         input:focus, select:focus { border-color: var(--accent); background: #fff; }
 
@@ -72,9 +79,10 @@
             width: 100%; padding: 15px; border: none; border-radius: 50px;
             background: var(--text-primary); color: #fff; font-weight: 600; font-size: 1rem;
             cursor: pointer; transition: 0.3s; margin-top: 10px;
+            box-shadow: 0 4px 10px rgba(90,77,65,0.2);
         }
         .btn:active { transform: scale(0.98); }
-        .btn-outline { background: transparent; border: 1px solid var(--accent); color: var(--accent); margin-top: 10px; }
+        .btn-outline { background: transparent; border: 1px solid var(--accent); color: var(--accent); margin-top: 10px; box-shadow: none; }
 
         /* 交易列表 */
         .tx-list { list-style: none; padding: 0; margin: 0; }
@@ -88,12 +96,12 @@
         .tx-amount { font-weight: 600; font-family: 'Montserrat', sans-serif; }
         .amount-inc { color: var(--success); }
         .amount-exp { color: var(--accent); }
-        .delete-btn { color: #ccc; margin-left: 10px; cursor: pointer; }
+        .delete-btn { color: #ccc; margin-left: 15px; cursor: pointer; padding: 5px; }
 
         /* 底部導覽列 (App 風格) */
         .bottom-nav {
             position: fixed; bottom: 0; width: 100%; background: #fff;
-            display: flex; justify-content: space-around; padding: 10px 0;
+            display: flex; justify-content: space-around; padding: 12px 0 25px; /* 增加底部空間適應 iPhone Home Bar */
             border-top: 1px solid #eee; box-shadow: 0 -5px 15px rgba(0,0,0,0.03);
             z-index: 100;
         }
@@ -101,7 +109,7 @@
             text-align: center; color: var(--text-secondary); cursor: pointer; font-size: 0.8rem;
             flex: 1;
         }
-        .nav-item i { display: block; font-size: 1.2rem; margin-bottom: 3px; }
+        .nav-item i { display: block; font-size: 1.3rem; margin-bottom: 4px; }
         .nav-item.active { color: var(--accent); font-weight: 600; }
 
         /* Chart Container */
@@ -194,7 +202,10 @@
 
         <div class="card">
             <div class="card-title">資料管理 (Data Mgmt)</div>
-            <p style="font-size:0.8rem; color:#888;">資料儲存於瀏覽器中。請定期備份。</p>
+            <p style="font-size:0.8rem; color:#888; line-height:1.6;">
+                <i class="fas fa-shield-alt"></i> 資料僅儲存於您的瀏覽器中，100% 隱私安全。<br>
+                <i class="fas fa-exclamation-triangle" style="color:#e57373;"></i> 換手機或清除瀏覽器前，請務必點擊「下載備份」。
+            </p>
             <button class="btn btn-outline" onclick="exportData()"><i class="fas fa-download"></i> 下載備份 (JSON)</button>
             <button class="btn btn-outline" onclick="document.getElementById('import-file').click()"><i class="fas fa-upload"></i> 匯入備份</button>
             <input type="file" id="import-file" style="display:none;" onchange="importData(this)">
@@ -207,7 +218,7 @@
             <i class="fas fa-chart-pie"></i> 儀表板
         </div>
         <div class="nav-item" onclick="switchPage('add')" id="nav-add">
-            <i class="fas fa-plus-circle" style="font-size:1.5rem; color:var(--text-primary);"></i> 記帳
+            <i class="fas fa-plus-circle" style="font-size:1.5rem; color:var(--text-primary); transform:translateY(-2px);"></i> 記帳
         </div>
         <div class="nav-item" onclick="switchPage('list')" id="nav-list">
             <i class="fas fa-list"></i> 明細/設定
@@ -243,6 +254,9 @@
             // 切換導覽列狀態
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.getElementById('nav-' + pageId).classList.add('active');
+            
+            // 頁面滾動回頂部
+            window.scrollTo(0, 0);
 
             if(pageId === 'dash') renderDashboard();
             if(pageId === 'list') renderList();
@@ -292,7 +306,7 @@
                 transactions = transactions.filter(t => t.id !== id);
                 saveData();
                 renderDashboard();
-                renderList(); // 如果在列表頁也要重整
+                renderList(); 
             }
         }
 
