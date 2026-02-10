@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bear 財務駕駛艙 | Financial Cockpit</title>
+    <link rel="icon" href="favicon.png" type="image/png">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Noto+Serif+TC:wght@400;600&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --bg-color: #fcfbf9;
+            --text-primary: #5a4d41;
+            --text-secondary: #968c83;
+            --accent: #b08d85;
+            --card-bg: #ffffff;
+            --success: #81c784;
+            --danger: #e57373;
+            --warning: #ffd54f;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: 'Montserrat', 'Noto Serif TC', sans-serif;
+            background-color: var(--bg-color); color: var(--text-primary);
+            margin: 0; padding: 0; padding-bottom: 80px; /* 避開底部導覽 */
+        }
+
+        /* 頂部導覽 */
+        header {
+            background: var(--bg-color); padding: 20px;
+            text-align: center; position: sticky; top: 0; z-index: 10;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        h1 { font-family: 'Playfair Display', serif; margin: 0; color: var(--accent); font-size: 1.5rem; }
+
+        /* 頁面切換容器 */
+        .page { display: none; padding: 20px; animation: fadeIn 0.3s ease; }
+        .page.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* 卡片樣式 */
+        .card {
+            background: var(--card-bg); border-radius: 15px; padding: 20px;
+            box-shadow: 0 5px 15px rgba(90,77,65,0.05); margin-bottom: 20px;
+            border: 1px solid rgba(176, 141, 133, 0.1);
+        }
+        .card-title { font-weight: 600; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+
+        /* 儀表板數據卡 */
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .stat-box { background: var(--bg-color); padding: 15px; border-radius: 12px; text-align: center; }
+        .stat-label { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 5px; }
+        .stat-value { font-size: 1.2rem; font-weight: 600; font-family: 'Montserrat', sans-serif; }
+        .income { color: var(--text-primary); }
+        .expense { color: var(--accent); }
+        .balance { color: var(--success); }
+
+        /* 輸入表單 */
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-size: 0.9rem; margin-bottom: 5px; font-weight: 600; }
+        input, select {
+            width: 100%; padding: 12px; border: 1px solid #eee; border-radius: 10px;
+            font-size: 1rem; background: var(--bg-color); outline: none; color: var(--text-primary);
+        }
+        input:focus, select:focus { border-color: var(--accent); background: #fff; }
+
+        .btn {
+            width: 100%; padding: 15px; border: none; border-radius: 50px;
+            background: var(--text-primary); color: #fff; font-weight: 600; font-size: 1rem;
+            cursor: pointer; transition: 0.3s; margin-top: 10px;
+        }
+        .btn:active { transform: scale(0.98); }
+        .btn-outline { background: transparent; border: 1px solid var(--accent); color: var(--accent); margin-top: 10px; }
+
+        /* 交易列表 */
+        .tx-list { list-style: none; padding: 0; margin: 0; }
+        .tx-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 0; border-bottom: 1px dashed #eee;
+        }
+        .tx-info { display: flex; flex-direction: column; }
+        .tx-cat { font-weight: 600; font-size: 0.95rem; }
+        .tx-date { font-size: 0.75rem; color: #ccc; }
+        .tx-amount { font-weight: 600; font-family: 'Montserrat', sans-serif; }
+        .amount-inc { color: var(--success); }
+        .amount-exp { color: var(--accent); }
+        .delete-btn { color: #ccc; margin-left: 10px; cursor: pointer; }
+
+        /* 底部導覽列 (App 風格) */
+        .bottom-nav {
+            position: fixed; bottom: 0; width: 100%; background: #fff;
+            display: flex; justify-content: space-around; padding: 10px 0;
+            border-top: 1px solid #eee; box-shadow: 0 -5px 15px rgba(0,0,0,0.03);
+            z-index: 100;
+        }
+        .nav-item {
+            text-align: center; color: var(--text-secondary); cursor: pointer; font-size: 0.8rem;
+            flex: 1;
+        }
+        .nav-item i { display: block; font-size: 1.2rem; margin-bottom: 3px; }
+        .nav-item.active { color: var(--accent); font-weight: 600; }
+
+        /* Chart Container */
+        .chart-wrapper { position: relative; height: 220px; width: 100%; display: flex; justify-content: center; }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Bear.saving</h1>
+        <div style="font-size:0.8rem; color:var(--text-secondary);">Financial Cockpit v1.0</div>
+    </header>
+
+    <div id="page-dash" class="page active">
+        <div class="stat-grid">
+            <div class="stat-box">
+                <div class="stat-label">本月收入</div>
+                <div class="stat-value income" id="display-income">$0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">本月支出</div>
+                <div class="stat-value expense" id="display-expense">$0</div>
+            </div>
+        </div>
+        <div class="card" style="text-align:center; padding:15px;">
+            <div class="stat-label">本月結餘 (底氣)</div>
+            <div class="stat-value balance" id="display-balance" style="font-size:1.8rem;">$0</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">支出結構分析 (良率監控)</div>
+            <div class="chart-wrapper">
+                <canvas id="expenseChart"></canvas>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">
+                最近 5 筆紀錄
+                <small style="font-weight:400; color:var(--accent); cursor:pointer;" onclick="switchPage('list')">查看全部</small>
+            </div>
+            <ul class="tx-list" id="recent-tx-list">
+                </ul>
+        </div>
+    </div>
+
+    <div id="page-add" class="page">
+        <div class="card">
+            <div class="card-title">新增一筆紀錄</div>
+            
+            <div class="form-group">
+                <label>日期</label>
+                <input type="date" id="input-date">
+            </div>
+
+            <div class="form-group">
+                <label>收支大類</label>
+                <select id="input-type" onchange="updateCategories()">
+                    <option value="expense">支出 (Expense)</option>
+                    <option value="income">收入 (Income)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>詳細分類</label>
+                <select id="input-category">
+                    </select>
+            </div>
+
+            <div class="form-group">
+                <label>金額</label>
+                <input type="number" id="input-amount" placeholder="0" inputmode="numeric">
+            </div>
+
+            <div class="form-group">
+                <label>備註 (選填)</label>
+                <input type="text" id="input-note" placeholder="例如：午餐、全聯...">
+            </div>
+
+            <button class="btn" onclick="addTransaction()">確認儲存 <i class="fas fa-check"></i></button>
+        </div>
+    </div>
+
+    <div id="page-list" class="page">
+        <div class="card">
+            <div class="card-title">本月明細</div>
+            <ul class="tx-list" id="full-tx-list"></ul>
+        </div>
+
+        <div class="card">
+            <div class="card-title">資料管理 (Data Mgmt)</div>
+            <p style="font-size:0.8rem; color:#888;">資料儲存於瀏覽器中。請定期備份。</p>
+            <button class="btn btn-outline" onclick="exportData()"><i class="fas fa-download"></i> 下載備份 (JSON)</button>
+            <button class="btn btn-outline" onclick="document.getElementById('import-file').click()"><i class="fas fa-upload"></i> 匯入備份</button>
+            <input type="file" id="import-file" style="display:none;" onchange="importData(this)">
+            <button class="btn btn-outline" style="border-color:#e57373; color:#e57373;" onclick="clearData()"><i class="fas fa-trash"></i> 清空所有資料</button>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="switchPage('dash')" id="nav-dash">
+            <i class="fas fa-chart-pie"></i> 儀表板
+        </div>
+        <div class="nav-item" onclick="switchPage('add')" id="nav-add">
+            <i class="fas fa-plus-circle" style="font-size:1.5rem; color:var(--text-primary);"></i> 記帳
+        </div>
+        <div class="nav-item" onclick="switchPage('list')" id="nav-list">
+            <i class="fas fa-list"></i> 明細/設定
+        </div>
+    </div>
+
+    <script>
+        // --- 1. 初始化資料與設定 ---
+        const categories = {
+            expense: ['固定支出', '變動支出', '預存支出'],
+            income: ['薪資收入', '業外收入']
+        };
+        
+        // 從 LocalStorage 讀取資料，如果沒有則為空陣列
+        let transactions = JSON.parse(localStorage.getItem('bear_transactions')) || [];
+        let myChart = null;
+
+        // 初始化執行
+        document.addEventListener('DOMContentLoaded', () => {
+            // 設定日期預設為今天
+            document.getElementById('input-date').valueAsDate = new Date();
+            updateCategories();
+            renderDashboard();
+        });
+
+        // --- 2. 核心邏輯 ---
+
+        function switchPage(pageId) {
+            // 切換頁面顯示
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page-' + pageId).classList.add('active');
+            
+            // 切換導覽列狀態
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById('nav-' + pageId).classList.add('active');
+
+            if(pageId === 'dash') renderDashboard();
+            if(pageId === 'list') renderList();
+        }
+
+        function updateCategories() {
+            const type = document.getElementById('input-type').value;
+            const catSelect = document.getElementById('input-category');
+            catSelect.innerHTML = '';
+            categories[type].forEach(cat => {
+                let opt = document.createElement('option');
+                opt.value = cat;
+                opt.innerText = cat;
+                catSelect.appendChild(opt);
+            });
+        }
+
+        function addTransaction() {
+            const date = document.getElementById('input-date').value;
+            const type = document.getElementById('input-type').value;
+            const category = document.getElementById('input-category').value;
+            const amount = parseFloat(document.getElementById('input-amount').value);
+            const note = document.getElementById('input-note').value;
+
+            if (!date || !amount) {
+                alert('請輸入日期與金額！(這是 SOP 喔)');
+                return;
+            }
+
+            const tx = {
+                id: Date.now(), // 用時間戳記當 ID
+                date, type, category, amount, note
+            };
+
+            transactions.unshift(tx); // 加到最前面
+            saveData();
+            
+            // 重置表單
+            document.getElementById('input-amount').value = '';
+            document.getElementById('input-note').value = '';
+            alert('記帳成功！💰');
+            switchPage('dash');
+        }
+
+        function deleteTx(id) {
+            if(confirm('確定要刪除這筆紀錄嗎？')) {
+                transactions = transactions.filter(t => t.id !== id);
+                saveData();
+                renderDashboard();
+                renderList(); // 如果在列表頁也要重整
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem('bear_transactions', JSON.stringify(transactions));
+        }
+
+        // --- 3. 渲染畫面 (Render) ---
+
+        function renderDashboard() {
+            // 篩選本月資料
+            const today = new Date();
+            const currentMonth = today.toISOString().slice(0, 7); // "2026-02"
+            
+            const monthTx = transactions.filter(t => t.date.startsWith(currentMonth));
+            
+            // 計算總額
+            let totalIncome = 0;
+            let totalExpense = 0;
+            let catExpense = { '固定支出': 0, '變動支出': 0, '預存支出': 0 };
+
+            monthTx.forEach(t => {
+                if (t.type === 'income') {
+                    totalIncome += t.amount;
+                } else {
+                    totalExpense += t.amount;
+                    if (catExpense[t.category] !== undefined) {
+                        catExpense[t.category] += t.amount;
+                    }
+                }
+            });
+
+            // 更新 DOM
+            document.getElementById('display-income').innerText = `$${totalIncome.toLocaleString()}`;
+            document.getElementById('display-expense').innerText = `$${totalExpense.toLocaleString()}`;
+            document.getElementById('display-balance').innerText = `$${(totalIncome - totalExpense).toLocaleString()}`;
+
+            // 更新最近交易列表
+            const recentList = document.getElementById('recent-tx-list');
+            recentList.innerHTML = '';
+            transactions.slice(0, 5).forEach(t => {
+                recentList.innerHTML += createTxHTML(t);
+            });
+
+            // 更新圖表
+            renderChart(catExpense);
+        }
+
+        function renderList() {
+            const fullList = document.getElementById('full-tx-list');
+            fullList.innerHTML = '';
+            transactions.forEach(t => {
+                fullList.innerHTML += createTxHTML(t);
+            });
+        }
+
+        function createTxHTML(t) {
+            const colorClass = t.type === 'income' ? 'amount-inc' : 'amount-exp';
+            const sign = t.type === 'income' ? '+' : '-';
+            return `
+                <li class="tx-item">
+                    <div class="tx-info">
+                        <span class="tx-cat">${t.category} <small style="color:#888; font-weight:400;">${t.note}</small></span>
+                        <span class="tx-date">${t.date}</span>
+                    </div>
+                    <div>
+                        <span class="tx-amount ${colorClass}">${sign}$${t.amount.toLocaleString()}</span>
+                        <i class="fas fa-trash delete-btn" onclick="deleteTx(${t.id})"></i>
+                    </div>
+                </li>
+            `;
+        }
+
+        // --- 4. 圖表繪製 ---
+        function renderChart(dataObj) {
+            const ctx = document.getElementById('expenseChart').getContext('2d');
+            
+            // 檢查是否有數據
+            const hasData = Object.values(dataObj).some(val => val > 0);
+            
+            // 銷毀舊圖表
+            if (myChart) myChart.destroy();
+
+            const chartData = hasData ? [dataObj['固定支出'], dataObj['變動支出'], dataObj['預存支出']] : [1];
+            const chartColors = hasData ? ['#5a4d41', '#b08d85', '#d4a373'] : ['#eee']; // 無數據顯示灰色
+            const chartLabels = hasData ? ['固定支出', '變動支出', '預存支出'] : ['尚無支出'];
+
+            myChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: chartLabels,
+                    datasets: [{
+                        data: chartData,
+                        backgroundColor: chartColors,
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { padding: 20, usePointStyle: true } }
+                    },
+                    cutout: '70%'
+                }
+            });
+        }
+
+        // --- 5. 資料備份與還原 ---
+        function exportData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(transactions));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "bear_backup_" + new Date().toISOString().slice(0,10) + ".json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        }
+
+        function importData(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if (Array.isArray(imported)) {
+                        transactions = imported;
+                        saveData();
+                        alert('匯入成功！數據已還原。');
+                        location.reload();
+                    } else {
+                        alert('格式錯誤：檔案好像不是 Bear 的備份檔喔。');
+                    }
+                } catch(err) {
+                    alert('讀取失敗，請確認檔案是否正確。');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function clearData() {
+            if(confirm('警告：這會清空所有記帳資料且無法復原！確定要執行嗎？')) {
+                localStorage.removeItem('bear_transactions');
+                location.reload();
+            }
+        }
+    </script>
+</body>
+</html>
