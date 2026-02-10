@@ -85,7 +85,7 @@
             color: rgba(176, 141, 133, 0.2); position: absolute; top: -40px; left: 50%; transform: translateX(-50%);
         }
 
-        /* [NEW] 最新消息區塊樣式 */
+        /* 最新消息區塊 */
         .news-box {
             background: #fff;
             border-left: 4px solid var(--accent);
@@ -97,19 +97,13 @@
             margin: 0 auto 20px;
         }
         .news-item {
-            display: flex;
-            align-items: flex-start;
-            margin-bottom: 18px;
-            border-bottom: 1px dashed #eee;
-            padding-bottom: 18px;
+            display: flex; align-items: flex-start; margin-bottom: 18px;
+            border-bottom: 1px dashed #eee; padding-bottom: 18px;
         }
         .news-item:last-child { margin-bottom: 0; border-bottom: none; padding-bottom: 0; }
         .news-icon {
-            color: var(--accent);
-            font-size: 1.1rem;
-            margin-right: 15px;
-            margin-top: 3px; /* 微調對齊 */
-            flex-shrink: 0;
+            color: var(--accent); font-size: 1.1rem;
+            margin-right: 15px; margin-top: 3px; flex-shrink: 0;
         }
         .news-content strong { color: var(--accent); font-weight: 600; }
         .news-title-text { font-weight: 600; display: block; margin-bottom: 3px; color: var(--text-primary); }
@@ -191,7 +185,7 @@
             display: flex; align-items: center; justify-content: center;
             color: var(--accent); font-size: 1.2rem; margin-right: 20px; flex-shrink: 0;
         }
-        .gift-section { background: #fff; border: 1.5px dashed var(--accent); border-radius: 20px; padding: 40px 30px; margin-top: 20px; }
+        .gift-section { background: #fff; border: 1.5px dashed var(--accent); border-radius: 20px; padding: 40px 30px; margin-top: 30px; }
         .gift-title { font-family: 'Playfair Display'; color: var(--accent); font-size: 1.5rem; margin-bottom: 25px; }
         .keyword-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f0f0f0; font-size: 0.9rem; text-align: left; }
         .keyword-item:last-child { border-bottom: none; }
@@ -282,10 +276,10 @@
                 <div>
                     <span class="news-title-text">質感書衣系列</span>
                     <span class="news-desc">
-                        • (常態販售書衣)<strong>預購<strong>:過年物流因素，再開日→ <strong>2/21</strong><br>
-                        • (黑/白星星書衣)現貨： <strong>年後</strong> 補貨 <br>
-                        • (期間限定黑/奶油愛心)現貨：約 <strong>3月底</strong>補貨<br>
-                        • (新品)迷你書衣❤兔兔小花：過年期間上架<br>
+                        • (常態販售書衣) <strong>預購</strong>: 過年物流因素，再開日→ <strong>2/21</strong><br>
+                        • (黑/白星星書衣) 現貨：<strong>年後</strong> 補貨<br>
+                        • (期間限定黑/奶油愛心) 現貨：約 <strong>3月底</strong> 補貨<br>
+                        • (新品) 迷你書衣❤兔兔小花：過年期間上架
                     </span>
                 </div>
             </div>
@@ -422,16 +416,31 @@
     <section class="section fade-in">
         <h2 style="font-family:'Playfair Display'; margin-bottom:20px;">Free Resources</h2>
         
-        <a href="tool.html" class="service-card">
+        <a href="tool.html" class="service-card" style="margin-bottom: 15px;">
             <div class="service-icon"><i class="fas fa-chart-pie"></i></div>
             <div>
-                <div style="font-weight:600; font-size:1.05rem;">財務診斷室 6.1</div>
-                <div style="font-size:0.85rem; color:var(--text-secondary); margin-top:5px;">免費使用 Bear 原創財務系統</div>
+                <div style="font-weight:600; font-size:1.05rem;">財務診斷室 6.3</div>
+                <div style="font-size:0.85rem; color:var(--text-secondary); margin-top:5px;">
+                    測測妳的理財動物人格 🦁
+                </div>
             </div>
             <i class="fas fa-chevron-right" style="margin-left:auto; color:#ddd;"></i>
         </a>
 
-        <div class="gift-section">
+        <a href="app.html" class="service-card">
+            <div class="service-icon" style="background:#f0f4f8; color:#546e7a;">
+                <i class="fas fa-tachometer-alt"></i>
+            </div>
+            <div>
+                <div style="font-weight:600; font-size:1.05rem;">Bear 財務駕駛艙 v1.0</div>
+                <div style="font-size:0.85rem; color:var(--text-secondary); margin-top:5px;">
+                    工程師邏輯 x 自動化記帳 App
+                </div>
+            </div>
+            <i class="fas fa-chevron-right" style="margin-left:auto; color:#ddd;"></i>
+        </a>
+
+        <div class="gift-section" style="margin-top: 30px;">
             <div class="gift-title">Bear's Secret</div>
             <p style="font-size:0.9rem; color:var(--text-secondary); margin-bottom:30px;">
                 點擊右側按鈕複製關鍵字，<br>至 IG 私訊領取專屬資源。
@@ -450,7 +459,7 @@
             </div>
             <div class="keyword-item">
                 <span>📊 各類預算盤點表格</span>
-                <button class="keyword-btn" onclick="copyText('［表格］')">［表格］</button>
+                <button class="keyword-btn" onclick="copyText('表格')">表格</button>
             </div>
         </div>
     </section>
@@ -469,7 +478,7 @@
                 <div class="faq-answer">非常適合！Bear 的設計初衷就是為了讓「害怕數字」的人也能輕鬆上手。不用懂複雜的會計，只要跟著書寫與分配，就能找回對金錢的掌控感。</div>
             </div>
             <div class="faq-item">
-                <div class="faq-question">財務診斷室 6.1 真的是免費的嗎？<i class="fas fa-chevron-down faq-icon"></i></div>
+                <div class="faq-question">財務診斷室 6.3 真的是免費的嗎？<i class="fas fa-chevron-down faq-icon"></i></div>
                 <div class="faq-answer">是的，這是我送給所有正在為錢煩惱的人的禮物。這是一套線上自我檢測系統，希望能幫妳看見自己的財務盲點。</div>
             </div>
             <div class="faq-item">
