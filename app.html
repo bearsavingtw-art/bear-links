@@ -21,9 +21,10 @@
             --text-secondary: #968c83;
             --accent: #b08d85;
             --card-bg: #ffffff;
-            --success: #81c784; /* 綠色 */
-            --warning: #ffd54f; /* 黃色 */
-            --danger: #e57373;  /* 紅色 */
+            --success: #81c784;
+            --warning: #ffd54f;
+            --danger: #e57373;
+            --info: #64b5f6; /* [NEW] 編輯按鈕藍色 */
             --bar-bg: #eee;
         }
 
@@ -56,14 +57,14 @@
         }
         .card-title { font-weight: 600; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
 
-        /* [NEW] 預算進度條樣式 */
+        /* 預算進度條樣式 */
         .budget-item { margin-bottom: 15px; }
         .budget-header { display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 5px; }
         .budget-bar-bg { width: 100%; height: 8px; background: var(--bar-bg); border-radius: 10px; overflow: hidden; }
         .budget-bar-fill { height: 100%; width: 0%; transition: 0.5s ease; border-radius: 10px; }
         .budget-remain { font-size: 0.8rem; color: var(--text-secondary); text-align: right; margin-top: 3px; }
 
-        /* [NEW] 購物冷靜閘專用樣式 */
+        /* 購物冷靜閘樣式 */
         .logic-card { text-align: center; }
         .logic-btn-group { display: flex; gap: 15px; margin-top: 20px; }
         .btn-yes { background: var(--success); flex: 1; border:none; padding:15px; border-radius:10px; color:#fff; font-weight:600; }
@@ -97,7 +98,8 @@
         }
         .btn:active { transform: scale(0.98); }
         .btn-outline { background: transparent; border: 1px solid var(--accent); color: var(--accent); margin-top: 10px; box-shadow: none; }
-        .btn-tool { background: #546e7a; margin-bottom: 20px; } /* 工具按鈕顏色 */
+        .btn-tool { background: #546e7a; margin-bottom: 20px; }
+        .btn-cancel { background: #999; margin-top: 10px; } /* [NEW] 取消按鈕 */
 
         /* 列表樣式 */
         .tx-list { list-style: none; padding: 0; margin: 0; }
@@ -110,7 +112,10 @@
         .tx-amount { font-weight: 600; font-family: 'Montserrat', sans-serif; }
         .amount-inc { color: var(--success); }
         .amount-exp { color: var(--accent); }
-        .delete-btn { color: #ccc; margin-left: 15px; cursor: pointer; padding: 5px; }
+        /* [NEW] 按鈕區 */
+        .action-btns { display: flex; align-items: center; gap: 15px; }
+        .edit-btn { color: var(--info); cursor: pointer; padding: 5px; }
+        .delete-btn { color: #ccc; cursor: pointer; padding: 5px; }
 
         /* 底部導覽列 */
         .bottom-nav {
@@ -130,7 +135,7 @@
 
     <header>
         <h1>Bear.saving</h1>
-        <div style="font-size:0.8rem; color:var(--text-secondary);">Financial Cockpit v1.1</div>
+        <div style="font-size:0.8rem; color:var(--text-secondary);">Financial Cockpit v1.2</div>
     </header>
 
     <div id="page-dash" class="page active">
@@ -154,8 +159,7 @@
                 預算剩餘額度
                 <small style="font-weight:400; color:var(--accent); cursor:pointer;" onclick="switchPage('settings')">設定預算 <i class="fas fa-cog"></i></small>
             </div>
-            <div id="budget-container">
-                </div>
+            <div id="budget-container"></div>
         </div>
 
         <div class="card">
@@ -163,6 +167,11 @@
             <div class="chart-wrapper">
                 <canvas id="expenseChart"></canvas>
             </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-title">最近 5 筆紀錄</div>
+            <ul class="tx-list" id="recent-tx-list"></ul>
         </div>
 
         <div class="card" style="text-align:center;">
@@ -173,8 +182,7 @@
 
     <div id="page-add" class="page">
         <div class="card">
-            <div class="card-title">新增一筆紀錄</div>
-            <div class="form-group">
+            <div class="card-title" id="add-page-title">新增一筆紀錄</div> <div class="form-group">
                 <label>日期</label>
                 <input type="date" id="input-date">
             </div>
@@ -197,7 +205,8 @@
                 <label>備註 (選填)</label>
                 <input type="text" id="input-note" placeholder="例如：午餐、全聯...">
             </div>
-            <button class="btn" onclick="addTransaction()">確認儲存 <i class="fas fa-check"></i></button>
+            <button class="btn" id="save-btn" onclick="saveTransaction()">確認儲存 <i class="fas fa-check"></i></button>
+            <button class="btn btn-cancel hidden" id="cancel-edit-btn" onclick="resetForm()">取消修改</button>
         </div>
     </div>
 
@@ -277,7 +286,7 @@
         <div class="nav-item active" onclick="switchPage('dash')" id="nav-dash">
             <i class="fas fa-chart-pie"></i> 儀表板
         </div>
-        <div class="nav-item" onclick="switchPage('add')" id="nav-add">
+        <div class="nav-item" onclick="openAddPage()" id="nav-add">
             <i class="fas fa-plus-circle" style="font-size:1.5rem; color:var(--text-primary); transform:translateY(-2px);"></i> 記帳
         </div>
         <div class="nav-item" onclick="switchPage('settings')" id="nav-settings">
@@ -295,6 +304,9 @@
         let transactions = JSON.parse(localStorage.getItem('bear_transactions')) || [];
         let budgets = JSON.parse(localStorage.getItem('bear_budgets')) || { '固定支出': 0, '變動支出': 0, '預存支出': 0 };
         let myChart = null;
+        
+        // [NEW] 編輯狀態變數
+        let editingId = null;
 
         // 購物邏輯閘變數
         let shopStep = 0;
@@ -311,17 +323,16 @@
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('input-date').valueAsDate = new Date();
             updateCategories();
-            loadBudgetInputs(); // 載入設定頁面的數值
+            loadBudgetInputs();
             renderDashboard();
         });
 
-        // --- 2. 頁面切換 ---
+        // --- 2. 頁面切換與表單重置 ---
         function switchPage(pageId) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById('page-' + pageId).classList.add('active');
             
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            // 處理導覽列亮燈邏輯
             if (pageId === 'dash' || pageId === 'shop') document.getElementById('nav-dash').classList.add('active');
             else if (pageId === 'add') document.getElementById('nav-add').classList.add('active');
             else document.getElementById('nav-settings').classList.add('active');
@@ -331,19 +342,46 @@
             if(pageId === 'settings') renderList();
         }
 
-        // --- 3. 記帳核心 ---
+        // [NEW] 點擊下方導覽列的「記帳」時，強制重置為新增模式
+        function openAddPage() {
+            resetForm();
+            switchPage('add');
+        }
+
+        // [NEW] 重置表單狀態
+        function resetForm() {
+            editingId = null;
+            document.getElementById('add-page-title').innerText = '新增一筆紀錄';
+            document.getElementById('save-btn').innerHTML = '確認儲存 <i class="fas fa-check"></i>';
+            document.getElementById('cancel-edit-btn').classList.add('hidden'); // 隱藏取消按鈕
+            
+            document.getElementById('input-date').valueAsDate = new Date();
+            document.getElementById('input-amount').value = '';
+            document.getElementById('input-note').value = '';
+            // 不特別重置分類，保留上次選擇會比較好用
+        }
+
+        // --- 3. 記帳核心 (新增/修改) ---
         function updateCategories() {
             const type = document.getElementById('input-type').value;
             const catSelect = document.getElementById('input-category');
+            
+            // 暫存目前選的值 (如果是編輯模式)
+            const currentVal = catSelect.value;
+            
             catSelect.innerHTML = '';
             categories[type].forEach(cat => {
                 let opt = document.createElement('option');
                 opt.value = cat; opt.innerText = cat;
                 catSelect.appendChild(opt);
             });
+            
+            // 嘗試恢復選擇 (如果類別還在的話)
+            if(currentVal) catSelect.value = currentVal;
         }
 
-        function addTransaction() {
+        // [NEW] 整合新增與修改
+        function saveTransaction() {
             const date = document.getElementById('input-date').value;
             const type = document.getElementById('input-type').value;
             const category = document.getElementById('input-category').value;
@@ -352,13 +390,45 @@
 
             if (!date || !amount) { alert('請輸入完整資訊！'); return; }
 
-            transactions.unshift({ id: Date.now(), date, type, category, amount, note });
+            if (editingId) {
+                // 修改模式：找到舊的更新
+                const index = transactions.findIndex(t => t.id === editingId);
+                if (index !== -1) {
+                    transactions[index] = { id: editingId, date, type, category, amount, note };
+                    alert('修改成功！✏️');
+                }
+            } else {
+                // 新增模式
+                transactions.unshift({ id: Date.now(), date, type, category, amount, note });
+                alert('記帳成功！💰');
+            }
+
             localStorage.setItem('bear_transactions', JSON.stringify(transactions));
+            resetForm(); // 清空表單
+            switchPage('dash'); // 回儀表板
+        }
+
+        // [NEW] 啟動編輯模式
+        function editTx(id) {
+            const tx = transactions.find(t => t.id === id);
+            if (!tx) return;
+
+            editingId = id; // 設定全域變數
             
-            document.getElementById('input-amount').value = '';
-            document.getElementById('input-note').value = '';
-            alert('記帳成功！💰');
-            switchPage('dash');
+            // 回填資料
+            document.getElementById('input-date').value = tx.date;
+            document.getElementById('input-type').value = tx.type;
+            updateCategories(); // 記得更新下拉選單內容
+            document.getElementById('input-category').value = tx.category;
+            document.getElementById('input-amount').value = tx.amount;
+            document.getElementById('input-note').value = tx.note;
+
+            // 改變 UI
+            document.getElementById('add-page-title').innerText = '編輯紀錄';
+            document.getElementById('save-btn').innerHTML = '確認修改 <i class="fas fa-save"></i>';
+            document.getElementById('cancel-edit-btn').classList.remove('hidden'); // 顯示取消按鈕
+
+            switchPage('add'); // 跳轉到表單頁
         }
 
         function deleteTx(id) {
@@ -381,10 +451,9 @@
             budgets['變動支出'] = parseFloat(document.getElementById('budget-var').value) || 0;
             budgets['預存支出'] = parseFloat(document.getElementById('budget-save').value) || 0;
             localStorage.setItem('bear_budgets', JSON.stringify(budgets));
-            // 不需要 alert，自動儲存即可
         }
 
-        // --- 5. 儀表板與圖表 (含預算邏輯) ---
+        // --- 5. 儀表板與圖表 ---
         function renderDashboard() {
             const currentMonth = new Date().toISOString().slice(0, 7);
             const monthTx = transactions.filter(t => t.date.startsWith(currentMonth));
@@ -406,27 +475,26 @@
 
             renderBudgetBars(catExp);
             renderChart(catExp);
+            renderList(true); // [NEW] 儀表板顯示前5筆
         }
 
         function renderBudgetBars(currentExp) {
             const container = document.getElementById('budget-container');
             container.innerHTML = '';
             
-            // 遍歷三個類別
             ['固定支出', '變動支出', '預存支出'].forEach(cat => {
                 const budget = budgets[cat] || 0;
                 const spent = currentExp[cat] || 0;
-                let percent = 0;
-                let colorVar = '--success'; // 預設綠色
+                let percent = 0, colorVar = '--success';
                 
                 if (budget > 0) {
                     percent = (spent / budget) * 100;
-                    if (percent > 100) colorVar = '--danger'; // 爆預算 紅色
-                    else if (percent > 80) colorVar = '--warning'; // 快沒了 黃色
+                    if (percent > 100) colorVar = '--danger';
+                    else if (percent > 80) colorVar = '--warning';
                 }
                 
                 const remaining = budget - spent;
-                const width = Math.min(percent, 100); // 視覺上不超過 100%
+                const width = Math.min(percent, 100);
 
                 container.innerHTML += `
                     <div class="budget-item">
@@ -438,12 +506,9 @@
                             <div class="budget-bar-fill" style="width:${width}%; background:var(${colorVar});"></div>
                         </div>
                         <div class="budget-remain">
-                            剩餘: <span style="color:var(${remaining < 0 ? '--danger' : '--text-primary'})">
-                                $${remaining.toLocaleString()}
-                            </span>
+                            剩餘: <span style="color:var(${remaining < 0 ? '--danger' : '--text-primary'})">$${remaining.toLocaleString()}</span>
                         </div>
-                    </div>
-                `;
+                    </div>`;
             });
             
             if (Object.values(budgets).every(b => b === 0)) {
@@ -469,16 +534,26 @@
             });
         }
 
-        function renderList() {
-            const list = document.getElementById('full-tx-list');
+        // [NEW] 整合儀表板與詳細列表
+        function renderList(isShort = false) {
+            const listId = isShort ? 'recent-tx-list' : 'full-tx-list';
+            const list = document.getElementById(listId);
+            if (!list) return;
+            
             list.innerHTML = '';
-            transactions.forEach(t => {
+            const dataToShow = isShort ? transactions.slice(0, 5) : transactions;
+
+            dataToShow.forEach(t => {
                 const color = t.type === 'income' ? 'amount-inc' : 'amount-exp';
                 const sign = t.type === 'income' ? '+' : '-';
                 list.innerHTML += `
                     <li class="tx-item">
                         <div class="tx-info"><span class="tx-cat">${t.category} <small style="color:#888;">${t.note}</small></span><span class="tx-date">${t.date}</span></div>
-                        <div><span class="tx-amount ${color}">${sign}$${t.amount.toLocaleString()}</span><i class="fas fa-trash delete-btn" onclick="deleteTx(${t.id})"></i></div>
+                        <div class="action-btns">
+                            <span class="tx-amount ${color}">${sign}$${t.amount.toLocaleString()}</span>
+                            <i class="fas fa-edit edit-btn" onclick="editTx(${t.id})"></i>
+                            <i class="fas fa-trash delete-btn" onclick="deleteTx(${t.id})"></i>
+                        </div>
                     </li>`;
             });
         }
@@ -555,7 +630,6 @@
             reader.onload = function(e) {
                 try {
                     const data = JSON.parse(e.target.result);
-                    // 相容舊版備份 (舊版是 Array, 新版是 Object)
                     if (Array.isArray(data)) { transactions = data; } 
                     else { transactions = data.tx || []; budgets = data.budget || {}; }
                     
