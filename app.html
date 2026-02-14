@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Bear 財務駕駛艙 | Financial Cockpit</title>
     
-    <link rel="manifest" href='data:application/manifest+json,{"name":"Bear 財務駕駛艙","short_name":"Bear.saving","start_url":".","display":"standalone","background_color":"#fcfbf9","theme_color":"#fcfbf9","icons":[{"src":"logo.png","sizes":"192x192","type":"image/png"},{"src":"logo.png","sizes":"512x512","type":"image/png"}]}'>
+    <link rel="manifest" href='data:application/manifest+json,%7B%22name%22%3A%22Bear%20%E8%B2%A1%E5%8B%99%E9%A7%95%E9%A7%9B%E8%89%99%22%2C%22short_name%22%3A%22Bear.saving%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23fcfbf9%22%2C%22theme_color%22%3A%22%23fcfbf9%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22logo.png%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fpng%22%2C%22purpose%22%3A%22any%20maskable%22%7D%2C%7B%22src%22%3A%22logo.png%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fpng%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D'>
 
     <link rel="icon" type="image/png" sizes="192x192" href="logo.png">
     <link rel="icon" type="image/png" sizes="512x512" href="logo.png">
@@ -77,7 +77,7 @@
         .btn-no { background: var(--danger); flex: 1; border:none; padding:15px; border-radius:10px; color:#fff; font-weight:600; }
         .result-icon { font-size: 3rem; margin-bottom: 10px; display: block; }
         
-        /* [NEW] 購物清單紀錄樣式 */
+        /* 購物清單紀錄樣式 */
         .shop-list-item {
             display: flex; justify-content: space-between; align-items: center;
             padding: 15px 0; border-bottom: 1px dashed #eee;
@@ -137,10 +137,11 @@
         }
         .tx-info { display: flex; flex-direction: column; }
         .tx-cat { font-weight: 600; font-size: 0.95rem; }
-        .tx-amount { font-weight: 600; font-family: 'Montserrat', sans-serif; }
+        .tx-amount { font-weight: 600; font-family: 'Montserrat', sans-serif; display: flex; flex-direction: column; align-items: flex-end; }
+        .tx-method { font-size: 0.75rem; color: #999; margin-top: 2px; } /* [NEW] 支付方式小字 */
         .amount-inc { color: var(--success); }
         .amount-exp { color: var(--accent); }
-        .action-btns { display: flex; align-items: center; gap: 15px; }
+        .action-btns { display: flex; align-items: center; gap: 10px; margin-left: 10px;} /* 微調間距 */
         .edit-btn { color: var(--info); cursor: pointer; padding: 5px; }
         .delete-btn { color: #ccc; cursor: pointer; padding: 5px; }
 
@@ -162,7 +163,7 @@
 
     <header>
         <h1>Bear.saving</h1>
-        <div style="font-size:0.8rem; color:var(--text-secondary);">Financial Cockpit v1.4</div>
+        <div style="font-size:0.8rem; color:var(--text-secondary);">Financial Cockpit v1.5</div>
     </header>
 
     <div id="page-dash" class="page active">
@@ -225,6 +226,16 @@
                 <label>詳細分類</label>
                 <select id="input-category"></select>
             </div>
+            
+            <div class="form-group">
+                <label>支付方式</label>
+                <select id="input-method">
+                    <option value="cash">💵 現金 (Cash)</option>
+                    <option value="card">💳 信用卡/行動支付 (Card)</option>
+                    <option value="other">🏦 轉帳/其他 (Other)</option>
+                </select>
+            </div>
+
             <div class="form-group">
                 <label>金額</label>
                 <input type="number" id="input-amount" placeholder="0" inputmode="numeric">
@@ -279,8 +290,7 @@
 
         <div id="shop-history-container" class="card">
             <div class="card-title">購物邏輯紀錄 (History)</div>
-            <div id="shop-list-content">
-                </div>
+            <div id="shop-list-content"></div>
         </div>
     </div>
 
@@ -337,13 +347,11 @@
         
         let transactions = JSON.parse(localStorage.getItem('bear_transactions')) || [];
         let budgets = JSON.parse(localStorage.getItem('bear_budgets')) || { '固定支出': 0, '變動支出': 0, '預存支出': 0 };
-        // [NEW] 購物清單資料庫
         let shoppingList = JSON.parse(localStorage.getItem('bear_shopping_list')) || [];
         
         let myChart = null;
         let editingId = null;
 
-        // 購物邏輯閘變數
         let shopStep = 0;
         let shopScore = 0;
         let shopItem = {};
@@ -360,8 +368,6 @@
             updateCategories();
             loadBudgetInputs();
             renderDashboard();
-            
-            // [NEW] 啟動倒數計時器監控
             setInterval(updateCountdowns, 1000);
         });
 
@@ -379,8 +385,8 @@
             if(pageId === 'dash') renderDashboard();
             if(pageId === 'settings') renderList();
             if(pageId === 'shop') {
-                resetShop(); // 重置表單狀態
-                renderShoppingList(); // [NEW] 渲染購物清單
+                resetShop();
+                renderShoppingList();
             }
         }
 
@@ -397,6 +403,7 @@
             document.getElementById('input-date').valueAsDate = new Date();
             document.getElementById('input-amount').value = '';
             document.getElementById('input-note').value = '';
+            document.getElementById('input-method').value = 'cash'; // [NEW] 重置預設為現金
         }
 
         // --- 3. 記帳核心 ---
@@ -419,16 +426,20 @@
             const category = document.getElementById('input-category').value;
             const amount = parseFloat(document.getElementById('input-amount').value);
             const note = document.getElementById('input-note').value;
+            const method = document.getElementById('input-method').value; // [NEW] 讀取支付方式
+
             if (!date || !amount) { alert('請輸入完整資訊！'); return; }
 
             if (editingId) {
                 const index = transactions.findIndex(t => t.id === editingId);
                 if (index !== -1) {
-                    transactions[index] = { id: editingId, date, type, category, amount, note };
+                    // [NEW] 更新時加入 method
+                    transactions[index] = { id: editingId, date, type, category, amount, note, method };
                     alert('修改成功！✏️');
                 }
             } else {
-                transactions.unshift({ id: Date.now(), date, type, category, amount, note });
+                // [NEW] 新增時加入 method
+                transactions.unshift({ id: Date.now(), date, type, category, amount, note, method });
                 alert('記帳成功！💰');
             }
             localStorage.setItem('bear_transactions', JSON.stringify(transactions));
@@ -446,6 +457,9 @@
             document.getElementById('input-category').value = tx.category;
             document.getElementById('input-amount').value = tx.amount;
             document.getElementById('input-note').value = tx.note;
+            // [NEW] 回填支付方式 (若舊資料沒有 method，預設 'cash')
+            document.getElementById('input-method').value = tx.method || 'cash';
+
             document.getElementById('add-page-title').innerText = '編輯紀錄';
             document.getElementById('save-btn').innerHTML = '確認修改 <i class="fas fa-save"></i>';
             document.getElementById('cancel-edit-btn').classList.remove('hidden');
@@ -532,6 +546,13 @@
             });
         }
 
+        // [NEW] 整合支付方式圖示
+        function getMethodIcon(method) {
+            if (method === 'card') return '💳';
+            if (method === 'other') return '🏦';
+            return '💵'; // 預設現金
+        }
+
         function renderList(isShort = false) {
             const listId = isShort ? 'recent-tx-list' : 'full-tx-list';
             const list = document.getElementById(listId);
@@ -541,11 +562,24 @@
             dataToShow.forEach(t => {
                 const color = t.type === 'income' ? 'amount-inc' : 'amount-exp';
                 const sign = t.type === 'income' ? '+' : '-';
-                list.innerHTML += `<li class="tx-item"><div class="tx-info"><span class="tx-cat">${t.category} <small style="color:#888;">${t.note}</small></span><span class="tx-date">${t.date}</span></div><div class="action-btns"><span class="tx-amount ${color}">${sign}$${t.amount.toLocaleString()}</span><i class="fas fa-edit edit-btn" onclick="editTx(${t.id})"></i><i class="fas fa-trash delete-btn" onclick="deleteTx(${t.id})"></i></div></li>`;
+                const methodIcon = getMethodIcon(t.method); // [NEW] 取得圖示
+                
+                list.innerHTML += `
+                    <li class="tx-item">
+                        <div class="tx-info">
+                            <span class="tx-cat">${t.category} <small style="color:#888;">${t.note}</small></span>
+                            <span class="tx-date">${t.date} <span style="font-size:0.8rem; margin-left:5px;">${methodIcon}</span></span>
+                        </div>
+                        <div class="action-btns">
+                            <span class="tx-amount ${color}">${sign}$${t.amount.toLocaleString()}</span>
+                            <i class="fas fa-edit edit-btn" onclick="editTx(${t.id})"></i>
+                            <i class="fas fa-trash delete-btn" onclick="deleteTx(${t.id})"></i>
+                        </div>
+                    </li>`;
             });
         }
 
-        // --- 6. 購物冷靜閘邏輯 (升級版) ---
+        // --- 6. 購物冷靜閘 ---
         function startLogic() {
             const name = document.getElementById('shop-name').value;
             const price = parseFloat(document.getElementById('shop-price').value);
@@ -556,7 +590,7 @@
             shopStep = 0; shopScore = 0;
             document.getElementById('shop-step-1').classList.add('hidden');
             document.getElementById('shop-step-2').classList.remove('hidden');
-            document.getElementById('shop-history-container').classList.add('hidden'); // 測驗時隱藏列表
+            document.getElementById('shop-history-container').classList.add('hidden'); 
             showQuestion();
         }
 
@@ -583,7 +617,7 @@
             document.getElementById('shop-step-3').classList.remove('hidden');
             
             let html = '';
-            let resultType = ''; // pass, wait, stop
+            let resultType = '';
             
             if(shopScore >= 60) {
                 resultType = 'pass';
@@ -596,8 +630,6 @@
                 html = `<span class="result-icon">🔴</span><h3>駁回 (STOP)</h3><p>衝動消費！把錢存下來吧。</p>`;
             }
             document.getElementById('logic-result-content').innerHTML = html;
-
-            // [NEW] 自動儲存測驗結果
             saveShoppingItem(resultType);
         }
 
@@ -607,8 +639,8 @@
                 name: shopItem.name,
                 price: shopItem.price,
                 costHour: shopItem.costHour,
-                result: resultType, // pass, wait, stop
-                timestamp: Date.now() // 紀錄時間，用於倒數
+                result: resultType,
+                timestamp: Date.now()
             };
             shoppingList.unshift(newItem);
             localStorage.setItem('bear_shopping_list', JSON.stringify(shoppingList));
@@ -617,13 +649,12 @@
         function resetShop() {
             document.getElementById('shop-step-3').classList.add('hidden');
             document.getElementById('shop-step-1').classList.remove('hidden');
-            document.getElementById('shop-history-container').classList.remove('hidden'); // 顯示列表
+            document.getElementById('shop-history-container').classList.remove('hidden'); 
             document.getElementById('shop-name').value = '';
             document.getElementById('shop-price').value = '';
-            renderShoppingList(); // 重新渲染列表
+            renderShoppingList();
         }
 
-        // [NEW] 渲染購物清單與倒數計時
         function renderShoppingList() {
             const listContainer = document.getElementById('shop-list-content');
             if(!listContainer) return;
@@ -643,7 +674,6 @@
                     badgeClass = 'status-pass'; badgeText = '通過 ✅';
                 } else if (item.result === 'wait') {
                     badgeClass = 'status-wait'; badgeText = '冷靜 ⏳';
-                    // 加入倒數計時容器
                     timerHtml = `<div class="timer-badge" data-ts="${item.timestamp}">計算中...</div>`;
                 } else {
                     badgeClass = 'status-stop'; badgeText = '駁回 🛑';
@@ -662,7 +692,7 @@
                     </div>
                 `;
             });
-            updateCountdowns(); // 立即更新一次時間
+            updateCountdowns();
         }
 
         function deleteShopItem(id) {
@@ -673,21 +703,17 @@
             }
         }
 
-        // [NEW] 全域計時器邏輯
         function updateCountdowns() {
             const timers = document.querySelectorAll('.timer-badge');
             const now = Date.now();
-            
             timers.forEach(timer => {
                 const createdTime = parseInt(timer.getAttribute('data-ts'));
-                const endTime = createdTime + (72 * 60 * 60 * 1000); // 72小時後
+                const endTime = createdTime + (72 * 60 * 60 * 1000);
                 const diff = endTime - now;
-
                 if (diff <= 0) {
                     timer.innerText = "冷靜期結束";
                     timer.style.background = "#888";
                 } else {
-                    // 換算時分秒
                     const h = Math.floor(diff / (1000 * 60 * 60));
                     const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
                     const s = Math.floor((diff % (1000 * 60)) / 1000);
@@ -696,7 +722,6 @@
             });
         }
 
-        // --- 7. 資料管理 (已整合 Shopping List) ---
         function exportData() {
             const data = { tx: transactions, budget: budgets, shop: shoppingList };
             const blob = new Blob([JSON.stringify(data)], {type: "text/json"});
@@ -715,9 +740,8 @@
                     else { 
                         transactions = data.tx || []; 
                         budgets = data.budget || {}; 
-                        shoppingList = data.shop || []; // 匯入購物清單
+                        shoppingList = data.shop || []; 
                     }
-                    
                     localStorage.setItem('bear_transactions', JSON.stringify(transactions));
                     localStorage.setItem('bear_budgets', JSON.stringify(budgets));
                     localStorage.setItem('bear_shopping_list', JSON.stringify(shoppingList));
