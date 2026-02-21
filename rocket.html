@@ -20,6 +20,7 @@
             --white: #ffffff;
             --card-shadow: 0 5px 20px rgba(0,0,0,0.03);
             --success-color: #7b9e87;
+            --warning-color: #e07a5f;
         }
 
         * { box-sizing: border-box; }
@@ -86,12 +87,28 @@
         .target-list li { position: relative; padding-left: 30px; margin-bottom: 15px; color: var(--text-secondary); }
         .target-list li::before { content: '🎯'; position: absolute; left: 0; top: 2px; font-size: 1rem; }
         .target-list li strong { color: var(--text-primary); font-weight: 600; }
-        .target-list li a { color: var(--accent); text-decoration: none; font-weight: 500; }
 
         .execution-box {
-            background: #fcfbf9; padding: 18px 25px; border-radius: 10px; font-size: 0.95rem; color: var(--text-primary); border: 1px dashed #dcd3cb; display: flex; align-items: flex-start; gap: 10px; margin-bottom: 15px;
+            background: #fcfbf9; padding: 18px 25px; border-radius: 10px; font-size: 0.95rem; color: var(--text-primary); border: 1px dashed #dcd3cb; display: flex; align-items: flex-start; gap: 10px; margin-bottom: 15px; flex-direction: column;
         }
         
+        /* 複利解說區塊 */
+        .compound-box {
+            background: #fff; border-left: 4px solid #d4a373; padding: 25px; border-radius: 0 10px 10px 0; margin-top: 15px; width: 100%; box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+        }
+        .compound-box h4 {
+            color: var(--text-primary); margin-top: 0; margin-bottom: 15px; font-size: 1.1rem; display: flex; align-items: center; gap: 8px; font-family: 'Noto Serif TC', serif;
+        }
+        .compound-desc { color: var(--text-secondary); font-size: 0.95rem; line-height: 1.7; margin-bottom: 20px; }
+        
+        .compare-row { display: flex; gap: 15px; flex-wrap: wrap; }
+        .compare-col { flex: 1; min-width: 250px; background: #fdfbf7; padding: 20px; border-radius: 10px; border: 1px solid #eee; }
+        .compare-col.bad { border-top: 3px solid var(--warning-color); }
+        .compare-col.good { border-top: 3px solid var(--success-color); }
+        .compare-title { font-weight: 600; margin-bottom: 10px; font-size: 1rem; display: flex; align-items: center; gap: 8px; }
+        .compare-col.bad .compare-title { color: var(--warning-color); }
+        .compare-col.good .compare-title { color: var(--success-color); }
+
         .pass-criteria {
             background: rgba(123, 158, 135, 0.1); padding: 12px 20px; border-radius: 8px; font-size: 0.9rem; color: var(--success-color); font-weight: 600; display: flex; align-items: center; gap: 8px; border-left: 3px solid var(--success-color);
         }
@@ -162,7 +179,7 @@
                 <li><strong>年度固定支出：</strong> 明年要繳的保費、稅金。這不是存錢，這是「預留」，必須分攤到每個月。</li>
                 <li><strong>快樂基金 (Wishlist)：</strong> 熊的「願望清單每月 $1500」。這是為了防止報復性消費的必要潤滑劑。</li>
             </ul>
-            <div class="execution-box">
+            <div class="execution-box" style="flex-direction: row;">
                 <i class="fas fa-cog" style="color: var(--accent); margin-top: 4px;"></i>
                 <div><strong>執行方式：</strong> 放在高活存帳戶，隨時可取用。</div>
             </div>
@@ -184,7 +201,7 @@
                 <li><strong>大型資產頭期款：</strong> （如果有的話）買房頭期款、買車。</li>
                 <li><strong>特別防呆機制：</strong> 當接到大案子、收到大筆款項時，溢出來的水位才能流向這裡，絕對不能拿去亂犒賞自己。</li>
             </ul>
-            <div class="execution-box">
+            <div class="execution-box" style="flex-direction: row;">
                 <i class="fas fa-cog" style="color: var(--accent); margin-top: 4px;"></i>
                 <div><strong>執行方式：</strong> 設立「子帳戶」或「專款專用袋」。利用 <strong>「目標金額 ÷ 月數 = 每月存款」</strong> 的逆向工程算法。算出來存不到，那就砍目標或是增加收入。</div>
             </div>
@@ -204,10 +221,38 @@
                 <li><strong>退休金/財務自由帳戶：</strong> 這不是為了 65 歲，而是為了讓妳在 40 歲時有選擇權，自己給自己的安全感，才是最穩固的底氣，絕不依賴他人。</li>
                 <li><strong>股票/ETF 投資：</strong> 進入「微退休」狀態，目標是讓被動收入慢慢覆蓋掉生存支出。</li>
             </ul>
+            
             <div class="execution-box">
-                <i class="fas fa-cog" style="color: var(--accent); margin-top: 4px;"></i>
-                <div><strong>執行方式：</strong> 定期定額，只進不出(很重要!!!!!)。這筆錢是丟進去讓「時間」幫妳打工的。</div>
+                <div style="display: flex; gap: 10px;">
+                    <i class="fas fa-cog" style="color: var(--accent); margin-top: 4px;"></i>
+                    <div><strong>執行方式：</strong> 定期定額，<strong>只進不出(很重要!!!!!)</strong>。這筆錢是丟進去讓「時間」幫妳打工的。</div>
+                </div>
+                
+                <div class="compound-box">
+                    <h4><i class="fas fa-chart-line"></i> 為什麼絕對不能提領？（複利的雪球效應）</h4>
+                    <div class="compound-desc">
+                        想像妳在斜坡上滾雪球。前 3 年雪球很小，感覺沒什麼增長；但到了第 5 年、第 10 年，只要雪球不破，它每滾一圈沾上的雪量會呈現指數型爆發。<br><br>
+                        <br><br>
+                        如果中途因為想買名牌包而「提領」了一半資金，等同於把好不容易變大的雪球敲碎。本金一旦被抽離，前面累積的時間價值全部歸零，這就是為什麼許多人存了半天，卻始終無法讓系統自動運轉的原因。
+                    </div>
+                    
+                    <div class="compare-row">
+                        <div class="compare-col bad">
+                            <div class="compare-title"><i class="fas fa-times-circle"></i> 隨意提領（破壞系統）</div>
+                            <div style="font-size: 0.9rem; color: var(--text-secondary);">
+                                存三年就領出來花掉，過了十年，妳手上依然只有一個小雪球，永遠要在原地辛苦奔跑。
+                            </div>
+                        </div>
+                        <div class="compare-col good">
+                            <div class="compare-title"><i class="fas fa-check-circle"></i> 只進不出（自動運轉）</div>
+                            <div style="font-size: 0.9rem; color: var(--text-secondary);">
+                                撐過前期的緩慢期，後期的被動收入會呈現指數型上升，最終有能力覆蓋生存支出。
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
+
             <div class="pass-criteria">
                 <i class="fas fa-check-circle"></i> 系統放行條件：被動收入已開始穩定產生，系統進入自動化循環。
             </div>
