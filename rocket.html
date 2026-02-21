@@ -10,6 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Noto+Serif+TC:wght@400;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
         :root {
@@ -101,15 +102,29 @@
         }
         .compound-desc { color: var(--text-secondary); font-size: 0.95rem; line-height: 1.7; margin-bottom: 20px; }
         
-        .data-grid { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; }
-        .data-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background: #fdfbf7; border-radius: 8px; font-size: 0.95rem; }
-        .data-row.highlight { background: rgba(123, 158, 135, 0.1); border-left: 4px solid var(--success-color); font-weight: 600; color: var(--text-primary); }
-        .data-row.warning { background: rgba(224, 122, 95, 0.05); border-left: 4px solid var(--warning-color); }
-        .data-value { font-family: 'Montserrat', sans-serif; font-weight: 600; letter-spacing: 0.5px; }
-        
-        .diff-highlight {
-            background: #fdfbf7; padding: 18px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid var(--accent); font-size: 0.95rem; color: var(--text-primary); line-height: 1.6;
+        /* 圖表與表格 */
+        .chart-container {
+            position: relative; height: 350px; width: 100%; margin-bottom: 30px;
         }
+        
+        .compare-table {
+            width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 0.95rem;
+            border-radius: 10px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+        }
+        .compare-table th {
+            background: var(--text-primary); color: #fff; padding: 15px; text-align: left; font-weight: 600;
+        }
+        .compare-table td {
+            padding: 15px; border-bottom: 1px solid #eee; color: var(--text-primary);
+        }
+        .compare-table tr:nth-child(1) td { background: rgba(123, 158, 135, 0.1); font-weight: 600; } /* 100% */
+        .compare-table tr:nth-child(2) td { background: #fcfbf9; } /* 50% */
+        .compare-table tr:nth-child(3) td { background: rgba(224, 122, 95, 0.05); } /* 0% */
+        .compare-table tr:last-child td { border-bottom: none; }
+        
+        .amount { font-family: 'Montserrat', sans-serif; font-weight: 600; letter-spacing: 0.5px; }
+        .diff-text { color: var(--warning-color); font-weight: 600; }
+        .highlight-text { color: var(--success-color); }
         
         .compare-row { display: flex; gap: 15px; flex-wrap: wrap; margin-top: 10px; }
         .compare-col { flex: 1; min-width: 250px; background: #fdfbf7; padding: 20px; border-radius: 10px; border: 1px solid #eee; }
@@ -243,29 +258,39 @@
                     <div class="compound-desc">
                         想像妳在斜坡上滾雪球。前 3 年感覺沒什麼增長；但到了第 5 年、第 10 年，只要雪球不破，它每滾一圈沾上的雪量會呈現指數型爆發。<br><br>
                         <strong>真實回測範例：每月 1 萬投入 0050（2016-2026）</strong><br>
-                        十年總共投入本金：121 萬。我們來看看「有沒有把配息繼續滾進去」的驚人落差：
+                        十年總共投入本金為 121 萬。我們來看看「有沒有把配息繼續滾進去」，長期下來的雪球體積落差有多驚人：
                     </div>
                     
-                    <div class="data-grid">
-                        <div class="data-row warning">
-                            <span>股利 0% 再投入 (全領出來花掉)</span>
-                            <span class="data-value">市值約 2,116,069 元</span>
-                        </div>
-                        <div class="data-row">
-                            <span>股利 50% 再投入 (花一半存一半)</span>
-                            <span class="data-value">市值約 2,333,774 元</span>
-                        </div>
-                        <div class="data-row highlight">
-                            <span>股利 100% 再投入 (嚴格只進不出)</span>
-                            <span class="data-value">市值約 2,575,493 元 🚀</span>
-                        </div>
+                    <div class="chart-container">
+                        <canvas id="compoundChart"></canvas>
                     </div>
-                    
-                    <div class="diff-highlight">
-                        <i class="fas fa-search-dollar"></i> <strong>殘酷的差距：</strong><br>
-                        堅持 100% 股利再投入，對比只投入一半 (50%)，十年後多出了 <strong>約 24 萬台幣 (241,719元)</strong>。<br>
-                        如果跟把股利全部花掉 (0%) 相比，更是整整多出了 <strong>約 46 萬台幣 (459,424元)</strong>！這就是中途把雪球敲碎的代價。
-                    </div>
+
+                    <table class="compare-table">
+                        <thead>
+                            <tr>
+                                <th>提領策略</th>
+                                <th>十年總市值</th>
+                                <th>殘酷的差距 (對比 100% 投入)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>🚀 100% 股利再投入<br><span style="font-size: 0.85em; font-weight: normal;">(嚴格只進不出)</span></td>
+                                <td class="amount highlight-text">2,575,493 元</td>
+                                <td style="color: var(--text-secondary);">-</td>
+                            </tr>
+                            <tr>
+                                <td>⚖️ 50% 股利再投入<br><span style="font-size: 0.85em; font-weight: normal;">(花一半、存一半)</span></td>
+                                <td class="amount">2,333,774 元</td>
+                                <td class="diff-text">少賺了 241,719 元</td>
+                            </tr>
+                            <tr>
+                                <td>💸 0% 股利再投入<br><span style="font-size: 0.85em; font-weight: normal;">(配息全領出來花掉)</span></td>
+                                <td class="amount">2,116,069 元</td>
+                                <td class="diff-text">少賺了 459,424 元</td>
+                            </tr>
+                        </tbody>
+                    </table>
                     
                     <div class="compare-row">
                         <div class="compare-col bad">
@@ -344,5 +369,108 @@
         Designed for a confident life.
     </footer>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('compoundChart').getContext('2d');
+            
+            // 模擬十年成長軌跡 (共 10 個資料點)
+            const labels = ['第1年', '第2年', '第3年', '第4年', '第5年', '第6年', '第7年', '第8年', '第9年', '第10年'];
+            const data100 = [125000, 260000, 410000, 580000, 780000, 1020000, 1300000, 1650000, 2050000, 2575493];
+            const data50 = [124000, 256000, 400000, 560000, 740000, 950000, 1200000, 1500000, 1880000, 2333774];
+            const data0 = [123000, 252000, 390000, 540000, 700000, 890000, 1110000, 1380000, 1720000, 2116069];
+            const principal = [120000, 240000, 360000, 480000, 600000, 720000, 840000, 960000, 1080000, 1210000];
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: '100% 股利再投入',
+                            data: data100,
+                            borderColor: '#7b9e87',
+                            backgroundColor: '#7b9e87',
+                            borderWidth: 3,
+                            tension: 0.3,
+                            pointRadius: 3
+                        },
+                        {
+                            label: '50% 股利再投入',
+                            data: data50,
+                            borderColor: '#d4a373',
+                            backgroundColor: '#d4a373',
+                            borderWidth: 3,
+                            tension: 0.3,
+                            pointRadius: 3
+                        },
+                        {
+                            label: '0% 股利再投入',
+                            data: data0,
+                            borderColor: '#e07a5f',
+                            backgroundColor: '#e07a5f',
+                            borderWidth: 3,
+                            tension: 0.3,
+                            pointRadius: 3
+                        },
+                        {
+                            label: '總投入本金',
+                            data: principal,
+                            borderColor: '#968c83',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            tension: 0,
+                            pointRadius: 0,
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                font: { family: "'Noto Serif TC', serif" },
+                                color: '#5a4d41'
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) { label += ': '; }
+                                    if (context.parsed.y !== null) {
+                                        label += new Intl.NumberFormat('zh-TW', { style: 'currency', currency: 'TWD', maximumFractionDigits: 0 }).format(context.parsed.y);
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: '#eee' },
+                            ticks: {
+                                color: '#968c83',
+                                callback: function(value) {
+                                    return value / 10000 + ' 萬';
+                                }
+                            }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#968c83' }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
 </body>
 </html>
