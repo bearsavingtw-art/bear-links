@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bear 的「三階段火箭」存錢目標法 | Bear.saving</title>
+    
+    <link rel="icon" href="favicon.png" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Noto+Serif+TC:wght@400;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-color: #fcfbf9;
+            --text-primary: #5a4d41;
+            --text-secondary: #968c83;
+            --accent: #b08d85;
+            --white: #ffffff;
+            --card-shadow: 0 5px 20px rgba(0,0,0,0.03);
+        }
+
+        * { box-sizing: border-box; }
+        
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: 'Montserrat', 'Noto Serif TC', serif;
+            margin: 0; padding: 0;
+            line-height: 1.8;
+        }
+
+        /* 導覽列 */
+        nav {
+            position: fixed; top: 0; left: 0; width: 100%; padding: 15px 30px;
+            display: flex; justify-content: space-between; align-items: center;
+            z-index: 1000; background: rgba(252, 251, 249, 0.95); box-shadow: 0 2px 20px rgba(0,0,0,0.05);
+        }
+        
+        .nav-logo {
+            font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 600;
+            color: var(--text-primary); text-decoration: none; letter-spacing: 1px;
+        }
+        .nav-back {
+            color: var(--text-primary); text-decoration: none; font-size: 0.95rem; font-weight: 500; transition: 0.3s;
+        }
+        .nav-back:hover { color: var(--accent); }
+
+        /* 內容區塊 */
+        .rocket-container {
+            max-width: 800px; margin: 100px auto 60px; padding: 20px;
+        }
+        
+        .rocket-header {
+            text-align: center; margin-bottom: 50px;
+        }
+        .rocket-header h1 {
+            font-family: 'Noto Serif TC', serif; font-size: 2.2rem; color: var(--text-primary); margin-bottom: 10px; line-height: 1.4;
+        }
+        .rocket-header p {
+            color: var(--text-secondary); font-size: 1.1rem; letter-spacing: 1px;
+        }
+
+        /* 階段卡片 */
+        .stage-card {
+            background: #fff; border-radius: 15px; padding: 35px; margin-bottom: 30px;
+            box-shadow: var(--card-shadow); border-left: 6px solid var(--accent);
+            position: relative; transition: transform 0.3s;
+        }
+        .stage-card:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.06); }
+        
+        .stage-title {
+            font-size: 1.4rem; margin-top: 0; margin-bottom: 15px; color: var(--text-primary); display: flex; align-items: center; gap: 12px; font-weight: 600;
+        }
+        .stage-tag {
+            background: #fdfbf7; color: var(--accent); padding: 5px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; border: 1px solid #eee; display: inline-block; margin-bottom: 20px;
+        }
+        
+        .stage-logic { margin-bottom: 20px; color: var(--text-secondary); font-size: 0.95rem; }
+        .stage-logic strong { color: var(--text-primary); font-weight: 600; }
+        .stage-logic span { color: var(--accent); font-weight: 600; }
+
+        .target-list { list-style: none; padding: 0; margin: 0 0 25px 0; }
+        .target-list li { position: relative; padding-left: 30px; margin-bottom: 15px; color: var(--text-secondary); }
+        .target-list li::before { content: '🎯'; position: absolute; left: 0; top: 2px; font-size: 1rem; }
+        .target-list li strong { color: var(--text-primary); font-weight: 600; }
+        .target-list li a { color: var(--accent); text-decoration: none; font-weight: 500; }
+
+        .execution-box {
+            background: #fcfbf9; padding: 18px 25px; border-radius: 10px; font-size: 0.95rem; color: var(--text-primary); border: 1px dashed #dcd3cb; display: flex; align-items: flex-start; gap: 10px;
+        }
+
+        /* Bear 獨家觀點 */
+        .insight-box {
+            background: var(--text-primary); color: #fff; padding: 45px 30px; border-radius: 20px; text-align: center; margin-top: 60px; margin-bottom: 60px; box-shadow: 0 15px 30px rgba(90, 77, 65, 0.15);
+        }
+        .insight-box h3 { font-family: 'Playfair Display', serif; color: #eaddd7; margin-top: 0; font-size: 1.4rem; letter-spacing: 1px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .insight-quote { font-size: 1.4rem; font-weight: 600; margin: 25px 0; line-height: 1.6; font-family: 'Noto Serif TC', serif; }
+        .insight-quote::before { content: "「"; color: var(--accent); font-size: 1.8rem; vertical-align: middle; }
+        .insight-quote::after { content: "」"; color: var(--accent); font-size: 1.8rem; vertical-align: middle; }
+        .insight-desc { font-size: 0.95rem; color: rgba(255,255,255,0.8); line-height: 1.7; max-width: 600px; margin: 0 auto; }
+
+        /* 給粉絲的企劃建議 */
+        .content-plan { background: #fff; padding: 35px; border-radius: 15px; border: 1px solid #eee; margin-top: 20px; }
+        .content-plan h3 { color: var(--text-primary); margin-top: 0; border-bottom: 2px solid #fcfbf9; padding-bottom: 15px; margin-bottom: 20px; font-size: 1.2rem; display: flex; align-items: center; gap: 10px; }
+        .plan-item { margin-bottom: 15px; font-size: 0.95rem; color: var(--text-secondary); }
+        .plan-item strong { color: var(--text-primary); }
+        .plan-cta { background: #fdfbf7; padding: 15px; border-radius: 8px; margin-top: 20px; font-weight: 500; color: var(--text-primary); border-left: 3px solid var(--accent); }
+
+        footer { text-align: center; margin-top: 60px; padding: 40px 20px; border-top: 1px solid #eee; color: var(--text-secondary); font-size: 0.8rem; letter-spacing: 1px; }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="index.html" class="nav-logo">Bear.saving</a>
+        <a href="index.html" class="nav-back"><i class="fas fa-arrow-left"></i> 返回首頁</a>
+    </nav>
+
+    <div class="rocket-container">
+        <div class="rocket-header">
+            <h1>🛠️ Bear 的「三階段火箭」<br>存錢目標法</h1>
+            <p>我們不談夢想，我們談 <strong>「系統穩定度」</strong>。</p>
+        </div>
+
+        <div class="stage-card">
+            <h3 class="stage-title"><i class="fas fa-life-ring" style="color: #78909c;"></i> 短期目標（0 - 1 年）</h3>
+            <div class="stage-tag">【系統維運與緩衝】</div>
+            <div class="stage-logic">
+                <strong>核心邏輯：</strong> 確保伺服器（生活）不會掛掉，並且有抗風險能力。<br>
+                <strong>關鍵字：</strong> <span>流動性 (Liquidity)</span>、<span>安全感</span>。
+            </div>
+            <ul class="target-list">
+                <li><strong>緊急預備金 (Buffer Pool)：</strong> 這是最優先級 (Priority 0)。至少存滿 6 個月的生存底薪。對於像妳這樣的「微退休/自由接案者」，這個水位的監控至關重要。（👉 搭配妳的<a href="#">「緩衝池水位診斷器」</a>）</li>
+                <li><strong>年度固定支出：</strong> 明年要繳的保費、稅金。這不是存錢，這是「預留」，必須分攤到每個月。</li>
+                <li><strong>快樂基金 (Wishlist)：</strong> 像妳之前的「願望清單 $1518」。這是為了防止報復性消費的必要潤滑劑。</li>
+            </ul>
+            <div class="execution-box">
+                <i class="fas fa-cog" style="color: var(--accent); margin-top: 4px;"></i>
+                <div><strong>執行方式：</strong> 放在高活存帳戶，隨時可取用。</div>
+            </div>
+        </div>
+
+        <div class="stage-card">
+            <h3 class="stage-title"><i class="fas fa-rocket" style="color: var(--accent);"></i> 中期目標（1 - 5 年）</h3>
+            <div class="stage-tag">【硬體升級與擴充】</div>
+            <div class="stage-logic">
+                <strong>核心邏輯：</strong> 提升系統效能，或是購買大型設備。<br>
+                <strong>關鍵字：</strong> <span>累積 (Accumulation)</span>、<span>專款專用</span>。
+            </div>
+            <ul class="target-list">
+                <li><strong>自我投資/生財工具：</strong> 比如妳想換一台更好的電腦寫 Code、買相機拍 Reels，或是上一堂高階課程。這是為了讓「微退休」能走得更遠的投資。</li>
+                <li><strong>體驗型消費：</strong> 一趟歐洲旅遊、帶家人出國。</li>
+                <li><strong>大型資產頭期款：</strong> （如果有的話）買房頭期款、買車。</li>
+            </ul>
+            <div class="execution-box">
+                <i class="fas fa-cog" style="color: var(--accent); margin-top: 4px;"></i>
+                <div><strong>執行方式：</strong> 設立「子帳戶」或「專款專用袋」。利用 <strong>「目標金額 ÷ 月數 = 每月存款」</strong> 的逆向工程算法。如果算出來每個月存不到，就代表要嘛砍目標，要嘛增加收入（接案/團購）。</div>
+            </div>
+        </div>
+
+        <div class="stage-card">
+            <h3 class="stage-title"><i class="fas fa-globe" style="color: #d4a373;"></i> 長期目標（5 年以上）</h3>
+            <div class="stage-tag">【自動化與永續】</div>
+            <div class="stage-logic">
+                <strong>核心邏輯：</strong> 建立備援電力，讓系統最終能自動運轉。<br>
+                <strong>關鍵字：</strong> <span>複利 (Compound Interest)</span>、<span>資產配置</span>。
+            </div>
+            <ul class="target-list">
+                <li><strong>退休金/財務自由帳戶：</strong> 這不是為了 65 歲，而是為了讓妳在 40 歲時有選擇權。</li>
+                <li><strong>股票/ETF 投資：</strong> 就像妳說的「微退休」狀態，目標是讓被動收入慢慢覆蓋掉生存支出。</li>
+            </ul>
+            <div class="execution-box">
+                <i class="fas fa-cog" style="color: var(--accent); margin-top: 4px;"></i>
+                <div><strong>執行方式：</strong> 定期定額，只進不出。這筆錢是丟進去讓「時間」幫妳打工的。</div>
+            </div>
+        </div>
+
+        <div class="insight-box">
+            <h3><i class="fas fa-lightbulb"></i> Bear's Insight</h3>
+            <div class="insight-quote">先有緩衝，才有資格談投資。</div>
+            <div class="insight-desc">
+                順序絕對不能亂！很多小白會犯錯，手上沒緊急預備金（短期），就急著去買股票（長期）。結果機車壞掉（短期）被迫賣股求現，最後變成韭菜。
+            </div>
+        </div>
+
+        <div class="content-plan">
+            <h3><i class="fas fa-chart-bar"></i> 社群內容企劃建議</h3>
+            <div class="plan-item"><strong>發布形式：</strong> 貼文或 Reels 短影音</div>
+            <div class="plan-item"><strong>建議標題：</strong> 別再瞎存錢了！工程師的『三階段火箭』存錢法 🚀</div>
+            <div class="plan-item" style="margin-top: 20px;">
+                <strong>內容大綱：</strong><br>
+                破解迷思：很多人存不到錢，是因為把「買房（長期）」跟「下個月保費（短期）」混在一起，結果要繳費時只好把買房基金領出來，永遠存不到。<br><br>
+                <strong>工程師解法：</strong><br>
+                • 短期 (0-1年) 是 🛟 <strong>「救生圈」</strong> (保命用的)<br>
+                • 中期 (1-5年) 是 🚀 <strong>「推進器」</strong> (升級生活用的)<br>
+                • 長期 (5年以上) 是 🪐 <strong>「太空站」</strong> (未來養老用的)
+            </div>
+            <div class="plan-cta">
+                <strong>CTA 行動呼籲：</strong><br>
+                妳不知道怎麼分配比例嗎？我的「財務駕駛艙」裡面有預算分配功能，先從搞定妳的「短期緩衝」開始吧！
+            </div>
+        </div>
+
+    </div>
+
+    <footer>
+        &copy; 2026 Bear.saving. All Rights Reserved.<br>
+        Designed for a confident life.
+    </footer>
+
+</body>
+</html>
