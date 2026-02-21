@@ -101,7 +101,17 @@
         }
         .compound-desc { color: var(--text-secondary); font-size: 0.95rem; line-height: 1.7; margin-bottom: 20px; }
         
-        .compare-row { display: flex; gap: 15px; flex-wrap: wrap; }
+        .data-grid { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; }
+        .data-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background: #fdfbf7; border-radius: 8px; font-size: 0.95rem; }
+        .data-row.highlight { background: rgba(123, 158, 135, 0.1); border-left: 4px solid var(--success-color); font-weight: 600; color: var(--text-primary); }
+        .data-row.warning { background: rgba(224, 122, 95, 0.05); border-left: 4px solid var(--warning-color); }
+        .data-value { font-family: 'Montserrat', sans-serif; font-weight: 600; letter-spacing: 0.5px; }
+        
+        .diff-highlight {
+            background: #fdfbf7; padding: 18px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid var(--accent); font-size: 0.95rem; color: var(--text-primary); line-height: 1.6;
+        }
+        
+        .compare-row { display: flex; gap: 15px; flex-wrap: wrap; margin-top: 10px; }
         .compare-col { flex: 1; min-width: 250px; background: #fdfbf7; padding: 20px; border-radius: 10px; border: 1px solid #eee; }
         .compare-col.bad { border-top: 3px solid var(--warning-color); }
         .compare-col.good { border-top: 3px solid var(--success-color); }
@@ -231,22 +241,43 @@
                 <div class="compound-box">
                     <h4><i class="fas fa-chart-line"></i> 為什麼絕對不能提領？（複利的雪球效應）</h4>
                     <div class="compound-desc">
-                        想像妳在斜坡上滾雪球。前 3 年雪球很小，感覺沒什麼增長；但到了第 5 年、第 10 年，只要雪球不破，它每滾一圈沾上的雪量會呈現指數型爆發。<br><br>
-                        <br><br>
-                        如果中途因為想買名牌包而「提領」了一半資金，等同於把好不容易變大的雪球敲碎。本金一旦被抽離，前面累積的時間價值全部歸零，這就是為什麼許多人存了半天，卻始終無法讓系統自動運轉的原因。
+                        想像妳在斜坡上滾雪球。前 3 年感覺沒什麼增長；但到了第 5 年、第 10 年，只要雪球不破，它每滾一圈沾上的雪量會呈現指數型爆發。<br><br>
+                        <strong>真實回測範例：每月 1 萬投入 0050（2016-2026）</strong><br>
+                        十年總共投入本金：121 萬。我們來看看「有沒有把配息繼續滾進去」的驚人落差：
+                    </div>
+                    
+                    <div class="data-grid">
+                        <div class="data-row warning">
+                            <span>股利 0% 再投入 (全領出來花掉)</span>
+                            <span class="data-value">市值約 2,116,069 元</span>
+                        </div>
+                        <div class="data-row">
+                            <span>股利 50% 再投入 (花一半存一半)</span>
+                            <span class="data-value">市值約 2,333,774 元</span>
+                        </div>
+                        <div class="data-row highlight">
+                            <span>股利 100% 再投入 (嚴格只進不出)</span>
+                            <span class="data-value">市值約 2,575,493 元 🚀</span>
+                        </div>
+                    </div>
+                    
+                    <div class="diff-highlight">
+                        <i class="fas fa-search-dollar"></i> <strong>殘酷的差距：</strong><br>
+                        堅持 100% 股利再投入，對比只投入一半 (50%)，十年後多出了 <strong>約 24 萬台幣 (241,719元)</strong>。<br>
+                        如果跟把股利全部花掉 (0%) 相比，更是整整多出了 <strong>約 46 萬台幣 (459,424元)</strong>！這就是中途把雪球敲碎的代價。
                     </div>
                     
                     <div class="compare-row">
                         <div class="compare-col bad">
                             <div class="compare-title"><i class="fas fa-times-circle"></i> 隨意提領（破壞系統）</div>
                             <div style="font-size: 0.9rem; color: var(--text-secondary);">
-                                存三年就領出來花掉，過了十年，妳手上依然只有一個小雪球，永遠要在原地辛苦奔跑。
+                                每年把配息領出來買名牌包，等於敲碎好不容易變大的雪球。十年下來妳少賺了將近 46 萬，永遠要在原地辛苦奔跑。
                             </div>
                         </div>
                         <div class="compare-col good">
                             <div class="compare-title"><i class="fas fa-check-circle"></i> 只進不出（自動運轉）</div>
                             <div style="font-size: 0.9rem; color: var(--text-secondary);">
-                                撐過前期的緩慢期，後期的被動收入會呈現指數型上升，最終有能力覆蓋生存支出。
+                                撐過前期的緩慢期，後期的本金會帶著股利一起產生指數型上升，最終靠系統替妳賺進生活選擇權。
                             </div>
                         </div>
                     </div>
