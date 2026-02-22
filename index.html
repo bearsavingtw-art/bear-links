@@ -122,10 +122,10 @@
         /* 系統樹狀圖容器 */
         .system-tree-container {
             width: 100%; overflow-x: auto;
-            padding: 20px 0; -webkit-overflow-scrolling: touch;
+            padding: 30px 0; -webkit-overflow-scrolling: touch;
             display: flex; justify-content: center;
         }
-        .mermaid { background-color: transparent; min-width: 600px; }
+        .mermaid { background-color: transparent; min-width: 850px; }
 
         /* 商品櫥窗 */
         .product-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 30px; margin-top: 40px; }
@@ -375,44 +375,39 @@
         
         <div class="system-tree-container">
             <div class="mermaid">
-                graph TD
-                %% --- 風格設定 ---
-                classDef root fill:#5a4d41,stroke:#5a4d41,color:#fff,font-weight:bold,font-size:16px;
-                classDef trunk fill:#b08d85,stroke:#b08d85,color:#fff,font-weight:bold;
-                classDef branch fill:#fcfbf9,stroke:#b08d85,color:#5a4d41,stroke-width:2px,stroke-dasharray: 5 5;
-                classDef leaf fill:#fff,stroke:#968c83,color:#5a4d41;
-                classDef ritual fill:#eaddd7,stroke:#b08d85,color:#5a4d41,font-style:italic;
-                classDef rocket fill:#fff,stroke:#e07a5f,color:#5a4d41,stroke-width:2px,font-weight:bold;
+                %%{init: {'theme': 'base', 'themeVariables': { 'fontSize': '16px', 'fontFamily': 'Montserrat, Noto Serif TC, sans-serif'}}}%%
+                flowchart TD
+                classDef root fill:#5a4d41,stroke:#5a4d41,color:#fff,font-weight:bold,font-size:18px,rx:10,ry:10,padding:12px;
+                classDef trunk fill:#b08d85,stroke:#b08d85,color:#fff,font-weight:bold,font-size:17px,rx:10,ry:10,padding:10px;
+                classDef branch fill:#fcfbf9,stroke:#b08d85,color:#5a4d41,stroke-width:2px,stroke-dasharray: 5 5,font-weight:bold,font-size:16px,padding:10px;
+                classDef leaf fill:#fff,stroke:#968c83,color:#5a4d41,font-size:15px,rx:6,ry:6,padding:8px;
+                classDef ritual fill:#eaddd7,stroke:#b08d85,color:#5a4d41,font-size:15px,rx:6,ry:6,padding:8px;
+                classDef rocket fill:#fff,stroke:#e07a5f,color:#e07a5f,stroke-width:2px,font-weight:bold,font-size:16px,rx:6,ry:6,padding:8px;
+                classDef outcome fill:#5a4d41,stroke:#5a4d41,color:#fff,font-weight:bold,font-size:18px,rx:10,ry:10,padding:12px;
 
-                %% --- 樹根：核心理念 ---
-                Root[核心根基：建立生活的「底氣」]:::root --> Trunk(Bear 動態財務系統 ):::trunk
+                Root["🌱 核心根基：建立生活的「底氣」"]:::root --> Trunk("Bear 動態財務系統"):::trunk
 
-                %% --- 樹幹：三大支柱 ---
-                Trunk --> B1[第一階段：釐清・診斷]:::branch
-                Trunk --> B2[第二階段：策略・佈局]:::branch
-                Trunk --> B3[第三階段：儀式・落地]:::branch
+                Trunk --> B1["第一階段：釐清・診斷"]:::branch
+                Trunk --> B2["第二階段：策略・佈局"]:::branch
+                Trunk --> B3["第三階段：儀式・落地"]:::branch
 
-                %% --- 分支 1：診斷 ---
-                B1 --> L1_1(Bear獨創研發財務診斷室 V6.3):::leaf
-                B1 --> L1_2(量力而為｜釐清邊界):::leaf
+                B1 --> L1_1("財務診斷室 V6.3"):::leaf
+                B1 --> L1_2("量力而為｜釐清邊界"):::leaf
 
-                %% --- 分支 2：策略 (三階段火箭核心) ---
-                B2 --> Rocket(核心框架：三階段火箭存錢法 🚀):::rocket
-                Rocket --> R1(短期救生圈：蓄水池 / 離職底氣計算機):::leaf
-                Rocket --> R2(中期推進器：財務駕駛艙 v1.0 預算分配):::leaf
-                Rocket --> R3(長期太空站：複利雪球 100% 嚴格再投入):::leaf
+                B2 --> Rocket{"三階段火箭存錢法 🚀"}:::rocket
+                Rocket --> R1("短期：蓄水池 / 離職底氣計算機"):::leaf
+                Rocket --> R2("中期：財務駕駛艙 v1.0"):::leaf
+                Rocket --> R3("長期：複利雪球 100% 投入"):::leaf
 
-                %% --- 分支 3：落地 ---
-                B3 --> L3_1(原創記帳本):::ritual
-                B3 --> L3_2(韓系質感書衣):::ritual
-                B3 --> L3_3(實體存錢工具 / 小兔農場挑戰):::ritual
+                B3 --> L3_1("原創記帳本"):::ritual
+                B3 --> L3_2("韓系質感書衣"):::ritual
+                B3 --> L3_3("小兔農場存錢挑戰"):::ritual
 
-                %% --- 成果 ---
-                L3_1 -. 書寫帶來平靜 .-> Outcome(拿回生活選擇權):::root
-                L3_3 -. 視覺化累積感 .-> Outcome
-                R3 -. 系統自動運轉 .-> Outcome
+                L1_2 -.-> Outcome
+                R3 -.-> Outcome
+                L3_3 -.-> Outcome
 
-                style Outcome fill:#5a4d41,stroke:#5a4d41,color:#fff,font-weight:bold;
+                Outcome["🎯 最終成果：拿回生活選擇權"]:::outcome
             </div>
         </div>
         <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:10px;">( ← 左右滑動查看完整系統 → )</p>
