@@ -156,6 +156,31 @@
 
         .chart-wrapper { position: relative; height: 220px; width: 100%; display: flex; justify-content: center; }
         .hidden { display: none; }
+
+        /* --- [NEW] 安裝提示與 Modal 樣式 --- */
+        .install-prompt {
+            background: rgba(176, 141, 133, 0.1); color: var(--accent);
+            padding: 12px; border-radius: 10px; text-align: center;
+            font-size: 0.85rem; font-weight: 600; margin-bottom: 20px;
+            cursor: pointer; border: 1px dashed var(--accent);
+            transition: 0.3s;
+        }
+        .install-prompt:active { transform: scale(0.98); }
+        
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); backdrop-filter: blur(3px);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 2000; opacity: 0; pointer-events: none; transition: 0.3s;
+        }
+        .modal-overlay.show { opacity: 1; pointer-events: auto; }
+        .modal-content {
+            background: #fff; padding: 25px; border-radius: 20px; width: 90%; max-width: 400px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2); transform: translateY(20px); transition: 0.3s;
+            text-align: center;
+        }
+        .modal-overlay.show .modal-content { transform: translateY(0); }
+        .install-guide-box { background: var(--bg-color); padding: 20px 15px; border-radius: 15px; margin-bottom: 20px; border: 1px solid #eee; }
     </style>
 </head>
 <body>
@@ -166,6 +191,11 @@
     </header>
 
     <div id="page-dash" class="page active">
+        
+        <div class="install-prompt" onclick="openInstallModal()">
+            <i class="fas fa-arrow-circle-down"></i> 將系統安裝至手機桌面，體驗全螢幕 App 👉
+        </div>
+
         <div class="stat-grid">
             <div class="stat-box">
                 <div class="stat-label">本月收入</div>
@@ -337,6 +367,31 @@
         </div>
     </div>
 
+    <div id="install-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 style="margin-top:0; color:var(--text-primary);"><i class="fas fa-mobile-alt"></i> 安裝 Bear 系統</h3>
+            <p style="font-size:0.9rem; color:var(--text-secondary); margin-bottom:15px;">將駕駛艙升級為手機原生 App，無網址列、全螢幕操作更順暢！</p>
+            
+            <div class="install-guide-box">
+                <div style="font-weight:600; color:var(--accent); margin-bottom:5px; text-align:left;"><i class="fab fa-apple"></i> iOS (Safari 用戶)</div>
+                <ol style="text-align:left; font-size:0.85rem; margin:0 0 15px 0; padding-left:20px; color:var(--text-primary); line-height:1.6;">
+                    <li>點擊螢幕下方的「分享」圖示 <i class="fas fa-share-square" style="color:var(--text-secondary);"></i></li>
+                    <li>選單往下滑，選擇<strong>「加入主畫面 <i class="fas fa-plus-square" style="color:var(--text-secondary);"></i>」</strong></li>
+                    <li>點擊右上角「新增」即可！</li>
+                </ol>
+
+                <div style="font-weight:600; color:var(--success); margin-bottom:5px; text-align:left;"><i class="fab fa-android"></i> Android (Chrome 用戶)</div>
+                <ol style="text-align:left; font-size:0.85rem; margin:0; padding-left:20px; color:var(--text-primary); line-height:1.6;">
+                    <li>點擊右上角的「選單」圖示 <i class="fas fa-ellipsis-v" style="color:var(--text-secondary);"></i></li>
+                    <li>選擇<strong>「加到主畫面」</strong></li>
+                    <li>點擊「新增」即可！</li>
+                </ol>
+            </div>
+
+            <button class="btn" onclick="closeInstallModal()">我知道了</button>
+        </div>
+    </div>
+
     <script>
         // --- 1. 資料與初始化 ---
         const categories = {
@@ -369,6 +424,14 @@
             renderDashboard();
             setInterval(updateCountdowns, 1000);
         });
+
+        // --- [NEW] 開關安裝 Modal ---
+        function openInstallModal() {
+            document.getElementById('install-modal').classList.add('show');
+        }
+        function closeInstallModal() {
+            document.getElementById('install-modal').classList.remove('show');
+        }
 
         // --- 2. 頁面切換 ---
         function switchPage(pageId) {
