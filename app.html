@@ -5,16 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Bear 財務駕駛艙 | Financial Cockpit</title>
     
-    <link rel="manifest" href='data:application/manifest+json,%7B%22name%22%3A%22Bear%20%E8%B2%A1%E5%8B%99%E9%A7%95%E9%A7%9B%E8%89%99%22%2C%22short_name%22%3A%22Bear.saving%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23fcfbf9%22%2C%22theme_color%22%3A%22%23fcfbf9%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22logo.png%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fpng%22%2C%22purpose%22%3A%22any%20maskable%22%7D%2C%7B%22src%22%3A%22logo.png%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fpng%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D'>
-
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#fcfbf9">
+    <link rel="apple-touch-icon" href="logo.png">
     <link rel="icon" type="image/png" sizes="192x192" href="logo.png">
     <link rel="icon" type="image/png" sizes="512x512" href="logo.png">
     <link rel="icon" href="logo.png" type="image/png">
-    <link rel="apple-touch-icon" href="logo.png">
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="theme-color" content="#fcfbf9">
     
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Noto+Serif+TC:wght@400;600&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
@@ -138,10 +137,10 @@
         .tx-info { display: flex; flex-direction: column; }
         .tx-cat { font-weight: 600; font-size: 0.95rem; }
         .tx-amount { font-weight: 600; font-family: 'Montserrat', sans-serif; display: flex; flex-direction: column; align-items: flex-end; }
-        .tx-method { font-size: 0.75rem; color: #999; margin-top: 2px; } /* [NEW] 支付方式小字 */
+        .tx-method { font-size: 0.75rem; color: #999; margin-top: 2px; } 
         .amount-inc { color: var(--success); }
         .amount-exp { color: var(--accent); }
-        .action-btns { display: flex; align-items: center; gap: 10px; margin-left: 10px;} /* 微調間距 */
+        .action-btns { display: flex; align-items: center; gap: 10px; margin-left: 10px;} 
         .edit-btn { color: var(--info); cursor: pointer; padding: 5px; }
         .delete-btn { color: #ccc; cursor: pointer; padding: 5px; }
 
@@ -403,7 +402,7 @@
             document.getElementById('input-date').valueAsDate = new Date();
             document.getElementById('input-amount').value = '';
             document.getElementById('input-note').value = '';
-            document.getElementById('input-method').value = 'cash'; // [NEW] 重置預設為現金
+            document.getElementById('input-method').value = 'cash'; 
         }
 
         // --- 3. 記帳核心 ---
@@ -426,19 +425,17 @@
             const category = document.getElementById('input-category').value;
             const amount = parseFloat(document.getElementById('input-amount').value);
             const note = document.getElementById('input-note').value;
-            const method = document.getElementById('input-method').value; // [NEW] 讀取支付方式
+            const method = document.getElementById('input-method').value;
 
             if (!date || !amount) { alert('請輸入完整資訊！'); return; }
 
             if (editingId) {
                 const index = transactions.findIndex(t => t.id === editingId);
                 if (index !== -1) {
-                    // [NEW] 更新時加入 method
                     transactions[index] = { id: editingId, date, type, category, amount, note, method };
                     alert('修改成功！✏️');
                 }
             } else {
-                // [NEW] 新增時加入 method
                 transactions.unshift({ id: Date.now(), date, type, category, amount, note, method });
                 alert('記帳成功！💰');
             }
@@ -457,7 +454,6 @@
             document.getElementById('input-category').value = tx.category;
             document.getElementById('input-amount').value = tx.amount;
             document.getElementById('input-note').value = tx.note;
-            // [NEW] 回填支付方式 (若舊資料沒有 method，預設 'cash')
             document.getElementById('input-method').value = tx.method || 'cash';
 
             document.getElementById('add-page-title').innerText = '編輯紀錄';
@@ -546,11 +542,10 @@
             });
         }
 
-        // [NEW] 整合支付方式圖示
         function getMethodIcon(method) {
             if (method === 'card') return '💳';
             if (method === 'other') return '🏦';
-            return '💵'; // 預設現金
+            return '💵'; 
         }
 
         function renderList(isShort = false) {
@@ -562,7 +557,7 @@
             dataToShow.forEach(t => {
                 const color = t.type === 'income' ? 'amount-inc' : 'amount-exp';
                 const sign = t.type === 'income' ? '+' : '-';
-                const methodIcon = getMethodIcon(t.method); // [NEW] 取得圖示
+                const methodIcon = getMethodIcon(t.method); 
                 
                 list.innerHTML += `
                     <li class="tx-item">
@@ -755,6 +750,19 @@
             if(confirm('確定清空？')) {
                 localStorage.clear(); location.reload();
             }
+        }
+
+        // ================= PWA Service Worker 註冊 =================
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(registration => {
+                        console.log('ServiceWorker 註冊成功，範圍: ', registration.scope);
+                    })
+                    .catch(err => {
+                        console.log('ServiceWorker 註冊失敗: ', err);
+                    });
+            });
         }
     </script>
 </body>
