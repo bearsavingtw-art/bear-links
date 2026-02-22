@@ -6,6 +6,9 @@
     <title>Bear 財務診斷室 6.3</title>
     <link rel="icon" href="favicon.png" type="image/png">
     
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#fcfbf9">
+    <link rel="apple-touch-icon" href="logo.png">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Noto+Serif+TC:wght@400;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -482,6 +485,19 @@
         function backToPage1FromReport() { document.getElementById('page3').classList.add('hidden'); document.getElementById('page1').classList.remove('hidden'); }
         function addFixedExp() { const div = document.createElement('div'); div.className = 'debt-item'; div.innerHTML = `<div class="debt-grid"><div><div class="grid-label">項目</div><input type="text" class="f-name"></div><div><div class="grid-label">金額</div><input type="number" class="f-pay"></div></div>`; document.getElementById('fixed-exp-list').appendChild(div); }
         function calcSurvival() { const pays = document.getElementsByClassName('f-pay'); let total = 0; for(let p of pays) total += parseFloat(p.value)||0; const rem = globalIncome - total; const box = document.getElementById('survival-result'); box.style.display='block'; if(rem<0) box.innerHTML=`⚠️ <b>缺口警報：</b> $${Math.abs(rem).toLocaleString()}`; else box.innerHTML=`📌 <b>可分配餘額：</b> $${rem.toLocaleString()}`; }
+
+        // ================= PWA Service Worker 註冊 =================
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(registration => {
+                        console.log('ServiceWorker 註冊成功，範圍: ', registration.scope);
+                    })
+                    .catch(err => {
+                        console.log('ServiceWorker 註冊失敗: ', err);
+                    });
+            });
+        }
     </script>
 </body>
 </html>
