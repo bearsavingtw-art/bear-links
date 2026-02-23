@@ -65,6 +65,39 @@
             color: var(--text-secondary); font-size: 1.1rem; letter-spacing: 1px;
         }
 
+        /* --- [新增] 需求定義 4 步驟區塊 --- */
+        .req-card {
+            background: #fff; border-radius: 15px; padding: 35px; margin-bottom: 40px;
+            box-shadow: var(--card-shadow); border-left: 6px solid var(--text-primary);
+            position: relative;
+        }
+        .req-title {
+            font-size: 1.4rem; margin-top: 0; margin-bottom: 10px; color: var(--text-primary);
+            display: flex; align-items: center; gap: 12px; font-weight: 600;
+        }
+        .req-desc {
+            color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 25px; line-height: 1.6;
+        }
+        .req-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+        }
+        .req-step {
+            background: #fdfbf7; border: 1px dashed #dcd3cb; padding: 20px; border-radius: 12px;
+            transition: 0.3s; display: flex; flex-direction: column;
+        }
+        .req-step:hover { border-color: var(--accent); background: #fff; box-shadow: 0 5px 15px rgba(0,0,0,0.03); }
+        .req-step-header {
+            display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+        }
+        .req-step-num {
+            background: var(--text-primary); color: #fff; width: 28px; height: 28px; flex-shrink: 0;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 0.9rem; font-weight: bold; font-family: 'Montserrat', sans-serif;
+        }
+        .req-step-title { font-weight: 600; color: var(--text-primary); font-size: 1.05rem; line-height: 1.3; }
+        .req-step-text { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; }
+        .req-step-text i { color: var(--accent); font-style: normal; font-weight: 500; }
+
         /* 階段卡片 */
         .stage-card {
             background: #fff; border-radius: 15px; padding: 35px; margin-bottom: 30px;
@@ -108,7 +141,7 @@
             position: relative; height: 350px; width: 100%; margin-bottom: 25px;
         }
         
-        /* 響應式數據比較卡 (取代舊 Table) */
+        /* 響應式數據比較卡 */
         .result-cards { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
         .r-card { 
             display: grid; grid-template-columns: 1fr; gap: 5px;
@@ -193,6 +226,8 @@
         @media (max-width: 768px) {
             .rocket-container { padding: 15px; margin-top: 80px; }
             .rocket-header h1 { font-size: 1.9rem; }
+            .req-card { padding: 25px 20px; border-left-width: 4px; }
+            .req-grid { grid-template-columns: 1fr; }
             .stage-card { padding: 25px 20px; border-left-width: 4px; }
             .execution-box { flex-direction: column; padding: 15px; }
             .compound-box { padding: 20px 15px; }
@@ -217,6 +252,47 @@
             <p>我們不談夢想，我們談 <strong>「系統穩定度」</strong>。</p>
         </div>
 
+        <div class="req-card">
+            <h3 class="req-title"><i class="fas fa-clipboard-list"></i> 準備階段：需求定義</h3>
+            <div class="req-desc">
+                在寫程式前，如果沒搞清楚規格，做出來的系統一定會崩潰。理財也是一樣。<br>
+                <strong>進入三階段火箭前，請先完成以下 4 個底層邏輯設定：</strong>
+            </div>
+            
+            <div class="req-grid">
+                <div class="req-step">
+                    <div class="req-step-header">
+                        <div class="req-step-num">1</div>
+                        <div class="req-step-title">寫下「使用者故事」</div>
+                    </div>
+                    <div class="req-step-text">不要只說想變有錢，請寫出具體場景。例如：<i>「我希望有半年的生活費，遇到雷包業主時有底氣拒絕。」</i>有畫面才有動力。</div>
+                </div>
+                
+                <div class="req-step">
+                    <div class="req-step-header">
+                        <div class="req-step-num">2</div>
+                        <div class="req-step-title">計算「最小可行性生活」</div>
+                    </div>
+                    <div class="req-step-text">誠實盤點開銷，算出如果明天起完全沒收入，每個月至少需要多少錢才能維持運作 (MVP)？這是第一階段的規格基準。</div>
+                </div>
+                
+                <div class="req-step">
+                    <div class="req-step-header">
+                        <div class="req-step-num">3</div>
+                        <div class="req-step-title">進行大腦「壓力測試」</div>
+                    </div>
+                    <div class="req-step-text">大盤突然暴跌 20% 妳今晚睡得著嗎？誠實評估風險承受度，這將直接決定後續防禦部隊與攻擊部隊的配置比例。</div>
+                </div>
+                
+                <div class="req-step">
+                    <div class="req-step-header">
+                        <div class="req-step-num">4</div>
+                        <div class="req-step-title">切割成「開發衝刺期」</div>
+                    </div>
+                    <div class="req-step-text">把遙不可及的財務自由，切成短、中、長期的 Sprint (衝刺任務)。完成這步後，我們就能正式點燃下方的三階段火箭！</div>
+                </div>
+            </div>
+        </div>
         <div class="stage-card">
             <h3 class="stage-title"><i class="fas fa-life-ring" style="color: #78909c;"></i> 短期目標（0 - 1 年）</h3>
             <div class="stage-tag">【系統維運與緩衝】</div>
