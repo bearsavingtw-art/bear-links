@@ -40,6 +40,7 @@
             --accent: #b08d85;
             --white: #ffffff;
             --card-shadow: 0 5px 20px rgba(0,0,0,0.03);
+            --danger: #e57373;
         }
 
         * { box-sizing: border-box; }
@@ -160,6 +161,12 @@
         .news-title-text { font-weight: 600; display: block; margin-bottom: 3px; color: var(--text-primary); }
         .news-desc { font-size: 0.9rem; color: var(--text-secondary); }
 
+        /* 售後工單特別樣式 */
+        .news-item-support {
+            background: rgba(229, 115, 115, 0.05); border: 1px solid #ffebee;
+            border-left: 4px solid var(--danger); padding: 15px; border-radius: 8px;
+        }
+
         /* 影片 */
         .video-container {
             width: 100%; max-width: 380px; margin: 0 auto 50px;
@@ -267,6 +274,13 @@
         .email-link { color: var(--text-primary); text-decoration: none; font-weight: 500; display: block; margin-top: 5px; word-break: break-all; }
         .email-link:hover { color: var(--accent); }
 
+        .btn-support {
+            display: inline-block; padding: 12px 25px; background: var(--text-primary); color: #fff;
+            text-decoration: none; border-radius: 50px; font-weight: 600; font-size: 0.95rem;
+            transition: 0.3s; margin-top: 10px; box-shadow: 0 5px 15px rgba(90, 77, 65, 0.1);
+        }
+        .btn-support:hover { background: var(--accent); transform: translateY(-2px); color: #fff; }
+
         .toast {
             position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px);
             background: rgba(90, 77, 65, 0.95); color: white;
@@ -320,6 +334,14 @@
         <h2 style="font-family:'Playfair Display'; margin-bottom: 25px;">Latest News</h2>
         <div class="news-box">
             
+            <div class="news-item news-item-support">
+                <i class="fas fa-tools news-icon" style="color: var(--danger);"></i>
+                <div>
+                    <span class="news-title-text" style="color: var(--danger);">【售後工單】商品異常與退換貨</span>
+                    <span class="news-desc">遇到缺件或瑕疵？<a href="https://docs.google.com/forms/d/e/1FAIpQLSeMwIoPGsWcBYe4AEH3hgWa0tBcMgwRWZ68J9y_8FxNSYAwLQ/viewform?usp=publish-editor" target="_blank" style="color: var(--danger); font-weight: 600; text-decoration: underline;">👉 點此填寫售後工單</a>，工程師將火速為妳排解。</span>
+                </div>
+            </div>
+
             <div class="news-item">
                 <i class="fas fa-book news-icon"></i>
                 <div>
@@ -559,13 +581,26 @@
     </section>
 
     <section class="section fade-in" style="padding-top: 20px;">
-        <h2 style="font-family:'Playfair Display'; margin-bottom:30px;">Connect</h2>
+        <h2 style="font-family:'Playfair Display'; margin-bottom:30px;">Connect & Support</h2>
         <div class="social-container">
             <div class="social-row">
                 <a href="https://www.instagram.com/bear.saving/" target="_blank" class="social-btn"><i class="fab fa-instagram"></i> Instagram (最活躍!)</a>
                 <a href="https://www.threads.com/@bear.saving" target="_blank" class="social-btn"><i class="fa-brands fa-threads"></i> Threads</a>
                 <a href="https://www.facebook.com/profile.php?id=61580631092861" target="_blank" class="social-btn"><i class="fab fa-facebook-f"></i> Facebook</a>
             </div>
+            
+            <div class="email-box" style="border-left-color: var(--danger); background: #fffafa;">
+                <div style="font-weight:600; color:var(--text-primary); margin-bottom:8px; font-size: 1.05rem;">
+                    <i class="fas fa-tools" style="margin-right:5px; color: var(--danger);"></i> 售後服務與問題回報
+                </div>
+                <div style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:15px; line-height: 1.6;">
+                    遇到缺件、瑕疵或異常狀況？請點擊下方填寫售後工單。系統會自動為妳建檔，我們將於平日 14:00-17:00 批次處理並回覆，絕不漏接妳的需求。
+                </div>
+                <a href="https://docs.google.com/forms/d/e/1FAIpQLSeMwIoPGsWcBYe4AEH3hgWa0tBcMgwRWZ68J9y_8FxNSYAwLQ/viewform?usp=publish-editor" target="_blank" class="btn-support">
+                    填寫售後工單 <i class="fas fa-external-link-alt" style="margin-left: 5px; font-size: 0.85rem;"></i>
+                </a>
+            </div>
+
             <div class="email-box">
                 <div style="font-weight:600; color:var(--text-primary); margin-bottom:5px;">
                     <i class="far fa-envelope" style="margin-right:5px;"></i> 合作邀約 (Business Only)
