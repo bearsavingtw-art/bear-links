@@ -129,7 +129,7 @@
         
         /* 複利解說區塊 */
         .compound-box {
-            background: #fff; border-left: 4px solid #d4a373; padding: 25px; border-radius: 0 10px 10px 0; margin-top: 15px; width: 100%; box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+            background: #fff; border-left: 4px solid #d4a373; padding: 25px; border-radius: 0 10px 10px 0; margin-top: 15px; margin-bottom: 25px; width: 100%; box-shadow: 0 2px 10px rgba(0,0,0,0.02);
         }
         .compound-box h4 {
             color: var(--text-primary); margin-top: 0; margin-bottom: 15px; font-size: 1.1rem; display: flex; align-items: center; gap: 8px; font-family: 'Noto Serif TC', serif;
@@ -148,17 +148,17 @@
             background: #fdfbf7; padding: 18px; border-radius: 10px; border: 1px solid #eee; 
         }
         .r-card.highlight { 
-            background: rgba(176, 141, 133, 0.08); border-color: var(--accent); border-left: 4px solid var(--accent); 
+            background: rgba(123, 158, 135, 0.08); border-color: var(--success-color); border-left: 4px solid var(--success-color); 
         }
         .r-title { font-weight: 600; color: var(--text-primary); line-height: 1.4; display: flex; flex-direction: column;}
         .r-sub { font-size: 0.85em; font-weight: normal; color: var(--text-secondary); margin-top: 2px; }
         .r-val { font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 1.25rem; color: var(--text-primary); }
-        .r-card.highlight .r-val { color: var(--accent); font-size: 1.35rem; }
+        .r-card.highlight .r-val { color: var(--success-color); font-size: 1.35rem; }
         .r-diff { font-size: 0.9rem; font-weight: 600; color: var(--warning-color); display: flex; align-items: center; }
         .r-diff.none { color: var(--text-secondary); }
         
         .diff-highlight {
-            background: #fdfbf7; padding: 18px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid var(--warning-color); font-size: 0.95rem; color: var(--text-primary); line-height: 1.6;
+            background: #fdfbf7; padding: 18px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid var(--accent); font-size: 0.95rem; color: var(--text-primary); line-height: 1.6;
         }
         
         .compare-row { display: flex; gap: 15px; flex-wrap: wrap; margin-top: 10px; }
@@ -168,19 +168,6 @@
         .compare-title { font-weight: 600; margin-bottom: 10px; font-size: 1rem; display: flex; align-items: center; gap: 8px; }
         .compare-col.bad .compare-title { color: var(--warning-color); }
         .compare-col.good .compare-title { color: var(--success-color); }
-
-        /* 系統備註區塊 */
-        .system-note {
-            background: #fdfbf7;
-            padding: 20px;
-            border-radius: 10px;
-            margin-top: 25px;
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            border: 1px dashed #dcd3cb;
-            line-height: 1.7;
-        }
-        .system-note strong { color: var(--text-primary); }
 
         .pass-criteria {
             background: rgba(123, 158, 135, 0.1); padding: 12px 20px; border-radius: 8px; font-size: 0.9rem; color: var(--success-color); font-weight: 600; display: flex; align-items: center; gap: 8px; border-left: 3px solid var(--success-color); margin-top: 20px;
@@ -249,7 +236,6 @@
             .insight-box { padding: 35px 20px; }
             .checklist-container { padding: 25px 20px; }
             .diff-highlight { padding: 15px; }
-            .system-note { padding: 15px; }
         }
     </style>
 </head>
@@ -368,11 +354,47 @@
                 <div style="width: 100%;">
                     <div style="margin-bottom: 10px;"><strong>執行方式：</strong> 定期定額，<strong>只進不出(很重要!!!!!)</strong>。這筆錢是丟進去讓「時間」幫妳打工的。</div>
                     
-                    <div class="compound-box">
-                        <h4><i class="fas fa-chart-line"></i> 破解高股息迷思：十年真實回測</h4>
+                    <div class="compound-box" style="border-left-color: #7b9e87;">
+                        <h4><i class="fas fa-chart-line"></i> 原理一：為什麼絕對不能提領？（雪球效應）</h4>
+                        <div class="compound-desc">
+                            想像妳在斜坡上滾雪球。前 3 年感覺沒什麼增長；但到了第 5 年、第 10 年，只要雪球不破，它每滾一圈沾上的雪量會呈現指數型爆發。<br><br>
+                            <strong>系統測試範例：每月定期定額 1 萬投入大盤指數（十年期）</strong><br>
+                            十年總共投入本金為 121 萬。我們來看看「有沒有把配息繼續滾進去」，長期下來的雪球體積落差有多驚人：
+                        </div>
+                        
+                        <div class="chart-container">
+                            <canvas id="compoundChart"></canvas>
+                        </div>
+
+                        <div class="result-cards">
+                            <div class="r-card highlight" style="background: rgba(123, 158, 135, 0.08); border-left-color: #7b9e87;">
+                                <div class="r-title">🚀 100% 股利再投入 <span class="r-sub">(嚴格只進不出)</span></div>
+                                <div class="r-val" style="color: #7b9e87;">2,575,493 元</div>
+                                <div class="r-diff none">-</div>
+                            </div>
+                            <div class="r-card">
+                                <div class="r-title">⚖️ 50% 股利再投入 <span class="r-sub">(花一半存一半)</span></div>
+                                <div class="r-val">2,333,774 元</div>
+                                <div class="r-diff"><i class="fas fa-arrow-down" style="margin-right: 4px;"></i>少賺 24.1 萬</div>
+                            </div>
+                            <div class="r-card">
+                                <div class="r-title">💸 0% 股利再投入 <span class="r-sub">(配息全領出來)</span></div>
+                                <div class="r-val">2,116,069 元</div>
+                                <div class="r-diff"><i class="fas fa-arrow-down" style="margin-right: 4px;"></i>少賺 45.9 萬</div>
+                            </div>
+                        </div>
+                        
+                        <div class="diff-highlight" style="border-left-color: #e07a5f;">
+                            <i class="fas fa-search-dollar"></i> <strong>殘酷的差距：</strong><br>
+                            如果把股利全部花掉 (0%) 相比，十年下來整整少賺了 <strong>約 46 萬台幣 (459,424元)</strong>！這就是中途把雪球敲碎的代價。
+                        </div>
+                    </div>
+
+                    <div class="compound-box" style="border-left-color: #d4a373;">
+                        <h4><i class="fas fa-balance-scale"></i> 原理二：破解高股息迷思（真實十年回測）</h4>
                         <div class="compound-desc">
                             新手最愛買「高股息」，覺得錢進口袋才安心。但我們用真實的台股歷史數據（2016-2026年，含股息再投入）來跑一次壓力測試：<br><br>
-                            每月定期定額投入 1 萬，十年總本金 121 萬。結果發現，<strong>「市值型」的爆發力絕對碾壓「高股息」</strong>。如果妳還在累積資產階段，選錯標的，代價就是少賺一百多萬。
+                            每月定期定額投入 1 萬，十年總本金 121 萬。結果發現，<strong>「市值型」的爆發力絕對碾壓「高股息」</strong>。如果妳還在累積資產階段，選錯標的，代價就是少賺百萬。
                         </div>
                         
                         <div class="chart-container">
@@ -380,9 +402,9 @@
                         </div>
 
                         <div class="result-cards">
-                            <div class="r-card highlight">
+                            <div class="r-card highlight" style="background: rgba(176, 141, 133, 0.08); border-left-color: #b08d85;">
                                 <div class="r-title">🏆 006208 <span class="r-sub">(富邦台50 / 市值型)</span></div>
-                                <div class="r-val">4,450,000 元</div>
+                                <div class="r-val" style="color: #b08d85;">4,450,000 元</div>
                                 <div class="r-diff none">手續費最低，長期勝出</div>
                             </div>
                             <div class="r-card">
@@ -397,16 +419,16 @@
                             </div>
                         </div>
                         
-                        <div class="diff-highlight">
-                            <i class="fas fa-search-dollar"></i> <strong>殘酷的系統落差：</strong><br>
-                            為了追求眼前的高配息（0056），妳在十年的大牛市中，整整輸給了市值型 ETF（006208/0050）<strong>將近 135 萬台幣</strong>！這就是追求「高配息」必須付出的「低成長」代價。
+                        <div class="diff-highlight" style="border-left-color: #e07a5f;">
+                            <i class="fas fa-exclamation-triangle"></i> <strong>系統選錯的代價：</strong><br>
+                            為了追求眼前的高配息（0056），妳在十年的大牛市中，整整輸給了市值型 ETF（006208/0050）<strong>將近 135 萬台幣</strong>！
                         </div>
                         
                         <div class="compare-row">
                             <div class="compare-col bad">
                                 <div class="compare-title"><i class="fas fa-times-circle"></i> 追求配息（拖慢速度）</div>
                                 <div style="font-size: 0.9rem; color: var(--text-secondary);">
-                                    高股息是給「已經有龐大本金，需要現金流退休」的人買的。年輕時買高股息，等於提早把滾雪球的雪敲碎。
+                                    高股息是給「已經有龐大本金，需要現金流退休」的人買的。年輕時買高股息，等於提早限制了資產成長的天花板。
                                 </div>
                             </div>
                             <div class="compare-col good">
@@ -416,15 +438,8 @@
                                 </div>
                             </div>
                         </div>
-
-                        <div class="system-note">
-                            <i class="fas fa-info-circle" style="color: var(--accent);"></i> <strong>工程師的系統備註：</strong><br>
-                            以上圖表是採用台股過去十年 (2016-2026) 的真實歷史數據回測。但在系統開發裡，我們<strong>「絕不拿最佳狀況來當作系統底線」</strong>。<br><br>
-                            過去十年的大牛市，不代表未來十年也會有一模一樣的驚人漲幅（全球股市長期保守預估約為 6%~8%）。如果一開始就預期十年後一定會有 400 多萬，萬一遇到幾年空頭，預期心理就會崩潰，甚至恐慌拋售。<br>
-                            理財看的是長期的底氣，不是短期的暴利。
-                        </div>
-
                     </div>
+                    
                 </div>
             </div>
 
@@ -490,115 +505,66 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const ctx = document.getElementById('etfBacktestChart').getContext('2d');
-            
-            // 模擬 2016-2026 年的真實回測數據趨勢
-            const labels = ['2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024', '2025', '2026'];
-            
-            // 每月投入 1 萬，累計本金
-            const principal = [120000, 240000, 360000, 480000, 600000, 720000, 840000, 960000, 1080000, 1200000, 1210000];
-            
-            // 006208 富邦台50 (約 445萬)
-            const data006208 = [131000, 283000, 405000, 608000, 860000, 1215000, 1620000, 2230000, 3050000, 3880000, 4450000];
-            
-            // 0050 元大台灣50 (約 435萬)
-            const data0050 = [130000, 280000, 400000, 600000, 850000, 1200000, 1600000, 2200000, 3000000, 3800000, 4350000];
-            
-            // 0056 元大高股息 (約 310萬)
-            const data0056 = [125000, 260000, 380000, 520000, 700000, 950000, 1250000, 1700000, 2300000, 2800000, 3100000];
+            // ================= 圖表 1：複利效應展示 =================
+            const ctx1 = document.getElementById('compoundChart').getContext('2d');
+            const labels1 = ['第1年', '第2年', '第3年', '第4年', '第5年', '第6年', '第7年', '第8年', '第9年', '第10年'];
+            const data100 = [125000, 260000, 410000, 580000, 780000, 1020000, 1300000, 1650000, 2050000, 2575493];
+            const data50 = [124000, 256000, 400000, 560000, 740000, 950000, 1200000, 1500000, 1880000, 2333774];
+            const data0 = [123000, 252000, 390000, 540000, 700000, 890000, 1110000, 1380000, 1720000, 2116069];
+            const principal1 = [120000, 240000, 360000, 480000, 600000, 720000, 840000, 960000, 1080000, 1210000];
 
-            new Chart(ctx, {
+            new Chart(ctx1, {
                 type: 'line',
                 data: {
-                    labels: labels,
+                    labels: labels1,
                     datasets: [
-                        {
-                            label: '006208 (富邦台50)',
-                            data: data006208,
-                            borderColor: '#b08d85',
-                            backgroundColor: '#b08d85',
-                            borderWidth: 2.5,
-                            tension: 0.3,
-                            pointRadius: 2
-                        },
-                        {
-                            label: '0050 (元大台灣50)',
-                            data: data0050,
-                            borderColor: '#e57373',
-                            backgroundColor: '#e57373',
-                            borderWidth: 2.5,
-                            tension: 0.3,
-                            pointRadius: 2
-                        },
-                        {
-                            label: '0056 (元大高股息)',
-                            data: data0056,
-                            borderColor: '#81c784',
-                            backgroundColor: '#81c784',
-                            borderWidth: 2.5,
-                            tension: 0.3,
-                            pointRadius: 2
-                        },
-                        {
-                            label: '投入本金',
-                            data: principal,
-                            borderColor: '#968c83',
-                            borderWidth: 2,
-                            borderDash: [5, 5],
-                            tension: 0,
-                            pointRadius: 0,
-                            fill: false
-                        }
+                        { label: '100% 再投入', data: data100, borderColor: '#7b9e87', backgroundColor: '#7b9e87', borderWidth: 2, tension: 0.3, pointRadius: 2 },
+                        { label: '50% 再投入', data: data50, borderColor: '#d4a373', backgroundColor: '#d4a373', borderWidth: 2, tension: 0.3, pointRadius: 2 },
+                        { label: '0% (全領出)', data: data0, borderColor: '#e07a5f', backgroundColor: '#e07a5f', borderWidth: 2, tension: 0.3, pointRadius: 2 },
+                        { label: '投入本金', data: principal1, borderColor: '#968c83', borderWidth: 2, borderDash: [5, 5], tension: 0, pointRadius: 0, fill: false }
                     ]
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: { mode: 'index', intersect: false },
+                    responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
                     plugins: {
-                        legend: {
-                            position: 'top',
-                            labels: {
-                                font: { family: "'Noto Serif TC', serif", size: window.innerWidth < 600 ? 10 : 12 },
-                                color: '#5a4d41',
-                                boxWidth: 12,
-                                padding: 10
-                            }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.dataset.label || '';
-                                    if (label) { label += ': '; }
-                                    if (context.parsed.y !== null) {
-                                        label += new Intl.NumberFormat('zh-TW', { style: 'currency', currency: 'TWD', maximumFractionDigits: 0 }).format(context.parsed.y);
-                                    }
-                                    return label;
-                                }
-                            }
-                        }
+                        legend: { position: 'top', labels: { font: { family: "'Noto Serif TC', serif", size: window.innerWidth < 600 ? 10 : 12 }, color: '#5a4d41', boxWidth: 12, padding: 10 } },
+                        tooltip: { callbacks: { label: function(context) { let label = context.dataset.label || ''; if (label) { label += ': '; } if (context.parsed.y !== null) { label += new Intl.NumberFormat('zh-TW', { style: 'currency', currency: 'TWD', maximumFractionDigits: 0 }).format(context.parsed.y); } return label; } } }
                     },
                     scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: { color: '#eee' },
-                            ticks: {
-                                color: '#968c83',
-                                font: { size: window.innerWidth < 600 ? 10 : 12 },
-                                callback: function(value) {
-                                    return (value / 10000) + ' 萬';
-                                }
-                            }
-                        },
-                        x: {
-                            grid: { display: false },
-                            ticks: { 
-                                color: '#968c83',
-                                font: { size: window.innerWidth < 600 ? 10 : 12 },
-                                maxRotation: 45,
-                                minRotation: 45
-                            }
-                        }
+                        y: { beginAtZero: true, grid: { color: '#eee' }, ticks: { color: '#968c83', font: { size: window.innerWidth < 600 ? 10 : 12 }, callback: function(value) { return (value / 10000) + ' 萬'; } } },
+                        x: { grid: { display: false }, ticks: { color: '#968c83', font: { size: window.innerWidth < 600 ? 10 : 12 }, maxRotation: 45, minRotation: 45 } }
+                    }
+                }
+            });
+
+            // ================= 圖表 2：真實歷史回測 (0050 vs 006208 vs 0056) =================
+            const ctx2 = document.getElementById('etfBacktestChart').getContext('2d');
+            const labels2 = ['2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024', '2025', '2026'];
+            const principal2 = [120000, 240000, 360000, 480000, 600000, 720000, 840000, 960000, 1080000, 1200000, 1210000];
+            const data006208 = [131000, 283000, 405000, 608000, 860000, 1215000, 1620000, 2230000, 3050000, 3880000, 4450000];
+            const data0050 = [130000, 280000, 400000, 600000, 850000, 1200000, 1600000, 2200000, 3000000, 3800000, 4350000];
+            const data0056 = [125000, 260000, 380000, 520000, 700000, 950000, 1250000, 1700000, 2300000, 2800000, 3100000];
+
+            new Chart(ctx2, {
+                type: 'line',
+                data: {
+                    labels: labels2,
+                    datasets: [
+                        { label: '006208 (富邦台50)', data: data006208, borderColor: '#b08d85', backgroundColor: '#b08d85', borderWidth: 2.5, tension: 0.3, pointRadius: 2 },
+                        { label: '0050 (元大台灣50)', data: data0050, borderColor: '#e57373', backgroundColor: '#e57373', borderWidth: 2.5, tension: 0.3, pointRadius: 2 },
+                        { label: '0056 (元大高股息)', data: data0056, borderColor: '#81c784', backgroundColor: '#81c784', borderWidth: 2.5, tension: 0.3, pointRadius: 2 },
+                        { label: '投入本金', data: principal2, borderColor: '#968c83', borderWidth: 2, borderDash: [5, 5], tension: 0, pointRadius: 0, fill: false }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { position: 'top', labels: { font: { family: "'Noto Serif TC', serif", size: window.innerWidth < 600 ? 10 : 12 }, color: '#5a4d41', boxWidth: 12, padding: 10 } },
+                        tooltip: { callbacks: { label: function(context) { let label = context.dataset.label || ''; if (label) { label += ': '; } if (context.parsed.y !== null) { label += new Intl.NumberFormat('zh-TW', { style: 'currency', currency: 'TWD', maximumFractionDigits: 0 }).format(context.parsed.y); } return label; } } }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#eee' }, ticks: { color: '#968c83', font: { size: window.innerWidth < 600 ? 10 : 12 }, callback: function(value) { return (value / 10000) + ' 萬'; } } },
+                        x: { grid: { display: false }, ticks: { color: '#968c83', font: { size: window.innerWidth < 600 ? 10 : 12 }, maxRotation: 45, minRotation: 45 } }
                     }
                 }
             });
