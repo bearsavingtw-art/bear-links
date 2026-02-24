@@ -16,13 +16,15 @@
             --accent: #b08d85;
             --card-bg: #ffffff;
             --success: #81c784;
+            --warning: #e07a5f;
+            --gold: #d4a373;
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
         body {
             font-family: 'Montserrat', 'Noto Serif TC', sans-serif;
-            background-color: #eaddd7; /* 外圍底色 */
+            background-color: #eaddd7; 
             display: flex;
             justify-content: center;
             align-items: center;
@@ -35,7 +37,7 @@
         .app-container {
             width: 100%;
             max-width: 420px;
-            height: 85vh;
+            height: 90vh;
             max-height: 850px;
             background-color: var(--bg-color);
             border-radius: 24px;
@@ -47,22 +49,42 @@
             border: 4px solid #fff;
         }
 
-        /* 頂部標題區 */
+        /* 頂部導覽列 (回首頁) */
+        .top-nav {
+            background: var(--bg-color);
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            z-index: 10;
+        }
+        .back-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.3s;
+        }
+        .back-link:hover { color: var(--accent); }
+
+        /* 標題區 */
         .header {
-            padding: 25px 20px 15px;
+            padding: 20px 20px 10px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px dashed rgba(176, 141, 133, 0.3);
-            background: rgba(252, 251, 249, 0.95);
             z-index: 5;
         }
         .header-text h1 {
             margin: 0;
-            font-size: 1.4rem;
+            font-size: 1.5rem;
             color: var(--text-primary);
             font-weight: 700;
             letter-spacing: 1px;
+            font-family: 'Playfair Display', 'Noto Serif TC', serif;
         }
         .header-text p {
             margin: 5px 0 0;
@@ -71,20 +93,30 @@
         }
         
         /* 慢慢熊 SVG */
-        .bear-icon { width: 60px; height: 60px; flex-shrink: 0; }
+        .bear-icon { width: 65px; height: 65px; flex-shrink: 0; }
+
+        /* 操作說明 Alert */
+        .instruction-box {
+            margin: 0 20px 15px;
+            background: rgba(176, 141, 133, 0.1);
+            border-left: 4px solid var(--accent);
+            padding: 12px 15px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            line-height: 1.5;
+        }
 
         /* 網格清單區 */
         .grid-container {
             flex: 1;
             overflow-y: auto;
-            padding: 20px;
+            padding: 5px 20px 20px;
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
             align-content: start;
         }
-        
-        /* 隱藏卷軸 */
         .grid-container::-webkit-scrollbar { width: 0; }
 
         /* 手繪風卡片 */
@@ -98,6 +130,7 @@
             display: flex;
             flex-direction: column;
             align-items: flex-start;
+            position: relative;
         }
         .sketch-card:hover, .sketch-card:active {
             transform: translateY(-3px);
@@ -118,87 +151,89 @@
             line-height: 1.4;
             font-family: sans-serif;
         }
+        .click-hint {
+            position: absolute; top: 10px; right: 10px;
+            font-size: 0.7rem; color: #ddd;
+        }
 
-        /* 底部提示 */
+        /* 底部提示與按鈕 */
         .footer-tip {
             background: var(--card-bg);
-            padding: 15px;
-            text-align: center;
-            font-size: 0.85rem;
-            color: var(--accent);
-            font-weight: 600;
+            padding: 15px 20px;
             border-top: 1px solid #eee;
             box-shadow: 0 -5px 10px rgba(0,0,0,0.02);
             z-index: 5;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
+        .tip-text {
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+        .home-btn {
+            background: var(--text-primary);
+            color: #fff;
+            text-align: center;
+            text-decoration: none;
+            padding: 12px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+        .home-btn:hover { background: var(--accent); }
 
         /* --- 互動視窗 (Bottom Sheet Modal) --- */
         .modal-overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(90, 77, 65, 0.4);
-            backdrop-filter: blur(2px);
-            z-index: 100;
-            display: flex;
-            align-items: flex-end;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(90, 77, 65, 0.4); backdrop-filter: blur(2px);
+            z-index: 100; display: flex; align-items: flex-end;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
         }
-        .modal-overlay.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
         .modal-content {
-            background: var(--bg-color);
-            width: 100%;
-            max-height: 80%;
-            border-radius: 24px 24px 0 0;
-            padding: 30px 25px 40px;
-            transform: translateY(100%);
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1);
-            overflow-y: auto;
-            position: relative;
+            background: var(--bg-color); width: 100%; max-height: 85%;
+            border-radius: 24px 24px 0 0; padding: 30px 25px 40px;
+            transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+            overflow-y: auto; position: relative;
         }
-        .modal-overlay.active .modal-content {
-            transform: translateY(0);
-        }
+        .modal-overlay.active .modal-content { transform: translateY(0); }
         
         .close-btn {
-            position: absolute;
-            top: 20px; right: 20px;
-            background: #eee;
-            color: var(--text-secondary);
-            width: 30px; height: 30px;
-            border-radius: 50%;
+            position: absolute; top: 20px; right: 20px;
+            background: #eee; color: var(--text-secondary);
+            width: 30px; height: 30px; border-radius: 50%;
             display: flex; justify-content: center; align-items: center;
-            cursor: pointer; border: none; font-size: 1rem;
+            cursor: pointer; border: none; font-size: 1rem; transition: 0.2s;
         }
+        .close-btn:hover { background: #ddd; color: var(--text-primary); }
         
-        .modal-emoji { font-size: 3rem; margin-bottom: 10px; display: block; }
-        .modal-title { font-size: 1.4rem; color: var(--text-primary); font-weight: 700; margin: 0 0 5px 0; }
-        .modal-eng { font-size: 0.85rem; color: var(--text-secondary); margin: 0 0 25px 0; font-family: 'Montserrat', sans-serif; }
+        .modal-emoji { font-size: 3rem; margin-bottom: 10px; display: block; text-align: center; }
+        .modal-title { font-size: 1.4rem; color: var(--text-primary); font-weight: 700; margin: 0 0 5px 0; text-align: center; }
+        .modal-eng { font-size: 0.85rem; color: var(--text-secondary); margin: 0 0 25px 0; font-family: 'Montserrat', sans-serif; text-align: center; }
         
         .detail-section {
-            background: #fff;
-            border: 1px solid #eee;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 15px;
-            text-align: left;
+            background: #fff; border: 1px solid #eee; border-radius: 12px;
+            padding: 18px; margin-bottom: 15px; text-align: left;
         }
+        .detail-section.highlight {
+            border: 1px solid var(--accent);
+            background: #fffafa;
+        }
+        
         .tag {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            margin-bottom: 10px;
+            display: inline-block; padding: 4px 10px; border-radius: 6px;
+            font-size: 0.8rem; font-weight: 600; margin-bottom: 10px;
         }
-        .tag.purpose { background: rgba(176, 141, 133, 0.15); color: var(--text-primary); }
+        .tag.purpose { background: rgba(90, 77, 65, 0.1); color: var(--text-primary); }
         .tag.focus { background: rgba(129, 199, 132, 0.15); color: var(--success); }
+        .tag.tip { background: var(--accent); color: #fff; }
         
         .detail-text { font-size: 0.95rem; color: var(--text-secondary); line-height: 1.7; margin: 0; }
+        .detail-section.highlight .detail-text { color: var(--text-primary); font-weight: 500; }
 
     </style>
 </head>
@@ -206,6 +241,10 @@
 
     <div class="app-container">
         
+        <div class="top-nav">
+            <a href="index.html" class="back-link"><i class="fas fa-chevron-left"></i> Bear.saving 系統首頁</a>
+        </div>
+
         <div class="header">
             <div class="header-text">
                 <h1>新手無腦存袋法</h1>
@@ -229,20 +268,24 @@
             </div>
         </div>
 
+        <div class="instruction-box">
+            <i class="fas fa-info-circle"></i> <b>使用指南：</b><br>領薪水的第一天，請按照自己的比例，無腦將現金或數位帳戶分流至以下 10 個資料夾。
+        </div>
+
         <div class="grid-container" id="bag-grid"></div>
 
         <div class="footer-tip">
-            <i class="fas fa-lightbulb"></i> 每次花錢前看一眼結餘，瞬間恢復理智！
+            <div class="tip-text"><i class="fas fa-lightbulb" style="color:var(--gold);"></i> 每次花錢前看一眼結餘，瞬間恢復理智！</div>
+            <a href="index.html" class="home-btn">返回 Bear 系統首頁</a>
         </div>
 
         <div class="modal-overlay" id="modal-backdrop" onclick="closeModal(event)">
             <div class="modal-content" id="modal-content" onclick="event.stopPropagation()">
                 <button class="close-btn" onclick="closeModal(true)"><i class="fas fa-times"></i></button>
-                <div style="text-align: center;">
-                    <span class="modal-emoji" id="m-emoji">🍱</span>
-                    <h2 class="modal-title" id="m-title">標題</h2>
-                    <p class="modal-eng" id="m-eng">English</p>
-                </div>
+                
+                <span class="modal-emoji" id="m-emoji">🍱</span>
+                <h2 class="modal-title" id="m-title">標題</h2>
+                <p class="modal-eng" id="m-eng">English</p>
                 
                 <div class="detail-section">
                     <div class="tag purpose"><i class="fas fa-shopping-bag"></i> 用途</div>
@@ -250,8 +293,13 @@
                 </div>
 
                 <div class="detail-section">
-                    <div class="tag focus"><i class="fas fa-thumbtack"></i> 重點</div>
+                    <div class="tag focus"><i class="fas fa-thumbtack"></i> 核心重點</div>
                     <p class="detail-text" id="m-focus">內容</p>
+                </div>
+
+                <div class="detail-section highlight">
+                    <div class="tag tip"><i class="fas fa-star"></i> Bear's Tip</div>
+                    <p class="detail-text" id="m-tip">進階心法</p>
                 </div>
             </div>
         </div>
@@ -259,67 +307,77 @@
     </div>
 
     <script>
-        // 存袋資料庫
+        // 存袋資料庫 (已豐富內容)
         const bagData = [
             {
                 id: 1, emoji: '🍱', title: '基礎伙食', eng: 'Daily Meals',
                 subtitle: '平日三餐、自己煮',
                 purpose: '平日上下班的三餐、自己買菜煮飯的錢。',
-                focus: '這是生存基本開銷，不包含週末跟朋友吃大餐。把這筆錢獨立出來，就能確保月底不會餓肚子。'
+                focus: '這是生存基本開銷，絕對不包含週末跟朋友吃大餐。把這筆錢獨立出來，就能確保月底不會餓肚子。',
+                tip: '超支警訊：如果這袋提早空了，代表妳可能把錢拿去吃太貴的餐廳，請馬上檢視聚餐頻率！'
             },
             {
                 id: 2, emoji: '🧋', title: '聚餐手搖', eng: 'Social & Drinks',
                 subtitle: '交際費、週末大餐',
                 purpose: '和朋友聚餐、週末犒賞自己的大餐、每天下午想喝的珍珠奶茶。',
-                focus: '把交際費和基礎伙食分開，妳才會看清楚自己每個月到底喝掉、吃掉多少額外的錢。'
+                focus: '把交際費和基礎伙食分開，妳才會看清楚自己每個月到底喝掉、吃掉多少額外的錢。',
+                tip: '無痛省錢法：自己泡咖啡或帶茶包去公司，這袋省下來的錢就能留給週末吃頓好的。'
             },
             {
                 id: 3, emoji: '🚌', title: '交通移動', eng: 'Transportation',
                 subtitle: '加值、加油、計程車',
                 purpose: '悠遊卡加值、機車或汽車加油錢、偶爾遲到搭計程車的費用。',
-                focus: '如果有固定月票，可以直接扣除；這袋放的是會變動的交通開支。'
+                focus: '如果有固定月票，可以直接從總預算扣除；這袋放的主要是會變動的交通開支。',
+                tip: '固定通勤族強烈建議直接買月票 (TPASS)，把這項支出的不確定性降到最低。'
             },
             {
                 id: 4, emoji: '🧻', title: '日常消耗', eng: 'Household Supplies',
                 subtitle: '衛生紙、洗衣精',
                 purpose: '衛生紙、沐浴乳、洗衣精、垃圾袋等家裡固定會用完需要補貨的物品。',
-                focus: '逛大賣場時，規定自己只能用這袋的錢結帳，避免順手拿太多零食。'
+                focus: '逛大賣場時，規定自己只能用這袋的錢結帳，從物理上阻斷亂拿零食的衝動。',
+                tip: '大賣場誘惑太多，出門前先列好清單，或是只帶剛好的現金出門。'
             },
             {
                 id: 5, emoji: '🎮', title: '個人零用', eng: 'Guilt-Free Spending',
                 subtitle: '專屬快樂基金',
                 purpose: '完全屬於妳自己的快樂基金。買可愛的文具、盲盒、遊戲課金，或是收銀機玩具。',
-                focus: '只要這袋裡面有錢，妳愛怎麼花都行，不需要有任何罪惡感。花光了就乖乖等下個月。'
+                focus: '只要這袋裡面有錢，妳愛怎麼花都行，不需要有任何罪惡感。花光了就乖乖等下個月。',
+                tip: '這是妳的專屬避風港。理財是為了生活，只要不透支，沒人可以管妳怎麼花這筆錢！'
             },
             {
                 id: 6, emoji: '✨', title: '變美服裝', eng: 'Appearance & Clothing',
                 subtitle: '衣服、剪髮、保養',
                 purpose: '買新衣服、剪頭髮、買保養品或化妝品。',
-                focus: '這類開銷容易不小心爆表，先抓出每個月的預算，如果這個月沒買衣服，可以累積到下個月買件質感更好的。'
+                focus: '這類開銷極容易不小心爆表，先抓出每個月的死預算。這個月沒買衣服，可以累積到下個月。',
+                tip: '如果這個月沒看到真正心動的衣服，千萬別為了花而花，存到下個月買件專櫃大衣更香。'
             },
             {
                 id: 7, emoji: '📚', title: '學習進階', eng: 'Self-Improvement',
                 subtitle: '買書、線上課程',
                 purpose: '買書、線上課程、報名講座、買理財工具。',
-                focus: '每個月固定留一點錢投資自己的腦袋，長期下來這會是妳回報率最高的一個存袋。'
+                focus: '每個月固定留一點錢投資自己的腦袋，長期下來這會是妳回報率最高的一個存袋。',
+                tip: '不知道學什麼時，就買本好書，或存下來當未來的上課基金。這袋的錢絕對不能省。'
             },
             {
                 id: 8, emoji: '💊', title: '醫療保健', eng: 'Health & Medical',
                 subtitle: '掛號費、維他命',
                 purpose: '看感冒的掛號費、買維他命、買眼藥水或OK繃。',
-                focus: '人難免會生病，先把這筆小錢留起來，生病時就不會因為還要花錢看醫生而覺得心煩。'
+                focus: '人吃五穀雜糧難免會生病，先把這筆小錢留起來，生病時就不會因為還要花錢看醫生而覺得心煩。',
+                tip: '每個月存幾百塊當健康基金，未來要看牙醫、買保健食品時才不會覺得肉痛。'
             },
             {
                 id: 9, emoji: '📅', title: '預存帳單', eng: 'Sinking Funds',
                 subtitle: '訂閱費、年度稅金',
                 purpose: '那些知道一定會來、但不是每個月繳的費用。例如：Netflix 訂閱費、明年的汽機車牌照稅、保險費。',
-                focus: '把年繳的費用除以 12 個月，每個月固定存進來。等到帳單來的那天，妳就可以很從容地直接從這袋拿錢去繳。'
+                focus: '把年繳的費用除以 12 個月，每個月固定存進來。等到帳單來的那天，妳就可以很從容地直接繳掉。',
+                tip: '拿出計算機，把所有「年繳」費用加總除以 12，這就是妳每個月必須存入這袋的死錢。'
             },
             {
                 id: 10, emoji: '🛡️', title: '緩衝預備', eng: 'Buffer Pool',
                 subtitle: '紅包、意外開銷',
                 purpose: '用來接住生活中無法預測的各種小意外。例如：朋友突然結婚要包紅包、機車突然要大修。',
-                focus: '維持系統穩定運作的機制。有了緩衝池，理財計畫就不會因為小意外而崩潰。沒動到就開心撥入儲蓄帳戶！'
+                focus: '維持系統穩定運作的機制。有了這袋，理財計畫就不會因為小意外而崩潰。',
+                tip: '沒有這袋，妳的系統隨時會因為一張紅色炸彈而當機。沒動到這筆錢的話，月底就開心撥入儲蓄帳戶吧！'
             }
         ];
 
@@ -330,6 +388,7 @@
             card.className = 'sketch-card';
             card.onclick = () => openModal(item);
             card.innerHTML = `
+                <i class="fas fa-hand-pointer click-hint"></i>
                 <div class="card-emoji">${item.emoji}</div>
                 <div class="card-title">${item.title}</div>
                 <div class="card-subtitle">${item.subtitle}</div>
@@ -345,6 +404,7 @@
             document.getElementById('m-eng').innerText = data.eng;
             document.getElementById('m-purpose').innerText = data.purpose;
             document.getElementById('m-focus').innerText = data.focus;
+            document.getElementById('m-tip').innerText = data.tip;
             modal.classList.add('active');
         }
 
