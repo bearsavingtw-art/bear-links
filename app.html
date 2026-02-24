@@ -128,8 +128,22 @@
         .btn-tool { background: #546e7a; margin-bottom: 20px; }
         .btn-cancel { background: #999; margin-top: 10px; }
 
-        /* 列表樣式 */
+        /* 列表與月份分隔線樣式 */
         .tx-list { list-style: none; padding: 0; margin: 0; }
+        
+        .month-divider {
+            background: rgba(176, 141, 133, 0.1);
+            color: var(--text-primary);
+            padding: 6px 15px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin: 20px 0 10px 0;
+            display: inline-block;
+            border-left: 3px solid var(--accent);
+        }
+        .month-divider:first-child { margin-top: 0; }
+
         .tx-item {
             display: flex; justify-content: space-between; align-items: center;
             padding: 12px 0; border-bottom: 1px dashed #eee;
@@ -157,7 +171,7 @@
         .chart-wrapper { position: relative; height: 220px; width: 100%; display: flex; justify-content: center; }
         .hidden { display: none; }
 
-        /* --- [NEW] 安裝提示與 Modal 樣式 --- */
+        /* --- 安裝提示與 Modal 樣式 --- */
         .install-prompt {
             background: rgba(176, 141, 133, 0.1); color: var(--accent);
             padding: 12px; border-radius: 10px; text-align: center;
@@ -187,7 +201,7 @@
 
     <header>
         <h1>Bear.saving</h1>
-        <div style="font-size:0.8rem; color:var(--text-secondary);">Financial Cockpit v1.6</div>
+        <div style="font-size:0.8rem; color:var(--text-secondary);">Financial Cockpit v1.7</div>
     </header>
 
     <div id="page-dash" class="page active">
@@ -342,7 +356,7 @@
         </div>
 
         <div class="card">
-            <div class="card-title">本月明細</div>
+            <div class="card-title">帳務明細 (依月份排序)</div>
             <ul class="tx-list" id="full-tx-list"></ul>
         </div>
 
@@ -425,7 +439,6 @@
             setInterval(updateCountdowns, 1000);
         });
 
-        // --- [NEW] 開關安裝 Modal ---
         function openInstallModal() {
             document.getElementById('install-modal').classList.add('show');
         }
@@ -468,13 +481,10 @@
             document.getElementById('input-method').value = 'cash'; 
         }
 
-        // --- [NEW] 核心排序邏輯 ---
         function sortTransactions() {
             transactions.sort((a, b) => {
-                // 先比日期 (新的在上)
                 const dateDiff = new Date(b.date) - new Date(a.date);
                 if (dateDiff !== 0) return dateDiff;
-                // 日期一樣的話，比輸入的時間戳記 id (新的在上)
                 return b.id - a.id;
             });
         }
@@ -514,7 +524,7 @@
                 alert('記帳成功！💰');
             }
             
-            sortTransactions(); // 儲存後立即排序
+            sortTransactions(); 
             localStorage.setItem('bear_transactions', JSON.stringify(transactions));
             resetForm();
             switchPage('dash');
@@ -561,7 +571,7 @@
 
         // --- 5. 儀表板與圖表 ---
         function renderDashboard() {
-            sortTransactions(); // 確保每次渲染前都是排序好的狀態
+            sortTransactions(); 
             
             const currentMonth = new Date().toISOString().slice(0, 7);
             const monthTx = transactions.filter(t => t.date.startsWith(currentMonth));
@@ -632,10 +642,27 @@
             if (!list) return;
             list.innerHTML = '';
             
-            // 經過前面的 sortTransactions()，現在只要直接取前5筆或是全部即可
             const dataToShow = isShort ? transactions.slice(0, 5) : transactions;
-            
+            let currentMonthTracker = ''; // 用來追蹤目前渲染到哪一個月份
+
             dataToShow.forEach(t => {
+                // --- [NEW] 依照月份動態產生分隔線 ---
+                // 取出交易紀錄的 YYYY-MM
+                const txMonthStr = t.date.substring(0, 7); 
+                
+                // 如果是在「全部明細」頁面，且遇到新的月份，就插入標題
+                if (!isShort && txMonthStr !== currentMonthTracker) {
+                    currentMonthTracker = txMonthStr;
+                    
+                    // 將 2026-02 轉換為 2026年 2月明細
+                    const dateObj = new Date(t.date);
+                    const year = dateObj.getFullYear();
+                    const month = dateObj.getMonth() + 1;
+                    
+                    list.innerHTML += `<div class="month-divider"><i class="far fa-calendar-alt"></i> ${year}年 ${month}月明細</div>`;
+                }
+                // ------------------------------------
+
                 const color = t.type === 'income' ? 'amount-inc' : 'amount-exp';
                 const sign = t.type === 'income' ? '+' : '-';
                 const methodIcon = getMethodIcon(t.method); 
