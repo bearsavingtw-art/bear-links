@@ -65,7 +65,7 @@
             color: var(--text-secondary); font-size: 1.1rem; letter-spacing: 1px;
         }
 
-        /* --- [新增] 需求定義 4 步驟區塊 --- */
+        /* 需求定義 4 步驟區塊 */
         .req-card {
             background: #fff; border-radius: 15px; padding: 35px; margin-bottom: 40px;
             box-shadow: var(--card-shadow); border-left: 6px solid var(--text-primary);
@@ -169,8 +169,21 @@
         .compare-col.bad .compare-title { color: var(--warning-color); }
         .compare-col.good .compare-title { color: var(--success-color); }
 
+        /* [新增] 系統備註區塊 */
+        .system-note {
+            background: #fdfbf7;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 25px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            border: 1px dashed #dcd3cb;
+            line-height: 1.7;
+        }
+        .system-note strong { color: var(--text-primary); }
+
         .pass-criteria {
-            background: rgba(123, 158, 135, 0.1); padding: 12px 20px; border-radius: 8px; font-size: 0.9rem; color: var(--success-color); font-weight: 600; display: flex; align-items: center; gap: 8px; border-left: 3px solid var(--success-color);
+            background: rgba(123, 158, 135, 0.1); padding: 12px 20px; border-radius: 8px; font-size: 0.9rem; color: var(--success-color); font-weight: 600; display: flex; align-items: center; gap: 8px; border-left: 3px solid var(--success-color); margin-top: 20px;
         }
 
         /* Bear 獨家觀點 */
@@ -236,6 +249,7 @@
             .insight-box { padding: 35px 20px; }
             .checklist-container { padding: 25px 20px; }
             .diff-highlight { padding: 15px; }
+            .system-note { padding: 15px; }
         }
     </style>
 </head>
@@ -293,6 +307,7 @@
                 </div>
             </div>
         </div>
+
         <div class="stage-card">
             <h3 class="stage-title"><i class="fas fa-life-ring" style="color: #78909c;"></i> 短期目標（0 - 1 年）</h3>
             <div class="stage-tag">【系統維運與緩衝】</div>
@@ -357,7 +372,7 @@
                         <h4><i class="fas fa-chart-line"></i> 為什麼絕對不能提領？（雪球效應）</h4>
                         <div class="compound-desc">
                             想像妳在斜坡上滾雪球。前 3 年感覺沒什麼增長；但到了第 5 年、第 10 年，只要雪球不破，它每滾一圈沾上的雪量會呈現指數型爆發。<br><br>
-                            <strong>真實回測範例：每月 1 萬投入 0050（2016-2026）</strong><br>
+                            <strong>系統測試範例：每月定期定額 1 萬投入大盤指數（十年期）</strong><br>
                             十年總共投入本金為 121 萬。我們來看看「有沒有把配息繼續滾進去」，長期下來的雪球體積落差有多驚人：
                         </div>
                         
@@ -403,6 +418,14 @@
                                 </div>
                             </div>
                         </div>
+
+                        <div class="system-note">
+                            <i class="fas fa-info-circle" style="color: var(--accent);"></i> <strong>工程師的系統備註：</strong><br>
+                            以上的圖表數據，是採用全球股市長期平均的「保守預估值」（大約 6% ~ 8% 的年化報酬率）來計算。為什麼刻意把數字算得比較少？因為在系統開發裡，我們<strong>「絕不拿最佳狀況來當作系統底線」</strong>。<br><br>
+                            過去十年的大牛市，不代表未來十年也會有一模一樣的驚人漲幅。如果一開始就預期十年後一定會有 400 多萬，萬一遇到幾年空頭，預期心理就會崩潰，甚至恐慌拋售。<br>
+                            理財看的是長期的底氣，不是短期的暴利。
+                        </div>
+
                     </div>
                 </div>
             </div>
