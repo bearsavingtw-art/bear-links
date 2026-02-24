@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>新手理財：10個無腦存袋 | Bear.saving</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Noto+Serif+TC:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-color: #fcfbf9;
+            --text-primary: #5a4d41;
+            --text-secondary: #968c83;
+            --accent: #b08d85;
+            --card-bg: #ffffff;
+            --success: #81c784;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            font-family: 'Montserrat', 'Noto Serif TC', sans-serif;
+            background-color: #eaddd7; /* 外圍底色 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* 模擬手機畫面容器 */
+        .app-container {
+            width: 100%;
+            max-width: 420px;
+            height: 85vh;
+            max-height: 850px;
+            background-color: var(--bg-color);
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(90, 77, 65, 0.15);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 4px solid #fff;
+        }
+
+        /* 頂部標題區 */
+        .header {
+            padding: 25px 20px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px dashed rgba(176, 141, 133, 0.3);
+            background: rgba(252, 251, 249, 0.95);
+            z-index: 5;
+        }
+        .header-text h1 {
+            margin: 0;
+            font-size: 1.4rem;
+            color: var(--text-primary);
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        .header-text p {
+            margin: 5px 0 0;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+        
+        /* 慢慢熊 SVG */
+        .bear-icon { width: 60px; height: 60px; flex-shrink: 0; }
+
+        /* 網格清單區 */
+        .grid-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            align-content: start;
+        }
+        
+        /* 隱藏卷軸 */
+        .grid-container::-webkit-scrollbar { width: 0; }
+
+        /* 手繪風卡片 */
+        .sketch-card {
+            background: var(--card-bg);
+            border: 2px solid var(--text-primary);
+            border-radius: 8px 12px 10px 8px / 12px 8px 10px 12px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .sketch-card:hover, .sketch-card:active {
+            transform: translateY(-3px);
+            box-shadow: 4px 4px 0px rgba(90, 77, 65, 0.1);
+            background: #fffafa;
+        }
+        
+        .card-emoji { font-size: 1.8rem; margin-bottom: 8px; }
+        .card-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            margin-bottom: 5px;
+        }
+        .card-subtitle {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+            font-family: sans-serif;
+        }
+
+        /* 底部提示 */
+        .footer-tip {
+            background: var(--card-bg);
+            padding: 15px;
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--accent);
+            font-weight: 600;
+            border-top: 1px solid #eee;
+            box-shadow: 0 -5px 10px rgba(0,0,0,0.02);
+            z-index: 5;
+        }
+
+        /* --- 互動視窗 (Bottom Sheet Modal) --- */
+        .modal-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(90, 77, 65, 0.4);
+            backdrop-filter: blur(2px);
+            z-index: 100;
+            display: flex;
+            align-items: flex-end;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-content {
+            background: var(--bg-color);
+            width: 100%;
+            max-height: 80%;
+            border-radius: 24px 24px 0 0;
+            padding: 30px 25px 40px;
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+            overflow-y: auto;
+            position: relative;
+        }
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 20px; right: 20px;
+            background: #eee;
+            color: var(--text-secondary);
+            width: 30px; height: 30px;
+            border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            cursor: pointer; border: none; font-size: 1rem;
+        }
+        
+        .modal-emoji { font-size: 3rem; margin-bottom: 10px; display: block; }
+        .modal-title { font-size: 1.4rem; color: var(--text-primary); font-weight: 700; margin: 0 0 5px 0; }
+        .modal-eng { font-size: 0.85rem; color: var(--text-secondary); margin: 0 0 25px 0; font-family: 'Montserrat', sans-serif; }
+        
+        .detail-section {
+            background: #fff;
+            border: 1px solid #eee;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        .tag {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        .tag.purpose { background: rgba(176, 141, 133, 0.15); color: var(--text-primary); }
+        .tag.focus { background: rgba(129, 199, 132, 0.15); color: var(--success); }
+        
+        .detail-text { font-size: 0.95rem; color: var(--text-secondary); line-height: 1.7; margin: 0; }
+
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        
+        <div class="header">
+            <div class="header-text">
+                <h1>新手無腦存袋法</h1>
+                <p>建立自動化的分配系統 💰</p>
+            </div>
+            
+            <div class="bear-icon">
+                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="25" cy="25" r="10" fill="#fff" stroke="#5a4d41" stroke-width="3" stroke-linecap="round"/>
+                    <circle cx="75" cy="25" r="10" fill="#fff" stroke="#5a4d41" stroke-width="3" stroke-linecap="round"/>
+                    <circle cx="50" cy="45" r="30" fill="#fff" stroke="#5a4d41" stroke-width="3" stroke-linecap="round"/>
+                    <circle cx="40" cy="42" r="3" fill="#5a4d41"/>
+                    <circle cx="60" cy="42" r="3" fill="#5a4d41"/>
+                    <ellipse cx="50" cy="50" rx="5" ry="3.5" fill="#fff" stroke="#5a4d41" stroke-width="2"/>
+                    <path d="M 50 53.5 L 50 58" stroke="#5a4d41" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M 35 73 Q 35 95 50 95 Q 65 95 65 73 Z" fill="#fff" stroke="#5a4d41" stroke-width="3" stroke-linejoin="round"/>
+                    <path d="M 35 75 C 25 80 28 90 35 90" fill="none" stroke="#5a4d41" stroke-width="3" stroke-linecap="round"/>
+                    <path d="M 65 75 C 75 80 72 90 65 90" fill="none" stroke="#5a4d41" stroke-width="3" stroke-linecap="round"/>
+                    <path d="M 36 73 Q 50 80 64 73" fill="#fff" stroke="none"/>
+                </svg>
+            </div>
+        </div>
+
+        <div class="grid-container" id="bag-grid"></div>
+
+        <div class="footer-tip">
+            <i class="fas fa-lightbulb"></i> 每次花錢前看一眼結餘，瞬間恢復理智！
+        </div>
+
+        <div class="modal-overlay" id="modal-backdrop" onclick="closeModal(event)">
+            <div class="modal-content" id="modal-content" onclick="event.stopPropagation()">
+                <button class="close-btn" onclick="closeModal(true)"><i class="fas fa-times"></i></button>
+                <div style="text-align: center;">
+                    <span class="modal-emoji" id="m-emoji">🍱</span>
+                    <h2 class="modal-title" id="m-title">標題</h2>
+                    <p class="modal-eng" id="m-eng">English</p>
+                </div>
+                
+                <div class="detail-section">
+                    <div class="tag purpose"><i class="fas fa-shopping-bag"></i> 用途</div>
+                    <p class="detail-text" id="m-purpose">內容</p>
+                </div>
+
+                <div class="detail-section">
+                    <div class="tag focus"><i class="fas fa-thumbtack"></i> 重點</div>
+                    <p class="detail-text" id="m-focus">內容</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // 存袋資料庫
+        const bagData = [
+            {
+                id: 1, emoji: '🍱', title: '基礎伙食', eng: 'Daily Meals',
+                subtitle: '平日三餐、自己煮',
+                purpose: '平日上下班的三餐、自己買菜煮飯的錢。',
+                focus: '這是生存基本開銷，不包含週末跟朋友吃大餐。把這筆錢獨立出來，就能確保月底不會餓肚子。'
+            },
+            {
+                id: 2, emoji: '🧋', title: '聚餐手搖', eng: 'Social & Drinks',
+                subtitle: '交際費、週末大餐',
+                purpose: '和朋友聚餐、週末犒賞自己的大餐、每天下午想喝的珍珠奶茶。',
+                focus: '把交際費和基礎伙食分開，妳才會看清楚自己每個月到底喝掉、吃掉多少額外的錢。'
+            },
+            {
+                id: 3, emoji: '🚌', title: '交通移動', eng: 'Transportation',
+                subtitle: '加值、加油、計程車',
+                purpose: '悠遊卡加值、機車或汽車加油錢、偶爾遲到搭計程車的費用。',
+                focus: '如果有固定月票，可以直接扣除；這袋放的是會變動的交通開支。'
+            },
+            {
+                id: 4, emoji: '🧻', title: '日常消耗', eng: 'Household Supplies',
+                subtitle: '衛生紙、洗衣精',
+                purpose: '衛生紙、沐浴乳、洗衣精、垃圾袋等家裡固定會用完需要補貨的物品。',
+                focus: '逛大賣場時，規定自己只能用這袋的錢結帳，避免順手拿太多零食。'
+            },
+            {
+                id: 5, emoji: '🎮', title: '個人零用', eng: 'Guilt-Free Spending',
+                subtitle: '專屬快樂基金',
+                purpose: '完全屬於妳自己的快樂基金。買可愛的文具、盲盒、遊戲課金，或是收銀機玩具。',
+                focus: '只要這袋裡面有錢，妳愛怎麼花都行，不需要有任何罪惡感。花光了就乖乖等下個月。'
+            },
+            {
+                id: 6, emoji: '✨', title: '變美服裝', eng: 'Appearance & Clothing',
+                subtitle: '衣服、剪髮、保養',
+                purpose: '買新衣服、剪頭髮、買保養品或化妝品。',
+                focus: '這類開銷容易不小心爆表，先抓出每個月的預算，如果這個月沒買衣服，可以累積到下個月買件質感更好的。'
+            },
+            {
+                id: 7, emoji: '📚', title: '學習進階', eng: 'Self-Improvement',
+                subtitle: '買書、線上課程',
+                purpose: '買書、線上課程、報名講座、買理財工具。',
+                focus: '每個月固定留一點錢投資自己的腦袋，長期下來這會是妳回報率最高的一個存袋。'
+            },
+            {
+                id: 8, emoji: '💊', title: '醫療保健', eng: 'Health & Medical',
+                subtitle: '掛號費、維他命',
+                purpose: '看感冒的掛號費、買維他命、買眼藥水或OK繃。',
+                focus: '人難免會生病，先把這筆小錢留起來，生病時就不會因為還要花錢看醫生而覺得心煩。'
+            },
+            {
+                id: 9, emoji: '📅', title: '預存帳單', eng: 'Sinking Funds',
+                subtitle: '訂閱費、年度稅金',
+                purpose: '那些知道一定會來、但不是每個月繳的費用。例如：Netflix 訂閱費、明年的汽機車牌照稅、保險費。',
+                focus: '把年繳的費用除以 12 個月，每個月固定存進來。等到帳單來的那天，妳就可以很從容地直接從這袋拿錢去繳。'
+            },
+            {
+                id: 10, emoji: '🛡️', title: '緩衝預備', eng: 'Buffer Pool',
+                subtitle: '紅包、意外開銷',
+                purpose: '用來接住生活中無法預測的各種小意外。例如：朋友突然結婚要包紅包、機車突然要大修。',
+                focus: '維持系統穩定運作的機制。有了緩衝池，理財計畫就不會因為小意外而崩潰。沒動到就開心撥入儲蓄帳戶！'
+            }
+        ];
+
+        // 渲染網格
+        const grid = document.getElementById('bag-grid');
+        bagData.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'sketch-card';
+            card.onclick = () => openModal(item);
+            card.innerHTML = `
+                <div class="card-emoji">${item.emoji}</div>
+                <div class="card-title">${item.title}</div>
+                <div class="card-subtitle">${item.subtitle}</div>
+            `;
+            grid.appendChild(card);
+        });
+
+        // Modal 邏輯
+        const modal = document.getElementById('modal-backdrop');
+        function openModal(data) {
+            document.getElementById('m-emoji').innerText = data.emoji;
+            document.getElementById('m-title').innerText = data.title;
+            document.getElementById('m-eng').innerText = data.eng;
+            document.getElementById('m-purpose').innerText = data.purpose;
+            document.getElementById('m-focus').innerText = data.focus;
+            modal.classList.add('active');
+        }
+
+        function closeModal(force = false) {
+            if (force || event.target === modal) {
+                modal.classList.remove('active');
+            }
+        }
+    </script>
+
+</body>
+</html>
