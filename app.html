@@ -187,7 +187,7 @@
 
     <header>
         <h1>Bear.saving</h1>
-        <div style="font-size:0.8rem; color:var(--text-secondary);">Financial Cockpit v1.5</div>
+        <div style="font-size:0.8rem; color:var(--text-secondary);">Financial Cockpit v1.6</div>
     </header>
 
     <div id="page-dash" class="page active">
@@ -468,6 +468,17 @@
             document.getElementById('input-method').value = 'cash'; 
         }
 
+        // --- [NEW] 核心排序邏輯 ---
+        function sortTransactions() {
+            transactions.sort((a, b) => {
+                // 先比日期 (新的在上)
+                const dateDiff = new Date(b.date) - new Date(a.date);
+                if (dateDiff !== 0) return dateDiff;
+                // 日期一樣的話，比輸入的時間戳記 id (新的在上)
+                return b.id - a.id;
+            });
+        }
+
         // --- 3. 記帳核心 ---
         function updateCategories() {
             const type = document.getElementById('input-type').value;
@@ -499,9 +510,11 @@
                     alert('修改成功！✏️');
                 }
             } else {
-                transactions.unshift({ id: Date.now(), date, type, category, amount, note, method });
+                transactions.push({ id: Date.now(), date, type, category, amount, note, method });
                 alert('記帳成功！💰');
             }
+            
+            sortTransactions(); // 儲存後立即排序
             localStorage.setItem('bear_transactions', JSON.stringify(transactions));
             resetForm();
             switchPage('dash');
@@ -548,6 +561,8 @@
 
         // --- 5. 儀表板與圖表 ---
         function renderDashboard() {
+            sortTransactions(); // 確保每次渲染前都是排序好的狀態
+            
             const currentMonth = new Date().toISOString().slice(0, 7);
             const monthTx = transactions.filter(t => t.date.startsWith(currentMonth));
             let totalInc = 0, totalExp = 0;
@@ -616,7 +631,10 @@
             const list = document.getElementById(listId);
             if (!list) return;
             list.innerHTML = '';
+            
+            // 經過前面的 sortTransactions()，現在只要直接取前5筆或是全部即可
             const dataToShow = isShort ? transactions.slice(0, 5) : transactions;
+            
             dataToShow.forEach(t => {
                 const color = t.type === 'income' ? 'amount-inc' : 'amount-exp';
                 const sign = t.type === 'income' ? '+' : '-';
