@@ -18,6 +18,7 @@
             --success: #81c784;
             --warning: #e07a5f;
             --gold: #d4a373;
+            --fixed-color: #78909c; /* 固定支出顏色 */
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -97,7 +98,7 @@
 
         /* 操作說明 Alert */
         .instruction-box {
-            margin: 0 20px 15px;
+            margin: 0 20px 10px;
             background: rgba(176, 141, 133, 0.1);
             border-left: 4px solid var(--accent);
             padding: 12px 15px;
@@ -107,24 +108,28 @@
             line-height: 1.5;
         }
 
-        /* 網格清單區 */
-        .grid-container {
+        /* 內容滾動區 (包覆網格與名詞解釋) */
+        .scroll-area {
             flex: 1;
             overflow-y: auto;
             padding: 5px 20px 20px;
+        }
+        .scroll-area::-webkit-scrollbar { width: 0; }
+
+        /* 網格清單區 */
+        .grid-container {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
-            align-content: start;
+            margin-bottom: 25px;
         }
-        .grid-container::-webkit-scrollbar { width: 0; }
 
         /* 手繪風卡片 */
         .sketch-card {
             background: var(--card-bg);
             border: 2px solid var(--text-primary);
             border-radius: 8px 12px 10px 8px / 12px 8px 10px 12px;
-            padding: 15px;
+            padding: 12px 15px 15px;
             cursor: pointer;
             transition: all 0.2s ease;
             display: flex;
@@ -138,7 +143,28 @@
             background: #fffafa;
         }
         
-        .card-emoji { font-size: 1.8rem; margin-bottom: 8px; }
+        /* 卡片頂部：Emoji + 分類標籤 */
+        .card-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            width: 100%;
+            margin-bottom: 8px;
+        }
+        .card-emoji { font-size: 1.8rem; line-height: 1; margin: 0; }
+        
+        .cat-tag {
+            font-size: 0.65rem;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            color: #fff;
+            letter-spacing: 0.5px;
+        }
+        .bg-fixed { background: var(--fixed-color); }
+        .bg-var { background: var(--accent); }
+        .bg-save { background: var(--gold); }
+
         .card-title {
             font-weight: 600;
             color: var(--text-primary);
@@ -151,9 +177,36 @@
             line-height: 1.4;
             font-family: sans-serif;
         }
+        
+        /* 點擊小手提示 */
         .click-hint {
-            position: absolute; top: 10px; right: 10px;
+            position: absolute; bottom: 10px; right: 10px;
             font-size: 0.7rem; color: #ddd;
+        }
+
+        /* --- 名詞解釋區塊 --- */
+        .explanation-box {
+            background: #fff;
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px dashed rgba(176, 141, 133, 0.5);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.02);
+        }
+        .exp-title {
+            margin: 0 0 15px 0;
+            font-size: 1.05rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .exp-item { margin-bottom: 15px; }
+        .exp-item:last-child { margin-bottom: 0; }
+        .exp-item p {
+            margin: 6px 0 0 0;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
         }
 
         /* 底部提示與按鈕 */
@@ -213,7 +266,7 @@
         
         .modal-emoji { font-size: 3rem; margin-bottom: 10px; display: block; text-align: center; }
         .modal-title { font-size: 1.4rem; color: var(--text-primary); font-weight: 700; margin: 0 0 5px 0; text-align: center; }
-        .modal-eng { font-size: 0.85rem; color: var(--text-secondary); margin: 0 0 25px 0; font-family: 'Montserrat', sans-serif; text-align: center; }
+        .modal-eng { font-size: 0.85rem; color: var(--text-secondary); margin: 0 0 20px 0; font-family: 'Montserrat', sans-serif; text-align: center; }
         
         .detail-section {
             background: #fff; border: 1px solid #eee; border-radius: 12px;
@@ -272,7 +325,30 @@
             <i class="fas fa-info-circle"></i> <b>使用指南：</b><br>領薪水的第一天，請按照自己的比例，無腦將現金或數位帳戶分流至以下 10 個資料夾。
         </div>
 
-        <div class="grid-container" id="bag-grid"></div>
+        <div class="scroll-area">
+            
+            <div class="grid-container" id="bag-grid"></div>
+
+            <div class="explanation-box">
+                <h3 class="exp-title"><i class="fas fa-book-open"></i> 系統名詞解釋</h3>
+                
+                <div class="exp-item">
+                    <span class="cat-tag bg-fixed">固定支出</span>
+                    <p>維持生存的基本底線。不管妳這個月開不開心、出不出門，都必須花的錢。</p>
+                </div>
+                
+                <div class="exp-item">
+                    <span class="cat-tag bg-var">變動支出</span>
+                    <p>提升生活品質的彈性花費。想要加快存錢速度時，請優先從這個類別縮減。</p>
+                </div>
+
+                <div class="exp-item">
+                    <span class="cat-tag bg-save">預存支出</span>
+                    <p>把「未來一定會發生」或「突發意外」的大筆開銷，平攤到每個月提前存起來的防護網。</p>
+                </div>
+            </div>
+
+        </div>
 
         <div class="footer-tip">
             <div class="tip-text"><i class="fas fa-lightbulb" style="color:var(--gold);"></i> 每次花錢前看一眼結餘，瞬間恢復理智！</div>
@@ -283,7 +359,11 @@
             <div class="modal-content" id="modal-content" onclick="event.stopPropagation()">
                 <button class="close-btn" onclick="closeModal(true)"><i class="fas fa-times"></i></button>
                 
-                <span class="modal-emoji" id="m-emoji">🍱</span>
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <span class="cat-tag" id="m-category" style="display:inline-block; margin-bottom:10px;">分類</span>
+                    <span class="modal-emoji" id="m-emoji" style="margin-bottom:0;">🍱</span>
+                </div>
+
                 <h2 class="modal-title" id="m-title">標題</h2>
                 <p class="modal-eng" id="m-eng">English</p>
                 
@@ -307,10 +387,11 @@
     </div>
 
     <script>
-        // 存袋資料庫 (已豐富內容)
+        // 存袋資料庫 (新增 category 與樣式對應)
         const bagData = [
             {
                 id: 1, emoji: '🍱', title: '基礎伙食', eng: 'Daily Meals',
+                category: '固定支出', catClass: 'bg-fixed',
                 subtitle: '平日三餐、自己煮',
                 purpose: '平日上下班的三餐、自己買菜煮飯的錢。',
                 focus: '這是生存基本開銷，絕對不包含週末跟朋友吃大餐。把這筆錢獨立出來，就能確保月底不會餓肚子。',
@@ -318,6 +399,7 @@
             },
             {
                 id: 2, emoji: '🧋', title: '聚餐手搖', eng: 'Social & Drinks',
+                category: '變動支出', catClass: 'bg-var',
                 subtitle: '交際費、週末大餐',
                 purpose: '和朋友聚餐、週末犒賞自己的大餐、每天下午想喝的珍珠奶茶。',
                 focus: '把交際費和基礎伙食分開，妳才會看清楚自己每個月到底喝掉、吃掉多少額外的錢。',
@@ -325,6 +407,7 @@
             },
             {
                 id: 3, emoji: '🚌', title: '交通移動', eng: 'Transportation',
+                category: '固定支出', catClass: 'bg-fixed',
                 subtitle: '加值、加油、計程車',
                 purpose: '悠遊卡加值、機車或汽車加油錢、偶爾遲到搭計程車的費用。',
                 focus: '如果有固定月票，可以直接從總預算扣除；這袋放的主要是會變動的交通開支。',
@@ -332,6 +415,7 @@
             },
             {
                 id: 4, emoji: '🧻', title: '日常消耗', eng: 'Household Supplies',
+                category: '固定支出', catClass: 'bg-fixed',
                 subtitle: '衛生紙、洗衣精',
                 purpose: '衛生紙、沐浴乳、洗衣精、垃圾袋等家裡固定會用完需要補貨的物品。',
                 focus: '逛大賣場時，規定自己只能用這袋的錢結帳，從物理上阻斷亂拿零食的衝動。',
@@ -339,6 +423,7 @@
             },
             {
                 id: 5, emoji: '🎮', title: '個人零用', eng: 'Guilt-Free Spending',
+                category: '變動支出', catClass: 'bg-var',
                 subtitle: '專屬快樂基金',
                 purpose: '完全屬於妳自己的快樂基金。買可愛的文具、盲盒、遊戲課金，或是收銀機玩具。',
                 focus: '只要這袋裡面有錢，妳愛怎麼花都行，不需要有任何罪惡感。花光了就乖乖等下個月。',
@@ -346,6 +431,7 @@
             },
             {
                 id: 6, emoji: '✨', title: '變美服裝', eng: 'Appearance & Clothing',
+                category: '變動支出', catClass: 'bg-var',
                 subtitle: '衣服、剪髮、保養',
                 purpose: '買新衣服、剪頭髮、買保養品或化妝品。',
                 focus: '這類開銷極容易不小心爆表，先抓出每個月的死預算。這個月沒買衣服，可以累積到下個月。',
@@ -353,6 +439,7 @@
             },
             {
                 id: 7, emoji: '📚', title: '學習進階', eng: 'Self-Improvement',
+                category: '變動支出', catClass: 'bg-var',
                 subtitle: '買書、線上課程',
                 purpose: '買書、線上課程、報名講座、買理財工具。',
                 focus: '每個月固定留一點錢投資自己的腦袋，長期下來這會是妳回報率最高的一個存袋。',
@@ -360,6 +447,7 @@
             },
             {
                 id: 8, emoji: '💊', title: '醫療保健', eng: 'Health & Medical',
+                category: '預存支出', catClass: 'bg-save',
                 subtitle: '掛號費、維他命',
                 purpose: '看感冒的掛號費、買維他命、買眼藥水或OK繃。',
                 focus: '人吃五穀雜糧難免會生病，先把這筆小錢留起來，生病時就不會因為還要花錢看醫生而覺得心煩。',
@@ -367,6 +455,7 @@
             },
             {
                 id: 9, emoji: '📅', title: '預存帳單', eng: 'Sinking Funds',
+                category: '預存支出', catClass: 'bg-save',
                 subtitle: '訂閱費、年度稅金',
                 purpose: '那些知道一定會來、但不是每個月繳的費用。例如：Netflix 訂閱費、明年的汽機車牌照稅、保險費。',
                 focus: '把年繳的費用除以 12 個月，每個月固定存進來。等到帳單來的那天，妳就可以很從容地直接繳掉。',
@@ -374,6 +463,7 @@
             },
             {
                 id: 10, emoji: '🛡️', title: '緩衝預備', eng: 'Buffer Pool',
+                category: '預存支出', catClass: 'bg-save',
                 subtitle: '紅包、意外開銷',
                 purpose: '用來接住生活中無法預測的各種小意外。例如：朋友突然結婚要包紅包、機車突然要大修。',
                 focus: '維持系統穩定運作的機制。有了這袋，理財計畫就不會因為小意外而崩潰。',
@@ -388,10 +478,13 @@
             card.className = 'sketch-card';
             card.onclick = () => openModal(item);
             card.innerHTML = `
-                <i class="fas fa-hand-pointer click-hint"></i>
-                <div class="card-emoji">${item.emoji}</div>
+                <div class="card-header-row">
+                    <div class="card-emoji">${item.emoji}</div>
+                    <span class="cat-tag ${item.catClass}">${item.category}</span>
+                </div>
                 <div class="card-title">${item.title}</div>
                 <div class="card-subtitle">${item.subtitle}</div>
+                <i class="fas fa-hand-pointer click-hint"></i>
             `;
             grid.appendChild(card);
         });
@@ -405,6 +498,12 @@
             document.getElementById('m-purpose').innerText = data.purpose;
             document.getElementById('m-focus').innerText = data.focus;
             document.getElementById('m-tip').innerText = data.tip;
+            
+            // 更新 Modal 內的分類標籤與顏色
+            const catBadge = document.getElementById('m-category');
+            catBadge.innerText = data.category;
+            catBadge.className = `cat-tag ${data.catClass}`;
+
             modal.classList.add('active');
         }
 
