@@ -100,13 +100,19 @@
         }
 
         /* 儀表板數據卡 */
-        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
         .stat-box { background: var(--bg-color); padding: 15px; border-radius: 12px; text-align: center; }
         .stat-label { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 5px; }
         .stat-value { font-size: 1.2rem; font-weight: 600; font-family: 'Montserrat', sans-serif; }
         .income { color: var(--text-primary); }
         .expense { color: var(--accent); }
         .balance { color: var(--success); }
+        
+        .cycle-badge {
+            display: inline-block; background: rgba(176, 141, 133, 0.1); color: var(--text-primary);
+            padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; margin-bottom: 20px;
+            border: 1px solid rgba(176, 141, 133, 0.2);
+        }
 
         /* 表單元件 */
         .form-group { margin-bottom: 15px; text-align: left; }
@@ -195,7 +201,7 @@
         .install-prompt {
             background: rgba(176, 141, 133, 0.1); color: var(--accent);
             padding: 12px; border-radius: 10px; text-align: center;
-            font-size: 0.85rem; font-weight: 600; margin-bottom: 20px;
+            font-size: 0.85rem; font-weight: 600; margin-bottom: 15px;
             cursor: pointer; border: 1px dashed var(--accent); transition: 0.3s;
         }
         .install-prompt:active { transform: scale(0.98); }
@@ -219,7 +225,7 @@
 
     <header>
         <h1>Bear.saving</h1>
-        <div style="font-size:0.8rem; color:var(--text-secondary);">Financial Cockpit v2.2</div>
+        <div style="font-size:0.8rem; color:var(--text-secondary);">Financial Cockpit v2.3</div>
     </header>
 
     <div id="page-dash" class="page active">
@@ -228,13 +234,17 @@
             <i class="fas fa-arrow-circle-down"></i> 將系統安裝至手機桌面，體驗全螢幕 App 👉
         </div>
 
+        <div style="text-align: center;">
+            <div class="cycle-badge" id="dash-cycle-info"><i class="far fa-calendar-alt"></i> 載入週期中...</div>
+        </div>
+
         <div class="stat-grid">
             <div class="stat-box">
-                <div class="stat-label">本月收入</div>
+                <div class="stat-label">本期收入</div>
                 <div class="stat-value income" id="display-income">$0</div>
             </div>
             <div class="stat-box">
-                <div class="stat-label">本月支出</div>
+                <div class="stat-label">本期支出</div>
                 <div class="stat-value expense" id="display-expense">$0</div>
             </div>
         </div>
@@ -245,14 +255,14 @@
 
         <div class="card">
             <div class="card-title">
-                預算剩餘額度
+                本期預算剩餘額度
                 <small style="font-weight:400; color:var(--accent); cursor:pointer;" onclick="switchPage('settings')">設定預算 <i class="fas fa-cog"></i></small>
             </div>
             <div id="budget-container"></div>
         </div>
 
         <div class="card">
-            <div class="card-title">支出結構分析</div>
+            <div class="card-title">本期支出結構分析</div>
             <div class="chart-wrapper">
                 <canvas id="expenseChart"></canvas>
             </div>
@@ -264,7 +274,7 @@
         </div>
 
         <div class="card" style="text-align:center;">
-            <div class="stat-label">本月日常總結餘</div>
+            <div class="stat-label">本期日常總結餘</div>
             <div class="stat-value balance" id="display-balance" style="font-size:1.8rem;">$0</div>
         </div>
     </div>
@@ -410,6 +420,18 @@
 
     <div id="page-settings" class="page">
         <div class="card">
+            <div class="card-title">系統設定 (System)</div>
+            <div class="form-group">
+                <label>每月帳單起始日 (發薪日結算)</label>
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <input type="number" id="setting-cycle-start" min="1" max="28" value="1" onchange="saveSysSettings()" inputmode="numeric" style="width: 100px;">
+                    <span style="font-weight:600; color:var(--text-primary);">號</span>
+                </div>
+                <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:8px;">預設為 1 號。若設定為 5 號，系統會自動將 2/5 ~ 3/4 視為同一個帳單週期。修改後將即時套用於儀表板與明細。</p>
+            </div>
+        </div>
+
+        <div class="card">
             <div class="card-title">本月預算設定 (Budget)</div>
             <div class="form-group">
                 <label>固定支出預算</label>
@@ -427,7 +449,7 @@
         </div>
 
         <div class="card">
-            <div class="card-title">帳務明細 (依月份排序)</div>
+            <div class="card-title">帳務明細 (依帳期排序)</div>
             <ul class="tx-list" id="full-tx-list"></ul>
         </div>
 
@@ -490,9 +512,10 @@
         let transactions = JSON.parse(localStorage.getItem('bear_transactions')) || [];
         let budgets = JSON.parse(localStorage.getItem('bear_budgets')) || { '固定支出': 0, '變動支出': 0, '預存支出': 0 };
         let shoppingList = JSON.parse(localStorage.getItem('bear_shopping_list')) || [];
-        
-        // 淨資產資料庫
         let netWorthData = JSON.parse(localStorage.getItem('bear_networth')) || [];
+        
+        // [NEW] 讀取系統設定 (預設起始日為1號)
+        let sysSettings = JSON.parse(localStorage.getItem('bear_sys_settings')) || { cycleStart: 1 };
         
         let myChart = null;
         let nwChart = null; 
@@ -517,18 +540,77 @@
             const mm = String(today.getMonth() + 1).padStart(2, '0');
             document.getElementById('nw-input-month').value = `${yyyy}-${mm}`;
 
+            // 載入系統設定
+            document.getElementById('setting-cycle-start').value = sysSettings.cycleStart;
+
             updateCategories();
             loadBudgetInputs();
             renderDashboard();
             setInterval(updateCountdowns, 1000);
 
-            // --- 解析網址參數，自動跳轉到對應的分頁 ---
+            // 解析網址參數自動跳轉
             const urlParams = new URLSearchParams(window.location.search);
             const tab = urlParams.get('tab');
             if (tab === 'networth') {
                 switchPage('networth');
             }
         });
+
+        // --- [NEW] 帳單週期運算核心 ---
+        function getCycleBoundary(dateString, startDay) {
+            let d = new Date(dateString);
+            let year = d.getFullYear();
+            let month = d.getMonth(); 
+            let day = d.getDate();
+
+            let cycleStartDate, cycleEndDate, labelStr;
+
+            if (startDay === 1) {
+                cycleStartDate = new Date(year, month, 1);
+                cycleEndDate = new Date(year, month + 1, 0); 
+                labelStr = `${year}年 ${month + 1}月`;
+            } else {
+                if (day >= startDay) {
+                    cycleStartDate = new Date(year, month, startDay);
+                    cycleEndDate = new Date(year, month + 1, startDay - 1);
+                    labelStr = `${year}年 ${month + 1}月帳期`;
+                } else {
+                    cycleStartDate = new Date(year, month - 1, startDay);
+                    cycleEndDate = new Date(year, month, startDay - 1);
+                    let labelMonth = month === 0 ? 12 : month;
+                    let labelYear = month === 0 ? year - 1 : year;
+                    labelStr = `${labelYear}年 ${labelMonth}月帳期`;
+                }
+            }
+            
+            return {
+                start: cycleStartDate,
+                end: cycleEndDate,
+                label: labelStr,
+                isDefault: (startDay === 1)
+            };
+        }
+
+        function formatDateYYYYMMDD(d) {
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${y}-${m}-${day}`;
+        }
+
+        // --- 儲存系統設定 ---
+        function saveSysSettings() {
+            let startDay = parseInt(document.getElementById('setting-cycle-start').value) || 1;
+            if (startDay < 1) startDay = 1;
+            if (startDay > 28) startDay = 28; // 限制最多28日避免跨月bug
+            document.getElementById('setting-cycle-start').value = startDay;
+            
+            sysSettings.cycleStart = startDay;
+            localStorage.setItem('bear_sys_settings', JSON.stringify(sysSettings));
+            alert('帳單週期設定已更新！');
+            renderDashboard(); // 重新計算儀表板
+            renderList();      // 重新計算明細分群
+        }
 
         function openInstallModal() { document.getElementById('install-modal').classList.add('show'); }
         function closeInstallModal() { document.getElementById('install-modal').classList.remove('show'); }
@@ -650,18 +732,37 @@
             budgets['變動支出'] = parseFloat(document.getElementById('budget-var').value) || 0;
             budgets['預存支出'] = parseFloat(document.getElementById('budget-save').value) || 0;
             localStorage.setItem('bear_budgets', JSON.stringify(budgets));
+            renderDashboard();
         }
 
         // --- 5. 儀表板與圖表 ---
         function renderDashboard() {
             sortTransactions(); 
             
-            const currentMonth = new Date().toISOString().slice(0, 7);
-            const monthTx = transactions.filter(t => t.date.startsWith(currentMonth));
+            // 取得今天的日期與對應的帳單週期
+            const todayStr = formatDateYYYYMMDD(new Date());
+            const currentCycle = getCycleBoundary(todayStr, sysSettings.cycleStart);
+            
+            // 更新儀表板上方的週期提示
+            const cycleBadge = document.getElementById('dash-cycle-info');
+            if (currentCycle.isDefault) {
+                cycleBadge.innerHTML = `<i class="far fa-calendar-alt"></i> 目前帳期：${currentCycle.label}`;
+            } else {
+                cycleBadge.innerHTML = `<i class="far fa-calendar-alt"></i> 目前帳期：${currentCycle.start.getMonth()+1}/${currentCycle.start.getDate()} - ${currentCycle.end.getMonth()+1}/${currentCycle.end.getDate()}`;
+            }
+
+            // 篩選出屬於「目前帳單週期」的交易紀錄
+            const cycleTx = transactions.filter(t => {
+                const tDate = new Date(t.date);
+                // 將時間歸零以做純日期比較
+                tDate.setHours(0,0,0,0);
+                return tDate >= currentCycle.start && tDate <= currentCycle.end;
+            });
+
             let totalInc = 0, totalExp = 0;
             let catExp = { '固定支出': 0, '變動支出': 0, '預存支出': 0 };
 
-            monthTx.forEach(t => {
+            cycleTx.forEach(t => {
                 if (t.type === 'income') totalInc += t.amount;
                 else {
                     totalExp += t.amount;
@@ -671,9 +772,10 @@
             document.getElementById('display-income').innerText = `$${totalInc.toLocaleString()}`;
             document.getElementById('display-expense').innerText = `$${totalExp.toLocaleString()}`;
             document.getElementById('display-balance').innerText = `$${(totalInc - totalExp).toLocaleString()}`;
+            
             renderBudgetBars(catExp);
             renderChart(catExp);
-            renderList(true);
+            renderList(true); // 首頁只顯示最新 5 筆
         }
 
         function renderBudgetBars(currentExp) {
@@ -726,16 +828,21 @@
             list.innerHTML = '';
             
             const dataToShow = isShort ? transactions.slice(0, 5) : transactions;
-            let currentMonthTracker = ''; 
+            let currentLabelTracker = ''; 
 
             dataToShow.forEach(t => {
-                const txMonthStr = t.date.substring(0, 7); 
-                if (!isShort && txMonthStr !== currentMonthTracker) {
-                    currentMonthTracker = txMonthStr;
-                    const dateObj = new Date(t.date);
-                    const year = dateObj.getFullYear();
-                    const month = dateObj.getMonth() + 1;
-                    list.innerHTML += `<div class="month-divider"><i class="far fa-calendar-alt"></i> ${year}年 ${month}月明細</div>`;
+                // 根據設定的起始日，取得這筆交易屬於哪個帳單週期
+                const cycleInfo = getCycleBoundary(t.date, sysSettings.cycleStart);
+                let displayLabel = cycleInfo.label;
+                
+                // 如果不是預設的1號，就在標題加上日期區間標示
+                if (!cycleInfo.isDefault) {
+                    displayLabel += ` (${cycleInfo.start.getMonth()+1}/${cycleInfo.start.getDate()} - ${cycleInfo.end.getMonth()+1}/${cycleInfo.end.getDate()})`;
+                }
+
+                if (!isShort && displayLabel !== currentLabelTracker) {
+                    currentLabelTracker = displayLabel;
+                    list.innerHTML += `<div class="month-divider"><i class="far fa-calendar-alt"></i> ${displayLabel}</div>`;
                 }
 
                 const color = t.type === 'income' ? 'amount-inc' : 'amount-exp';
@@ -799,7 +906,6 @@
                 document.getElementById('nw-display-debt').innerText = '$0';
             }
 
-            // --- 串接診斷室：自動載入負債 ---
             const diagnosedDebt = localStorage.getItem('bear_diagnosed_debt');
             const debtInput = document.getElementById('nw-input-debt');
             const formTitle = document.getElementById('nw-form-title');
@@ -1058,7 +1164,8 @@
                 tx: transactions, 
                 budget: budgets, 
                 shop: shoppingList,
-                networth: netWorthData 
+                networth: netWorthData,
+                settings: sysSettings // 備份設定值
             };
             const blob = new Blob([JSON.stringify(data)], {type: "text/json"});
             const link = document.createElement("a");
@@ -1078,11 +1185,13 @@
                         budgets = data.budget || {}; 
                         shoppingList = data.shop || []; 
                         netWorthData = data.networth || []; 
+                        sysSettings = data.settings || { cycleStart: 1 };
                     }
                     localStorage.setItem('bear_transactions', JSON.stringify(transactions));
                     localStorage.setItem('bear_budgets', JSON.stringify(budgets));
                     localStorage.setItem('bear_shopping_list', JSON.stringify(shoppingList));
                     localStorage.setItem('bear_networth', JSON.stringify(netWorthData));
+                    localStorage.setItem('bear_sys_settings', JSON.stringify(sysSettings));
                     alert('匯入成功！'); location.reload();
                 } catch(err) { alert('檔案錯誤'); }
             };
