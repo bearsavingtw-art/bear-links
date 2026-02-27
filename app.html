@@ -153,7 +153,7 @@
         .edit-btn { color: var(--info); cursor: pointer; padding: 5px; }
         .delete-btn { color: #ccc; cursor: pointer; padding: 5px; }
 
-        /* --- [NEW] 淨資產模組專屬樣式 --- */
+        /* 淨資產模組專屬樣式 */
         .networth-hero {
             background: linear-gradient(135deg, var(--text-primary) 0%, #3e332a 100%);
             color: #fff; border-radius: 15px; padding: 30px 20px; text-align: center;
@@ -219,7 +219,7 @@
 
     <header>
         <h1>Bear.saving</h1>
-        <div style="font-size:0.8rem; color:var(--text-secondary);">Financial Cockpit v2.0</div>
+        <div style="font-size:0.8rem; color:var(--text-secondary);">Financial Cockpit v2.1</div>
     </header>
 
     <div id="page-dash" class="page active">
@@ -491,11 +491,11 @@
         let budgets = JSON.parse(localStorage.getItem('bear_budgets')) || { '固定支出': 0, '變動支出': 0, '預存支出': 0 };
         let shoppingList = JSON.parse(localStorage.getItem('bear_shopping_list')) || [];
         
-        // [NEW] 淨資產資料庫
+        // 淨資產資料庫
         let netWorthData = JSON.parse(localStorage.getItem('bear_networth')) || [];
         
         let myChart = null;
-        let nwChart = null; // 淨資產圖表實例
+        let nwChart = null; 
         let editingId = null;
 
         let shopStep = 0;
@@ -512,7 +512,6 @@
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('input-date').valueAsDate = new Date();
             
-            // 設定淨資產表單預設月份為當月
             const today = new Date();
             const yyyy = today.getFullYear();
             const mm = String(today.getMonth() + 1).padStart(2, '0');
@@ -542,7 +541,7 @@
             if(pageId === 'dash') renderDashboard();
             if(pageId === 'settings') renderList();
             if(pageId === 'shop') { resetShop(); renderShoppingList(); }
-            if(pageId === 'networth') renderNetWorthPage(); // 渲染淨資產頁面
+            if(pageId === 'networth') renderNetWorthPage(); 
         }
 
         function openAddPage() { resetForm(); switchPage('add'); }
@@ -751,7 +750,7 @@
             });
         }
 
-        // --- [NEW] 6. 淨資產追蹤模組 ---
+        // --- 6. 淨資產追蹤模組 ---
         function saveNetWorth() {
             const month = document.getElementById('nw-input-month').value;
             const cash = parseFloat(document.getElementById('nw-input-cash').value) || 0;
@@ -762,7 +761,6 @@
 
             const net = (cash + invest) - debt;
 
-            // 檢查該月份是否已存在，存在則覆蓋，不存在則新增
             const existingIndex = netWorthData.findIndex(item => item.month === month);
             if (existingIndex !== -1) {
                 netWorthData[existingIndex] = { month, cash, invest, debt, net };
@@ -770,13 +768,11 @@
                 netWorthData.push({ month, cash, invest, debt, net });
             }
 
-            // 依照月份排序 (舊到新，方便畫圖)
             netWorthData.sort((a, b) => a.month.localeCompare(b.month));
             
             localStorage.setItem('bear_networth', JSON.stringify(netWorthData));
             alert('盤點資料已更新！🚀');
             
-            // 清空輸入框 (保留月份)
             document.getElementById('nw-input-cash').value = '';
             document.getElementById('nw-input-invest').value = '';
             document.getElementById('nw-input-debt').value = '';
@@ -785,7 +781,6 @@
         }
 
         function renderNetWorthPage() {
-            // 1. 渲染頂部摘要 (取最後一筆資料，即最新月份)
             if (netWorthData.length > 0) {
                 const latest = netWorthData[netWorthData.length - 1];
                 document.getElementById('nw-display-total').innerText = `$${latest.net.toLocaleString()}`;
@@ -797,7 +792,18 @@
                 document.getElementById('nw-display-debt').innerText = '$0';
             }
 
-            // 2. 渲染歷史列表 (反轉陣列，新的在上面)
+            // --- 串接診斷室：自動載入負債 ---
+            const diagnosedDebt = localStorage.getItem('bear_diagnosed_debt');
+            const debtInput = document.getElementById('nw-input-debt');
+            const formTitle = document.getElementById('nw-form-title');
+            
+            if (!debtInput.value && diagnosedDebt && parseFloat(diagnosedDebt) > 0) {
+                debtInput.value = Math.round(parseFloat(diagnosedDebt));
+                formTitle.innerHTML = '更新本月盤點數據 <span style="font-size:0.75rem; color:var(--success); font-weight:normal;">(已載入診斷室負債資料✨)</span>';
+            } else {
+                formTitle.innerHTML = '更新本月盤點數據';
+            }
+
             const listContainer = document.getElementById('nw-history-list');
             listContainer.innerHTML = '';
             
@@ -806,7 +812,6 @@
             } else {
                 const reversedData = [...netWorthData].reverse();
                 reversedData.forEach(item => {
-                    // 格式化月份 (2026-02 -> 2026年 2月)
                     const parts = item.month.split('-');
                     const displayMonth = `${parts[0]}年 ${parseInt(parts[1])}月`;
                     
@@ -825,7 +830,6 @@
                 });
             }
 
-            // 3. 繪製成長折線圖
             renderNetWorthChart();
         }
 
@@ -833,23 +837,21 @@
             const ctx = document.getElementById('networthChart').getContext('2d');
             
             if (netWorthData.length === 0) {
-                // 如果沒有資料，畫一個空的圖表佔位
                 if(nwChart) nwChart.destroy();
                 return;
             }
 
             const labels = netWorthData.map(item => {
                 const parts = item.month.split('-');
-                return `${parts[1]}月`; // X軸只顯示月份
+                return `${parts[1]}月`; 
             });
             const dataPoints = netWorthData.map(item => item.net);
 
             if (nwChart) nwChart.destroy();
             
-            // 建立漸層填充
             let gradient = ctx.createLinearGradient(0, 0, 0, 400);
-            gradient.addColorStop(0, 'rgba(176, 141, 133, 0.5)'); // accent color with alpha
-            gradient.addColorStop(1, 'rgba(252, 251, 249, 0)');   // bg color
+            gradient.addColorStop(0, 'rgba(176, 141, 133, 0.5)'); 
+            gradient.addColorStop(1, 'rgba(252, 251, 249, 0)');   
 
             nwChart = new Chart(ctx, {
                 type: 'line',
@@ -1049,7 +1051,7 @@
                 tx: transactions, 
                 budget: budgets, 
                 shop: shoppingList,
-                networth: netWorthData // 加入淨資產資料
+                networth: netWorthData 
             };
             const blob = new Blob([JSON.stringify(data)], {type: "text/json"});
             const link = document.createElement("a");
@@ -1068,7 +1070,7 @@
                         transactions = data.tx || []; 
                         budgets = data.budget || {}; 
                         shoppingList = data.shop || []; 
-                        netWorthData = data.networth || []; // 匯入淨資產資料
+                        netWorthData = data.networth || []; 
                     }
                     localStorage.setItem('bear_transactions', JSON.stringify(transactions));
                     localStorage.setItem('bear_budgets', JSON.stringify(budgets));
