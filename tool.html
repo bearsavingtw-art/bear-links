@@ -171,7 +171,7 @@
         .debt-table td { padding: 10px; border-bottom: 1px solid #eee; color: var(--text-secondary); }
         .save-money { color: var(--success); font-weight: bold; }
 
-        /* [NEW] 串接駕駛艙的提示區塊 */
+        /* 串接駕駛艙的提示區塊 */
         .app-link-box {
             background: rgba(129, 199, 132, 0.1); border-left: 4px solid var(--success);
             padding: 20px; border-radius: 10px; margin-top: 25px; text-align: left;
@@ -406,7 +406,6 @@
             debtData = [];
             let totalMonthlyDebtPay = 0, highDebts = [];
             
-            // 抓取準備更新的導流區塊
             const appLinkArea = document.getElementById('app-link-area');
             
             if (userHasDebt === 'yes') {
@@ -424,23 +423,23 @@
                 let sumAllDebt = debtData.reduce((sum, item) => sum + item.totalDebt, 0);
                 localStorage.setItem('bear_diagnosed_debt', sumAllDebt);
 
-                // --- [NEW] 顯示引導去駕駛艙的專屬區塊 ---
+                // 顯示引導去駕駛艙的專屬區塊 (帶入參數 ?tab=networth)
                 appLinkArea.innerHTML = `
                     <div class="app-link-box">
                         <div class="app-link-title"><i class="fas fa-magic"></i> 系統已記住妳的債務數據</div>
                         <div class="app-link-desc">我們幫妳把算出來的總負債 ($${Math.round(sumAllDebt).toLocaleString()}) 存起來了。現在可以直接前往「財務駕駛艙」進行本月的淨資產盤點囉！</div>
-                        <a href="app.html" class="btn" style="background:var(--success); margin-top:0; padding:12px;">前往財務駕駛艙 <i class="fas fa-arrow-right"></i></a>
+                        <a href="app.html?tab=networth" class="btn" style="background:var(--success); margin-top:0; padding:12px;">前往財務駕駛艙 <i class="fas fa-arrow-right"></i></a>
                     </div>
                 `;
             } else {
                 localStorage.removeItem('bear_diagnosed_debt');
                 
-                // 如果沒有負債，也可以引導去駕駛艙記帳
+                // 如果沒有負債，也可以引導去駕駛艙記帳 (帶入參數 ?tab=networth)
                 appLinkArea.innerHTML = `
                     <div class="app-link-box" style="border-left-color: var(--accent); background: #fdfbf7;">
                         <div class="app-link-title"><i class="fas fa-check-circle" style="color:var(--accent);"></i> 財務底盤穩健</div>
                         <div class="app-link-desc">沒有負債是最棒的開始！點擊下方前往「財務駕駛艙」，開始追蹤妳每個月的淨資產成長吧！</div>
-                        <a href="app.html" class="btn" style="background:var(--text-primary); margin-top:0; padding:12px;">前往財務駕駛艙 <i class="fas fa-arrow-right"></i></a>
+                        <a href="app.html?tab=networth" class="btn" style="background:var(--text-primary); margin-top:0; padding:12px;">前往財務駕駛艙 <i class="fas fa-arrow-right"></i></a>
                     </div>
                 `;
             }
