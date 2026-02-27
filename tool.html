@@ -278,10 +278,10 @@
         let selectedType = 'stable';
         let budgetChart = null;
         
-        // 產品連結 (妳可以隨時替換這裡)
+        // 產品連結
         const LINK_BOOK = "https://myship.7-11.com.tw/general/detail/GM2502152714662"; // 記帳本
-        const LINK_BAG = "https://myship.7-11.com.tw/general/detail/GM2502152714662";  // 存錢袋/錢架 (暫用賣場連結)
-        const LINK_NOTE = "https://myship.7-11.com.tw/general/detail/GM2502152714662"; // 雙扣手帳 (暫用賣場連結)
+        const LINK_BAG = "https://myship.7-11.com.tw/general/detail/GM2502152714662";  // 存錢袋/錢架
+        const LINK_NOTE = "https://myship.7-11.com.tw/general/detail/GM2502152714662"; // 雙扣手帳
         const IG_VIDEO_URL = "https://www.instagram.com/reel/DTP7iSMgagR/";
 
         function toggleDebtSection() {
@@ -299,7 +299,7 @@
 
         function addDebt() {
             const div = document.createElement('div'); div.className = 'debt-item';
-            div.innerHTML = `<div class="debt-grid"><div><div class="grid-label">項目名稱</div><input type="text" class="d-name"></div><div><div class="grid-label">年利率 %</div><input type="number" step="0.1" class="d-rate"></div><div><div class="grid-label">每月繳款</div><input type="number" class="d-pay"></div><div><div class="grid-label">剩餘期數</div><input type="number" class="d-months"></div></div>`;
+            div.innerHTML = `<div class="debt-grid"><div><div class="grid-label">項目名稱</div><input type="text" class="d-name" placeholder="例:學貸"></div><div><div class="grid-label">年利率 %</div><input type="number" step="0.1" class="d-rate" placeholder="0.0"></div><div><div class="grid-label">每月繳款</div><input type="number" class="d-pay" placeholder="0"></div><div><div class="grid-label">剩餘期數</div><input type="number" class="d-months" placeholder="0"></div></div>`;
             document.getElementById('debt-list').appendChild(div);
         }
         function addFixedExp() {
@@ -322,10 +322,7 @@
             debtData = [];
             let totalMonthlyDebtPay = 0, highDebts = [];
             if (userHasDebt === 'yes') {
-                userHasFund = 'yes'; // 有債務我們預設他可能有預備金狀態是 Turtle (或透過邏輯判斷)
-                // 這裡簡化邏輯：有債務的人，如果有填寫負債，通常預備金不足或正在努力
-                // 但為了動物判斷，我們假設有債務 = 烏龜 (背殼前行)
-                
+                userHasFund = 'yes'; 
                 const rates = document.getElementsByClassName('d-rate'), pays = document.getElementsByClassName('d-pay'), names = document.getElementsByClassName('d-name'), months = document.getElementsByClassName('d-months');
                 for (let i = 0; i < rates.length; i++) {
                     let p = parseFloat(pays[i].value) || 0, r = parseFloat(rates[i].value) || 0, m = parseFloat(months[i].value) || 0, n = names[i].value || `項目${i+1}`;
@@ -334,6 +331,13 @@
                     debtData.push({name: n, rate: r, pay: p, month: m, totalDebt: totalPay, savedInterest: estInterest});
                     if (r >= 5) highDebts.push(n);
                 }
+
+                // --- [新增] 串接駕駛艙：把總負債存起來 ---
+                let sumAllDebt = debtData.reduce((sum, item) => sum + item.totalDebt, 0);
+                localStorage.setItem('bear_diagnosed_debt', sumAllDebt);
+            } else {
+                // 如果選擇無負債，清除過去可能存留的負債紀錄
+                localStorage.removeItem('bear_diagnosed_debt');
             }
 
             // 2. 決定動物人格 & 處方
@@ -355,7 +359,7 @@
                 overBtn.classList.remove('hidden');
             }
 
-            // 4. 渲染預算圖表 (高利貸者使用特殊比例)
+            // 4. 渲染預算圖表 
             const isHighDebt = highDebts.length > 0;
             renderBudget(globalIncome, document.getElementById('budget-area'), userHasFund, (userHasDebt === 'yes'), !isHighDebt);
             
@@ -365,9 +369,7 @@
         function renderAnimalAndPrescription(hasDebt, hasFund, incomeType, highDebts) {
             let animal = {}, prescription = {};
 
-            // --- 邏輯判斷 ---
             if (hasDebt === 'yes') {
-                // 有債務 -> 烏龜 (即使有預備金，債務仍是殼)
                 animal = {
                     emoji: '🐢', title: '穩健的烏龜', tag: '慢步前行',
                     desc: '雖然背著沉重的殼（債務），但妳有目標、有方向。只要腳步不停，終點一定會到。現在的妳需要的是耐心與精準的還款策略。'
@@ -386,9 +388,7 @@
                     };
                 }
             } else {
-                // 無債務
                 if (hasFund === 'no') {
-                    // 無債 + 無預備金 = 倉鼠 (月光/原地跑)
                     animal = {
                         emoji: '🐹', title: '忙碌的倉鼠', tag: '滾輪循環',
                         desc: '妳很努力生活，但就像在滾輪上奔跑，薪水進來又出去，好像沒留下什麼。妳需要按下暫停鍵，幫自己存下第一筆底氣。'
@@ -399,7 +399,6 @@
                         btnText: '📒 Bear 雙扣手帳 (強制儲蓄)', link: LINK_NOTE
                     };
                 } else if (incomeType === 'unstable') {
-                    // 無債 + 有預備金 + 收入不穩 = 松鼠
                     animal = {
                         emoji: '🐿️', title: '機靈的松鼠', tag: '屯糧高手',
                         desc: '因為收入起伏，妳比別人更懂得未雨綢繆。妳的快樂來自於看著「蓄水池」的水位上升，那讓妳在冬天也能安穩過冬。'
@@ -410,7 +409,6 @@
                         btnText: '💰 質感存錢袋/錢架 (建立蓄水池)', link: LINK_BAG
                     };
                 } else {
-                    // 無債 + 有預備金 + 穩定 = 獅子
                     animal = {
                         emoji: '🦁', title: '自信的獅子', tag: '掌控全場',
                         desc: '恭喜妳！妳擁有極佳的財務底氣。妳不是在為生存奔波，而是在為選擇權而活。妳是森林之王，掌控著自己的生活節奏。'
@@ -423,7 +421,6 @@
                 }
             }
 
-            // --- 渲染動物卡片 ---
             document.getElementById('animal-persona-area').innerHTML = `
                 <div class="animal-card">
                     <span class="animal-emoji">${animal.emoji}</span>
@@ -433,7 +430,6 @@
                 </div>
             `;
 
-            // --- 渲染處方籤 ---
             document.getElementById('prescription-area').innerHTML = `
                 <div class="prescription-container">
                     <div class="prescription-header"><i class="fas fa-file-medical"></i> Bear 的處方籤</div>
