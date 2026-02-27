@@ -15,7 +15,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Noto+Serif+TC:wght@400;600&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Noto+Serif+TC:wght@400;600&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -30,6 +30,7 @@
             --warning: #ffd54f;
             --danger: #e57373;
             --info: #64b5f6;
+            --gold: #d4a373;
             --bar-bg: #eee;
         }
 
@@ -108,7 +109,7 @@
         .balance { color: var(--success); }
 
         /* 表單元件 */
-        .form-group { margin-bottom: 15px; }
+        .form-group { margin-bottom: 15px; text-align: left; }
         label { display: block; font-size: 0.9rem; margin-bottom: 5px; font-weight: 600; }
         input, select {
             width: 100%; padding: 12px; border: 1px solid #eee; border-radius: 10px;
@@ -132,15 +133,9 @@
         .tx-list { list-style: none; padding: 0; margin: 0; }
         
         .month-divider {
-            background: rgba(176, 141, 133, 0.1);
-            color: var(--text-primary);
-            padding: 6px 15px;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin: 20px 0 10px 0;
-            display: inline-block;
-            border-left: 3px solid var(--accent);
+            background: rgba(176, 141, 133, 0.1); color: var(--text-primary);
+            padding: 6px 15px; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+            margin: 20px 0 10px 0; display: inline-block; border-left: 3px solid var(--accent);
         }
         .month-divider:first-child { margin-top: 0; }
 
@@ -158,26 +153,50 @@
         .edit-btn { color: var(--info); cursor: pointer; padding: 5px; }
         .delete-btn { color: #ccc; cursor: pointer; padding: 5px; }
 
+        /* --- [NEW] 淨資產模組專屬樣式 --- */
+        .networth-hero {
+            background: linear-gradient(135deg, var(--text-primary) 0%, #3e332a 100%);
+            color: #fff; border-radius: 15px; padding: 30px 20px; text-align: center;
+            margin-bottom: 20px; box-shadow: 0 10px 20px rgba(90,77,65,0.2);
+        }
+        .nw-label { font-size: 0.85rem; color: rgba(255,255,255,0.8); margin-bottom: 5px; }
+        .nw-value { font-size: 2.2rem; font-weight: 700; font-family: 'Montserrat', sans-serif; letter-spacing: 1px; }
+        .nw-sub-grid {
+            display: flex; justify-content: space-between; margin-top: 20px; padding-top: 15px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+        }
+        .nw-sub-item { flex: 1; }
+        .nw-sub-val { font-size: 1.1rem; font-weight: 600; font-family: 'Montserrat', sans-serif; margin-top: 3px; }
+        .val-asset { color: #a5d6a7; }
+        .val-debt { color: #ef9a9a; }
+        
+        .nw-history-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px 0; border-bottom: 1px dashed #eee;
+        }
+        .nw-history-month { font-weight: 600; color: var(--text-primary); }
+        .nw-history-net { font-weight: 700; font-family: 'Montserrat', sans-serif; font-size: 1.1rem; }
+        .nw-history-details { font-size: 0.75rem; color: var(--text-secondary); margin-top: 4px; }
+
         /* 底部導覽列 */
         .bottom-nav {
             position: fixed; bottom: 0; width: 100%; background: #fff;
             display: flex; justify-content: space-around; padding: 12px 0 25px;
             border-top: 1px solid #eee; box-shadow: 0 -5px 15px rgba(0,0,0,0.03); z-index: 100;
         }
-        .nav-item { text-align: center; color: var(--text-secondary); cursor: pointer; font-size: 0.8rem; flex: 1; }
+        .nav-item { text-align: center; color: var(--text-secondary); cursor: pointer; font-size: 0.75rem; flex: 1; }
         .nav-item i { display: block; font-size: 1.3rem; margin-bottom: 4px; }
         .nav-item.active { color: var(--accent); font-weight: 600; }
 
         .chart-wrapper { position: relative; height: 220px; width: 100%; display: flex; justify-content: center; }
         .hidden { display: none; }
 
-        /* --- 安裝提示與 Modal 樣式 --- */
+        /* 安裝提示與 Modal 樣式 */
         .install-prompt {
             background: rgba(176, 141, 133, 0.1); color: var(--accent);
             padding: 12px; border-radius: 10px; text-align: center;
             font-size: 0.85rem; font-weight: 600; margin-bottom: 20px;
-            cursor: pointer; border: 1px dashed var(--accent);
-            transition: 0.3s;
+            cursor: pointer; border: 1px dashed var(--accent); transition: 0.3s;
         }
         .install-prompt:active { transform: scale(0.98); }
         
@@ -190,8 +209,7 @@
         .modal-overlay.show { opacity: 1; pointer-events: auto; }
         .modal-content {
             background: #fff; padding: 25px; border-radius: 20px; width: 90%; max-width: 400px;
-            box-shadow: 0 15px 30px rgba(0,0,0,0.2); transform: translateY(20px); transition: 0.3s;
-            text-align: center;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2); transform: translateY(20px); transition: 0.3s; text-align: center;
         }
         .modal-overlay.show .modal-content { transform: translateY(0); }
         .install-guide-box { background: var(--bg-color); padding: 20px 15px; border-radius: 15px; margin-bottom: 20px; border: 1px solid #eee; }
@@ -201,7 +219,7 @@
 
     <header>
         <h1>Bear.saving</h1>
-        <div style="font-size:0.8rem; color:var(--text-secondary);">Financial Cockpit v1.7</div>
+        <div style="font-size:0.8rem; color:var(--text-secondary);">Financial Cockpit v2.0</div>
     </header>
 
     <div id="page-dash" class="page active">
@@ -246,7 +264,7 @@
         </div>
 
         <div class="card" style="text-align:center;">
-            <div class="stat-label">本月總結餘 (底氣)</div>
+            <div class="stat-label">本月日常總結餘</div>
             <div class="stat-value balance" id="display-balance" style="font-size:1.8rem;">$0</div>
         </div>
     </div>
@@ -304,11 +322,11 @@
             </div>
             <div class="form-group">
                 <label>價格 ($)</label>
-                <input type="number" id="shop-price" placeholder="價格">
+                <input type="number" id="shop-price" placeholder="價格" inputmode="numeric">
             </div>
             <div class="form-group">
                 <label>妳的月薪 (計算生命匯率)</label>
-                <input type="number" id="shop-salary" placeholder="例如：45000">
+                <input type="number" id="shop-salary" placeholder="例如：45000" inputmode="numeric">
             </div>
             <button class="btn" onclick="startLogic()">開始診斷 <i class="fas fa-arrow-right"></i></button>
             <button class="btn btn-outline" onclick="switchPage('dash')">返回儀表板</button>
@@ -337,20 +355,73 @@
         </div>
     </div>
 
+    <div id="page-networth" class="page">
+        <div class="networth-hero">
+            <div class="nw-label">目前總淨資產 (Net Worth)</div>
+            <div class="nw-value" id="nw-display-total">$0</div>
+            
+            <div class="nw-sub-grid">
+                <div class="nw-sub-item">
+                    <div class="nw-label">總資產 (存款+投資)</div>
+                    <div class="nw-sub-val val-asset" id="nw-display-asset">$0</div>
+                </div>
+                <div class="nw-sub-item" style="border-left: 1px solid rgba(255,255,255,0.2); padding-left:15px;">
+                    <div class="nw-label">總負債 (扣除項目)</div>
+                    <div class="nw-sub-val val-debt" id="nw-display-debt">$0</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">淨資產成長曲線</div>
+            <div class="chart-wrapper">
+                <canvas id="networthChart"></canvas>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title" id="nw-form-title">更新本月盤點數據</div>
+            <p style="font-size:0.85rem; color:var(--text-secondary); margin-top:0;">每月只需在發薪日或月底更新一次。重複輸入將自動覆蓋該月紀錄。</p>
+            
+            <div class="form-group">
+                <label>盤點月份</label>
+                <input type="month" id="nw-input-month">
+            </div>
+            <div class="form-group">
+                <label>💰 銀行存款總額</label>
+                <input type="number" id="nw-input-cash" placeholder="包含所有活存與定存" inputmode="numeric">
+            </div>
+            <div class="form-group">
+                <label>📈 投資現值總額</label>
+                <input type="number" id="nw-input-invest" placeholder="股票、ETF目前的總市值" inputmode="numeric">
+            </div>
+            <div class="form-group">
+                <label>💳 剩餘負債總額 (若無可填0)</label>
+                <input type="number" id="nw-input-debt" placeholder="學貸、車貸、信貸等總和" inputmode="numeric">
+            </div>
+            <button class="btn" onclick="saveNetWorth()">儲存盤點結果 <i class="fas fa-chart-line"></i></button>
+        </div>
+
+        <div class="card">
+            <div class="card-title">歷史盤點紀錄</div>
+            <div id="nw-history-list"></div>
+        </div>
+    </div>
+
     <div id="page-settings" class="page">
         <div class="card">
             <div class="card-title">本月預算設定 (Budget)</div>
             <div class="form-group">
                 <label>固定支出預算</label>
-                <input type="number" id="budget-fixed" placeholder="0" onchange="saveBudget()">
+                <input type="number" id="budget-fixed" placeholder="0" onchange="saveBudget()" inputmode="numeric">
             </div>
             <div class="form-group">
                 <label>變動支出預算</label>
-                <input type="number" id="budget-var" placeholder="0" onchange="saveBudget()">
+                <input type="number" id="budget-var" placeholder="0" onchange="saveBudget()" inputmode="numeric">
             </div>
             <div class="form-group">
                 <label>預存支出預算</label>
-                <input type="number" id="budget-save" placeholder="0" onchange="saveBudget()">
+                <input type="number" id="budget-save" placeholder="0" onchange="saveBudget()" inputmode="numeric">
             </div>
             <p style="font-size:0.8rem; color:var(--text-secondary);">* 輸入後自動儲存</p>
         </div>
@@ -373,11 +444,14 @@
         <div class="nav-item active" onclick="switchPage('dash')" id="nav-dash">
             <i class="fas fa-chart-pie"></i> 儀表板
         </div>
+        <div class="nav-item" onclick="switchPage('networth')" id="nav-networth">
+            <i class="fas fa-coins"></i> 資產盤點
+        </div>
         <div class="nav-item" onclick="openAddPage()" id="nav-add">
-            <i class="fas fa-plus-circle" style="font-size:1.5rem; color:var(--text-primary); transform:translateY(-2px);"></i> 記帳
+            <i class="fas fa-plus-circle" style="font-size:1.6rem; color:var(--text-primary); transform:translateY(-2px);"></i> 記帳
         </div>
         <div class="nav-item" onclick="switchPage('settings')" id="nav-settings">
-            <i class="fas fa-sliders-h"></i> 設定/明細
+            <i class="fas fa-list-ul"></i> 明細設定
         </div>
     </div>
 
@@ -417,7 +491,11 @@
         let budgets = JSON.parse(localStorage.getItem('bear_budgets')) || { '固定支出': 0, '變動支出': 0, '預存支出': 0 };
         let shoppingList = JSON.parse(localStorage.getItem('bear_shopping_list')) || [];
         
+        // [NEW] 淨資產資料庫
+        let netWorthData = JSON.parse(localStorage.getItem('bear_networth')) || [];
+        
         let myChart = null;
+        let nwChart = null; // 淨資產圖表實例
         let editingId = null;
 
         let shopStep = 0;
@@ -433,18 +511,21 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('input-date').valueAsDate = new Date();
+            
+            // 設定淨資產表單預設月份為當月
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            document.getElementById('nw-input-month').value = `${yyyy}-${mm}`;
+
             updateCategories();
             loadBudgetInputs();
             renderDashboard();
             setInterval(updateCountdowns, 1000);
         });
 
-        function openInstallModal() {
-            document.getElementById('install-modal').classList.add('show');
-        }
-        function closeInstallModal() {
-            document.getElementById('install-modal').classList.remove('show');
-        }
+        function openInstallModal() { document.getElementById('install-modal').classList.add('show'); }
+        function closeInstallModal() { document.getElementById('install-modal').classList.remove('show'); }
 
         // --- 2. 頁面切換 ---
         function switchPage(pageId) {
@@ -454,21 +535,17 @@
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             if (pageId === 'dash' || pageId === 'shop') document.getElementById('nav-dash').classList.add('active');
             else if (pageId === 'add') document.getElementById('nav-add').classList.add('active');
+            else if (pageId === 'networth') document.getElementById('nav-networth').classList.add('active');
             else document.getElementById('nav-settings').classList.add('active');
             
             window.scrollTo(0, 0);
             if(pageId === 'dash') renderDashboard();
             if(pageId === 'settings') renderList();
-            if(pageId === 'shop') {
-                resetShop();
-                renderShoppingList();
-            }
+            if(pageId === 'shop') { resetShop(); renderShoppingList(); }
+            if(pageId === 'networth') renderNetWorthPage(); // 渲染淨資產頁面
         }
 
-        function openAddPage() {
-            resetForm();
-            switchPage('add');
-        }
+        function openAddPage() { resetForm(); switchPage('add'); }
 
         function resetForm() {
             editingId = null;
@@ -643,25 +720,17 @@
             list.innerHTML = '';
             
             const dataToShow = isShort ? transactions.slice(0, 5) : transactions;
-            let currentMonthTracker = ''; // 用來追蹤目前渲染到哪一個月份
+            let currentMonthTracker = ''; 
 
             dataToShow.forEach(t => {
-                // --- [NEW] 依照月份動態產生分隔線 ---
-                // 取出交易紀錄的 YYYY-MM
                 const txMonthStr = t.date.substring(0, 7); 
-                
-                // 如果是在「全部明細」頁面，且遇到新的月份，就插入標題
                 if (!isShort && txMonthStr !== currentMonthTracker) {
                     currentMonthTracker = txMonthStr;
-                    
-                    // 將 2026-02 轉換為 2026年 2月明細
                     const dateObj = new Date(t.date);
                     const year = dateObj.getFullYear();
                     const month = dateObj.getMonth() + 1;
-                    
                     list.innerHTML += `<div class="month-divider"><i class="far fa-calendar-alt"></i> ${year}年 ${month}月明細</div>`;
                 }
-                // ------------------------------------
 
                 const color = t.type === 'income' ? 'amount-inc' : 'amount-exp';
                 const sign = t.type === 'income' ? '+' : '-';
@@ -682,7 +751,156 @@
             });
         }
 
-        // --- 6. 購物冷靜閘 ---
+        // --- [NEW] 6. 淨資產追蹤模組 ---
+        function saveNetWorth() {
+            const month = document.getElementById('nw-input-month').value;
+            const cash = parseFloat(document.getElementById('nw-input-cash').value) || 0;
+            const invest = parseFloat(document.getElementById('nw-input-invest').value) || 0;
+            const debt = parseFloat(document.getElementById('nw-input-debt').value) || 0;
+
+            if(!month) { alert('請選擇盤點月份！'); return; }
+
+            const net = (cash + invest) - debt;
+
+            // 檢查該月份是否已存在，存在則覆蓋，不存在則新增
+            const existingIndex = netWorthData.findIndex(item => item.month === month);
+            if (existingIndex !== -1) {
+                netWorthData[existingIndex] = { month, cash, invest, debt, net };
+            } else {
+                netWorthData.push({ month, cash, invest, debt, net });
+            }
+
+            // 依照月份排序 (舊到新，方便畫圖)
+            netWorthData.sort((a, b) => a.month.localeCompare(b.month));
+            
+            localStorage.setItem('bear_networth', JSON.stringify(netWorthData));
+            alert('盤點資料已更新！🚀');
+            
+            // 清空輸入框 (保留月份)
+            document.getElementById('nw-input-cash').value = '';
+            document.getElementById('nw-input-invest').value = '';
+            document.getElementById('nw-input-debt').value = '';
+
+            renderNetWorthPage();
+        }
+
+        function renderNetWorthPage() {
+            // 1. 渲染頂部摘要 (取最後一筆資料，即最新月份)
+            if (netWorthData.length > 0) {
+                const latest = netWorthData[netWorthData.length - 1];
+                document.getElementById('nw-display-total').innerText = `$${latest.net.toLocaleString()}`;
+                document.getElementById('nw-display-asset').innerText = `$${(latest.cash + latest.invest).toLocaleString()}`;
+                document.getElementById('nw-display-debt').innerText = `$${latest.debt.toLocaleString()}`;
+            } else {
+                document.getElementById('nw-display-total').innerText = '$0';
+                document.getElementById('nw-display-asset').innerText = '$0';
+                document.getElementById('nw-display-debt').innerText = '$0';
+            }
+
+            // 2. 渲染歷史列表 (反轉陣列，新的在上面)
+            const listContainer = document.getElementById('nw-history-list');
+            listContainer.innerHTML = '';
+            
+            if (netWorthData.length === 0) {
+                listContainer.innerHTML = '<div style="text-align:center; padding:15px; color:#999; font-size:0.9rem;">尚未有盤點紀錄</div>';
+            } else {
+                const reversedData = [...netWorthData].reverse();
+                reversedData.forEach(item => {
+                    // 格式化月份 (2026-02 -> 2026年 2月)
+                    const parts = item.month.split('-');
+                    const displayMonth = `${parts[0]}年 ${parseInt(parts[1])}月`;
+                    
+                    listContainer.innerHTML += `
+                        <div class="nw-history-item">
+                            <div>
+                                <div class="nw-history-month">${displayMonth}</div>
+                                <div class="nw-history-details">存款 $${(item.cash/10000).toFixed(1)}W | 投資 $${(item.invest/10000).toFixed(1)}W | 負債 $${(item.debt/10000).toFixed(1)}W</div>
+                            </div>
+                            <div style="display:flex; align-items:center;">
+                                <div class="nw-history-net">$${item.net.toLocaleString()}</div>
+                                <i class="fas fa-trash delete-btn" style="margin-left:15px;" onclick="deleteNetWorth('${item.month}')"></i>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            // 3. 繪製成長折線圖
+            renderNetWorthChart();
+        }
+
+        function renderNetWorthChart() {
+            const ctx = document.getElementById('networthChart').getContext('2d');
+            
+            if (netWorthData.length === 0) {
+                // 如果沒有資料，畫一個空的圖表佔位
+                if(nwChart) nwChart.destroy();
+                return;
+            }
+
+            const labels = netWorthData.map(item => {
+                const parts = item.month.split('-');
+                return `${parts[1]}月`; // X軸只顯示月份
+            });
+            const dataPoints = netWorthData.map(item => item.net);
+
+            if (nwChart) nwChart.destroy();
+            
+            // 建立漸層填充
+            let gradient = ctx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(176, 141, 133, 0.5)'); // accent color with alpha
+            gradient.addColorStop(1, 'rgba(252, 251, 249, 0)');   // bg color
+
+            nwChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '淨資產走勢',
+                        data: dataPoints,
+                        borderColor: '#b08d85',
+                        backgroundColor: gradient,
+                        borderWidth: 3,
+                        pointBackgroundColor: '#5a4d41',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 5,
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            grid: { color: '#eee', borderDash: [5, 5] },
+                            ticks: { 
+                                color: '#968c83',
+                                callback: function(value) { return (value / 10000) + 'W'; }
+                            }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#968c83' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function deleteNetWorth(monthStr) {
+            if(confirm(`確定刪除 ${monthStr} 的盤點紀錄嗎？`)) {
+                netWorthData = netWorthData.filter(item => item.month !== monthStr);
+                localStorage.setItem('bear_networth', JSON.stringify(netWorthData));
+                renderNetWorthPage();
+            }
+        }
+
+
+        // --- 7. 購物冷靜閘 ---
         function startLogic() {
             const name = document.getElementById('shop-name').value;
             const price = parseFloat(document.getElementById('shop-price').value);
@@ -825,8 +1043,14 @@
             });
         }
 
+        // --- 8. 資料匯出與匯入 ---
         function exportData() {
-            const data = { tx: transactions, budget: budgets, shop: shoppingList };
+            const data = { 
+                tx: transactions, 
+                budget: budgets, 
+                shop: shoppingList,
+                networth: netWorthData // 加入淨資產資料
+            };
             const blob = new Blob([JSON.stringify(data)], {type: "text/json"});
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
@@ -844,10 +1068,12 @@
                         transactions = data.tx || []; 
                         budgets = data.budget || {}; 
                         shoppingList = data.shop || []; 
+                        netWorthData = data.networth || []; // 匯入淨資產資料
                     }
                     localStorage.setItem('bear_transactions', JSON.stringify(transactions));
                     localStorage.setItem('bear_budgets', JSON.stringify(budgets));
                     localStorage.setItem('bear_shopping_list', JSON.stringify(shoppingList));
+                    localStorage.setItem('bear_networth', JSON.stringify(netWorthData));
                     alert('匯入成功！'); location.reload();
                 } catch(err) { alert('檔案錯誤'); }
             };
@@ -855,7 +1081,7 @@
         }
 
         function clearData() {
-            if(confirm('確定清空？')) {
+            if(confirm('確定清空所有資料？（此動作無法復原）')) {
                 localStorage.clear(); location.reload();
             }
         }
@@ -864,12 +1090,8 @@
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js')
-                    .then(registration => {
-                        console.log('ServiceWorker 註冊成功，範圍: ', registration.scope);
-                    })
-                    .catch(err => {
-                        console.log('ServiceWorker 註冊失敗: ', err);
-                    });
+                    .then(registration => { console.log('ServiceWorker 註冊成功，範圍: ', registration.scope); })
+                    .catch(err => { console.log('ServiceWorker 註冊失敗: ', err); });
             });
         }
     </script>
