@@ -219,7 +219,7 @@
 
     <header>
         <h1>Bear.saving</h1>
-        <div style="font-size:0.8rem; color:var(--text-secondary);">Financial Cockpit v2.1</div>
+        <div style="font-size:0.8rem; color:var(--text-secondary);">Financial Cockpit v2.2</div>
     </header>
 
     <div id="page-dash" class="page active">
@@ -521,6 +521,13 @@
             loadBudgetInputs();
             renderDashboard();
             setInterval(updateCountdowns, 1000);
+
+            // --- 解析網址參數，自動跳轉到對應的分頁 ---
+            const urlParams = new URLSearchParams(window.location.search);
+            const tab = urlParams.get('tab');
+            if (tab === 'networth') {
+                switchPage('networth');
+            }
         });
 
         function openInstallModal() { document.getElementById('install-modal').classList.add('show'); }
