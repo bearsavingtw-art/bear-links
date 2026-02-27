@@ -1,12 +1,569 @@
-        <a href="rocket.html" class="service-card" style="margin-bottom: 15px; border-color: var(--accent); background: #fdfbf7;">
-            <div class="service-icon" style="background:#fff; color:var(--accent);">
-                <i class="fas fa-rocket"></i>
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bear 財務診斷室 6.3</title>
+    <link rel="icon" href="favicon.png" type="image/png">
+    
+    <link rel="manifest" href="manifest_tool.json">
+    <meta name="theme-color" content="#fcfbf9">
+    <link rel="apple-touch-icon" href="logo.png">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Noto+Serif+TC:wght@400;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            /* Bear.saving 品牌色系 */
+            --bg-color: #fcfbf9;        /* 米白背景 */
+            --text-primary: #5a4d41;    /* 深棕文字 */
+            --text-secondary: #968c83;  /* 淺棕副標 */
+            --accent: #b08d85;          /* 乾燥玫瑰色 */
+            --input-bg: #fdfbf7;        
+            --white: #ffffff;
+            --shadow: 0 10px 30px rgba(90, 77, 65, 0.08);
+            --danger: #e57373;          
+            --success: #81c784;         
+            --gold: #d4a373;            /* 獅子金 */
+        }
+
+        body {
+            font-family: 'Montserrat', 'Noto Serif TC', serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0; padding: 0;
+            min-height: 100vh;
+            display: flex; flex-direction: column;
+        }
+
+        /* 導覽列 */
+        nav {
+            padding: 20px 30px; display: flex; justify-content: space-between; align-items: center;
+            background: rgba(252, 251, 249, 0.95); position: fixed; top: 0; width: 100%; z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .nav-logo { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 600; color: var(--text-primary); text-decoration: none; }
+        .nav-back { font-size: 0.9rem; color: var(--text-secondary); text-decoration: none; display: flex; align-items: center; gap: 5px; transition: 0.3s; }
+        .nav-back:hover { color: var(--accent); }
+
+        /* 主容器 */
+        .main-wrapper {
+            flex: 1; display: flex; justify-content: center; align-items: center;
+            padding: 100px 20px 40px; 
+        }
+
+        .container {
+            background-color: var(--white);
+            padding: 40px 30px;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            width: 100%; max-width: 600px;
+            text-align: center;
+            position: relative;
+            border: 1px solid rgba(176, 141, 133, 0.1);
+        }
+
+        h1 { font-family: 'Playfair Display', serif; font-size: 1.8rem; margin-bottom: 25px; color: var(--accent); }
+
+        /* 輸入區塊 */
+        .question { margin-bottom: 25px; text-align: left; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-primary); }
+        
+        input, select { 
+            width: 100%; padding: 12px; 
+            border: 1px solid #e0e0e0; border-radius: 10px; 
+            box-sizing: border-box; font-size: 1rem; outline: none; 
+            background-color: var(--input-bg); color: var(--text-primary);
+            font-family: 'Montserrat', sans-serif; transition: 0.3s;
+        }
+        input:focus, select:focus { border-color: var(--accent); background: #fff; }
+
+        /* 選項卡片 */
+        .options { display: flex; gap: 12px; margin-top: 10px; }
+        .option-card {
+            flex: 1; padding: 15px 10px;
+            border: 1px solid #e0e0e0; border-radius: 12px;
+            cursor: pointer; transition: all 0.3s;
+            background-color: var(--input-bg); color: var(--text-secondary);
+        }
+        .option-card b { display: block; margin-bottom: 4px; font-size: 1rem; color: var(--text-primary); }
+        .option-card small { font-size: 0.8rem; }
+        .option-card.selected { background-color: var(--accent); border-color: var(--accent); }
+        .option-card.selected b, .option-card.selected small { color: var(--white); }
+
+        /* 按鈕樣式 */
+        .btn { 
+            background: var(--text-primary); color: white; border: none; 
+            padding: 15px 30px; border-radius: 50px; font-size: 1rem; cursor: pointer; 
+            width: 100%; margin-top: 15px; font-weight: 600; transition: 0.3s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1); letter-spacing: 1px;
+        }
+        .btn:hover { background: var(--accent); transform: translateY(-2px); }
+        .btn-outline {
+            background: transparent; border: 1px dashed var(--accent); color: var(--accent);
+            width: 100%; padding: 10px; border-radius: 10px; cursor: pointer; font-size: 0.9rem;
+            transition: 0.3s;
+        }
+        .btn-outline:hover { background: var(--input-bg); }
+        .btn-warning { background: var(--danger); }
+        .btn-info { background: #78909c; }
+
+        /* 隱藏/顯示 */
+        .hidden { display: none; }
+
+        /* 動物人格卡片 */
+        .animal-card {
+            background: #fff; border: 2px solid var(--accent);
+            border-radius: 20px; padding: 30px 20px;
+            margin-bottom: 30px; position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(176, 141, 133, 0.15);
+        }
+        .animal-emoji { font-size: 4rem; display: block; margin-bottom: 10px; animation: popIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .animal-title { font-size: 1.4rem; font-weight: 700; color: var(--text-primary); margin-bottom: 10px; font-family: 'Playfair Display', serif; }
+        .animal-desc { font-size: 0.95rem; color: var(--text-secondary); line-height: 1.6; text-align: left; }
+        .animal-tag { 
+            display: inline-block; background: var(--input-bg); 
+            color: var(--accent); padding: 5px 15px; border-radius: 50px; 
+            font-size: 0.8rem; font-weight: 600; margin-bottom: 15px;
+        }
+        @keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        /* 處方籤樣式 */
+        .prescription-container {
+            margin-top: 30px; text-align: left;
+            background: #fffafa; border: 1px solid #ffebee;
+            border-radius: 15px; padding: 25px;
+            position: relative;
+        }
+        .prescription-header {
+            font-weight: 700; color: var(--danger); font-size: 1.1rem;
+            margin-bottom: 15px; display: flex; align-items: center; gap: 8px;
+        }
+        .prescription-text { font-size: 0.95rem; color: var(--text-primary); margin-bottom: 20px; line-height: 1.6; }
+        .product-link-btn {
+            display: block; width: 100%; padding: 12px;
+            background: var(--text-primary); color: #fff;
+            text-align: center; text-decoration: none; border-radius: 50px;
+            font-weight: 600; transition: 0.3s;
+        }
+        .product-link-btn:hover { background: var(--accent); }
+
+        /* 圖表與預算 */
+        .budget-card { background: var(--input-bg); border-radius: 15px; padding: 25px; margin-top: 20px; text-align: left; }
+        .chart-container { position: relative; height: 250px; width: 100%; margin: 20px 0; display: flex; justify-content: center; }
+        .budget-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; align-items: center; font-size: 0.95rem; }
+        
+        /* 負債輸入 */
+        .debt-item { background: var(--input-bg); padding: 20px; border-radius: 15px; margin-bottom: 15px; border: 1px dashed var(--accent); position: relative;}
+        .debt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .grid-label { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 4px; text-align: left; }
+
+        /* 總報告表格 */
+        .full-report { text-align: left; background: #fff; padding: 20px; border-radius: 15px; border: 1px solid #eee; }
+        .report-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dashed #eee; font-size: 1rem; }
+        .debt-table-wrapper { width: 100%; overflow-x: auto; margin-top: 15px; }
+        .debt-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; min-width: 450px; }
+        .debt-table th { background: var(--input-bg); text-align: left; padding: 10px; border-bottom: 2px solid var(--accent); color: var(--text-primary); }
+        .debt-table td { padding: 10px; border-bottom: 1px solid #eee; color: var(--text-secondary); }
+        .save-money { color: var(--success); font-weight: bold; }
+
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="index.html" class="nav-back"><i class="fas fa-arrow-left"></i> 回首頁</a>
+        <a href="index.html" class="nav-logo">Bear.saving</a>
+        <div style="width: 70px;"></div>
+    </nav>
+
+    <div class="main-wrapper">
+        <div class="container" id="page1">
+            <h1>Financial Diagnosis</h1>
+            <p style="color:var(--text-secondary); margin-bottom:30px; font-size:0.9rem;">Bear 財務診斷室 6.3 | 人格分析與處方</p>
+
+            <div id="quiz-form">
+                
+                <div class="question">
+                    <label>1. 目前有無負債？</label>
+                    <select id="hasDebt" onchange="toggleDebtSection()">
+                        <option value="no">無負債 (一身輕✨)</option>
+                        <option value="yes">我有負債 (想面對💪)</option>
+                    </select>
+                </div>
+
+                <div id="emergency-fund-group" class="question">
+                    <label>2. 是否存滿 3-6 個月生活預備金？</label>
+                    <select id="hasEmergencyFund">
+                        <option value="no">尚未存滿</option>
+                        <option value="yes">已經存滿了</option>
+                    </select>
+                </div>
+
+                <div id="debt-input-group" style="display:none;">
+                    <label>2. 負債明細</label>
+                    <div id="debt-list">
+                        <div class="debt-item">
+                            <div class="debt-grid">
+                                <div><div class="grid-label">項目名稱</div><input type="text" class="d-name" placeholder="例:學貸"></div>
+                                <div><div class="grid-label">年利率 %</div><input type="number" step="0.1" class="d-rate" placeholder="0.0"></div>
+                                <div><div class="grid-label">每月繳款</div><input type="number" class="d-pay" placeholder="0"></div>
+                                <div><div class="grid-label">剩餘期數</div><input type="number" class="d-months" placeholder="0"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn-outline" onclick="addDebt()">＋ 新增負債項目</button>
+                </div>
+
+                <div class="question" style="margin-top:25px;">
+                    <label>3. 收入性質？</label>
+                    <div class="options">
+                        <div class="option-card selected" onclick="selectType('stable')" id="type-stable">
+                            <b>穩定收入</b><br><small>一般上班族</small>
+                        </div>
+                        <div class="option-card" onclick="selectType('unstable')" id="type-unstable">
+                            <b>不穩定收入</b><br><small>接案 / 業務</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question">
+                    <label>4. 每月總收入</label>
+                    <input type="number" id="monthlyIncome" placeholder="請輸入金額">
+                </div>
+
+                <button class="btn" onclick="processDiagnosis()">開始診斷 <i class="fas fa-paw" style="margin-left:5px;"></i></button>
             </div>
-            <div>
-                <div style="font-weight:600; font-size:1.05rem;">Bear 的「三階段火箭」存錢法</div>
-                <div style="font-size:0.85rem; color:var(--text-secondary); margin-top:5px;">
-                    先有緩衝，才有資格談投資 🚀
+
+            <div id="result" class="hidden">
+                
+                <div id="animal-persona-area"></div>
+                <div id="debt-overview-area"></div>
+                <div id="budget-area"></div>
+                <div id="prescription-area"></div>
+
+                <button id="over50-btn" class="btn btn-warning" style="margin-top:20px;" onclick="showSurvivalPage()">🆘 固定支出 > 總收入 50%？點此處</button>
+                <button id="summary-report-btn" class="btn btn-info hidden" style="margin-top:10px;" onclick="showFullReport()">📊 查看詳細財務報告</button>
+                
+                <div style="display: flex; gap: 10px; margin-top: 30px;">
+                    <button class="btn" style="flex:1; margin-top:0;" onclick="backToEditMode()"><i class="fas fa-edit"></i> 返回修改資料</button>
+                    <button class="btn-outline" style="flex:1; margin-top:0; border-color:#e0e0e0; color:#999;" onclick="clearToolData()"><i class="fas fa-redo"></i> 清空重測</button>
                 </div>
             </div>
-            <i class="fas fa-chevron-right" style="margin-left:auto; color:#ddd;"></i>
-        </a>
+        </div>
+
+        <div class="container hidden" id="page2">
+            <h1>Fixed Cost Check</h1>
+            <p style="color:var(--text-secondary); margin-bottom:20px;">固定支出深度盤點</p>
+            <div id="fixed-exp-list">
+                <div class="debt-item"><div class="debt-grid"><div><div class="grid-label">項目</div><input type="text" class="f-name"></div><div><div class="grid-label">金額</div><input type="number" class="f-pay"></div></div></div>
+            </div>
+            <button class="btn-outline" onclick="addFixedExp()">＋ 新增項目</button>
+            <div id="survival-result" class="diag-box" style="background:#fffaf0; display:none; margin-top:20px; border-left:4px solid var(--accent);"></div>
+            <button class="btn" onclick="calcSurvival()">重新精算</button>
+            <button class="btn-outline" style="margin-top:10px;" onclick="backToPage1()">返回</button>
+        </div>
+
+        <div class="container hidden" id="page3">
+            <h1>Full Report</h1>
+            <div id="full-report-content" class="full-report"></div>
+            <button class="btn" style="margin-top:20px;" onclick="backToPage1FromReport()">返回</button>
+        </div>
+    </div>
+
+    <script>
+        let globalIncome = 0, userHasDebt = 'no', userHasFund = 'no', debtData = [];
+        let selectedType = 'stable';
+        let budgetChart = null;
+        
+        // 產品連結
+        const LINK_BOOK = "https://myship.7-11.com.tw/general/detail/GM2502152714662"; // 記帳本
+        const LINK_BAG = "https://myship.7-11.com.tw/general/detail/GM2502152714662";  // 存錢袋/錢架
+        const LINK_NOTE = "https://myship.7-11.com.tw/general/detail/GM2502152714662"; // 雙扣手帳
+        const IG_VIDEO_URL = "https://www.instagram.com/reel/DTP7iSMgagR/";
+
+        // --- [NEW] 背景自動儲存草稿機制 ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('quiz-form');
+            form.addEventListener('input', saveDraft);  // 只要打字就自動存
+            form.addEventListener('change', saveDraft); // 切換選單也自動存
+            loadDraft(); // 載入畫面時把草稿倒回來
+        });
+
+        function saveDraft() {
+            const state = {
+                hasDebt: document.getElementById('hasDebt').value,
+                hasFund: document.getElementById('hasEmergencyFund').value,
+                incomeType: selectedType,
+                monthlyIncome: document.getElementById('monthlyIncome').value,
+                debts: []
+            };
+            const rates = document.getElementsByClassName('d-rate');
+            const pays = document.getElementsByClassName('d-pay');
+            const names = document.getElementsByClassName('d-name');
+            const months = document.getElementsByClassName('d-months');
+            
+            for (let i = 0; i < rates.length; i++) {
+                state.debts.push({
+                    name: names[i].value,
+                    rate: rates[i].value,
+                    pay: pays[i].value,
+                    month: months[i].value
+                });
+            }
+            localStorage.setItem('bear_tool_draft', JSON.stringify(state));
+        }
+
+        function loadDraft() {
+            const draftStr = localStorage.getItem('bear_tool_draft');
+            if (draftStr) {
+                try {
+                    const state = JSON.parse(draftStr);
+                    document.getElementById('hasDebt').value = state.hasDebt || 'no';
+                    document.getElementById('hasEmergencyFund').value = state.hasFund || 'no';
+                    if (state.incomeType) selectType(state.incomeType);
+                    document.getElementById('monthlyIncome').value = state.monthlyIncome || '';
+                    
+                    toggleDebtSection();
+
+                    // 如果草稿裡有大於一筆的負債，動態生成格子還原
+                    if (state.debts && state.debts.length > 0) {
+                        const debtList = document.getElementById('debt-list');
+                        debtList.innerHTML = ''; 
+                        state.debts.forEach(d => {
+                            const div = document.createElement('div'); div.className = 'debt-item';
+                            div.innerHTML = `<div class="debt-grid"><div><div class="grid-label">項目名稱</div><input type="text" class="d-name" value="${d.name || ''}" placeholder="例:學貸"></div><div><div class="grid-label">年利率 %</div><input type="number" step="0.1" class="d-rate" value="${d.rate || ''}" placeholder="0.0"></div><div><div class="grid-label">每月繳款</div><input type="number" class="d-pay" value="${d.pay || ''}" placeholder="0"></div><div><div class="grid-label">剩餘期數</div><input type="number" class="d-months" value="${d.month || ''}" placeholder="0"></div></div>`;
+                            debtList.appendChild(div);
+                        });
+                    }
+                } catch(e) {}
+            }
+        }
+
+        function clearToolData() {
+            localStorage.removeItem('bear_tool_draft');
+            localStorage.removeItem('bear_diagnosed_debt');
+            location.reload();
+        }
+
+        function backToEditMode() {
+            document.getElementById('result').classList.add('hidden');
+            document.getElementById('quiz-form').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        // ---------------------------------
+
+        function toggleDebtSection() {
+            const has = document.getElementById('hasDebt').value;
+            document.getElementById('debt-input-group').style.display = (has === 'yes') ? 'block' : 'none';
+            document.getElementById('emergency-fund-group').style.display = (has === 'no') ? 'block' : 'none';
+            saveDraft();
+        }
+        
+        function selectType(type) {
+            selectedType = type;
+            document.getElementById('type-stable').classList.remove('selected');
+            document.getElementById('type-unstable').classList.remove('selected');
+            document.getElementById('type-' + type).classList.add('selected');
+            saveDraft();
+        }
+
+        function addDebt() {
+            const div = document.createElement('div'); div.className = 'debt-item';
+            div.innerHTML = `<div class="debt-grid"><div><div class="grid-label">項目名稱</div><input type="text" class="d-name" placeholder="例:學貸"></div><div><div class="grid-label">年利率 %</div><input type="number" step="0.1" class="d-rate" placeholder="0.0"></div><div><div class="grid-label">每月繳款</div><input type="number" class="d-pay" placeholder="0"></div><div><div class="grid-label">剩餘期數</div><input type="number" class="d-months" placeholder="0"></div></div>`;
+            document.getElementById('debt-list').appendChild(div);
+            saveDraft();
+        }
+
+        function addFixedExp() {
+            const div = document.createElement('div'); div.className = 'debt-item';
+            div.innerHTML = `<div class="debt-grid"><div><div class="grid-label">支出項目</div><input type="text" class="f-name"></div><div><div class="grid-label">金額</div><input type="number" class="f-pay"></div></div>`;
+            document.getElementById('fixed-exp-list').appendChild(div);
+        }
+
+        function processDiagnosis() {
+            userHasDebt = document.getElementById('hasDebt').value;
+            userHasFund = (userHasDebt === 'no') ? document.getElementById('hasEmergencyFund').value : 'no';
+            globalIncome = parseFloat(document.getElementById('monthlyIncome').value) || 0;
+
+            if (globalIncome <= 0) return alert("請輸入有效的月收入金額喔！");
+
+            document.getElementById('quiz-form').classList.add('hidden');
+            document.getElementById('result').classList.remove('hidden');
+
+            debtData = [];
+            let totalMonthlyDebtPay = 0, highDebts = [];
+            if (userHasDebt === 'yes') {
+                userHasFund = 'yes'; 
+                const rates = document.getElementsByClassName('d-rate'), pays = document.getElementsByClassName('d-pay'), names = document.getElementsByClassName('d-name'), months = document.getElementsByClassName('d-months');
+                for (let i = 0; i < rates.length; i++) {
+                    let p = parseFloat(pays[i].value) || 0, r = parseFloat(rates[i].value) || 0, m = parseFloat(months[i].value) || 0, n = names[i].value || `項目${i+1}`;
+                    totalMonthlyDebtPay += p;
+                    let totalPay = p * m, estInterest = totalPay - (totalPay / (1 + (r * m / 2400)));
+                    debtData.push({name: n, rate: r, pay: p, month: m, totalDebt: totalPay, savedInterest: estInterest});
+                    if (r >= 5) highDebts.push(n);
+                }
+
+                // 串接駕駛艙：把總負債存起來
+                let sumAllDebt = debtData.reduce((sum, item) => sum + item.totalDebt, 0);
+                localStorage.setItem('bear_diagnosed_debt', sumAllDebt);
+            } else {
+                localStorage.removeItem('bear_diagnosed_debt');
+            }
+
+            renderAnimalAndPrescription(userHasDebt, userHasFund, selectedType, highDebts);
+
+            const overviewArea = document.getElementById('debt-overview-area');
+            const overBtn = document.getElementById('over50-btn');
+            const summaryBtn = document.getElementById('summary-report-btn');
+            
+            if (userHasDebt === 'yes') {
+                let debtRatio = (totalMonthlyDebtPay / globalIncome) * 100;
+                overviewArea.innerHTML = `<div class="debt-summary-card"><div class="summary-item"><span class="summary-label">每月還債總額</span><span class="summary-value">$${totalMonthlyDebtPay.toLocaleString()}</span></div><div class="summary-item"><span class="summary-label">債務佔比</span><span class="summary-value">${debtRatio.toFixed(1)}%</span></div></div>`;
+                summaryBtn.classList.remove('hidden');
+                if (debtRatio > 50) overBtn.classList.add('hidden'); else overBtn.classList.remove('hidden');
+            } else {
+                overviewArea.innerHTML = "";
+                summaryBtn.classList.add('hidden');
+                overBtn.classList.remove('hidden');
+            }
+
+            const isHighDebt = highDebts.length > 0;
+            renderBudget(globalIncome, document.getElementById('budget-area'), userHasFund, (userHasDebt === 'yes'), !isHighDebt);
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function renderAnimalAndPrescription(hasDebt, hasFund, incomeType, highDebts) {
+            let animal = {}, prescription = {};
+
+            if (hasDebt === 'yes') {
+                animal = {
+                    emoji: '🐢', title: '穩健的烏龜', tag: '慢步前行',
+                    desc: '雖然背著沉重的殼（債務），但妳有目標、有方向。只要腳步不停，終點一定會到。現在的妳需要的是耐心與精準的還款策略。'
+                };
+                if (highDebts.length > 0) {
+                    prescription = {
+                        title: '高利止血方案',
+                        text: `偵測到高利率債務 (${highDebts.join('、')})！這是在讓妳漏財的元兇。妳現在急需止血，請優先處理它。`,
+                        btnText: '📚 取得原創記帳本 (債務雪球法)', link: LINK_BOOK
+                    };
+                } else {
+                    prescription = {
+                        title: '債務整理方案',
+                        text: '債務不可怕，可怕的是混亂。建議使用專用的債務頁面，把每一筆款項視覺化，看著數字減少會更有動力！',
+                        btnText: '📚 取得原創記帳本', link: LINK_BOOK
+                    };
+                }
+            } else {
+                if (hasFund === 'no') {
+                    animal = {
+                        emoji: '🐹', title: '忙碌的倉鼠', tag: '滾輪循環',
+                        desc: '妳很努力生活，但就像在滾輪上奔跑，薪水進來又出去，好像沒留下什麼。妳需要按下暫停鍵，幫自己存下第一筆底氣。'
+                    };
+                    prescription = {
+                        title: '強制儲蓄方案',
+                        text: '錢放在戶頭會忍不住花掉？妳需要物理隔離！使用雙扣手帳把「預備金」鎖起來，這是對未來的妳最溫柔的保護。',
+                        btnText: '📒 Bear 雙扣手帳 (強制儲蓄)', link: LINK_NOTE
+                    };
+                } else if (incomeType === 'unstable') {
+                    animal = {
+                        emoji: '🐿️', title: '機靈的松鼠', tag: '屯糧高手',
+                        desc: '因為收入起伏，妳比別人更懂得未雨綢繆。妳的快樂來自於看著「蓄水池」的水位上升，那讓妳在冬天也能安穩過冬。'
+                    };
+                    prescription = {
+                        title: '視覺化安全感方案',
+                        text: '對於收入不穩的妳，「看得到」的錢最安心。建立實體蓄水池，讓每一分努力都具象化。',
+                        btnText: '💰 質感存錢袋/錢架 (建立蓄水池)', link: LINK_BAG
+                    };
+                } else {
+                    animal = {
+                        emoji: '🦁', title: '自信的獅子', tag: '掌控全場',
+                        desc: '恭喜妳！妳擁有極佳的財務底氣。妳不是在為生存奔波，而是在為選擇權而活。妳是森林之王，掌控著自己的生活節奏。'
+                    };
+                    prescription = {
+                        title: '財富增值方案',
+                        text: '妳的基礎很穩固，現在可以專注於讓資產長大，或是投資自己。保持記帳習慣，別讓細節偷走妳的財富。',
+                        btnText: '📚 質感書衣記帳本 (維持好習慣)', link: LINK_BOOK
+                    };
+                }
+            }
+
+            document.getElementById('animal-persona-area').innerHTML = `
+                <div class="animal-card">
+                    <span class="animal-emoji">${animal.emoji}</span>
+                    <span class="animal-tag">#${animal.tag}</span>
+                    <div class="animal-title">${animal.title}</div>
+                    <div class="animal-desc">${animal.desc}</div>
+                </div>
+            `;
+
+            document.getElementById('prescription-area').innerHTML = `
+                <div class="prescription-container">
+                    <div class="prescription-header"><i class="fas fa-file-medical"></i> Bear 的處方籤</div>
+                    <div class="prescription-text">
+                        <b>診斷：${prescription.title}</b><br>
+                        ${prescription.text}
+                    </div>
+                    <a href="${prescription.link}" target="_blank" class="product-link-btn">${prescription.btnText} <i class="fas fa-arrow-right"></i></a>
+                </div>
+            `;
+        }
+
+        function renderBudget(income, container, hasFund, isDebtMode, isLowDebt) {
+            let f, v, pre, e, s, i;
+            if (isDebtMode && isLowDebt) { f=0.6; v=0.2; pre=0.1; e=0.05; s=0; i=0.05; }
+            else if (hasFund === 'no') { f=0.5; v=0.2; pre=0.1; e=0.1; s=0.05; i=0.05; }
+            else { f=0.5; v=0.2; pre=0.1; e=0; s=0.15; i=0.05; }
+            
+            const categories = [
+                { label: '固定支出', pct: f, color: '#5a4d41' },
+                { label: '變動支出', pct: v, color: '#b08d85' },
+                { label: '預存支出', pct: pre, color: '#d4a373' },
+                { label: '緊急預備', pct: e, color: '#e57373' },
+                { label: '儲蓄投資', pct: s, color: '#81c784' },
+                { label: '投資自己', pct: i, color: '#ffd54f' }
+            ];
+
+            let html = `<div class="budget-card"><div style="font-weight:600; font-size:1.1rem; margin-bottom:5px; color:var(--text-primary);">💡 理想預算分配</div><div class="chart-container"><canvas id="budgetChart"></canvas></div>`;
+            let labels=[], data=[], colors=[];
+            categories.forEach(cat => {
+                if (cat.pct > 0) {
+                    html += `<div class="budget-row"><span style="display:flex; align-items:center;"><span style="display:inline-block; width:10px; height:10px; background:${cat.color}; border-radius:50%; margin-right:8px;"></span>${cat.label} (${Math.round(cat.pct*100)}%)</span><b>$${Math.round(income*cat.pct).toLocaleString()}</b></div>`;
+                    labels.push(cat.label); data.push(Math.round(income * cat.pct)); colors.push(cat.color);
+                }
+            });
+            html += `</div>`;
+            container.innerHTML = html;
+
+            setTimeout(() => {
+                const ctx = document.getElementById('budgetChart').getContext('2d');
+                if (budgetChart) budgetChart.destroy();
+                budgetChart = new Chart(ctx, { type: 'doughnut', data: { labels: labels, datasets: [{ data: data, backgroundColor: colors, borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } });
+            }, 100);
+        }
+
+        function showSurvivalPage() { document.getElementById('page1').classList.add('hidden'); document.getElementById('page2').classList.remove('hidden'); }
+        function backToPage1() { document.getElementById('page2').classList.add('hidden'); document.getElementById('page1').classList.remove('hidden'); }
+        function showFullReport() { document.getElementById('page1').classList.add('hidden'); document.getElementById('page3').classList.remove('hidden'); const content = document.getElementById('full-report-content'); let totalMonthly = 0; debtData.forEach(d => totalMonthly += d.pay); let ratio = ((totalMonthly / globalIncome) * 100).toFixed(1); let html = `<div class="report-row"><span class="report-title">每月收入</span><span>$${globalIncome.toLocaleString()}</span></div><div class="report-row"><span class="report-title">每月還債</span><span style="color:var(--danger); font-weight:bold;">$${totalMonthly.toLocaleString()}</span></div><div class="report-row"><span class="report-title">債務佔比</span><span style="color:var(--danger); font-weight:bold;">${ratio}%</span></div><h4 style="margin:20px 0 10px 0; border-bottom:1px solid #eee; padding-bottom:5px;">📌 負債明細</h4><div class="debt-table-wrapper"><table class="debt-table"><tr><th>項目(利率)</th><th>月繳</th><th>期數</th><th>總欠款</th><th>省利息</th></tr>`; debtData.forEach(d => { html += `<tr><td>${d.name}<br>(${d.rate}%)</td><td>$${d.pay.toLocaleString()}</td><td>${d.month}</td><td>$${Math.round(d.totalDebt).toLocaleString()}</td><td class="save-money">$${Math.round(d.savedInterest).toLocaleString()}</td></tr>`; }); html += `</table></div>`; content.innerHTML = html; }
+        function backToPage1FromReport() { document.getElementById('page3').classList.add('hidden'); document.getElementById('page1').classList.remove('hidden'); }
+        function addFixedExp() { const div = document.createElement('div'); div.className = 'debt-item'; div.innerHTML = `<div class="debt-grid"><div><div class="grid-label">項目</div><input type="text" class="f-name"></div><div><div class="grid-label">金額</div><input type="number" class="f-pay"></div></div>`; document.getElementById('fixed-exp-list').appendChild(div); }
+        function calcSurvival() { const pays = document.getElementsByClassName('f-pay'); let total = 0; for(let p of pays) total += parseFloat(p.value)||0; const rem = globalIncome - total; const box = document.getElementById('survival-result'); box.style.display='block'; if(rem<0) box.innerHTML=`⚠️ <b>缺口警報：</b> $${Math.abs(rem).toLocaleString()}`; else box.innerHTML=`📌 <b>可分配餘額：</b> $${rem.toLocaleString()}`; }
+
+        // ================= PWA Service Worker 註冊 =================
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(registration => {
+                        console.log('ServiceWorker 註冊成功，範圍: ', registration.scope);
+                    })
+                    .catch(err => {
+                        console.log('ServiceWorker 註冊失敗: ', err);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>
