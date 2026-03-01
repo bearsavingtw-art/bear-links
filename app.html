@@ -42,7 +42,6 @@
             overscroll-behavior-y: none;
         }
 
-        /* 頂部導覽 */
         header {
             background: var(--bg-color); padding: 20px 20px 10px;
             text-align: center; position: sticky; top: 0; z-index: 10;
@@ -50,12 +49,10 @@
         }
         h1 { font-family: 'Playfair Display', serif; margin: 0; color: var(--accent); font-size: 1.5rem; }
 
-        /* 頁面切換 */
         .page { display: none; padding: 20px; animation: fadeIn 0.3s ease; }
         .page.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* 卡片通用樣式 */
         .card {
             background: var(--card-bg); border-radius: 15px; padding: 20px;
             box-shadow: 0 5px 15px rgba(90,77,65,0.05); margin-bottom: 20px;
@@ -63,7 +60,6 @@
         }
         .card-title { font-weight: 600; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
 
-        /* 預算進度條 (變緊湊以容納10袋) */
         .budget-group-title { font-size:0.85rem; font-weight:bold; margin: 15px 0 8px; color:var(--text-primary); border-bottom: 1px solid #eee; padding-bottom:4px; display: flex; align-items: center; gap: 5px; }
         .budget-item { margin-bottom: 12px; }
         .budget-header { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px; font-weight: 500;}
@@ -71,14 +67,12 @@
         .budget-bar-fill { height: 100%; width: 0%; transition: 0.5s ease; border-radius: 10px; }
         .budget-remain { font-size: 0.75rem; color: var(--text-secondary); text-align: right; margin-top: 3px; }
 
-        /* 購物冷靜閘樣式 */
         .logic-card { text-align: center; }
         .logic-btn-group { display: flex; gap: 15px; margin-top: 20px; }
         .btn-yes { background: var(--success); flex: 1; border:none; padding:15px; border-radius:10px; color:#fff; font-weight:600; }
         .btn-no { background: var(--danger); flex: 1; border:none; padding:15px; border-radius:10px; color:#fff; font-weight:600; }
         .result-icon { font-size: 3rem; margin-bottom: 10px; display: block; }
         
-        /* 購物清單紀錄樣式 */
         .shop-list-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px dashed #eee; }
         .shop-info { flex: 1; text-align: left; }
         .shop-name { font-weight: 600; font-size: 1rem; color: var(--text-primary); }
@@ -89,7 +83,6 @@
         .status-stop { background: rgba(229, 115, 115, 0.2); color: var(--danger); }
         .timer-badge { display: inline-block; background: #333; color: #fff; padding: 3px 8px; border-radius: 4px; font-size: 0.7rem; margin-top: 5px; font-family: monospace; }
 
-        /* 儀表板數據卡 & 月份切換 */
         .dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: rgba(176, 141, 133, 0.05); padding: 10px 15px; border-radius: 20px; border: 1px solid rgba(176, 141, 133, 0.15); }
         .month-nav-btn { background: none; border: none; font-size: 1.2rem; color: var(--accent); cursor: pointer; padding: 5px 10px; }
         .month-nav-btn:active { transform: scale(0.9); }
@@ -104,7 +97,6 @@
         .expense { color: var(--accent); }
         .balance { color: var(--success); }
 
-        /* 表單元件 */
         .form-group { margin-bottom: 15px; text-align: left; }
         label { display: block; font-size: 0.9rem; margin-bottom: 5px; font-weight: 600; }
         input, select {
@@ -126,7 +118,6 @@
         .btn-tool { background: #546e7a; margin-bottom: 20px; }
         .btn-cancel { background: #999; margin-top: 10px; }
 
-        /* 列表與月份分隔線樣式 */
         .tx-list { list-style: none; padding: 0; margin: 0; }
         .month-divider { background: rgba(176, 141, 133, 0.1); color: var(--text-primary); padding: 6px 15px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; margin: 20px 0 10px 0; display: inline-block; border-left: 3px solid var(--accent); }
         .month-divider:first-child { margin-top: 0; }
@@ -141,7 +132,6 @@
         .edit-btn { color: var(--info); cursor: pointer; padding: 5px; }
         .delete-btn { color: #ccc; cursor: pointer; padding: 5px; }
 
-        /* 淨資產模組專屬樣式 */
         .networth-hero { background: linear-gradient(135deg, var(--text-primary) 0%, #3e332a 100%); color: #fff; border-radius: 15px; padding: 30px 20px; text-align: center; margin-bottom: 20px; box-shadow: 0 10px 20px rgba(90,77,65,0.2); }
         .nw-label { font-size: 0.85rem; color: rgba(255,255,255,0.8); margin-bottom: 5px; }
         .nw-value { font-size: 2.2rem; font-weight: 700; font-family: 'Montserrat', sans-serif; letter-spacing: 1px; }
@@ -155,7 +145,6 @@
         .nw-history-net { font-weight: 700; font-family: 'Montserrat', sans-serif; font-size: 1.1rem; }
         .nw-history-details { font-size: 0.75rem; color: var(--text-secondary); margin-top: 4px; }
 
-        /* 底部導覽列 */
         .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #fff; display: flex; justify-content: space-around; padding: 12px 0 25px; border-top: 1px solid #eee; box-shadow: 0 -5px 15px rgba(0,0,0,0.03); z-index: 100; }
         .nav-item { text-align: center; color: var(--text-secondary); cursor: pointer; font-size: 0.75rem; flex: 1; }
         .nav-item i { display: block; font-size: 1.3rem; margin-bottom: 4px; }
@@ -163,7 +152,6 @@
         .chart-wrapper { position: relative; height: 220px; width: 100%; display: flex; justify-content: center; }
         .hidden { display: none; }
 
-        /* 安裝提示 */
         .install-prompt { background: rgba(176, 141, 133, 0.1); color: var(--accent); padding: 12px; border-radius: 10px; text-align: center; font-size: 0.85rem; font-weight: 600; margin-bottom: 15px; cursor: pointer; border: 1px dashed var(--accent); transition: 0.3s; }
         .install-prompt:active { transform: scale(0.98); }
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(3px); display: flex; justify-content: center; align-items: center; z-index: 2000; opacity: 0; pointer-events: none; transition: 0.3s; }
@@ -171,13 +159,19 @@
         .modal-content { background: #fff; padding: 25px; border-radius: 20px; width: 90%; max-width: 400px; box-shadow: 0 15px 30px rgba(0,0,0,0.2); transform: translateY(20px); transition: 0.3s; text-align: center; }
         .modal-overlay.show .modal-content { transform: translateY(0); }
         .install-guide-box { background: var(--bg-color); padding: 20px 15px; border-radius: 15px; margin-bottom: 20px; border: 1px solid #eee; }
+
+        /* [NEW] 結算診斷專屬樣式 */
+        .diag-status-badge { font-size: 1rem; padding: 12px; border-radius: 10px; text-align: center; display: block; font-weight: 600; margin-bottom: 15px; }
+        .diag-status-badge.success { background: rgba(129, 199, 132, 0.2); color: var(--success); }
+        .diag-status-badge.warning { background: rgba(255, 213, 79, 0.2); color: #f9a825; }
+        .diag-status-badge.danger { background: rgba(229, 115, 115, 0.2); color: var(--danger); }
     </style>
 </head>
 <body>
 
     <header>
         <h1>Bear.saving</h1>
-        <div style="font-size:0.8rem; color:var(--text-secondary);">Financial Cockpit v2.6 (10袋連動版)</div>
+        <div style="font-size:0.8rem; color:var(--text-secondary);">Financial Cockpit v2.7</div>
     </header>
 
     <div id="page-dash" class="page active">
@@ -232,7 +226,9 @@
 
         <div class="card" style="text-align:center;">
             <div class="stat-label" id="balance-card-title">本期日常總結餘</div>
-            <div class="stat-value balance" id="display-balance" style="font-size:1.8rem;">$0</div>
+            <div class="stat-value balance" id="display-balance" style="font-size:1.8rem; margin-bottom:15px;">$0</div>
+            
+            <button class="btn" style="background:#5a4d41;" onclick="switchPage('review')">📊 產生本期結算診斷報告</button>
         </div>
     </div>
 
@@ -254,7 +250,6 @@
                 <label>10 袋詳細分類</label>
                 <select id="input-category"></select>
             </div>
-            
             <div class="form-group">
                 <label>支付方式</label>
                 <select id="input-method">
@@ -263,7 +258,6 @@
                     <option value="other">🏦 轉帳/其他 (Other)</option>
                 </select>
             </div>
-
             <div class="form-group">
                 <label>金額</label>
                 <input type="number" id="input-amount" placeholder="0" inputmode="numeric">
@@ -274,6 +268,24 @@
             </div>
             <button class="btn" id="save-btn" onclick="saveTransaction()">確認儲存 <i class="fas fa-check"></i></button>
             <button class="btn btn-cancel hidden" id="cancel-edit-btn" onclick="resetForm()">取消修改</button>
+        </div>
+    </div>
+
+    <div id="page-review" class="page">
+        <div class="card">
+            <div class="card-title">
+                <span id="review-cycle-title">結算診斷</span>
+                <button class="btn-outline" style="width:auto; padding:6px 15px; margin:0;" onclick="switchPage('dash')"><i class="fas fa-arrow-left"></i> 返回</button>
+            </div>
+            <p style="font-size:0.85rem; color:var(--text-secondary); margin-top:0;">預算與實際花費對比 (灰色為預算，彩色為實際)</p>
+            <div class="chart-wrapper">
+                <canvas id="reviewChart"></canvas>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">系統診斷結果</div>
+            <div id="diagnostic-content"></div>
         </div>
     </div>
 
@@ -341,7 +353,7 @@
                     <span style="font-weight:600; color:var(--text-primary);">號</span>
                 </div>
                 <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:8px;">
-                    預設為 1 號。若設定為 31 號，遇到小月系統會自動以該月最後一天做為基準。
+                    預設為 1 號。若設定為 31 號，遇到沒有 31 號的小月系統會自動以該月最後一天做為結算基準。
                 </p>
             </div>
         </div>
@@ -397,13 +409,12 @@
 
     <script>
         // --- 1. 資料與初始化 ---
-        // [NEW] 10 個無腦存袋定義，並歸屬在三大類之下
         const envelopes = {
             '固定支出': ['🏠 居住水電', '🚌 交通通訊', '🛡️ 訂閱保險'],
             '變動支出': ['🍱 伙食餐飲', '🧻 日常雜支', '🎉 娛樂社交', '✨ 變美治裝'],
             '預存支出': ['🏥 醫療健康', '🎯 年度大筆', '🎁 願望清單']
         };
-        const categories = { income: ['薪資收入', '業外收入'] }; // 收入維持不變
+        const categories = { income: ['薪資收入', '業外收入'] }; 
         
         let transactions = JSON.parse(localStorage.getItem('bear_transactions')) || [];
         let budgets = JSON.parse(localStorage.getItem('bear_budgets')) || {};
@@ -413,6 +424,7 @@
         
         let myChart = null;
         let nwChart = null; 
+        let reviewChart = null; // [NEW] 月結診斷圖表實例
         let editingId = null;
         let dashboardViewDate = new Date();
 
@@ -433,7 +445,7 @@
 
             document.getElementById('setting-cycle-start').value = sysSettings.cycleStart;
 
-            renderBudgetSettings(); // 動態渲染10袋預算輸入框
+            renderBudgetSettings(); 
             updateCategories();
             renderDashboard();
             setInterval(updateCountdowns, 1000);
@@ -460,6 +472,7 @@
             } else {
                 const thisMonthStart = getSmartDate(year, month, startDay);
                 const lastMonthStart = getSmartDate(year, month - 1, startDay);
+
                 if (dateObj >= thisMonthStart) {
                     cycleStartDate = thisMonthStart;
                     cycleEndDate = new Date(getSmartDate(year, month + 1, startDay).getTime() - 86400000); 
@@ -500,17 +513,23 @@
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById('page-' + pageId).classList.add('active');
             
+            // 處理底部導覽列亮起狀態
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            if (pageId === 'dash' || pageId === 'shop') document.getElementById('nav-dash').classList.add('active');
+            if (pageId === 'dash' || pageId === 'shop' || pageId === 'review') document.getElementById('nav-dash').classList.add('active');
             else if (pageId === 'add') document.getElementById('nav-add').classList.add('active');
             else if (pageId === 'networth') document.getElementById('nav-networth').classList.add('active');
             else document.getElementById('nav-settings').classList.add('active');
             
             window.scrollTo(0, 0);
-            if(pageId === 'dash') { dashboardViewDate = new Date(); renderDashboard(); }
+            
+            if(pageId === 'dash') {
+                dashboardViewDate = new Date(); 
+                renderDashboard();
+            }
             if(pageId === 'settings') renderList();
             if(pageId === 'shop') { resetShop(); renderShoppingList(); }
             if(pageId === 'networth') renderNetWorthPage(); 
+            if(pageId === 'review') renderReviewPage(); // [NEW] 渲染診斷頁面
         }
 
         function openAddPage() { resetForm(); switchPage('add'); }
@@ -542,7 +561,6 @@
             catSelect.innerHTML = '';
             
             if (type === 'expense') {
-                // [NEW] 支出選項改為 10 袋，並用三大類做群組 (optgroup)
                 for (let mainCat in envelopes) {
                     let optgroup = document.createElement('optgroup');
                     optgroup.label = `--- ${mainCat} ---`;
@@ -573,13 +591,12 @@
 
             if (!date || !amount) { alert('請輸入完整資訊！'); return; }
             
-            // [NEW] 找出這筆交易屬於三大類中的哪一類 (寫入資料庫方便日後畫圓餅圖)
             let mainCategory = type === 'income' ? '收入' : '';
             if (type === 'expense') {
                 for (let main in envelopes) {
                     if (envelopes[main].includes(category)) { mainCategory = main; break; }
                 }
-                if(!mainCategory) mainCategory = category; // 預防舊資料或未預期狀況
+                if(!mainCategory) mainCategory = category; 
             }
 
             if (editingId) {
@@ -645,7 +662,6 @@
         function saveBudget(envName) {
             budgets[envName] = parseFloat(document.getElementById(`budget-${envName}`).value) || 0;
             localStorage.setItem('bear_budgets', JSON.stringify(budgets));
-            // 不需要 alert，自動儲存體驗更好
         }
 
         // --- 5. 儀表板與圖表 ---
@@ -659,18 +675,31 @@
             const currentCycleTime = currentCycle.start.getTime();
             const realTodayCycleTime = realTodayCycle.start.getTime();
 
-            if (currentCycleTime < realTodayCycleTime) timeStatus = 'past';
-            else if (currentCycleTime > realTodayCycleTime) timeStatus = 'future';
+            if (currentCycleTime < realTodayCycleTime) {
+                timeStatus = 'past';
+            } else if (currentCycleTime > realTodayCycleTime) {
+                timeStatus = 'future';
+            }
 
             const titleEl = document.getElementById('dash-cycle-title');
             const datesEl = document.getElementById('dash-cycle-dates');
             
-            if (timeStatus === 'past') { titleEl.innerHTML = `回顧：${currentCycle.label}`; titleEl.style.color = 'var(--text-secondary)'; } 
-            else if (timeStatus === 'future') { titleEl.innerHTML = `未來預估：${currentCycle.label}`; titleEl.style.color = 'var(--info)'; } 
-            else { titleEl.innerHTML = currentCycle.label; titleEl.style.color = 'var(--text-primary)'; }
+            if (timeStatus === 'past') {
+                titleEl.innerHTML = `回顧：${currentCycle.label}`;
+                titleEl.style.color = 'var(--text-secondary)'; 
+            } else if (timeStatus === 'future') {
+                titleEl.innerHTML = `未來預估：${currentCycle.label}`;
+                titleEl.style.color = 'var(--info)'; 
+            } else {
+                titleEl.innerHTML = currentCycle.label;
+                titleEl.style.color = 'var(--text-primary)';
+            }
             
-            if (currentCycle.isDefault) datesEl.innerHTML = `(1號 - 月底)`;
-            else datesEl.innerHTML = `(${currentCycle.start.getMonth()+1}/${currentCycle.start.getDate()} - ${currentCycle.end.getMonth()+1}/${currentCycle.end.getDate()})`;
+            if (currentCycle.isDefault) {
+                datesEl.innerHTML = `(1號 - 月底)`;
+            } else {
+                datesEl.innerHTML = `(${currentCycle.start.getMonth()+1}/${currentCycle.start.getDate()} - ${currentCycle.end.getMonth()+1}/${currentCycle.end.getDate()})`;
+            }
 
             let prefix = '本期';
             if (timeStatus === 'past') prefix = '該期';
@@ -688,21 +717,19 @@
             });
 
             let totalInc = 0, totalExp = 0;
-            let mainExp = { '固定支出': 0, '變動支出': 0, '預存支出': 0 }; // 算大類給圓餅圖用
-            let envExp = {}; // 算細項給 10 袋進度條用
+            let mainExp = { '固定支出': 0, '變動支出': 0, '預存支出': 0 }; 
+            let envExp = {}; 
 
             cycleTx.forEach(t => {
                 if (t.type === 'income') totalInc += t.amount;
                 else {
                     totalExp += t.amount;
-                    // 計算大類 (相容舊資料邏輯)
                     let mCat = t.mainCategory;
-                    if (!mCat) { mCat = t.category; } // 舊資料 fallback
+                    if (!mCat) { mCat = t.category; } 
                     
                     if (mainExp[mCat] !== undefined) mainExp[mCat] += t.amount;
-                    else mainExp['其他舊版支出'] = (mainExp['其他舊版支出'] || 0) + t.amount; // 兜底
+                    else mainExp['其他舊版支出'] = (mainExp['其他舊版支出'] || 0) + t.amount; 
                     
-                    // 計算小袋
                     if (!envExp[t.category]) envExp[t.category] = 0;
                     envExp[t.category] += t.amount;
                 }
@@ -713,11 +740,10 @@
             document.getElementById('display-balance').innerText = `$${(totalInc - totalExp).toLocaleString()}`;
             
             renderBudgetBars(envExp);
-            renderChart(mainExp); // 圓餅圖只畫三大類，保持清爽
+            renderChart(mainExp); 
             renderDashList(cycleTx); 
         }
 
-        // [NEW] 渲染 10 個無腦存袋的進度條
         function renderBudgetBars(envExp) {
             const container = document.getElementById('budget-container');
             container.innerHTML = '';
@@ -732,7 +758,6 @@
                     const budget = budgets[env] || 0;
                     const spent = envExp[env] || 0;
                     
-                    // 為了畫面乾淨，如果預算是0且沒有花費，就先隱藏不顯示
                     if (budget > 0 || spent > 0) {
                         groupHasBudget = true; hasAnyBudget = true;
                         let percent = 0, colorVar = '--success';
@@ -755,12 +780,11 @@
                 if(groupHasBudget) container.innerHTML += html;
             }
 
-            // 處理舊版未分類資料的顯示
             let oldCatHtml = '';
             ['固定支出', '變動支出', '預存支出'].forEach(legacyCat => {
                 if (envExp[legacyCat] > 0) {
                     hasAnyBudget = true;
-                    const budget = budgets[legacyCat] || 0; // 抓取以前設定的舊預算
+                    const budget = budgets[legacyCat] || 0; 
                     const spent = envExp[legacyCat];
                     let percent = 0, colorVar = '--info';
                     if (budget > 0) { percent = (spent / budget) * 100; if (percent > 100) colorVar = '--danger'; }
@@ -779,7 +803,6 @@
             }
         }
 
-        // 圓餅圖保持三大類
         function renderChart(mainExpObj) {
             const ctx = document.getElementById('expenseChart').getContext('2d');
             const hasData = Object.values(mainExpObj).some(val => val > 0);
@@ -860,23 +883,153 @@
             });
         }
 
+        // --- [NEW] 月結診斷與對比柱狀圖 ---
+        function renderReviewPage() {
+            const currentCycle = getCycleBoundary(dashboardViewDate, sysSettings.cycleStart);
+            document.getElementById('review-cycle-title').innerText = `${currentCycle.label} 診斷`;
+
+            // 1. 計算三大類預算總和
+            let mainBudgets = { '固定支出': 0, '變動支出': 0, '預存支出': 0 };
+            for (let mainCat in envelopes) {
+                envelopes[mainCat].forEach(env => {
+                    mainBudgets[mainCat] += (budgets[env] || 0);
+                });
+            }
+
+            // 2. 計算本期三大類實際花費與總收入
+            const cycleTx = transactions.filter(t => {
+                const tDate = new Date(t.date);
+                tDate.setHours(0,0,0,0);
+                return tDate >= currentCycle.start && tDate <= currentCycle.end;
+            });
+
+            let mainActuals = { '固定支出': 0, '變動支出': 0, '預存支出': 0 };
+            let totalIncome = 0;
+            let totalExp = 0;
+
+            cycleTx.forEach(t => {
+                if (t.type === 'income') {
+                    totalIncome += t.amount;
+                } else {
+                    totalExp += t.amount;
+                    let mCat = t.mainCategory || t.category;
+                    if (mainActuals[mCat] !== undefined) {
+                        mainActuals[mCat] += t.amount;
+                    } else {
+                        // 處理舊版資料
+                        mainActuals['其他舊版支出'] = (mainActuals['其他舊版支出'] || 0) + t.amount;
+                    }
+                }
+            });
+
+            // 3. 繪製對比柱狀圖 (Grouped Bar Chart)
+            const ctx = document.getElementById('reviewChart').getContext('2d');
+            if (reviewChart) reviewChart.destroy();
+
+            reviewChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['固定支出', '變動支出', '預存支出'],
+                    datasets: [
+                        {
+                            label: '預算規劃',
+                            data: [mainBudgets['固定支出'], mainBudgets['變動支出'], mainBudgets['預存支出']],
+                            backgroundColor: '#e0e0e0',
+                            borderRadius: 5
+                        },
+                        {
+                            label: '實際花費',
+                            data: [mainActuals['固定支出']||0, mainActuals['變動支出']||0, mainActuals['預存支出']||0],
+                            backgroundColor: ['#5a4d41', '#b08d85', '#d4a373'],
+                            borderRadius: 5
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } },
+                    scales: { 
+                        y: { beginAtZero: true, grid: { color: '#f0f0f0' } }, 
+                        x: { grid: { display: false } } 
+                    }
+                }
+            });
+
+            // 4. AI 系統診斷邏輯
+            const diagContainer = document.getElementById('diagnostic-content');
+            let diagHtml = '';
+            
+            let isFixedOver = (mainActuals['固定支出'] > mainBudgets['固定支出']) && (mainBudgets['固定支出'] > 0);
+            let isVarOver = (mainActuals['變動支出'] > mainBudgets['變動支出']) && (mainBudgets['變動支出'] > 0);
+
+            if (totalExp > totalIncome && totalIncome > 0) {
+                diagHtml = `
+                    <div class="diag-status-badge danger">🆘 底氣流失中 (總支出 > 總收入)</div>
+                    <p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.6;">
+                        這個月辛苦了，我們正在透支未來的底氣。請先深呼吸，下個月試著把「變動支出」的預算往下調降 10%，我們一步一步把掌控權拿回來。
+                    </p>
+                `;
+            } else if (isFixedOver) {
+                diagHtml = `
+                    <div class="diag-status-badge danger">🔴 結構性漏水 (固定支出超標)</div>
+                    <p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.6;">
+                        警報！妳的固定支出超出了預期。請立刻檢查是不是有忘記取消的訂閱，或是日常水電使用過度。固定支出是財務的根基，必須盡快止血。
+                    </p>
+                `;
+            } else if (isVarOver) {
+                diagHtml = `
+                    <div class="diag-status-badge warning">🟡 慾望小暴走 (變動支出超標)</div>
+                    <p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.6;">
+                        變動支出不小心超標了！下個月請試著在每次消費前，啟動「購物冷靜閘」。別自責，知道哪裡漏水，下個月補起來就好。
+                    </p>
+                `;
+            } else if (totalExp === 0 && totalIncome === 0) {
+                diagHtml = `
+                    <div class="diag-status-badge" style="background:#f0f4f8; color:#546e7a;">⏳ 尚無資料</div>
+                    <p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.6; text-align:center;">
+                        這個帳期還沒有任何收支紀錄喔！快去記下妳的第一筆帳吧。
+                    </p>
+                `;
+            } else {
+                diagHtml = `
+                    <div class="diag-status-badge success">🟢 游刃有餘 (預算控管完美)</div>
+                    <p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.6;">
+                        太棒了！這個月妳完美守住了防線。多出來的結餘，請撥 20% 買個小禮物犒賞自己，剩下的放進「蓄水池」，讓未來的底氣更厚實。
+                    </p>
+                `;
+            }
+
+            diagContainer.innerHTML = diagHtml;
+        }
+
         // --- 6. 淨資產追蹤模組 ---
         function saveNetWorth() {
             const month = document.getElementById('nw-input-month').value;
             const cash = parseFloat(document.getElementById('nw-input-cash').value) || 0;
             const invest = parseFloat(document.getElementById('nw-input-invest').value) || 0;
             const debt = parseFloat(document.getElementById('nw-input-debt').value) || 0;
+
             if(!month) { alert('請選擇盤點月份！'); return; }
+
             const net = (cash + invest) - debt;
+
             const existingIndex = netWorthData.findIndex(item => item.month === month);
-            if (existingIndex !== -1) { netWorthData[existingIndex] = { month, cash, invest, debt, net }; } 
-            else { netWorthData.push({ month, cash, invest, debt, net }); }
+            if (existingIndex !== -1) {
+                netWorthData[existingIndex] = { month, cash, invest, debt, net };
+            } else {
+                netWorthData.push({ month, cash, invest, debt, net });
+            }
+
             netWorthData.sort((a, b) => a.month.localeCompare(b.month));
+            
             localStorage.setItem('bear_networth', JSON.stringify(netWorthData));
             alert('盤點資料已更新！🚀');
+            
             document.getElementById('nw-input-cash').value = '';
             document.getElementById('nw-input-invest').value = '';
             document.getElementById('nw-input-debt').value = '';
+
             renderNetWorthPage();
         }
 
@@ -891,45 +1044,104 @@
                 document.getElementById('nw-display-asset').innerText = '$0';
                 document.getElementById('nw-display-debt').innerText = '$0';
             }
+
             const diagnosedDebt = localStorage.getItem('bear_diagnosed_debt');
             const debtInput = document.getElementById('nw-input-debt');
             const formTitle = document.getElementById('nw-form-title');
+            
             if (!debtInput.value && diagnosedDebt && parseFloat(diagnosedDebt) > 0) {
                 debtInput.value = Math.round(parseFloat(diagnosedDebt));
                 formTitle.innerHTML = '更新本月盤點數據 <span style="font-size:0.75rem; color:var(--success); font-weight:normal;">(已載入診斷室負債資料✨)</span>';
-            } else { formTitle.innerHTML = '更新本月盤點數據'; }
+            } else {
+                formTitle.innerHTML = '更新本月盤點數據';
+            }
 
             const listContainer = document.getElementById('nw-history-list');
             listContainer.innerHTML = '';
-            if (netWorthData.length === 0) { listContainer.innerHTML = '<div style="text-align:center; padding:15px; color:#999; font-size:0.9rem;">尚未有盤點紀錄</div>'; } 
-            else {
+            
+            if (netWorthData.length === 0) {
+                listContainer.innerHTML = '<div style="text-align:center; padding:15px; color:#999; font-size:0.9rem;">尚未有盤點紀錄</div>';
+            } else {
                 const reversedData = [...netWorthData].reverse();
                 reversedData.forEach(item => {
                     const parts = item.month.split('-');
                     const displayMonth = `${parts[0]}年 ${parseInt(parts[1])}月`;
+                    
                     listContainer.innerHTML += `
                         <div class="nw-history-item">
-                            <div><div class="nw-history-month">${displayMonth}</div><div class="nw-history-details">存款 $${(item.cash/10000).toFixed(1)}W | 投資 $${(item.invest/10000).toFixed(1)}W | 負債 $${(item.debt/10000).toFixed(1)}W</div></div>
-                            <div style="display:flex; align-items:center;"><div class="nw-history-net">$${item.net.toLocaleString()}</div><i class="fas fa-trash delete-btn" style="margin-left:15px;" onclick="deleteNetWorth('${item.month}')"></i></div>
-                        </div>`;
+                            <div>
+                                <div class="nw-history-month">${displayMonth}</div>
+                                <div class="nw-history-details">存款 $${(item.cash/10000).toFixed(1)}W | 投資 $${(item.invest/10000).toFixed(1)}W | 負債 $${(item.debt/10000).toFixed(1)}W</div>
+                            </div>
+                            <div style="display:flex; align-items:center;">
+                                <div class="nw-history-net">$${item.net.toLocaleString()}</div>
+                                <i class="fas fa-trash delete-btn" style="margin-left:15px;" onclick="deleteNetWorth('${item.month}')"></i>
+                            </div>
+                        </div>
+                    `;
                 });
             }
+
             renderNetWorthChart();
         }
 
         function renderNetWorthChart() {
             const ctx = document.getElementById('networthChart').getContext('2d');
-            if (netWorthData.length === 0) { if(nwChart) nwChart.destroy(); return; }
-            const labels = netWorthData.map(item => { const parts = item.month.split('-'); return `${parts[1]}月`; });
+            
+            if (netWorthData.length === 0) {
+                if(nwChart) nwChart.destroy();
+                return;
+            }
+
+            const labels = netWorthData.map(item => {
+                const parts = item.month.split('-');
+                return `${parts[1]}月`; 
+            });
             const dataPoints = netWorthData.map(item => item.net);
+
             if (nwChart) nwChart.destroy();
+            
             let gradient = ctx.createLinearGradient(0, 0, 0, 400);
             gradient.addColorStop(0, 'rgba(176, 141, 133, 0.5)'); 
             gradient.addColorStop(1, 'rgba(252, 251, 249, 0)');   
+
             nwChart = new Chart(ctx, {
                 type: 'line',
-                data: { labels: labels, datasets: [{ label: '淨資產走勢', data: dataPoints, borderColor: '#b08d85', backgroundColor: gradient, borderWidth: 3, pointBackgroundColor: '#5a4d41', pointBorderColor: '#fff', pointBorderWidth: 2, pointRadius: 5, fill: true, tension: 0.3 }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: false, grid: { color: '#eee', borderDash: [5, 5] }, ticks: { color: '#968c83', callback: function(value) { return (value / 10000) + 'W'; } } }, x: { grid: { display: false }, ticks: { color: '#968c83' } } } }
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '淨資產走勢',
+                        data: dataPoints,
+                        borderColor: '#b08d85',
+                        backgroundColor: gradient,
+                        borderWidth: 3,
+                        pointBackgroundColor: '#5a4d41',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 5,
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            grid: { color: '#eee', borderDash: [5, 5] },
+                            ticks: { 
+                                color: '#968c83',
+                                callback: function(value) { return (value / 10000) + 'W'; }
+                            }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#968c83' }
+                        }
+                    }
+                }
             });
         }
 
@@ -941,80 +1153,164 @@
             }
         }
 
+
         // --- 7. 購物冷靜閘 ---
         function startLogic() {
             const name = document.getElementById('shop-name').value;
             const price = parseFloat(document.getElementById('shop-price').value);
             const salary = parseFloat(document.getElementById('shop-salary').value);
             if(!name || !price || !salary) { alert('請輸入完整資訊！'); return; }
+            
             shopItem = { name, price, wage: Math.round(salary/160), costHour: (price/(salary/160)).toFixed(1) };
             shopStep = 0; shopScore = 0;
-            document.getElementById('shop-step-1').classList.add('hidden'); document.getElementById('shop-step-2').classList.remove('hidden'); document.getElementById('shop-history-container').classList.add('hidden'); 
+            document.getElementById('shop-step-1').classList.add('hidden');
+            document.getElementById('shop-step-2').classList.remove('hidden');
+            document.getElementById('shop-history-container').classList.add('hidden'); 
             showQuestion();
         }
 
         function showQuestion() {
             const q = logicQuestions[shopStep];
-            document.getElementById('q-icon').innerText = q.icon; document.getElementById('q-title').innerText = q.title; document.getElementById('q-desc').innerText = q.desc; document.getElementById('btn-yes').innerText = q.yes; document.getElementById('btn-no').innerText = q.no;
-            if(q.data) document.getElementById('q-data').innerText = `需花費工時：${shopItem.costHour} 小時`; else document.getElementById('q-data').innerText = '';
+            document.getElementById('q-icon').innerText = q.icon;
+            document.getElementById('q-title').innerText = q.title;
+            document.getElementById('q-desc').innerText = q.desc;
+            document.getElementById('btn-yes').innerText = q.yes;
+            document.getElementById('btn-no').innerText = q.no;
+            if(q.data) document.getElementById('q-data').innerText = `需花費工時：${shopItem.costHour} 小時`;
+            else document.getElementById('q-data').innerText = '';
         }
 
-        function nextStep(isYes) { shopScore += logicQuestions[shopStep].val(isYes); shopStep++; if(shopStep < logicQuestions.length) showQuestion(); else showShopResult(); }
+        function nextStep(isYes) {
+            shopScore += logicQuestions[shopStep].val(isYes);
+            shopStep++;
+            if(shopStep < logicQuestions.length) showQuestion();
+            else showShopResult();
+        }
 
         function showShopResult() {
-            document.getElementById('shop-step-2').classList.add('hidden'); document.getElementById('shop-step-3').classList.remove('hidden');
-            let html = '', resultType = '';
-            if(shopScore >= 60) { resultType = 'pass'; html = `<span class="result-icon">🟢</span><h3>通過 (PASS)</h3><p>理性投資！符合需求與價值。</p>`; } 
-            else if(shopScore >= 0) { resultType = 'wait'; html = `<span class="result-icon">🟡</span><h3>冷靜 (WAIT)</h3><p>建議啟動 72 小時冷靜期。</p>`; } 
-            else { resultType = 'stop'; html = `<span class="result-icon">🔴</span><h3>駁回 (STOP)</h3><p>衝動消費！把錢存下來吧。</p>`; }
-            document.getElementById('logic-result-content').innerHTML = html; saveShoppingItem(resultType);
+            document.getElementById('shop-step-2').classList.add('hidden');
+            document.getElementById('shop-step-3').classList.remove('hidden');
+            
+            let html = '';
+            let resultType = '';
+            
+            if(shopScore >= 60) {
+                resultType = 'pass';
+                html = `<span class="result-icon">🟢</span><h3>通過 (PASS)</h3><p>理性投資！符合需求與價值。</p>`;
+            } else if(shopScore >= 0) {
+                resultType = 'wait';
+                html = `<span class="result-icon">🟡</span><h3>冷靜 (WAIT)</h3><p>建議啟動 72 小時冷靜期。</p>`;
+            } else {
+                resultType = 'stop';
+                html = `<span class="result-icon">🔴</span><h3>駁回 (STOP)</h3><p>衝動消費！把錢存下來吧。</p>`;
+            }
+            document.getElementById('logic-result-content').innerHTML = html;
+            saveShoppingItem(resultType);
         }
 
         function saveShoppingItem(resultType) {
-            const newItem = { id: Date.now(), name: shopItem.name, price: shopItem.price, costHour: shopItem.costHour, result: resultType, timestamp: Date.now() };
-            shoppingList.unshift(newItem); localStorage.setItem('bear_shopping_list', JSON.stringify(shoppingList));
+            const newItem = {
+                id: Date.now(),
+                name: shopItem.name,
+                price: shopItem.price,
+                costHour: shopItem.costHour,
+                result: resultType,
+                timestamp: Date.now()
+            };
+            shoppingList.unshift(newItem);
+            localStorage.setItem('bear_shopping_list', JSON.stringify(shoppingList));
         }
 
         function resetShop() {
-            document.getElementById('shop-step-3').classList.add('hidden'); document.getElementById('shop-step-1').classList.remove('hidden'); document.getElementById('shop-history-container').classList.remove('hidden'); 
-            document.getElementById('shop-name').value = ''; document.getElementById('shop-price').value = ''; renderShoppingList();
+            document.getElementById('shop-step-3').classList.add('hidden');
+            document.getElementById('shop-step-1').classList.remove('hidden');
+            document.getElementById('shop-history-container').classList.remove('hidden'); 
+            document.getElementById('shop-name').value = '';
+            document.getElementById('shop-price').value = '';
+            renderShoppingList();
         }
 
         function renderShoppingList() {
             const listContainer = document.getElementById('shop-list-content');
             if(!listContainer) return;
-            if(shoppingList.length === 0) { listContainer.innerHTML = '<div style="text-align:center; padding:15px; color:#999; font-size:0.9rem;">目前沒有購物評估紀錄</div>'; return; }
+            
+            if(shoppingList.length === 0) {
+                listContainer.innerHTML = '<div style="text-align:center; padding:15px; color:#999; font-size:0.9rem;">目前沒有購物評估紀錄</div>';
+                return;
+            }
+
             listContainer.innerHTML = '';
             shoppingList.forEach(item => {
-                let badgeClass = '', badgeText = '', timerHtml = '';
-                if (item.result === 'pass') { badgeClass = 'status-pass'; badgeText = '通過 ✅'; } 
-                else if (item.result === 'wait') { badgeClass = 'status-wait'; badgeText = '冷靜 ⏳'; timerHtml = `<div class="timer-badge" data-ts="${item.timestamp}">計算中...</div>`; } 
-                else { badgeClass = 'status-stop'; badgeText = '駁回 🛑'; }
+                let badgeClass = '';
+                let badgeText = '';
+                let timerHtml = '';
+
+                if (item.result === 'pass') {
+                    badgeClass = 'status-pass'; badgeText = '通過 ✅';
+                } else if (item.result === 'wait') {
+                    badgeClass = 'status-wait'; badgeText = '冷靜 ⏳';
+                    timerHtml = `<div class="timer-badge" data-ts="${item.timestamp}">計算中...</div>`;
+                } else {
+                    badgeClass = 'status-stop'; badgeText = '駁回 🛑';
+                }
+
                 listContainer.innerHTML += `
                     <div class="shop-list-item">
-                        <div class="shop-info"><div class="shop-name">${item.name} <span style="font-size:0.8rem; font-weight:400;">$${item.price.toLocaleString()}</span></div><div class="shop-meta">工時: ${item.costHour}hr ${timerHtml}</div></div>
-                        <div style="display:flex; align-items:center;"><span class="shop-status ${badgeClass}">${badgeText}</span><i class="fas fa-trash delete-btn" style="margin-left:15px;" onclick="deleteShopItem(${item.id})"></i></div>
-                    </div>`;
+                        <div class="shop-info">
+                            <div class="shop-name">${item.name} <span style="font-size:0.8rem; font-weight:400;">$${item.price.toLocaleString()}</span></div>
+                            <div class="shop-meta">工時: ${item.costHour}hr ${timerHtml}</div>
+                        </div>
+                        <div style="display:flex; align-items:center;">
+                            <span class="shop-status ${badgeClass}">${badgeText}</span>
+                            <i class="fas fa-trash delete-btn" style="margin-left:15px;" onclick="deleteShopItem(${item.id})"></i>
+                        </div>
+                    </div>
+                `;
             });
             updateCountdowns();
         }
 
-        function deleteShopItem(id) { if(confirm('確定刪除這筆紀錄？')) { shoppingList = shoppingList.filter(i => i.id !== id); localStorage.setItem('bear_shopping_list', JSON.stringify(shoppingList)); renderShoppingList(); } }
+        function deleteShopItem(id) {
+            if(confirm('確定刪除這筆紀錄？')) {
+                shoppingList = shoppingList.filter(i => i.id !== id);
+                localStorage.setItem('bear_shopping_list', JSON.stringify(shoppingList));
+                renderShoppingList();
+            }
+        }
 
         function updateCountdowns() {
-            const timers = document.querySelectorAll('.timer-badge'); const now = Date.now();
+            const timers = document.querySelectorAll('.timer-badge');
+            const now = Date.now();
             timers.forEach(timer => {
-                const diff = parseInt(timer.getAttribute('data-ts')) + (72 * 60 * 60 * 1000) - now;
-                if (diff <= 0) { timer.innerText = "冷靜期結束"; timer.style.background = "#888"; } 
-                else { const h = Math.floor(diff / (1000 * 60 * 60)), m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)), s = Math.floor((diff % (1000 * 60)) / 1000); timer.innerText = `${h}h ${m}m ${s}s`; }
+                const createdTime = parseInt(timer.getAttribute('data-ts'));
+                const endTime = createdTime + (72 * 60 * 60 * 1000);
+                const diff = endTime - now;
+                if (diff <= 0) {
+                    timer.innerText = "冷靜期結束";
+                    timer.style.background = "#888";
+                } else {
+                    const h = Math.floor(diff / (1000 * 60 * 60));
+                    const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                    const s = Math.floor((diff % (1000 * 60)) / 1000);
+                    timer.innerText = `${h}h ${m}m ${s}s`;
+                }
             });
         }
 
         // --- 8. 資料匯出與匯入 ---
         function exportData() {
-            const data = { tx: transactions, budget: budgets, shop: shoppingList, networth: netWorthData, settings: sysSettings };
-            const blob = new Blob([JSON.stringify(data)], {type: "text/json"}); const link = document.createElement("a"); link.href = URL.createObjectURL(blob);
-            link.download = "bear_backup_" + new Date().toISOString().slice(0,10) + ".json"; link.click();
+            const data = { 
+                tx: transactions, 
+                budget: budgets, 
+                shop: shoppingList,
+                networth: netWorthData,
+                settings: sysSettings 
+            };
+            const blob = new Blob([JSON.stringify(data)], {type: "text/json"});
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "bear_backup_" + new Date().toISOString().slice(0,10) + ".json";
+            link.click();
         }
 
         function importData(input) {
@@ -1022,16 +1318,39 @@
             reader.onload = function(e) {
                 try {
                     const data = JSON.parse(e.target.result);
-                    if (Array.isArray(data)) { transactions = data; } else { transactions = data.tx || []; budgets = data.budget || {}; shoppingList = data.shop || []; netWorthData = data.networth || []; sysSettings = data.settings || { cycleStart: 1 }; }
-                    localStorage.setItem('bear_transactions', JSON.stringify(transactions)); localStorage.setItem('bear_budgets', JSON.stringify(budgets)); localStorage.setItem('bear_shopping_list', JSON.stringify(shoppingList)); localStorage.setItem('bear_networth', JSON.stringify(netWorthData)); localStorage.setItem('bear_sys_settings', JSON.stringify(sysSettings));
+                    if (Array.isArray(data)) { transactions = data; } 
+                    else { 
+                        transactions = data.tx || []; 
+                        budgets = data.budget || {}; 
+                        shoppingList = data.shop || []; 
+                        netWorthData = data.networth || []; 
+                        sysSettings = data.settings || { cycleStart: 1 };
+                    }
+                    localStorage.setItem('bear_transactions', JSON.stringify(transactions));
+                    localStorage.setItem('bear_budgets', JSON.stringify(budgets));
+                    localStorage.setItem('bear_shopping_list', JSON.stringify(shoppingList));
+                    localStorage.setItem('bear_networth', JSON.stringify(netWorthData));
+                    localStorage.setItem('bear_sys_settings', JSON.stringify(sysSettings));
                     alert('匯入成功！'); location.reload();
                 } catch(err) { alert('檔案錯誤'); }
-            }; reader.readAsText(input.files[0]);
+            };
+            reader.readAsText(input.files[0]);
         }
 
-        function clearData() { if(confirm('確定清空所有資料？（此動作無法復原）')) { localStorage.clear(); location.reload(); } }
+        function clearData() {
+            if(confirm('確定清空所有資料？（此動作無法復原）')) {
+                localStorage.clear(); location.reload();
+            }
+        }
 
-        if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(err => { console.log('ServiceWorker 註冊失敗: ', err); }); }); }
+        // ================= PWA Service Worker 註冊 =================
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(registration => { console.log('ServiceWorker 註冊成功，範圍: ', registration.scope); })
+                    .catch(err => { console.log('ServiceWorker 註冊失敗: ', err); });
+            });
+        }
     </script>
 </body>
 </html>
