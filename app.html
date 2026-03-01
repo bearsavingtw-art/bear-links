@@ -160,18 +160,42 @@
         .modal-overlay.show .modal-content { transform: translateY(0); }
         .install-guide-box { background: var(--bg-color); padding: 20px 15px; border-radius: 15px; margin-bottom: 20px; border: 1px solid #eee; }
 
-        /* [NEW] 結算診斷專屬樣式 */
+        /* 結算診斷專屬樣式 */
         .diag-status-badge { font-size: 1rem; padding: 12px; border-radius: 10px; text-align: center; display: block; font-weight: 600; margin-bottom: 15px; }
         .diag-status-badge.success { background: rgba(129, 199, 132, 0.2); color: var(--success); }
         .diag-status-badge.warning { background: rgba(255, 213, 79, 0.2); color: #f9a825; }
         .diag-status-badge.danger { background: rgba(229, 115, 115, 0.2); color: var(--danger); }
+
+        /* [NEW] 里程碑成就專屬樣式 */
+        .milestone-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;}
+        .milestone-item { 
+            background: var(--bg-color); border: 1px solid #eee; border-radius: 12px; 
+            padding: 15px 10px; text-align: center; position: relative; transition: 0.3s;
+        }
+        .milestone-icon { font-size: 2.2rem; filter: grayscale(100%); opacity: 0.3; transition: 0.5s; display: block; margin-bottom: 8px;}
+        .milestone-title { font-weight: 700; font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 4px; transition: 0.3s;}
+        .milestone-desc { font-size: 0.75rem; color: #aaa; line-height: 1.4; display: none;}
+        .milestone-progress { font-size: 0.7rem; color: #999; margin-top: 5px; font-family: monospace;}
+        
+        .milestone-item.unlocked { background: #fff; border-color: var(--accent); box-shadow: 0 4px 10px rgba(176,141,133,0.15); }
+        .milestone-item.unlocked .milestone-icon { filter: none; opacity: 1; transform: scale(1.1); }
+        .milestone-item.unlocked .milestone-title { color: var(--text-primary); }
+        .milestone-item.unlocked .milestone-desc { display: block; color: var(--text-secondary); margin-top: 5px;}
+        .milestone-item.unlocked .milestone-progress { display: none; }
+        
+        .achievement-banner {
+            background: linear-gradient(135deg, #d4a373 0%, #b08d85 100%);
+            color: #fff; padding: 15px; border-radius: 15px; display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 20px; cursor: pointer; box-shadow: 0 5px 15px rgba(212,163,115,0.3); transition: 0.3s;
+        }
+        .achievement-banner:active { transform: scale(0.98); }
     </style>
 </head>
 <body>
 
     <header>
         <h1>Bear.saving</h1>
-        <div style="font-size:0.8rem; color:var(--text-secondary);">Financial Cockpit v2.7</div>
+        <div style="font-size:0.8rem; color:var(--text-secondary);">Financial Cockpit v2.8</div>
     </header>
 
     <div id="page-dash" class="page active">
@@ -227,7 +251,6 @@
         <div class="card" style="text-align:center;">
             <div class="stat-label" id="balance-card-title">本期日常總結餘</div>
             <div class="stat-value balance" id="display-balance" style="font-size:1.8rem; margin-bottom:15px;">$0</div>
-            
             <button class="btn" style="background:#5a4d41;" onclick="switchPage('review')">📊 產生本期結算診斷報告</button>
         </div>
     </div>
@@ -344,6 +367,14 @@
     </div>
 
     <div id="page-settings" class="page">
+        <div class="achievement-banner" onclick="switchPage('milestones')">
+            <div>
+                <div style="font-weight:700; font-size:1.1rem; margin-bottom:2px;"><i class="fas fa-medal"></i> 底氣里程碑</div>
+                <div style="font-size:0.85rem; opacity:0.9;">查看妳的安全感成就解鎖進度</div>
+            </div>
+            <i class="fas fa-chevron-right" style="font-size:1.2rem;"></i>
+        </div>
+
         <div class="card">
             <div class="card-title">系統設定 (System)</div>
             <div class="form-group">
@@ -378,11 +409,33 @@
         </div>
     </div>
 
+    <div id="page-milestones" class="page">
+        <div class="card" style="background: linear-gradient(135deg, var(--text-primary) 0%, #3e332a 100%); color: #fff; text-align: center; border: none;">
+            <div style="font-size:3rem; margin-bottom:10px;">🏆</div>
+            <h2 style="margin:0 0 5px 0; font-family:'Playfair Display';">Security Milestones</h2>
+            <p style="font-size:0.85rem; color:rgba(255,255,255,0.8); margin:0;">記帳不是終點，找回掌控感才是。</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title">紀律與習慣</div>
+            <div class="milestone-grid" id="ms-grid-habit">
+                </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">資產與底氣</div>
+            <div class="milestone-grid" id="ms-grid-asset">
+                </div>
+        </div>
+
+        <button class="btn-outline" onclick="switchPage('settings')"><i class="fas fa-arrow-left"></i> 返回設定</button>
+    </div>
+
     <div class="bottom-nav">
         <div class="nav-item active" onclick="switchPage('dash')" id="nav-dash"><i class="fas fa-chart-pie"></i> 儀表板</div>
         <div class="nav-item" onclick="switchPage('networth')" id="nav-networth"><i class="fas fa-coins"></i> 資產盤點</div>
         <div class="nav-item" onclick="openAddPage()" id="nav-add"><i class="fas fa-plus-circle" style="font-size:1.6rem; color:var(--text-primary); transform:translateY(-2px);"></i> 記帳</div>
-        <div class="nav-item" onclick="switchPage('settings')" id="nav-settings"><i class="fas fa-list-ul"></i> 明細設定</div>
+        <div class="nav-item" onclick="switchPage('settings')" id="nav-settings"><i class="fas fa-list-ul"></i> 設定</div>
     </div>
 
     <div id="install-modal" class="modal-overlay">
@@ -424,7 +477,7 @@
         
         let myChart = null;
         let nwChart = null; 
-        let reviewChart = null; // [NEW] 月結診斷圖表實例
+        let reviewChart = null; 
         let editingId = null;
         let dashboardViewDate = new Date();
 
@@ -513,7 +566,6 @@
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById('page-' + pageId).classList.add('active');
             
-            // 處理底部導覽列亮起狀態
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             if (pageId === 'dash' || pageId === 'shop' || pageId === 'review') document.getElementById('nav-dash').classList.add('active');
             else if (pageId === 'add') document.getElementById('nav-add').classList.add('active');
@@ -522,14 +574,12 @@
             
             window.scrollTo(0, 0);
             
-            if(pageId === 'dash') {
-                dashboardViewDate = new Date(); 
-                renderDashboard();
-            }
+            if(pageId === 'dash') { dashboardViewDate = new Date(); renderDashboard(); }
             if(pageId === 'settings') renderList();
             if(pageId === 'shop') { resetShop(); renderShoppingList(); }
             if(pageId === 'networth') renderNetWorthPage(); 
-            if(pageId === 'review') renderReviewPage(); // [NEW] 渲染診斷頁面
+            if(pageId === 'review') renderReviewPage(); 
+            if(pageId === 'milestones') renderMilestonesPage(); // [NEW] 渲染里程碑
         }
 
         function openAddPage() { resetForm(); switchPage('add'); }
@@ -642,7 +692,7 @@
             }
         }
 
-        // --- 4. 預算設定 (10袋版) ---
+        // --- 4. 預算設定 ---
         function renderBudgetSettings() {
             const container = document.getElementById('budget-settings-container');
             container.innerHTML = '';
@@ -675,31 +725,18 @@
             const currentCycleTime = currentCycle.start.getTime();
             const realTodayCycleTime = realTodayCycle.start.getTime();
 
-            if (currentCycleTime < realTodayCycleTime) {
-                timeStatus = 'past';
-            } else if (currentCycleTime > realTodayCycleTime) {
-                timeStatus = 'future';
-            }
+            if (currentCycleTime < realTodayCycleTime) { timeStatus = 'past'; } 
+            else if (currentCycleTime > realTodayCycleTime) { timeStatus = 'future'; }
 
             const titleEl = document.getElementById('dash-cycle-title');
             const datesEl = document.getElementById('dash-cycle-dates');
             
-            if (timeStatus === 'past') {
-                titleEl.innerHTML = `回顧：${currentCycle.label}`;
-                titleEl.style.color = 'var(--text-secondary)'; 
-            } else if (timeStatus === 'future') {
-                titleEl.innerHTML = `未來預估：${currentCycle.label}`;
-                titleEl.style.color = 'var(--info)'; 
-            } else {
-                titleEl.innerHTML = currentCycle.label;
-                titleEl.style.color = 'var(--text-primary)';
-            }
+            if (timeStatus === 'past') { titleEl.innerHTML = `回顧：${currentCycle.label}`; titleEl.style.color = 'var(--text-secondary)'; } 
+            else if (timeStatus === 'future') { titleEl.innerHTML = `未來預估：${currentCycle.label}`; titleEl.style.color = 'var(--info)'; } 
+            else { titleEl.innerHTML = currentCycle.label; titleEl.style.color = 'var(--text-primary)'; }
             
-            if (currentCycle.isDefault) {
-                datesEl.innerHTML = `(1號 - 月底)`;
-            } else {
-                datesEl.innerHTML = `(${currentCycle.start.getMonth()+1}/${currentCycle.start.getDate()} - ${currentCycle.end.getMonth()+1}/${currentCycle.end.getDate()})`;
-            }
+            if (currentCycle.isDefault) { datesEl.innerHTML = `(1號 - 月底)`; } 
+            else { datesEl.innerHTML = `(${currentCycle.start.getMonth()+1}/${currentCycle.start.getDate()} - ${currentCycle.end.getMonth()+1}/${currentCycle.end.getDate()})`; }
 
             let prefix = '本期';
             if (timeStatus === 'past') prefix = '該期';
@@ -747,7 +784,6 @@
         function renderBudgetBars(envExp) {
             const container = document.getElementById('budget-container');
             container.innerHTML = '';
-            
             let hasAnyBudget = false;
 
             for (let mainCat in envelopes) {
@@ -883,12 +919,11 @@
             });
         }
 
-        // --- [NEW] 月結診斷與對比柱狀圖 ---
+        // --- 月結診斷與對比柱狀圖 ---
         function renderReviewPage() {
             const currentCycle = getCycleBoundary(dashboardViewDate, sysSettings.cycleStart);
             document.getElementById('review-cycle-title').innerText = `${currentCycle.label} 診斷`;
 
-            // 1. 計算三大類預算總和
             let mainBudgets = { '固定支出': 0, '變動支出': 0, '預存支出': 0 };
             for (let mainCat in envelopes) {
                 envelopes[mainCat].forEach(env => {
@@ -896,7 +931,6 @@
                 });
             }
 
-            // 2. 計算本期三大類實際花費與總收入
             const cycleTx = transactions.filter(t => {
                 const tDate = new Date(t.date);
                 tDate.setHours(0,0,0,0);
@@ -916,13 +950,11 @@
                     if (mainActuals[mCat] !== undefined) {
                         mainActuals[mCat] += t.amount;
                     } else {
-                        // 處理舊版資料
                         mainActuals['其他舊版支出'] = (mainActuals['其他舊版支出'] || 0) + t.amount;
                     }
                 }
             });
 
-            // 3. 繪製對比柱狀圖 (Grouped Bar Chart)
             const ctx = document.getElementById('reviewChart').getContext('2d');
             if (reviewChart) reviewChart.destroy();
 
@@ -931,32 +963,13 @@
                 data: {
                     labels: ['固定支出', '變動支出', '預存支出'],
                     datasets: [
-                        {
-                            label: '預算規劃',
-                            data: [mainBudgets['固定支出'], mainBudgets['變動支出'], mainBudgets['預存支出']],
-                            backgroundColor: '#e0e0e0',
-                            borderRadius: 5
-                        },
-                        {
-                            label: '實際花費',
-                            data: [mainActuals['固定支出']||0, mainActuals['變動支出']||0, mainActuals['預存支出']||0],
-                            backgroundColor: ['#5a4d41', '#b08d85', '#d4a373'],
-                            borderRadius: 5
-                        }
+                        { label: '預算規劃', data: [mainBudgets['固定支出'], mainBudgets['變動支出'], mainBudgets['預存支出']], backgroundColor: '#e0e0e0', borderRadius: 5 },
+                        { label: '實際花費', data: [mainActuals['固定支出']||0, mainActuals['變動支出']||0, mainActuals['預存支出']||0], backgroundColor: ['#5a4d41', '#b08d85', '#d4a373'], borderRadius: 5 }
                     ]
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom' } },
-                    scales: { 
-                        y: { beginAtZero: true, grid: { color: '#f0f0f0' } }, 
-                        x: { grid: { display: false } } 
-                    }
-                }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: true, grid: { color: '#f0f0f0' } }, x: { grid: { display: false } } } }
             });
 
-            // 4. AI 系統診斷邏輯
             const diagContainer = document.getElementById('diagnostic-content');
             let diagHtml = '';
             
@@ -964,43 +977,73 @@
             let isVarOver = (mainActuals['變動支出'] > mainBudgets['變動支出']) && (mainBudgets['變動支出'] > 0);
 
             if (totalExp > totalIncome && totalIncome > 0) {
-                diagHtml = `
-                    <div class="diag-status-badge danger">🆘 底氣流失中 (總支出 > 總收入)</div>
-                    <p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.6;">
-                        這個月辛苦了，我們正在透支未來的底氣。請先深呼吸，下個月試著把「變動支出」的預算往下調降 10%，我們一步一步把掌控權拿回來。
-                    </p>
-                `;
+                diagHtml = `<div class="diag-status-badge danger">🆘 底氣流失中 (總支出 > 總收入)</div><p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.6;">這個月辛苦了，我們正在透支未來的底氣。請先深呼吸，下個月試著把「變動支出」的預算往下調降 10%，我們一步一步把掌控權拿回來。</p>`;
             } else if (isFixedOver) {
-                diagHtml = `
-                    <div class="diag-status-badge danger">🔴 結構性漏水 (固定支出超標)</div>
-                    <p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.6;">
-                        警報！妳的固定支出超出了預期。請立刻檢查是不是有忘記取消的訂閱，或是日常水電使用過度。固定支出是財務的根基，必須盡快止血。
-                    </p>
-                `;
+                diagHtml = `<div class="diag-status-badge danger">🔴 結構性漏水 (固定支出超標)</div><p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.6;">警報！妳的固定支出超出了預期。請立刻檢查是不是有忘記取消的訂閱，或是日常水電使用過度。固定支出是財務的根基，必須盡快止血。</p>`;
             } else if (isVarOver) {
-                diagHtml = `
-                    <div class="diag-status-badge warning">🟡 慾望小暴走 (變動支出超標)</div>
-                    <p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.6;">
-                        變動支出不小心超標了！下個月請試著在每次消費前，啟動「購物冷靜閘」。別自責，知道哪裡漏水，下個月補起來就好。
-                    </p>
-                `;
+                diagHtml = `<div class="diag-status-badge warning">🟡 慾望小暴走 (變動支出超標)</div><p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.6;">變動支出不小心超標了！下個月請試著在每次消費前，啟動「購物冷靜閘」。別自責，知道哪裡漏水，下個月補起來就好。</p>`;
             } else if (totalExp === 0 && totalIncome === 0) {
-                diagHtml = `
-                    <div class="diag-status-badge" style="background:#f0f4f8; color:#546e7a;">⏳ 尚無資料</div>
-                    <p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.6; text-align:center;">
-                        這個帳期還沒有任何收支紀錄喔！快去記下妳的第一筆帳吧。
-                    </p>
-                `;
+                diagHtml = `<div class="diag-status-badge" style="background:#f0f4f8; color:#546e7a;">⏳ 尚無資料</div><p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.6; text-align:center;">這個帳期還沒有任何收支紀錄喔！快去記下妳的第一筆帳吧。</p>`;
             } else {
-                diagHtml = `
-                    <div class="diag-status-badge success">🟢 游刃有餘 (預算控管完美)</div>
-                    <p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.6;">
-                        太棒了！這個月妳完美守住了防線。多出來的結餘，請撥 20% 買個小禮物犒賞自己，剩下的放進「蓄水池」，讓未來的底氣更厚實。
-                    </p>
-                `;
+                diagHtml = `<div class="diag-status-badge success">🟢 游刃有餘 (預算控管完美)</div><p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.6;">太棒了！這個月妳完美守住了防線。多出來的結餘，請撥 20% 買個小禮物犒賞自己，剩下的放進「蓄水池」，讓未來的底氣更厚實。</p>`;
+            }
+            diagContainer.innerHTML = diagHtml;
+        }
+
+        // --- [NEW] 底氣里程碑成就系統 ---
+        function renderMilestonesPage() {
+            // 計算各項成就條件
+            let txCount = transactions.length;
+            let rejectedShops = shoppingList.filter(s => s.result === 'stop').length;
+            
+            let maxNetWorth = 0;
+            if (netWorthData.length > 0) {
+                maxNetWorth = Math.max(...netWorthData.map(n => n.net));
             }
 
-            diagContainer.innerHTML = diagHtml;
+            // 定義里程碑資料
+            const milestones = {
+                habit: [
+                    { id: 'h1', icon: '🌱', title: '第一滴露水', desc: '成功記下第一筆帳，萬事起頭難，妳已經跨出找回底氣的第一步！', condition: txCount >= 1, progress: `${txCount}/1` },
+                    { id: 'h2', icon: '🌿', title: '記帳熟練者', desc: '累積記錄 50 筆帳務，妳已經證明自己能持續追蹤金錢流向。', condition: txCount >= 50, progress: `${txCount}/50` },
+                    { id: 'h3', icon: '🛡️', title: '冷靜之盾', desc: '使用冷靜閘成功「駁回」3 次衝動消費，守住了未來的生命時間！', condition: rejectedShops >= 3, progress: `${rejectedShops}/3` }
+                ],
+                asset: [
+                    { id: 'a1', icon: '🚀', title: '突破零點', desc: '淨資產大於 $0！正式擺脫負債的引力，這是一個偉大的起點。', condition: maxNetWorth > 0, progress: `目前最高 $${maxNetWorth.toLocaleString()}` },
+                    { id: 'a2', icon: '💧', title: '初級蓄水池', desc: '淨資產突破 10 萬元！妳為自己存下了第一筆能應付突發狀況的底氣。', condition: maxNetWorth >= 100000, progress: `目前最高 $${maxNetWorth.toLocaleString()}` },
+                    { id: 'a3', icon: '🌊', title: '微退休預備', desc: '淨資產突破 50 萬元！妳擁有了說「不」的權利，能優雅地面對爛工作。', condition: maxNetWorth >= 500000, progress: `目前最高 $${maxNetWorth.toLocaleString()}` }
+                ]
+            };
+
+            // 渲染習慣區
+            const gridHabit = document.getElementById('ms-grid-habit');
+            gridHabit.innerHTML = '';
+            milestones.habit.forEach(m => {
+                let classStr = m.condition ? 'milestone-item unlocked' : 'milestone-item';
+                gridHabit.innerHTML += `
+                    <div class="${classStr}">
+                        <span class="milestone-icon">${m.icon}</span>
+                        <div class="milestone-title">${m.title}</div>
+                        <div class="milestone-desc">${m.desc}</div>
+                        <div class="milestone-progress">進度: ${m.progress}</div>
+                    </div>
+                `;
+            });
+
+            // 渲染資產區
+            const gridAsset = document.getElementById('ms-grid-asset');
+            gridAsset.innerHTML = '';
+            milestones.asset.forEach(m => {
+                let classStr = m.condition ? 'milestone-item unlocked' : 'milestone-item';
+                gridAsset.innerHTML += `
+                    <div class="${classStr}">
+                        <span class="milestone-icon">${m.icon}</span>
+                        <div class="milestone-title">${m.title}</div>
+                        <div class="milestone-desc">${m.desc}</div>
+                        <div class="milestone-progress">進度: ${m.progress}</div>
+                    </div>
+                `;
+            });
         }
 
         // --- 6. 淨資產追蹤模組 ---
