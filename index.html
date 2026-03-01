@@ -97,35 +97,13 @@
 
         /* 往下滑動提示動畫 */
         .scroll-indicator {
-            position: absolute;
-            bottom: 40px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: rgba(255, 255, 255, 0.9);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            animation: bounce 2s infinite;
-            pointer-events: none;
-            z-index: 10;
+            position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.9); display: flex; flex-direction: column;
+            align-items: center; animation: bounce 2s infinite; pointer-events: none; z-index: 10;
         }
-        .scroll-indicator span {
-            font-size: 0.85rem;
-            letter-spacing: 1px;
-            font-family: 'Noto Serif TC', serif;
-            text-shadow: 0 2px 5px rgba(0,0,0,0.3);
-        }
-        .scroll-indicator i {
-            margin-top: 8px;
-            font-size: 1.2rem;
-            opacity: 0.8;
-            text-shadow: 0 2px 5px rgba(0,0,0,0.3);
-        }
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% { transform: translateY(0) translateX(-50%); }
-            40% { transform: translateY(-10px) translateX(-50%); }
-            60% { transform: translateY(-5px) translateX(-50%); }
-        }
+        .scroll-indicator span { font-size: 0.85rem; letter-spacing: 1px; font-family: 'Noto Serif TC', serif; text-shadow: 0 2px 5px rgba(0,0,0,0.3); }
+        .scroll-indicator i { margin-top: 8px; font-size: 1.2rem; opacity: 0.8; text-shadow: 0 2px 5px rgba(0,0,0,0.3); }
+        @keyframes bounce { 0%, 20%, 50%, 80%, 100% { transform: translateY(0) translateX(-50%); } 40% { transform: translateY(-10px) translateX(-50%); } 60% { transform: translateY(-5px) translateX(-50%); } }
 
         /* 通用區塊 */
         .section { padding: 80px 20px; max-width: 900px; margin: 0 auto; text-align: center; }
@@ -139,105 +117,48 @@
             color: rgba(176, 141, 133, 0.2); position: absolute; top: -40px; left: 50%; transform: translateX(-50%);
         }
 
-        /* 最新消息區塊 */
-        .news-box {
-            background: #fff;
-            border-left: 4px solid var(--accent);
-            padding: 30px 25px;
-            border-radius: 0 12px 12px 0;
-            box-shadow: var(--card-shadow);
-            text-align: left;
-            max-width: 700px;
-            margin: 0 auto 20px;
-        }
-        .news-item {
-            display: flex; align-items: flex-start; margin-bottom: 18px;
-            border-bottom: 1px dashed #eee; padding-bottom: 18px;
-        }
-        .news-item:last-child { margin-bottom: 0; border-bottom: none; padding-bottom: 0; }
-        .news-icon {
-            color: var(--accent); font-size: 1.1rem;
-            margin-right: 15px; margin-top: 3px; flex-shrink: 0;
-        }
-        .news-content strong { color: var(--accent); font-weight: 600; }
-        .news-title-text { font-weight: 600; display: block; margin-bottom: 3px; color: var(--text-primary); }
-        .news-desc { font-size: 0.9rem; color: var(--text-secondary); }
-
-        /* 售後工單特別樣式 */
-        .news-item-support {
-            background: rgba(229, 115, 115, 0.05); border: 1px solid #ffebee;
-            border-left: 4px solid var(--danger); padding: 15px; border-radius: 8px;
-        }
-
-        /* 影片 */
-        .video-container {
-            width: 100%; max-width: 380px; margin: 0 auto 50px;
-            border-radius: 20px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.08);
-            position: relative; min-height: 500px; background: #fff;
-            display: flex; justify-content: center; align-items: center;
-        }
-        .fallback-link { position: absolute; text-align: center; z-index: 1; color: var(--text-secondary); text-decoration: none; font-size: 0.9rem; }
-        .instagram-media { position: relative; z-index: 2; min-width: 100% !important; margin: 0 !important; }
-
-        /* --- [NEW] The Bear System 視覺化生態系 --- */
-        .system-timeline {
-            max-width: 600px; margin: 0 auto; text-align: left;
-            position: relative; padding: 20px 0;
-        }
-        .system-step {
-            background: #fff; border-radius: 15px; padding: 25px;
-            box-shadow: var(--card-shadow); margin-bottom: 30px;
-            position: relative; border: 1px solid rgba(176, 141, 133, 0.15);
+        /* --- [NEW] 精簡版 The Bear System (底氣三部曲) --- */
+        .system-trilogy { display: flex; flex-direction: column; gap: 20px; max-width: 700px; margin: 0 auto; }
+        .trilogy-card {
+            background: #fff; border-radius: 20px; padding: 30px 25px;
+            text-align: left; box-shadow: var(--card-shadow); border: 1px solid #f0f0f0;
+            display: flex; flex-direction: column; gap: 15px; position: relative; overflow: hidden;
             transition: transform 0.3s ease;
         }
-        .system-step:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        .trilogy-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.08); border-color: var(--accent); }
         
-        /* 連接箭頭 */
-        .system-connector {
-            text-align: center; color: var(--accent); font-size: 1.5rem;
-            margin-top: -15px; margin-bottom: 15px; opacity: 0.6;
+        /* 卡片左側的裝飾色塊 */
+        .trilogy-card::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 6px; height: 100%;
         }
-        .data-flow-connector {
-            display: flex; align-items: center; justify-content: center; gap: 10px;
-            color: var(--success); font-size: 0.85rem; font-weight: 600;
-            margin-top: -15px; margin-bottom: 15px;
-        }
-        .data-flow-connector::before, .data-flow-connector::after {
-            content: ''; height: 1px; background: var(--success); flex: 0.2; opacity: 0.5;
-        }
+        .card-step-1::before { background: var(--danger); }
+        .card-step-2::before { background: var(--tool-color); }
+        .card-step-3::before { background: var(--accent); }
 
-        .step-header { display: flex; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px;}
-        .step-number { 
-            background: var(--text-primary); color: #fff; width: 30px; height: 30px; 
-            border-radius: 50%; display: flex; align-items: center; justify-content: center; 
-            font-weight: bold; font-size: 0.9rem; margin-right: 12px; flex-shrink: 0;
+        .trilogy-header { display: flex; align-items: center; gap: 15px; }
+        .trilogy-icon {
+            width: 55px; height: 55px; border-radius: 50%; display: flex;
+            align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;
         }
-        .step-title { font-size: 1.15rem; font-weight: 700; color: var(--text-primary); font-family: 'Noto Serif TC', serif; }
-        
-        .tool-list { list-style: none; padding: 0; margin: 0; }
-        .tool-item { 
-            display: flex; align-items: center; margin-bottom: 10px; 
-            padding: 10px 15px; border-radius: 10px; background: #fdfbf7;
-        }
-        .tool-item:last-child { margin-bottom: 0; }
-        .tool-icon { margin-right: 12px; font-size: 1.1rem; width: 20px; text-align: center; }
-        .tool-name { font-weight: 600; font-size: 0.95rem; color: var(--text-primary); }
-        .tool-desc { font-size: 0.8rem; color: var(--text-secondary); margin-left: auto; }
-        
-        /* 標籤樣式 */
-        .tag-app { background: var(--tool-bg); border-left: 3px solid var(--tool-color); }
-        .tag-app .tool-icon { color: var(--tool-color); }
-        .tag-concept { background: #fffafa; border-left: 3px solid var(--danger); }
-        .tag-concept .tool-icon { color: var(--danger); }
-        .tag-physical { background: #f9f6f0; border-left: 3px solid var(--accent); }
-        .tag-physical .tool-icon { color: var(--accent); }
+        .card-step-1 .trilogy-icon { background: #fffafa; color: var(--danger); }
+        .card-step-2 .trilogy-icon { background: #f0f4f8; color: var(--tool-color); }
+        .card-step-3 .trilogy-icon { background: #fdfbf7; color: var(--accent); }
 
-        .system-goal {
-            text-align: center; background: var(--text-primary); color: #fff;
-            padding: 20px; border-radius: 15px; font-weight: 600; font-size: 1.1rem;
-            letter-spacing: 1px; box-shadow: 0 10px 20px rgba(90, 77, 65, 0.2);
-            margin-top: 10px;
+        .trilogy-title { font-size: 1.2rem; font-weight: 700; color: var(--text-primary); margin-bottom: 3px; }
+        .trilogy-subtitle { font-size: 0.85rem; color: var(--text-secondary); letter-spacing: 1px; }
+        .trilogy-desc { font-size: 0.95rem; color: #666; line-height: 1.6; margin: 5px 0 10px; }
+        
+        .trilogy-btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            padding: 12px 20px; border-radius: 50px; font-weight: 600; font-size: 0.9rem;
+            text-decoration: none; transition: 0.3s; width: 100%; border: none; cursor: pointer;
         }
+        .btn-step-1 { background: var(--danger); color: #fff; }
+        .btn-step-1:hover { background: #d32f2f; }
+        .btn-step-2 { background: var(--tool-color); color: #fff; }
+        .btn-step-2:hover { background: #37474f; }
+        .btn-step-3 { background: var(--text-primary); color: #fff; }
+        .btn-step-3:hover { background: var(--accent); }
 
         /* 商品櫥窗 */
         .product-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 30px; margin-top: 40px; }
@@ -268,85 +189,54 @@
         .review-card:hover { transform: translateY(-5px); }
         .review-img { width: 100%; height: auto; display: block; }
 
+        /* 影片 */
+        .video-container {
+            width: 100%; max-width: 380px; margin: 0 auto 50px;
+            border-radius: 20px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+            position: relative; min-height: 500px; background: #fff;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .fallback-link { position: absolute; text-align: center; z-index: 1; color: var(--text-secondary); text-decoration: none; font-size: 0.9rem; }
+        .instagram-media { position: relative; z-index: 2; min-width: 100% !important; margin: 0 !important; }
+
+        /* 最新消息區塊 */
+        .news-box {
+            background: #fff; border-left: 4px solid var(--accent); padding: 30px 25px;
+            border-radius: 0 12px 12px 0; box-shadow: var(--card-shadow); text-align: left;
+            max-width: 700px; margin: 0 auto 20px;
+        }
+        .news-item { display: flex; align-items: flex-start; margin-bottom: 18px; border-bottom: 1px dashed #eee; padding-bottom: 18px; }
+        .news-item:last-child { margin-bottom: 0; border-bottom: none; padding-bottom: 0; }
+        .news-icon { color: var(--accent); font-size: 1.1rem; margin-right: 15px; margin-top: 3px; flex-shrink: 0; }
+        .news-content strong { color: var(--accent); font-weight: 600; }
+        .news-title-text { font-weight: 600; display: block; margin-bottom: 3px; color: var(--text-primary); }
+        .news-desc { font-size: 0.9rem; color: var(--text-secondary); }
+        .news-item-support { background: rgba(229, 115, 115, 0.05); border: 1px solid #ffebee; border-left: 4px solid var(--danger); padding: 15px; border-radius: 8px; }
+
         /* FAQ */
         .faq-container { text-align: left; max-width: 700px; margin: 0 auto; }
         .faq-item { border-bottom: 1px solid #eee; margin-bottom: 15px; padding-bottom: 10px; }
-        .faq-question {
-            font-weight: 600; cursor: pointer; display: flex; justify-content: space-between; align-items: center;
-            padding: 15px 0; color: var(--text-primary); transition: 0.3s;
-        }
+        .faq-question { font-weight: 600; cursor: pointer; display: flex; justify-content: space-between; align-items: center; padding: 15px 0; color: var(--text-primary); transition: 0.3s; }
         .faq-question:hover { color: var(--accent); }
         .faq-icon { font-size: 0.9rem; transition: transform 0.3s; color: var(--accent); }
-        .faq-answer {
-            max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out;
-            color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6;
-        }
+        .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6; }
         .faq-item.active .faq-answer { max-height: 300px; padding-bottom: 15px; }
         .faq-item.active .faq-icon { transform: rotate(180deg); }
-
-        /* 服務與禮物 */
-        .service-card {
-            display: flex; align-items: center; background: #fff; padding: 20px; border-radius: 15px;
-            text-decoration: none; color: var(--text-primary);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.03); transition: 0.3s;
-            border: 1px solid transparent; text-align: left; margin-bottom: 20px;
-        }
-        .service-card:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.08); border-color: var(--accent); }
-        .service-icon {
-            width: 50px; height: 50px; background: #fdfbf7; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            color: var(--accent); font-size: 1.2rem; margin-right: 20px; flex-shrink: 0;
-        }
-        .gift-section { background: #fff; border: 1.5px dashed var(--accent); border-radius: 20px; padding: 40px 30px; margin-top: 30px; }
-        .gift-title { font-family: 'Playfair Display'; color: var(--accent); font-size: 1.5rem; margin-bottom: 25px; }
-        .keyword-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f0f0f0; font-size: 0.9rem; text-align: left; }
-        .keyword-item:last-child { border-bottom: none; }
-        .keyword-btn {
-            background: #fdfbf7; color: var(--text-primary); border: 1px solid #e0e0e0;
-            padding: 6px 14px; border-radius: 8px; font-weight: 600; cursor: pointer;
-            transition: 0.2s; font-size: 0.85rem; white-space: nowrap; margin-left: 10px;
-        }
-        .keyword-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
 
         /* 聯絡區塊 */
         .social-container { display: flex; flex-direction: column; gap: 20px; align-items: center; }
         .social-row { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; }
-        .social-btn {
-            display: flex; align-items: center; gap: 8px;
-            background: #fff; padding: 12px 25px; border-radius: 50px;
-            text-decoration: none; color: var(--text-primary);
-            box-shadow: var(--card-shadow); transition: 0.3s; font-size: 0.9rem;
-        }
+        .social-btn { display: flex; align-items: center; gap: 8px; background: #fff; padding: 12px 25px; border-radius: 50px; text-decoration: none; color: var(--text-primary); box-shadow: var(--card-shadow); transition: 0.3s; font-size: 0.9rem; }
         .social-btn:hover { transform: translateY(-3px); background: var(--accent); color: #fff; }
-        .social-btn i { font-size: 1.1rem; }
         
-        .email-box {
-            background: #fff; width: 100%; max-width: 500px;
-            padding: 25px; border-radius: 15px; margin-top: 15px;
-            border-left: 4px solid var(--accent); text-align: left;
-        }
+        .email-box { background: #fff; width: 100%; max-width: 500px; padding: 25px; border-radius: 15px; margin-top: 15px; border-left: 4px solid var(--accent); text-align: left; }
         .email-link { color: var(--text-primary); text-decoration: none; font-weight: 500; display: block; margin-top: 5px; word-break: break-all; }
         .email-link:hover { color: var(--accent); }
 
-        .btn-support {
-            display: inline-block; padding: 12px 25px; background: var(--text-primary); color: #fff;
-            text-decoration: none; border-radius: 50px; font-weight: 600; font-size: 0.95rem;
-            transition: 0.3s; margin-top: 10px; box-shadow: 0 5px 15px rgba(90, 77, 65, 0.1);
-        }
+        .btn-support { display: inline-block; padding: 12px 25px; background: var(--text-primary); color: #fff; text-decoration: none; border-radius: 50px; font-weight: 600; font-size: 0.95rem; transition: 0.3s; margin-top: 10px; box-shadow: 0 5px 15px rgba(90, 77, 65, 0.1); }
         .btn-support:hover { background: var(--accent); transform: translateY(-2px); color: #fff; }
 
-        .toast {
-            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px);
-            background: rgba(90, 77, 65, 0.95); color: white;
-            padding: 12px 30px; border-radius: 50px; font-size: 0.9rem;
-            opacity: 0; transition: 0.4s; z-index: 2000; box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-        }
-        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-
-        footer {
-            margin-top: 60px; padding: 40px 20px; border-top: 1px solid #eee;
-            color: var(--text-secondary); font-size: 0.8rem; letter-spacing: 1px;
-        }
+        footer { margin-top: 60px; padding: 40px 20px; border-top: 1px solid #eee; color: var(--text-secondary); font-size: 0.8rem; letter-spacing: 1px; }
 
         .fade-in { opacity: 0; transform: translateY(20px); transition: 0.8s ease; }
         .fade-in.visible { opacity: 1; transform: translateY(0); }
@@ -362,8 +252,6 @@
             <a href="https://www.instagram.com/bear.saving/" target="_blank"><i class="fab fa-instagram"></i></a>
         </div>
     </nav>
-
-    <div id="toast" class="toast">關鍵字已複製</div>
 
     <header class="hero">
         <video class="hero-video" autoplay muted loop playsinline poster="hero.jpg">
@@ -381,13 +269,11 @@
             <span>( 往下滑!有免費資源可以使用 )</span>
             <i class="fas fa-chevron-down"></i>
         </div>
-        
     </header>
 
     <section class="section fade-in" style="padding-bottom: 0;">
         <h2 style="font-family:'Playfair Display'; margin-bottom: 25px;">Latest News</h2>
         <div class="news-box">
-            
             <div class="news-item news-item-support">
                 <i class="fas fa-tools news-icon" style="color: var(--danger);"></i>
                 <div>
@@ -395,7 +281,6 @@
                     <span class="news-desc">遇到缺件或瑕疵？<a href="https://docs.google.com/forms/d/e/1FAIpQLSeMwIoPGsWcBYe4AEH3hgWa0tBcMgwRWZ68J9y_8FxNSYAwLQ/viewform?usp=publish-editor" target="_blank" style="color: var(--danger); font-weight: 600; text-decoration: underline;">👉 點此填寫售後工單</a>，工程師將火速為妳排解。</span>
                 </div>
             </div>
-
             <div class="news-item">
                 <i class="fas fa-book news-icon"></i>
                 <div>
@@ -403,7 +288,6 @@
                     <span class="news-desc">已售完，年後印刷中，預計 <strong>3月中</strong> 補貨上架！</span>
                 </div>
             </div>
-
             <div class="news-item">
                 <i class="fas fa-star news-icon"></i>
                 <div>
@@ -415,46 +299,65 @@
                     </span>
                 </div>
             </div>
-
-            <div class="news-item">
-                <i class="fas fa-rabbit news-icon"></i>
-                <div>
-                    <span class="news-title-text">Little Bunny's Farm 存錢挑戰</span>
-                    <span class="news-desc">下批補貨時間：<strong>3月中</strong>。</span>
-                </div>
-            </div>
-
             <div class="news-item">
                 <i class="fas fa-bag-shopping news-icon"></i>
                 <div>
                     <span class="news-title-text">真皮包 / 錢包快閃團</span>
-                    <span class="news-desc">現貨米白/大象灰快閃團開放中!售完為止!>3月中開團預購團(肩背包/其他顏色錢包等)請密切鎖定 IG 限動「重要公告」。<br>
+                    <span class="news-desc">現貨米白/大象灰快閃團開放中! 售完為止。<br>3月中預購團(肩背包等)請鎖定 IG 限動。<br>
                     <a href="https://www.instagram.com/bear.saving/" target="_blank" style="color:var(--accent); text-decoration: underline;">👉 點此追蹤 IG 不漏接</a>
                     </span>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section fade-in" style="padding-top: 40px; padding-bottom: 20px;">
+        <h2 style="font-family:'Playfair Display'; margin-bottom:5px;">The Bear System</h2>
+        <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:30px;">不只是表格，而是一套完整的底氣生態系。</p>
+        
+        <div class="system-trilogy">
+            
+            <div class="trilogy-card card-step-1">
+                <div class="trilogy-header">
+                    <div class="trilogy-icon"><i class="fas fa-stethoscope"></i></div>
+                    <div>
+                        <div class="trilogy-subtitle">STEP 01</div>
+                        <div class="trilogy-title">看清現實，找出破口</div>
+                    </div>
+                </div>
+                <div class="trilogy-desc">不敢面對戶頭？讓「財務診斷室」幫妳算好 10 袋預算上限，抓出漏財元兇，數據還能一鍵同步到駕駛艙。</div>
+                <a href="tool.html" class="trilogy-btn btn-step-1">進入財務診斷室 v6.4 <i class="fas fa-arrow-right"></i></a>
+            </div>
+
+            <div class="trilogy-card card-step-2">
+                <div class="trilogy-header">
+                    <div class="trilogy-icon"><i class="fas fa-tachometer-alt"></i></div>
+                    <div>
+                        <div class="trilogy-subtitle">STEP 02</div>
+                        <div class="trilogy-title">建立系統，無腦防禦</div>
+                    </div>
+                </div>
+                <div class="trilogy-desc">專為手機設計的「財務駕駛艙 App」。內建 10 袋記帳、淨資產盤點、結算報告，還有專治衝動購物的冷靜邏輯閘。</div>
+                <a href="app.html" class="trilogy-btn btn-step-2">開啟財務駕駛艙 v2.8 <i class="fas fa-arrow-right"></i></a>
+            </div>
+
+            <div class="trilogy-card card-step-3">
+                <div class="trilogy-header">
+                    <div class="trilogy-icon"><i class="fas fa-book-open"></i></div>
+                    <div>
+                        <div class="trilogy-subtitle">STEP 03</div>
+                        <div class="trilogy-title">實體儀式，讓習慣落地</div>
+                    </div>
+                </div>
+                <div class="trilogy-desc">數位系統管大局，實體手帳管細節。用原創記帳本與質感書衣，把理財變成每天最期待的獨處時光。</div>
+                <a href="https://myship.7-11.com.tw/general/detail/GM2502152714662?utm_source=ig&utm_medium=social" target="_blank" class="trilogy-btn btn-step-3">逛逛實體存錢工具 <i class="fas fa-shopping-bag"></i></a>
             </div>
 
         </div>
     </section>
 
-    <section class="section fade-in">
-        <p style="margin-bottom:25px; font-weight:600; color:var(--text-primary); letter-spacing:1px;">
-            (必看!) 存錢工具介紹影片 👇
-        </p>
-        <div class="video-container">
-            <a href="https://www.instagram.com/p/DUStl0QEmYI/" target="_blank" class="fallback-link">
-                <i class="fab fa-instagram" style="font-size: 2rem; display:block; margin-bottom:10px;"></i>
-                影片載入中...<br>若無畫面請點此前往 IG 觀看
-            </a>
-            <blockquote class="instagram-media" 
-                data-instgrm-permalink="https://www.instagram.com/p/DUStl0QEmYI/?utm_source=ig_embed&amp;utm_campaign=loading" 
-                data-instgrm-version="14">
-            </blockquote>
-        </div>
-    </section>
-
-    <section class="section fade-in" style="padding-top: 0;">
-        <h2 style="font-family:'Playfair Display'; margin-top:20px; margin-bottom:10px;">Selected Tools</h2>
+    <section class="section fade-in" style="padding-top: 20px;">
+        <h2 style="font-family:'Playfair Display'; margin-bottom:10px;">Selected Tools</h2>
         <div class="product-grid">
             <a href="https://myship.7-11.com.tw/general/detail/GM2502152714662?utm_source=ig&utm_medium=social" target="_blank" class="product-card">
                 <img src="product1.jpg" alt="Bear 原創記帳本" class="p-image">
@@ -483,6 +386,22 @@
         </div>
     </section>
 
+    <section class="section fade-in">
+        <p style="margin-bottom:25px; font-weight:600; color:var(--text-primary); letter-spacing:1px;">
+            (必看!) 存錢工具介紹影片 👇
+        </p>
+        <div class="video-container">
+            <a href="https://www.instagram.com/p/DUStl0QEmYI/" target="_blank" class="fallback-link">
+                <i class="fab fa-instagram" style="font-size: 2rem; display:block; margin-bottom:10px;"></i>
+                影片載入中...<br>若無畫面請點此前往 IG 觀看
+            </a>
+            <blockquote class="instagram-media" 
+                data-instgrm-permalink="https://www.instagram.com/p/DUStl0QEmYI/?utm_source=ig_embed&amp;utm_campaign=loading" 
+                data-instgrm-version="14">
+            </blockquote>
+        </div>
+    </section>
+
     <section class="section fade-in" style="padding-bottom: 20px;">
         <h2 style="font-family:'Playfair Display'; margin-bottom:10px;">Love Letters</h2>
         <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:30px;">來自粉絲的真實回饋，也是我持續前進的動力。</p>
@@ -502,179 +421,22 @@
         </div>
     </section>
 
-    <section class="section fade-in" style="padding-top: 20px; padding-bottom: 20px;">
-        <h2 style="font-family:'Playfair Display'; margin-bottom:10px;">The Bear System</h2>
-        <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:30px;">不只是表格，而是一套完整的底氣生態系。</p>
-        
-        <div class="system-timeline">
-            
-            <div class="system-step">
-                <div class="step-header">
-                    <div class="step-number">1</div>
-                    <div class="step-title">看清現實 (診斷)</div>
-                </div>
-                <ul class="tool-list">
-                    <li class="tool-item tag-app">
-                        <i class="fas fa-chart-pie tool-icon"></i>
-                        <span class="tool-name">財務診斷室 V6.3</span>
-                        <span class="tool-desc">動物人格分析</span>
-                    </li>
-                    <li class="tool-item tag-concept">
-                        <i class="fas fa-heartbeat tool-icon"></i>
-                        <span class="tool-name">負債盤點與止血計畫</span>
-                    </li>
-                </ul>
-            </div>
-
-            <div class="data-flow-connector">
-                <i class="fas fa-magic"></i> 系統自動記憶負債數據
-            </div>
-
-            <div class="system-step">
-                <div class="step-header">
-                    <div class="step-number">2</div>
-                    <div class="step-title">系統建置 (策略)</div>
-                </div>
-                <ul class="tool-list">
-                    <li class="tool-item tag-concept">
-                        <i class="fas fa-rocket tool-icon"></i>
-                        <span class="tool-name">三階段火箭藍圖</span>
-                    </li>
-                    <li class="tool-item tag-concept">
-                        <i class="fas fa-envelope-open-text tool-icon"></i>
-                        <span class="tool-name">10 個無腦存袋 / 蓄水池</span>
-                    </li>
-                    <li class="tool-item tag-app">
-                        <i class="fas fa-tachometer-alt tool-icon"></i>
-                        <span class="tool-name">財務駕駛艙 v2.5</span>
-                        <span class="tool-desc">淨資產 / 自訂帳期</span>
-                    </li>
-                </ul>
-            </div>
-
-            <div class="system-connector"><i class="fas fa-chevron-down"></i></div>
-
-            <div class="system-step">
-                <div class="step-header">
-                    <div class="step-number">3</div>
-                    <div class="step-title">執行防禦 (落地)</div>
-                </div>
-                <ul class="tool-list">
-                    <li class="tool-item tag-physical">
-                        <i class="fas fa-book tool-icon"></i>
-                        <span class="tool-name">原創記帳本 / 質感書衣</span>
-                        <span class="tool-desc">實體儀式感</span>
-                    </li>
-                    <li class="tool-item tag-app">
-                        <i class="fas fa-brain tool-icon"></i>
-                        <span class="tool-name">購物冷靜邏輯閘</span>
-                        <span class="tool-desc">App 內建防禦</span>
-                    </li>
-                    <li class="tool-item tag-physical">
-                        <i class="fas fa-rabbit tool-icon"></i>
-                        <span class="tool-name">小兔農場存錢挑戰</span>
-                        <span class="tool-desc">遊戲化儲蓄</span>
-                    </li>
-                </ul>
-            </div>
-
-            <div class="system-goal">🎯 最終成果：拿回 100% 的生活選擇權</div>
-        </div>
-    </section>
-
-    <section class="section fade-in">
-        <h2 style="font-family:'Playfair Display'; margin-bottom:20px;">Free Resources</h2>
-        
-        <a href="rocket.html" class="service-card" style="margin-bottom: 15px; border-color: var(--accent); background: #fdfbf7;">
-            <div class="service-icon" style="background:#fff; color:var(--accent);">
-                <i class="fas fa-rocket"></i>
-            </div>
-            <div>
-                <div style="font-weight:600; font-size:1.05rem;">Bear 的「三階段火箭」存錢法</div>
-                <div style="font-size:0.85rem; color:var(--text-secondary); margin-top:5px;">
-                    先有緩衝，才有資格談投資 🚀
-                </div>
-            </div>
-            <i class="fas fa-chevron-right" style="margin-left:auto; color:#ddd;"></i>
-        </a>
-
-        <a href="envelopes.html" class="service-card" style="margin-bottom: 15px; border-color: #f8bbd0; background: #fffafa;">
-            <div class="service-icon" style="background:#fff; color:#e57373;">
-                <i class="fas fa-envelope-open-text"></i>
-            </div>
-            <div>
-                <div style="font-weight:600; font-size:1.05rem; color: var(--text-primary);">新手理財：10 個無腦存袋</div>
-                <div style="font-size:0.85rem; color:var(--text-secondary); margin-top:5px;">
-                    建立自動化的分配系統 💌
-                </div>
-            </div>
-            <i class="fas fa-chevron-right" style="margin-left:auto; color:#ddd;"></i>
-        </a>
-
-        <a href="tool.html" class="service-card" style="margin-bottom: 15px;">
-            <div class="service-icon"><i class="fas fa-chart-pie"></i></div>
-            <div>
-                <div style="font-weight:600; font-size:1.05rem;">財務診斷室 6.3</div>
-                <div style="font-size:0.85rem; color:var(--text-secondary); margin-top:5px;">
-                    測測妳的理財動物人格 🦁
-                </div>
-            </div>
-            <i class="fas fa-chevron-right" style="margin-left:auto; color:#ddd;"></i>
-        </a>
-
-        <a href="app.html" class="service-card">
-            <div class="service-icon" style="background:#f0f4f8; color:#546e7a;">
-                <i class="fas fa-tachometer-alt"></i>
-            </div>
-            <div>
-                <div style="font-weight:600; font-size:1.05rem;">Bear 財務駕駛艙 v2.5</div>
-                <div style="font-size:0.85rem; color:var(--text-secondary); margin-top:5px;">
-                    淨資產盤點 x 自訂帳期 x 購物冷靜閘
-                </div>
-            </div>
-            <i class="fas fa-chevron-right" style="margin-left:auto; color:#ddd;"></i>
-        </a>
-
-        <div class="gift-section" style="margin-top: 30px;">
-            <div class="gift-title">Bear's Secret</div>
-            <p style="font-size:0.9rem; color:var(--text-secondary); margin-bottom:30px;">
-                點擊右側按鈕複製關鍵字，<br>至 IG 私訊領取專屬資源。
-            </p>
-            <div class="keyword-item">
-                <span>💰 原創存錢系統 PDF</span>
-                <button class="keyword-btn" onclick="copyText('財務/ 2026')">財務/ 2026</button>
-            </div>
-            <div class="keyword-item">
-                <span>💧 獲取離職底氣計算機</span>
-                <button class="keyword-btn" onclick="copyText('預備金')">預備金</button>
-            </div>
-            <div class="keyword-item">
-                <span>🌊 收入不穩專用「蓄水池」</span>
-                <button class="keyword-btn" onclick="copyText('蓄水池')">蓄水池</button>
-            </div>
-            <div class="keyword-item">
-                <span>📊 各類預算盤點表格</span>
-                <button class="keyword-btn" onclick="copyText('表格')">表格</button>
-            </div>
-        </div>
-    </section>
-
     <section class="section fade-in" style="padding-top: 0;">
         <h2 style="font-family:'Playfair Display'; margin-bottom:30px;">Q & A</h2>
         <div class="faq-container">
             <div class="faq-item">
                 <div class="faq-question">Bear 的系統跟一般理財表格有什麼不同？<i class="fas fa-chevron-down faq-icon"></i></div>
                 <div class="faq-answer">
-                    最大的不同在於「診斷」與「動態計算」。一般的表格只是紀錄過去的數字，但 Bear 的系統（如財務駕駛艙和蓄水池）能幫妳預測未來、自訂帳單週期，甚至在妳衝動購物前用「冷靜閘」攔住妳，讓妳真正擁有掌控權。
+                    最大的不同在於「自動化」與「防呆機制」。一般的表格只是紀錄過去，但 Bear 的「財務診斷室」能幫妳計算預算，「財務駕駛艙」能自訂帳單週期，甚至在妳衝動購物前用「冷靜閘」攔住妳。
                 </div>
             </div>
             <div class="faq-item">
                 <div class="faq-question">理財新手適合使用這套工具嗎？<i class="fas fa-chevron-down faq-icon"></i></div>
-                <div class="faq-answer">非常適合！Bear 的設計初衷就是為了讓「害怕數字」的人也能輕鬆上手。我們有「10 個無腦存袋」教妳分配，也有「財務診斷室」幫妳釐清現況。不用懂複雜的會計，只要跟著步驟走就能找回底氣。</div>
+                <div class="faq-answer">非常適合！Bear 的設計初衷就是為了讓「害怕數字」的人也能輕鬆上手。不用懂複雜的會計，只要順著這套「底氣三部曲」走，就能找回掌控感。</div>
             </div>
             <div class="faq-item">
                 <div class="faq-question">財務診斷室與駕駛艙是免費的嗎？<i class="fas fa-chevron-down faq-icon"></i></div>
-                <div class="faq-answer">是的，這是我送給所有正在為錢煩惱的人的禮物。它們是能安裝在手機上的 PWA 網頁應用程式，希望能陪妳一起度過陣痛期。</div>
+                <div class="faq-answer">是的，這是我送給所有正在為錢煩惱的人的禮物。它們是能安裝在手機上的 PWA 網頁應用程式，希望能陪妳一起度過理財的陣痛期。</div>
             </div>
             <div class="faq-item">
                 <div class="faq-question">下單實體商品後大約多久會收到？<i class="fas fa-chevron-down faq-icon"></i></div>
@@ -727,15 +489,6 @@
             else nav.classList.remove('scrolled');
         });
 
-        function copyText(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                const toast = document.getElementById('toast');
-                toast.innerHTML = `<i class="fas fa-check-circle"></i> 已複製：${text}`;
-                toast.classList.add('show');
-                setTimeout(() => { toast.classList.remove('show'); }, 2000);
-            });
-        }
-
         document.querySelectorAll('.faq-question').forEach(item => {
             item.addEventListener('click', () => {
                 const parent = item.parentNode;
@@ -753,16 +506,9 @@
         }, { threshold: 0.1 });
         document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
 
-        // ================= PWA Service Worker 註冊 =================
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js')
-                    .then(registration => {
-                        console.log('ServiceWorker 註冊成功，範圍: ', registration.scope);
-                    })
-                    .catch(err => {
-                        console.log('ServiceWorker 註冊失敗: ', err);
-                    });
+                navigator.serviceWorker.register('sw.js').catch(err => { console.log('ServiceWorker 註冊失敗: ', err); });
             });
         }
     </script>
