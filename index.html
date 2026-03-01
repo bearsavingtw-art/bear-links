@@ -29,7 +29,7 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Noto+Serif+TC:wght@400;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Noto+Serif+TC:wght@400;600;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     
     <style>
@@ -41,6 +41,8 @@
             --white: #ffffff;
             --card-shadow: 0 5px 20px rgba(0,0,0,0.03);
             --danger: #e57373;
+            --tool-bg: #f0f4f8;
+            --tool-color: #546e7a;
         }
 
         * { box-sizing: border-box; }
@@ -177,13 +179,65 @@
         .fallback-link { position: absolute; text-align: center; z-index: 1; color: var(--text-secondary); text-decoration: none; font-size: 0.9rem; }
         .instagram-media { position: relative; z-index: 2; min-width: 100% !important; margin: 0 !important; }
 
-        /* 系統樹狀圖容器 */
-        .system-tree-container {
-            width: 100%; overflow-x: auto;
-            padding: 30px 0; -webkit-overflow-scrolling: touch;
-            display: flex; justify-content: center;
+        /* --- [NEW] The Bear System 視覺化生態系 --- */
+        .system-timeline {
+            max-width: 600px; margin: 0 auto; text-align: left;
+            position: relative; padding: 20px 0;
         }
-        .mermaid { background-color: transparent; min-width: 850px; }
+        .system-step {
+            background: #fff; border-radius: 15px; padding: 25px;
+            box-shadow: var(--card-shadow); margin-bottom: 30px;
+            position: relative; border: 1px solid rgba(176, 141, 133, 0.15);
+            transition: transform 0.3s ease;
+        }
+        .system-step:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        
+        /* 連接箭頭 */
+        .system-connector {
+            text-align: center; color: var(--accent); font-size: 1.5rem;
+            margin-top: -15px; margin-bottom: 15px; opacity: 0.6;
+        }
+        .data-flow-connector {
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            color: var(--success); font-size: 0.85rem; font-weight: 600;
+            margin-top: -15px; margin-bottom: 15px;
+        }
+        .data-flow-connector::before, .data-flow-connector::after {
+            content: ''; height: 1px; background: var(--success); flex: 0.2; opacity: 0.5;
+        }
+
+        .step-header { display: flex; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px;}
+        .step-number { 
+            background: var(--text-primary); color: #fff; width: 30px; height: 30px; 
+            border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+            font-weight: bold; font-size: 0.9rem; margin-right: 12px; flex-shrink: 0;
+        }
+        .step-title { font-size: 1.15rem; font-weight: 700; color: var(--text-primary); font-family: 'Noto Serif TC', serif; }
+        
+        .tool-list { list-style: none; padding: 0; margin: 0; }
+        .tool-item { 
+            display: flex; align-items: center; margin-bottom: 10px; 
+            padding: 10px 15px; border-radius: 10px; background: #fdfbf7;
+        }
+        .tool-item:last-child { margin-bottom: 0; }
+        .tool-icon { margin-right: 12px; font-size: 1.1rem; width: 20px; text-align: center; }
+        .tool-name { font-weight: 600; font-size: 0.95rem; color: var(--text-primary); }
+        .tool-desc { font-size: 0.8rem; color: var(--text-secondary); margin-left: auto; }
+        
+        /* 標籤樣式 */
+        .tag-app { background: var(--tool-bg); border-left: 3px solid var(--tool-color); }
+        .tag-app .tool-icon { color: var(--tool-color); }
+        .tag-concept { background: #fffafa; border-left: 3px solid var(--danger); }
+        .tag-concept .tool-icon { color: var(--danger); }
+        .tag-physical { background: #f9f6f0; border-left: 3px solid var(--accent); }
+        .tag-physical .tool-icon { color: var(--accent); }
+
+        .system-goal {
+            text-align: center; background: var(--text-primary); color: #fff;
+            padding: 20px; border-radius: 15px; font-weight: 600; font-size: 1.1rem;
+            letter-spacing: 1px; box-shadow: 0 10px 20px rgba(90, 77, 65, 0.2);
+            margin-top: 10px;
+        }
 
         /* 商品櫥窗 */
         .product-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 30px; margin-top: 40px; }
@@ -452,45 +506,80 @@
         <h2 style="font-family:'Playfair Display'; margin-bottom:10px;">The Bear System</h2>
         <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:30px;">不只是表格，而是一套完整的底氣生態系。</p>
         
-        <div class="system-tree-container">
-            <div class="mermaid">
-                %%{init: {'theme': 'base', 'themeVariables': { 'fontSize': '16px', 'fontFamily': 'Montserrat, Noto Serif TC, sans-serif'}}}%%
-                flowchart TD
-                classDef root fill:#5a4d41,stroke:#5a4d41,color:#fff,font-weight:bold,font-size:18px,rx:10,ry:10,padding:12px;
-                classDef trunk fill:#b08d85,stroke:#b08d85,color:#fff,font-weight:bold,font-size:17px,rx:10,ry:10,padding:10px;
-                classDef branch fill:#fcfbf9,stroke:#b08d85,color:#5a4d41,stroke-width:2px,stroke-dasharray: 5 5,font-weight:bold,font-size:16px,padding:10px;
-                classDef leaf fill:#fff,stroke:#968c83,color:#5a4d41,font-size:15px,rx:6,ry:6,padding:8px;
-                classDef app fill:#e3f2fd,stroke:#546e7a,color:#546e7a,font-size:15px,rx:6,ry:6,padding:8px,font-weight:bold;
-                classDef ritual fill:#eaddd7,stroke:#b08d85,color:#5a4d41,font-size:15px,rx:6,ry:6,padding:8px;
-                classDef rocket fill:#fff,stroke:#e07a5f,color:#e07a5f,stroke-width:2px,font-weight:bold,font-size:16px,rx:6,ry:6,padding:8px;
-                classDef outcome fill:#5a4d41,stroke:#5a4d41,color:#fff,font-weight:bold,font-size:18px,rx:10,ry:10,padding:12px;
-
-                Root["🌱 核心根基：建立生活的「底氣」"]:::root --> Trunk("Bear 動態財務系統"):::trunk
-
-                Trunk --> B1["階段一：看清現實 (診斷)"]:::branch
-                Trunk --> B2["階段二：系統建置 (策略)"]:::branch
-                Trunk --> B3["階段三：執行防禦 (落地)"]:::branch
-
-                B1 --> L1_1("財務診斷室 V6.3 (動物人格分析)"):::leaf
-                B1 --> L1_2("負債盤點與止血計畫"):::leaf
-
-                B2 --> Rocket{"三階段火箭藍圖 🚀"}:::rocket
-                Rocket --> R1("短：蓄水池計算機 / 10 個無腦存袋"):::leaf
-                Rocket --> R2("中：財務駕駛艙 v2.5 (淨資產/週期)"):::app
-                Rocket --> R3("長：指數投資與被動收入"):::leaf
-
-                B3 --> L3_1("原創記帳本 / 質感書衣"):::ritual
-                B3 --> L3_2("小兔農場存錢挑戰 (遊戲化)"):::ritual
-                B3 --> L3_3("購物冷靜邏輯閘 (駕駛艙內建)"):::app
-
-                L1_2 -.-> |數據自動帶入| R2
-                R3 -.-> Outcome
-                L3_3 -.-> Outcome
-
-                Outcome["🎯 最終成果：拿回 100% 的生活選擇權"]:::outcome
+        <div class="system-timeline">
+            
+            <div class="system-step">
+                <div class="step-header">
+                    <div class="step-number">1</div>
+                    <div class="step-title">看清現實 (診斷)</div>
+                </div>
+                <ul class="tool-list">
+                    <li class="tool-item tag-app">
+                        <i class="fas fa-chart-pie tool-icon"></i>
+                        <span class="tool-name">財務診斷室 V6.3</span>
+                        <span class="tool-desc">動物人格分析</span>
+                    </li>
+                    <li class="tool-item tag-concept">
+                        <i class="fas fa-heartbeat tool-icon"></i>
+                        <span class="tool-name">負債盤點與止血計畫</span>
+                    </li>
+                </ul>
             </div>
+
+            <div class="data-flow-connector">
+                <i class="fas fa-magic"></i> 系統自動記憶負債數據
+            </div>
+
+            <div class="system-step">
+                <div class="step-header">
+                    <div class="step-number">2</div>
+                    <div class="step-title">系統建置 (策略)</div>
+                </div>
+                <ul class="tool-list">
+                    <li class="tool-item tag-concept">
+                        <i class="fas fa-rocket tool-icon"></i>
+                        <span class="tool-name">三階段火箭藍圖</span>
+                    </li>
+                    <li class="tool-item tag-concept">
+                        <i class="fas fa-envelope-open-text tool-icon"></i>
+                        <span class="tool-name">10 個無腦存袋 / 蓄水池</span>
+                    </li>
+                    <li class="tool-item tag-app">
+                        <i class="fas fa-tachometer-alt tool-icon"></i>
+                        <span class="tool-name">財務駕駛艙 v2.5</span>
+                        <span class="tool-desc">淨資產 / 自訂帳期</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="system-connector"><i class="fas fa-chevron-down"></i></div>
+
+            <div class="system-step">
+                <div class="step-header">
+                    <div class="step-number">3</div>
+                    <div class="step-title">執行防禦 (落地)</div>
+                </div>
+                <ul class="tool-list">
+                    <li class="tool-item tag-physical">
+                        <i class="fas fa-book tool-icon"></i>
+                        <span class="tool-name">原創記帳本 / 質感書衣</span>
+                        <span class="tool-desc">實體儀式感</span>
+                    </li>
+                    <li class="tool-item tag-app">
+                        <i class="fas fa-brain tool-icon"></i>
+                        <span class="tool-name">購物冷靜邏輯閘</span>
+                        <span class="tool-desc">App 內建防禦</span>
+                    </li>
+                    <li class="tool-item tag-physical">
+                        <i class="fas fa-rabbit tool-icon"></i>
+                        <span class="tool-name">小兔農場存錢挑戰</span>
+                        <span class="tool-desc">遊戲化儲蓄</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="system-goal">🎯 最終成果：拿回 100% 的生活選擇權</div>
         </div>
-        <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:10px;">( ← 左右滑動查看最新生態系 → )</p>
     </section>
 
     <section class="section fade-in">
@@ -631,10 +720,6 @@
     </footer>
 
     <script async src="//www.instagram.com/embed.js"></script>
-    <script type="module">
-        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
-        mermaid.initialize({ startOnLoad: true, theme: 'base' });
-    </script>
     <script>
         window.addEventListener('scroll', () => {
             const nav = document.getElementById('navbar');
