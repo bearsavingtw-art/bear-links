@@ -99,7 +99,13 @@
             font-family: monospace;
         }
 
-        /* 儀表板數據卡 */
+        /* 儀表板數據卡 & 月份切換 */
+        .dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: rgba(176, 141, 133, 0.05); padding: 10px 15px; border-radius: 20px; border: 1px solid rgba(176, 141, 133, 0.15); }
+        .month-nav-btn { background: none; border: none; font-size: 1.2rem; color: var(--accent); cursor: pointer; padding: 5px 10px; }
+        .month-nav-btn:active { transform: scale(0.9); }
+        .current-cycle-display { text-align: center; font-weight: 600; font-size: 0.95rem; color: var(--text-primary); display: flex; flex-direction: column; }
+        .current-cycle-dates { font-size: 0.75rem; color: var(--text-secondary); font-weight: 400; margin-top: 2px; }
+
         .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
         .stat-box { background: var(--bg-color); padding: 15px; border-radius: 12px; text-align: center; }
         .stat-label { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 5px; }
@@ -107,12 +113,6 @@
         .income { color: var(--text-primary); }
         .expense { color: var(--accent); }
         .balance { color: var(--success); }
-        
-        .cycle-badge {
-            display: inline-block; background: rgba(176, 141, 133, 0.1); color: var(--text-primary);
-            padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; margin-bottom: 20px;
-            border: 1px solid rgba(176, 141, 133, 0.2);
-        }
 
         /* 表單元件 */
         .form-group { margin-bottom: 15px; text-align: left; }
@@ -225,7 +225,7 @@
 
     <header>
         <h1>Bear.saving</h1>
-        <div style="font-size:0.8rem; color:var(--text-secondary);">Financial Cockpit v2.3</div>
+        <div style="font-size:0.8rem; color:var(--text-secondary);">Financial Cockpit v2.5</div>
     </header>
 
     <div id="page-dash" class="page active">
@@ -234,8 +234,13 @@
             <i class="fas fa-arrow-circle-down"></i> 將系統安裝至手機桌面，體驗全螢幕 App 👉
         </div>
 
-        <div style="text-align: center;">
-            <div class="cycle-badge" id="dash-cycle-info"><i class="far fa-calendar-alt"></i> 載入週期中...</div>
+        <div class="dashboard-header">
+            <button class="month-nav-btn" onclick="changeDashboardMonth(-1)"><i class="fas fa-chevron-left"></i></button>
+            <div class="current-cycle-display">
+                <span id="dash-cycle-title">載入中...</span>
+                <span id="dash-cycle-dates" class="current-cycle-dates"></span>
+            </div>
+            <button class="month-nav-btn" onclick="changeDashboardMonth(1)"><i class="fas fa-chevron-right"></i></button>
         </div>
 
         <div class="stat-grid">
@@ -255,26 +260,26 @@
 
         <div class="card">
             <div class="card-title">
-                本期預算剩餘額度
+                <span id="budget-card-title">本期預算剩餘額度</span>
                 <small style="font-weight:400; color:var(--accent); cursor:pointer;" onclick="switchPage('settings')">設定預算 <i class="fas fa-cog"></i></small>
             </div>
             <div id="budget-container"></div>
         </div>
 
         <div class="card">
-            <div class="card-title">本期支出結構分析</div>
+            <div class="card-title" id="chart-card-title">本期支出結構分析</div>
             <div class="chart-wrapper">
                 <canvas id="expenseChart"></canvas>
             </div>
         </div>
         
         <div class="card">
-            <div class="card-title">最近 5 筆紀錄</div>
+            <div class="card-title" id="recent-list-title">本期最新紀錄</div>
             <ul class="tx-list" id="recent-tx-list"></ul>
         </div>
 
         <div class="card" style="text-align:center;">
-            <div class="stat-label">本期日常總結餘</div>
+            <div class="stat-label" id="balance-card-title">本期日常總結餘</div>
             <div class="stat-value balance" id="display-balance" style="font-size:1.8rem;">$0</div>
         </div>
     </div>
@@ -424,10 +429,12 @@
             <div class="form-group">
                 <label>每月帳單起始日 (發薪日結算)</label>
                 <div style="display:flex; align-items:center; gap:10px;">
-                    <input type="number" id="setting-cycle-start" min="1" max="28" value="1" onchange="saveSysSettings()" inputmode="numeric" style="width: 100px;">
+                    <input type="number" id="setting-cycle-start" min="1" max="31" value="1" onchange="saveSysSettings()" inputmode="numeric" style="width: 100px;">
                     <span style="font-weight:600; color:var(--text-primary);">號</span>
                 </div>
-                <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:8px;">預設為 1 號。若設定為 5 號，系統會自動將 2/5 ~ 3/4 視為同一個帳單週期。修改後將即時套用於儀表板與明細。</p>
+                <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:8px;">
+                    預設為 1 號。若設定為 31 號，遇到沒有 31 號的小月 (如 2 月、4 月)，系統會自動以該月最後一天做為結算基準。
+                </p>
             </div>
         </div>
 
@@ -513,13 +520,12 @@
         let budgets = JSON.parse(localStorage.getItem('bear_budgets')) || { '固定支出': 0, '變動支出': 0, '預存支出': 0 };
         let shoppingList = JSON.parse(localStorage.getItem('bear_shopping_list')) || [];
         let netWorthData = JSON.parse(localStorage.getItem('bear_networth')) || [];
-        
-        // [NEW] 讀取系統設定 (預設起始日為1號)
         let sysSettings = JSON.parse(localStorage.getItem('bear_sys_settings')) || { cycleStart: 1 };
         
         let myChart = null;
         let nwChart = null; 
         let editingId = null;
+        let dashboardViewDate = new Date();
 
         let shopStep = 0;
         let shopScore = 0;
@@ -534,13 +540,11 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('input-date').valueAsDate = new Date();
-            
             const today = new Date();
             const yyyy = today.getFullYear();
             const mm = String(today.getMonth() + 1).padStart(2, '0');
             document.getElementById('nw-input-month').value = `${yyyy}-${mm}`;
 
-            // 載入系統設定
             document.getElementById('setting-cycle-start').value = sysSettings.cycleStart;
 
             updateCategories();
@@ -548,21 +552,23 @@
             renderDashboard();
             setInterval(updateCountdowns, 1000);
 
-            // 解析網址參數自動跳轉
             const urlParams = new URLSearchParams(window.location.search);
-            const tab = urlParams.get('tab');
-            if (tab === 'networth') {
-                switchPage('networth');
-            }
+            if (urlParams.get('tab') === 'networth') switchPage('networth');
         });
 
-        // --- [NEW] 帳單週期運算核心 ---
-        function getCycleBoundary(dateString, startDay) {
-            let d = new Date(dateString);
-            let year = d.getFullYear();
-            let month = d.getMonth(); 
-            let day = d.getDate();
+        // --- [NEW] 智慧型帳單週期運算 (支援 29/30/31 號防呆) ---
+        function getSmartDate(year, month, targetDay) {
+            // 這個函數會幫我們找出「真實存在」的日期
+            // 比如 2026年2月的目標是 31 號，它會回傳 2026/2/28
+            const lastDayOfMonth = new Date(year, month + 1, 0).getDate();
+            const actualDay = Math.min(targetDay, lastDayOfMonth);
+            return new Date(year, month, actualDay);
+        }
 
+        function getCycleBoundary(dateObj, startDay) {
+            let year = dateObj.getFullYear();
+            let month = dateObj.getMonth(); 
+            let day = dateObj.getDate();
             let cycleStartDate, cycleEndDate, labelStr;
 
             if (startDay === 1) {
@@ -570,46 +576,43 @@
                 cycleEndDate = new Date(year, month + 1, 0); 
                 labelStr = `${year}年 ${month + 1}月`;
             } else {
-                if (day >= startDay) {
-                    cycleStartDate = new Date(year, month, startDay);
-                    cycleEndDate = new Date(year, month + 1, startDay - 1);
-                    labelStr = `${year}年 ${month + 1}月帳期`;
+                // 找出這個月和上個月「應該」的起始日 (防呆處理)
+                const thisMonthStart = getSmartDate(year, month, startDay);
+                const lastMonthStart = getSmartDate(year, month - 1, startDay);
+
+                if (dateObj >= thisMonthStart) {
+                    // 日期在「本月起始日」之後 -> 算下一個月的帳
+                    cycleStartDate = thisMonthStart;
+                    cycleEndDate = new Date(getSmartDate(year, month + 1, startDay).getTime() - 86400000); // 下個月起始日的前一天
+                    labelStr = `${month + 1}月帳期`;
                 } else {
-                    cycleStartDate = new Date(year, month - 1, startDay);
-                    cycleEndDate = new Date(year, month, startDay - 1);
+                    // 日期在「本月起始日」之前 -> 算這個月的帳
+                    cycleStartDate = lastMonthStart;
+                    cycleEndDate = new Date(thisMonthStart.getTime() - 86400000);
                     let labelMonth = month === 0 ? 12 : month;
-                    let labelYear = month === 0 ? year - 1 : year;
-                    labelStr = `${labelYear}年 ${labelMonth}月帳期`;
+                    labelStr = `${labelMonth}月帳期`;
                 }
             }
-            
-            return {
-                start: cycleStartDate,
-                end: cycleEndDate,
-                label: labelStr,
-                isDefault: (startDay === 1)
-            };
+            return { start: cycleStartDate, end: cycleEndDate, label: labelStr, isDefault: (startDay === 1) };
         }
 
-        function formatDateYYYYMMDD(d) {
-            const y = d.getFullYear();
-            const m = String(d.getMonth() + 1).padStart(2, '0');
-            const day = String(d.getDate()).padStart(2, '0');
-            return `${y}-${m}-${day}`;
+        function changeDashboardMonth(offset) {
+            dashboardViewDate.setMonth(dashboardViewDate.getMonth() + offset);
+            renderDashboard();
         }
 
-        // --- 儲存系統設定 ---
+        // --- 儲存系統設定 (上限解放到 31) ---
         function saveSysSettings() {
             let startDay = parseInt(document.getElementById('setting-cycle-start').value) || 1;
             if (startDay < 1) startDay = 1;
-            if (startDay > 28) startDay = 28; // 限制最多28日避免跨月bug
+            if (startDay > 31) startDay = 31; // 放寬限制到 31
             document.getElementById('setting-cycle-start').value = startDay;
-            
             sysSettings.cycleStart = startDay;
             localStorage.setItem('bear_sys_settings', JSON.stringify(sysSettings));
             alert('帳單週期設定已更新！');
-            renderDashboard(); // 重新計算儀表板
-            renderList();      // 重新計算明細分群
+            dashboardViewDate = new Date(); 
+            renderDashboard(); 
+            renderList();      
         }
 
         function openInstallModal() { document.getElementById('install-modal').classList.add('show'); }
@@ -627,7 +630,10 @@
             else document.getElementById('nav-settings').classList.add('active');
             
             window.scrollTo(0, 0);
-            if(pageId === 'dash') renderDashboard();
+            if(pageId === 'dash') {
+                dashboardViewDate = new Date(); 
+                renderDashboard();
+            }
             if(pageId === 'settings') renderList();
             if(pageId === 'shop') { resetShop(); renderShoppingList(); }
             if(pageId === 'networth') renderNetWorthPage(); 
@@ -739,22 +745,37 @@
         function renderDashboard() {
             sortTransactions(); 
             
-            // 取得今天的日期與對應的帳單週期
-            const todayStr = formatDateYYYYMMDD(new Date());
-            const currentCycle = getCycleBoundary(todayStr, sysSettings.cycleStart);
+            const currentCycle = getCycleBoundary(dashboardViewDate, sysSettings.cycleStart);
+            const realTodayCycle = getCycleBoundary(new Date(), sysSettings.cycleStart);
             
-            // 更新儀表板上方的週期提示
-            const cycleBadge = document.getElementById('dash-cycle-info');
-            if (currentCycle.isDefault) {
-                cycleBadge.innerHTML = `<i class="far fa-calendar-alt"></i> 目前帳期：${currentCycle.label}`;
+            // 用 getTime 比較確保判斷正確
+            const isHistorical = (currentCycle.start.getTime() !== realTodayCycle.start.getTime());
+
+            const titleEl = document.getElementById('dash-cycle-title');
+            const datesEl = document.getElementById('dash-cycle-dates');
+            
+            if (isHistorical) {
+                titleEl.innerHTML = `回顧：${currentCycle.label}`;
+                titleEl.style.color = 'var(--warning)'; 
             } else {
-                cycleBadge.innerHTML = `<i class="far fa-calendar-alt"></i> 目前帳期：${currentCycle.start.getMonth()+1}/${currentCycle.start.getDate()} - ${currentCycle.end.getMonth()+1}/${currentCycle.end.getDate()}`;
+                titleEl.innerHTML = currentCycle.label;
+                titleEl.style.color = 'var(--text-primary)';
+            }
+            
+            if (currentCycle.isDefault) {
+                datesEl.innerHTML = `(1號 - 月底)`;
+            } else {
+                datesEl.innerHTML = `(${currentCycle.start.getMonth()+1}/${currentCycle.start.getDate()} - ${currentCycle.end.getMonth()+1}/${currentCycle.end.getDate()})`;
             }
 
-            // 篩選出屬於「目前帳單週期」的交易紀錄
+            const prefix = isHistorical ? '該期' : '本期';
+            document.getElementById('budget-card-title').innerText = `${prefix}預算剩餘額度`;
+            document.getElementById('chart-card-title').innerText = `${prefix}支出結構分析`;
+            document.getElementById('recent-list-title').innerText = `${prefix}紀錄明細`;
+            document.getElementById('balance-card-title').innerText = `${prefix}日常總結餘`;
+
             const cycleTx = transactions.filter(t => {
                 const tDate = new Date(t.date);
-                // 將時間歸零以做純日期比較
                 tDate.setHours(0,0,0,0);
                 return tDate >= currentCycle.start && tDate <= currentCycle.end;
             });
@@ -769,13 +790,14 @@
                     if (catExp[t.category] !== undefined) catExp[t.category] += t.amount;
                 }
             });
+            
             document.getElementById('display-income').innerText = `$${totalInc.toLocaleString()}`;
             document.getElementById('display-expense').innerText = `$${totalExp.toLocaleString()}`;
             document.getElementById('display-balance').innerText = `$${(totalInc - totalExp).toLocaleString()}`;
             
             renderBudgetBars(catExp);
             renderChart(catExp);
-            renderList(true); // 首頁只顯示最新 5 筆
+            renderDashList(cycleTx); 
         }
 
         function renderBudgetBars(currentExp) {
@@ -821,26 +843,53 @@
             return '💵'; 
         }
 
-        function renderList(isShort = false) {
-            const listId = isShort ? 'recent-tx-list' : 'full-tx-list';
-            const list = document.getElementById(listId);
+        function renderDashList(cycleTx) {
+            const list = document.getElementById('recent-tx-list');
+            list.innerHTML = '';
+            if(cycleTx.length === 0) {
+                list.innerHTML = '<div style="text-align:center; padding:10px; color:#ccc; font-size:0.8rem;">該期尚未有任何紀錄</div>';
+                return;
+            }
+            
+            const dataToShow = cycleTx.slice(0, 10);
+            
+            dataToShow.forEach(t => {
+                const color = t.type === 'income' ? 'amount-inc' : 'amount-exp';
+                const sign = t.type === 'income' ? '+' : '-';
+                const methodIcon = getMethodIcon(t.method); 
+                
+                list.innerHTML += `
+                    <li class="tx-item">
+                        <div class="tx-info">
+                            <span class="tx-cat">${t.category} <small style="color:#888;">${t.note}</small></span>
+                            <span class="tx-date">${t.date} <span style="font-size:0.8rem; margin-left:5px;">${methodIcon}</span></span>
+                        </div>
+                        <div class="action-btns">
+                            <span class="tx-amount ${color}">${sign}$${t.amount.toLocaleString()}</span>
+                            <i class="fas fa-edit edit-btn" onclick="editTx(${t.id})"></i>
+                            <i class="fas fa-trash delete-btn" onclick="deleteTx(${t.id})"></i>
+                        </div>
+                    </li>`;
+            });
+        }
+
+        function renderList() {
+            const list = document.getElementById('full-tx-list');
             if (!list) return;
             list.innerHTML = '';
             
-            const dataToShow = isShort ? transactions.slice(0, 5) : transactions;
             let currentLabelTracker = ''; 
 
-            dataToShow.forEach(t => {
-                // 根據設定的起始日，取得這筆交易屬於哪個帳單週期
-                const cycleInfo = getCycleBoundary(t.date, sysSettings.cycleStart);
+            transactions.forEach(t => {
+                const tDateObj = new Date(t.date);
+                const cycleInfo = getCycleBoundary(tDateObj, sysSettings.cycleStart);
                 let displayLabel = cycleInfo.label;
                 
-                // 如果不是預設的1號，就在標題加上日期區間標示
                 if (!cycleInfo.isDefault) {
                     displayLabel += ` (${cycleInfo.start.getMonth()+1}/${cycleInfo.start.getDate()} - ${cycleInfo.end.getMonth()+1}/${cycleInfo.end.getDate()})`;
                 }
 
-                if (!isShort && displayLabel !== currentLabelTracker) {
+                if (displayLabel !== currentLabelTracker) {
                     currentLabelTracker = displayLabel;
                     list.innerHTML += `<div class="month-divider"><i class="far fa-calendar-alt"></i> ${displayLabel}</div>`;
                 }
@@ -1165,7 +1214,7 @@
                 budget: budgets, 
                 shop: shoppingList,
                 networth: netWorthData,
-                settings: sysSettings // 備份設定值
+                settings: sysSettings 
             };
             const blob = new Blob([JSON.stringify(data)], {type: "text/json"});
             const link = document.createElement("a");
