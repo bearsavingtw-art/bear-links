@@ -556,10 +556,8 @@
             if (urlParams.get('tab') === 'networth') switchPage('networth');
         });
 
-        // --- [NEW] 智慧型帳單週期運算 (支援 29/30/31 號防呆) ---
+        // --- 智慧型帳單週期運算 (支援 29/30/31 號防呆) ---
         function getSmartDate(year, month, targetDay) {
-            // 這個函數會幫我們找出「真實存在」的日期
-            // 比如 2026年2月的目標是 31 號，它會回傳 2026/2/28
             const lastDayOfMonth = new Date(year, month + 1, 0).getDate();
             const actualDay = Math.min(targetDay, lastDayOfMonth);
             return new Date(year, month, actualDay);
@@ -568,7 +566,6 @@
         function getCycleBoundary(dateObj, startDay) {
             let year = dateObj.getFullYear();
             let month = dateObj.getMonth(); 
-            let day = dateObj.getDate();
             let cycleStartDate, cycleEndDate, labelStr;
 
             if (startDay === 1) {
@@ -576,17 +573,14 @@
                 cycleEndDate = new Date(year, month + 1, 0); 
                 labelStr = `${year}年 ${month + 1}月`;
             } else {
-                // 找出這個月和上個月「應該」的起始日 (防呆處理)
                 const thisMonthStart = getSmartDate(year, month, startDay);
                 const lastMonthStart = getSmartDate(year, month - 1, startDay);
 
                 if (dateObj >= thisMonthStart) {
-                    // 日期在「本月起始日」之後 -> 算下一個月的帳
                     cycleStartDate = thisMonthStart;
-                    cycleEndDate = new Date(getSmartDate(year, month + 1, startDay).getTime() - 86400000); // 下個月起始日的前一天
+                    cycleEndDate = new Date(getSmartDate(year, month + 1, startDay).getTime() - 86400000); 
                     labelStr = `${month + 1}月帳期`;
                 } else {
-                    // 日期在「本月起始日」之前 -> 算這個月的帳
                     cycleStartDate = lastMonthStart;
                     cycleEndDate = new Date(thisMonthStart.getTime() - 86400000);
                     let labelMonth = month === 0 ? 12 : month;
@@ -601,11 +595,10 @@
             renderDashboard();
         }
 
-        // --- 儲存系統設定 (上限解放到 31) ---
         function saveSysSettings() {
             let startDay = parseInt(document.getElementById('setting-cycle-start').value) || 1;
             if (startDay < 1) startDay = 1;
-            if (startDay > 31) startDay = 31; // 放寬限制到 31
+            if (startDay > 31) startDay = 31; 
             document.getElementById('setting-cycle-start').value = startDay;
             sysSettings.cycleStart = startDay;
             localStorage.setItem('bear_sys_settings', JSON.stringify(sysSettings));
@@ -748,15 +741,27 @@
             const currentCycle = getCycleBoundary(dashboardViewDate, sysSettings.cycleStart);
             const realTodayCycle = getCycleBoundary(new Date(), sysSettings.cycleStart);
             
-            // 用 getTime 比較確保判斷正確
-            const isHistorical = (currentCycle.start.getTime() !== realTodayCycle.start.getTime());
+            // 智慧時間狀態判斷：過去、現在、未來
+            let timeStatus = 'current'; 
+            const currentCycleTime = currentCycle.start.getTime();
+            const realTodayCycleTime = realTodayCycle.start.getTime();
+
+            if (currentCycleTime < realTodayCycleTime) {
+                timeStatus = 'past';
+            } else if (currentCycleTime > realTodayCycleTime) {
+                timeStatus = 'future';
+            }
 
             const titleEl = document.getElementById('dash-cycle-title');
             const datesEl = document.getElementById('dash-cycle-dates');
             
-            if (isHistorical) {
+            // 根據不同狀態給予不同的標題和顏色
+            if (timeStatus === 'past') {
                 titleEl.innerHTML = `回顧：${currentCycle.label}`;
-                titleEl.style.color = 'var(--warning)'; 
+                titleEl.style.color = 'var(--text-secondary)'; 
+            } else if (timeStatus === 'future') {
+                titleEl.innerHTML = `未來：${currentCycle.label}`;
+                titleEl.style.color = 'var(--info)'; 
             } else {
                 titleEl.innerHTML = currentCycle.label;
                 titleEl.style.color = 'var(--text-primary)';
@@ -768,7 +773,11 @@
                 datesEl.innerHTML = `(${currentCycle.start.getMonth()+1}/${currentCycle.start.getDate()} - ${currentCycle.end.getMonth()+1}/${currentCycle.end.getDate()})`;
             }
 
-            const prefix = isHistorical ? '該期' : '本期';
+            // 更新卡片標題
+            let prefix = '本期';
+            if (timeStatus === 'past') prefix = '該期';
+            if (timeStatus === 'future') prefix = '預估'; 
+            
             document.getElementById('budget-card-title').innerText = `${prefix}預算剩餘額度`;
             document.getElementById('chart-card-title').innerText = `${prefix}支出結構分析`;
             document.getElementById('recent-list-title').innerText = `${prefix}紀錄明細`;
