@@ -76,7 +76,7 @@
         .balance { color: var(--success); }
 
         .form-group { margin-bottom: 15px; text-align: left; }
-        label { display: block; font-size: 0.9rem; margin-bottom: 5px; font-weight: 600; }
+        label { display: block; font-size: 0.85rem; margin-bottom: 5px; font-weight: 600; color: var(--text-primary); }
         input, select { width: 100%; padding: 12px; border: 1px solid #eee; border-radius: 10px; font-size: 1rem; background: var(--bg-color); outline: none; color: var(--text-primary); appearance: none; -webkit-appearance: none; }
         input:focus, select:focus { border-color: var(--accent); background: #fff; }
         optgroup { font-weight: 700; color: var(--accent); }
@@ -147,8 +147,7 @@
         .achievement-banner { background: linear-gradient(135deg, #d4a373 0%, #b08d85 100%); color: #fff; padding: 15px; border-radius: 15px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; cursor: pointer; box-shadow: 0 5px 15px rgba(212,163,115,0.3); transition: 0.3s; }
         .achievement-banner:active { transform: scale(0.98); }
         .filter-badge { display: inline-block; background: rgba(176, 141, 133, 0.1); color: var(--accent); padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; margin-bottom: 10px; cursor: pointer; border: 1px dashed var(--accent); }
-        
-        /* [NEW] 設定頁面的編輯框樣式 */
+        .custom-cat-badge { display: inline-block; background: #e0e0e0; color: #555; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; margin-left: 5px; font-weight: normal; }
         .env-name-input { border: 1px dashed transparent; background: transparent; color: var(--text-primary); font-weight: 600; transition: 0.3s; }
         .env-name-input:focus { border-color: var(--accent); background: #fff; outline: none; }
         .env-name-input::placeholder { color: #ccc; font-weight: normal; }
@@ -326,6 +325,7 @@
             <div class="card-title">淨資產成長曲線</div>
             <div class="chart-wrapper"><canvas id="networthChart"></canvas></div>
         </div>
+        
         <div class="card">
             <div class="card-title" id="nw-form-title">更新本月盤點數據</div>
             <p style="font-size:0.85rem; color:var(--text-secondary); margin-top:0;">每月只需在發薪日或月底更新一次。</p>
@@ -400,10 +400,17 @@
     <div id="debt-form-modal" class="modal-overlay">
         <div class="modal-content" style="text-align: left;">
             <h3 style="margin-top:0; color:var(--danger); border-bottom: 2px solid #ffebee; padding-bottom:10px;"><i class="fas fa-fire"></i> 新增 / 更新負債目標</h3>
-            <div class="form-group"><label>負債名稱</label><input type="text" id="debt-name" placeholder="例如：學貸、車貸、信貸"></div>
-            <div class="form-group"><label>初始總負債 ($)</label><input type="number" id="debt-initial" placeholder="一開始總共欠多少錢"></div>
-            <div class="form-group"><label>目前剩餘欠款 ($)</label><input type="number" id="debt-current" placeholder="現在還欠多少"></div>
-            <div class="form-group"><label>每月預計還款 ($)</label><input type="number" id="debt-monthly" placeholder="每個月打算還多少"></div>
+            <div class="form-group"><label>負債名稱 (如:學貸)</label><input type="text" id="debt-name" placeholder="請輸入負債名稱"></div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div class="form-group"><label>初始總額 ($)</label><input type="number" id="debt-initial" placeholder="總欠款" inputmode="numeric"></div>
+                <div class="form-group"><label>目前剩餘 ($)</label><input type="number" id="debt-current" placeholder="現欠款" inputmode="numeric"></div>
+                <div class="form-group"><label>每月還款 ($)</label><input type="number" id="debt-monthly" placeholder="每月預定" inputmode="numeric"></div>
+                <div class="form-group"><label>總期數 (期)</label><input type="number" id="debt-total-terms" placeholder="例如: 48" inputmode="numeric"></div>
+            </div>
+            
+            <div class="form-group"><label>每月扣款日 (選填)</label><input type="number" id="debt-pay-date" min="1" max="31" placeholder="例如：5 (即每月5號)" inputmode="numeric"></div>
+            
             <div style="display:flex; gap:10px; margin-top:20px;">
                 <button class="btn" style="background:var(--danger); margin-top:0; flex:1;" onclick="saveDebt()">儲存目標</button>
                 <button class="btn-outline" style="margin-top:0; flex:1;" onclick="closeDebtForm()">取消</button>
@@ -430,6 +437,10 @@
                 <ol style="text-align:left; font-size:0.85rem; margin:0 0 15px 0; padding-left:20px; color:var(--text-primary); line-height:1.6;">
                     <li>點擊螢幕下方的「分享」圖示</li><li>選單往下滑，選擇<strong>「加入主畫面」</strong></li><li>點擊右上角「新增」即可！</li>
                 </ol>
+                <div style="font-weight:600; color:var(--success); margin-bottom:5px; text-align:left;"><i class="fab fa-android"></i> Android (Chrome 用戶)</div>
+                <ol style="text-align:left; font-size:0.85rem; margin:0; padding-left:20px; color:var(--text-primary); line-height:1.6;">
+                    <li>點擊右上角的「選單」圖示</li><li>選擇<strong>「加到主畫面」</strong></li><li>點擊「新增」即可！</li>
+                </ol>
             </div>
             <button class="btn" onclick="closeInstallModal()">我知道了</button>
         </div>
@@ -437,7 +448,6 @@
 
     <script>
         // --- 1. 資料與初始化 ---
-        // 這是系統預設的「建議名單」
         const defaultSuggestions = {
             '固定支出': ['🏠 居住水電', '🚌 交通通訊', '🛡️ 訂閱保險'],
             '變動支出': ['🍱 伙食餐飲', '🧻 日常雜支', '🎉 娛樂社交', '✨ 變美治裝'],
@@ -451,10 +461,9 @@
         let netWorthData = JSON.parse(localStorage.getItem('bear_networth')) || [];
         let sysSettings = JSON.parse(localStorage.getItem('bear_sys_settings')) || { cycleStart: 1 };
         
-        // [NEW] 讀取或初始化使用者的自訂分類庫與負債庫
         let userEnvelopes = JSON.parse(localStorage.getItem('bear_custom_envelopes'));
         if (!userEnvelopes) {
-            userEnvelopes = JSON.parse(JSON.stringify(defaultSuggestions)); // 深拷貝預設值
+            userEnvelopes = JSON.parse(JSON.stringify(defaultSuggestions)); 
             localStorage.setItem('bear_custom_envelopes', JSON.stringify(userEnvelopes));
         }
         let userDebts = JSON.parse(localStorage.getItem('bear_debts_tracker')) || [];
@@ -483,25 +492,39 @@
             if (urlParams.get('tab') === 'networth') switchPage('networth');
         });
 
-        // --- 核心邏輯：動態抓取選單 ---
+        function getAllCategoriesGrouped() {
+            let grouped = { '固定支出': new Set(), '變動支出': new Set(), '預存支出': new Set() };
+            for(let main in userEnvelopes) { userEnvelopes[main].forEach(sub => grouped[main].add(sub)); }
+            transactions.forEach(t => {
+                if(t.type === 'expense') {
+                    let main = t.mainCategory;
+                    if (!main || !['固定支出', '變動支出', '預存支出'].includes(main)) {
+                        if (['固定支出', '變動支出', '預存支出'].includes(t.category)) { main = t.category; } 
+                        else { main = '變動支出'; }
+                    }
+                    if(grouped[main]) {
+                        let subDisplay = (t.category === main) ? `一般${main}` : t.category;
+                        grouped[main].add(subDisplay);
+                    }
+                }
+            });
+            return { '固定支出': Array.from(grouped['固定支出']), '變動支出': Array.from(grouped['變動支出']), '預存支出': Array.from(grouped['預存支出']) };
+        }
+
+        // [NEW] 無縫接軌：自帶記憶輸入框
         function updateSubCategories() {
             const mainCat = document.getElementById('input-main-category').value;
             const subInput = document.getElementById('input-sub-category');
             const dataList = document.getElementById('sub-category-list');
-            const subGroup = document.getElementById('sub-category-group');
             
             dataList.innerHTML = '';
-            subInput.value = ''; // 清空輸入框
+            subInput.value = ''; 
             
             if (mainCat === '收入') {
-                subGroup.style.display = 'block';
                 incomeCats.forEach(cat => { dataList.innerHTML += `<option value="${cat}">`; });
             } else {
-                subGroup.style.display = 'block';
-                // 列出存在 userEnvelopes 裡的該大類所有分類
-                if (userEnvelopes[mainCat]) {
-                    userEnvelopes[mainCat].forEach(sub => { dataList.innerHTML += `<option value="${sub}">`; });
-                }
+                const allDynamicCats = getAllCategoriesGrouped();
+                allDynamicCats[mainCat].forEach(sub => { dataList.innerHTML += `<option value="${sub}">`; });
             }
         }
 
@@ -562,7 +585,7 @@
         function saveTransaction() {
             const date = document.getElementById('input-date').value;
             const mainCat = document.getElementById('input-main-category').value;
-            let subCat = document.getElementById('input-sub-category').value.trim(); // 直接讀取 input text
+            let subCat = document.getElementById('input-sub-category').value.trim(); 
             const amount = parseFloat(document.getElementById('input-amount').value);
             const note = document.getElementById('input-note').value;
             const method = document.getElementById('input-method').value;
@@ -572,7 +595,7 @@
             const type = (mainCat === '收入') ? 'income' : 'expense';
             const saveMainCategory = (type === 'income') ? '收入' : mainCat;
 
-            // [NEW] 自動學習新分類：如果這是一個新的自訂名稱，把它存進對應的 UserEnvelopes 裡
+            // 自動學習新分類
             if (type === 'expense' && userEnvelopes[mainCat]) {
                 if (!userEnvelopes[mainCat].includes(subCat)) {
                     userEnvelopes[mainCat].push(subCat);
@@ -600,10 +623,7 @@
 
             document.getElementById('input-main-category').value = mainToSet;
             updateSubCategories();
-            
-            // 直接把歷史的 category 塞進文字框
             document.getElementById('input-sub-category').value = tx.category;
-
             document.getElementById('input-amount').value = tx.amount; document.getElementById('input-note').value = tx.note; document.getElementById('input-method').value = tx.method || 'cash';
             document.getElementById('add-page-title').innerText = '編輯紀錄'; document.getElementById('save-btn').innerHTML = '確認修改 <i class="fas fa-save"></i>'; document.getElementById('cancel-edit-btn').classList.remove('hidden');
             switchPage('add');
@@ -611,16 +631,19 @@
 
         function deleteTx(id) { if(confirm('確定刪除？')) { transactions = transactions.filter(t => t.id !== id); localStorage.setItem('bear_transactions', JSON.stringify(transactions)); renderDashboard(); renderList(); } }
 
-        // --- 4. 動態且可編輯的預算設定 ---
         function renderBudgetSettings() {
             const container = document.getElementById('budget-settings-container'); container.innerHTML = '';
-            
-            for (let mainCat in userEnvelopes) {
-                if (userEnvelopes[mainCat].length === 0) continue; 
+            const allDynamicCats = getAllCategoriesGrouped();
+
+            for (let mainCat in allDynamicCats) {
+                if (allDynamicCats[mainCat].length === 0) continue; 
                 container.innerHTML += `<div style="font-weight:700; margin: 20px 0 10px; color:var(--accent); font-size:1.05rem; border-bottom:1px solid #eee; padding-bottom:5px;">${mainCat}</div>`;
                 
-                userEnvelopes[mainCat].forEach((env, index) => {
+                allDynamicCats[mainCat].forEach((env, index) => {
                     let val = budgets[env] || '';
+                    let isCustom = !defaultSuggestions[mainCat].includes(env);
+                    let labelHtml = env;
+                    if(isCustom && env !== `一般${mainCat}`) { labelHtml += ` <span class="custom-cat-badge">自訂</span>`; }
                     container.innerHTML += `
                     <div class="env-setting-row" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; gap:8px;">
                         <input type="text" id="env-name-${mainCat}-${index}" value="${env}" data-old="${env}" data-main="${mainCat}" class="env-name-input" style="flex:1; padding:8px 5px; font-size:0.9rem; width: 100%;" onchange="saveEditedEnv('${mainCat}', ${index})" placeholder="分類名稱">
@@ -631,59 +654,48 @@
             }
         }
 
-        // [NEW] 儲存編輯過的名字與預算 (無縫連動舊歷史)
         function saveEditedEnv(mainCat, index) {
             const nameInput = document.getElementById(`env-name-${mainCat}-${index}`);
             const budgetInput = document.getElementById(`env-budget-${mainCat}-${index}`);
-            
-            const oldName = nameInput.getAttribute('data-old');
-            const newName = nameInput.value.trim();
-            const newBudget = parseFloat(budgetInput.value) || 0;
+            const oldName = nameInput.getAttribute('data-old'); const newName = nameInput.value.trim(); const newBudget = parseFloat(budgetInput.value) || 0;
 
             if (!newName) { alert('分類名稱不能為空！'); nameInput.value = oldName; return; }
 
-            // 如果名字改變了，我們要在背後做大搬風！
             if (oldName !== newName) {
-                // 1. 更新 userEnvelopes 名單
-                userEnvelopes[mainCat][index] = newName;
+                if(!userEnvelopes[mainCat]) userEnvelopes[mainCat] = [...defaultSuggestions[mainCat]];
+                
+                let envIndex = userEnvelopes[mainCat].indexOf(oldName);
+                if (envIndex !== -1) userEnvelopes[mainCat][envIndex] = newName;
+                else userEnvelopes[mainCat].push(newName);
+                
                 localStorage.setItem('bear_custom_envelopes', JSON.stringify(userEnvelopes));
                 
-                // 2. 更新 budgets 紀錄
-                budgets[newName] = newBudget;
-                delete budgets[oldName];
-                localStorage.setItem('bear_budgets', JSON.stringify(budgets));
+                budgets[newName] = newBudget; delete budgets[oldName]; localStorage.setItem('bear_budgets', JSON.stringify(budgets));
                 
-                // 3. 更新所有歷史 transactions 的標籤
                 let changedCount = 0;
-                transactions.forEach(t => {
-                    if (t.mainCategory === mainCat && t.category === oldName) {
-                        t.category = newName;
-                        changedCount++;
-                    }
-                });
+                transactions.forEach(t => { if (t.mainCategory === mainCat && t.category === oldName) { t.category = newName; changedCount++; } });
                 if (changedCount > 0) localStorage.setItem('bear_transactions', JSON.stringify(transactions));
                 
                 nameInput.setAttribute('data-old', newName);
-                alert(`已將「${oldName}」更新為「${newName}」，並同步更新了 ${changedCount} 筆歷史紀錄！✨`);
+                if(changedCount > 0) alert(`已同步更新 ${changedCount} 筆歷史紀錄！✨`);
             } else {
-                // 名字沒變，純更新預算
-                budgets[oldName] = newBudget;
-                localStorage.setItem('bear_budgets', JSON.stringify(budgets));
+                budgets[oldName] = newBudget; localStorage.setItem('bear_budgets', JSON.stringify(budgets));
             }
         }
 
         function deleteEnvelope(mainCat, index) {
-            const envName = userEnvelopes[mainCat][index];
+            const allDynamicCats = getAllCategoriesGrouped();
+            const envName = allDynamicCats[mainCat][index];
             if(confirm(`確定要刪除「${envName}」分類嗎？\n(過去的記帳明細不會消失，但預算設定會被移除)`)) {
-                userEnvelopes[mainCat].splice(index, 1);
-                localStorage.setItem('bear_custom_envelopes', JSON.stringify(userEnvelopes));
-                delete budgets[envName];
-                localStorage.setItem('bear_budgets', JSON.stringify(budgets));
+                if(userEnvelopes[mainCat]) {
+                    userEnvelopes[mainCat] = userEnvelopes[mainCat].filter(e => e !== envName);
+                    localStorage.setItem('bear_custom_envelopes', JSON.stringify(userEnvelopes));
+                }
+                delete budgets[envName]; localStorage.setItem('bear_budgets', JSON.stringify(budgets));
                 renderBudgetSettings();
             }
         }
 
-        // --- 5. 儀表板與圖表 (含動態過濾) ---
         function renderDashboard() {
             sortTransactions(); 
             const currentCycle = getCycleBoundary(dashboardViewDate, sysSettings.cycleStart);
@@ -706,8 +718,7 @@
             document.getElementById('chart-card-title').innerText = `${prefix}三大類結構分析`;
             document.getElementById('balance-card-title').innerText = `${prefix}日常總結餘`;
 
-            const listTitle = document.getElementById('recent-list-title');
-            const clearBtn = document.getElementById('clear-filter-btn');
+            const listTitle = document.getElementById('recent-list-title'); const clearBtn = document.getElementById('clear-filter-btn');
             if (currentChartFilter) { listTitle.innerHTML = `<i class="fas fa-filter"></i> ${currentChartFilter} 明細`; clearBtn.classList.remove('hidden'); } 
             else { listTitle.innerHTML = `${prefix}紀錄明細`; clearBtn.classList.add('hidden'); }
 
@@ -723,10 +734,11 @@
                 else {
                     totalExp += t.amount;
                     let mCat = t.mainCategory;
-                    if (!mCat || !['固定支出', '變動支出', '預存支出'].includes(mCat)) { mCat = '變動支出'; }
+                    if (!mCat || !['固定支出', '變動支出', '預存支出'].includes(mCat)) { mCat = ['固定支出', '變動支出', '預存支出'].includes(t.category) ? t.category : '變動支出'; }
                     mainExp[mCat] += t.amount;
-                    if (!envExp[t.category]) envExp[t.category] = 0;
-                    envExp[t.category] += t.amount;
+                    let subCatDisplay = (t.category === mCat) ? `一般${mCat}` : t.category;
+                    if (!envExp[subCatDisplay]) envExp[subCatDisplay] = { spent: 0, mainGroup: mCat };
+                    envExp[subCatDisplay].spent += t.amount;
                 }
             });
             
@@ -741,13 +753,13 @@
 
         function renderBudgetBars(envExp) {
             const container = document.getElementById('budget-container'); container.innerHTML = '';
-            let hasAnyBudget = false; 
+            let hasAnyBudget = false; const allDynamicCats = getAllCategoriesGrouped();
 
-            for (let mainCat in userEnvelopes) {
+            for (let mainCat in allDynamicCats) {
                 let html = `<div class="budget-group-title"><i class="fas fa-folder-open"></i> ${mainCat}</div>`;
                 let groupHasBudget = false;
-                userEnvelopes[mainCat].forEach(env => {
-                    const budget = budgets[env] || 0; const spent = envExp[env] || 0;
+                allDynamicCats[mainCat].forEach(env => {
+                    const budget = budgets[env] || 0; const spentData = envExp[env] || { spent: 0 }; const spent = spentData.spent;
                     if (budget > 0 || spent > 0) {
                         groupHasBudget = true; hasAnyBudget = true;
                         let percent = 0, colorVar = '--success';
@@ -763,7 +775,7 @@
                 });
                 if(groupHasBudget) container.innerHTML += html;
             }
-            if (!hasAnyBudget) { container.innerHTML = '<div style="text-align:center; padding:10px; color:#ccc; font-size:0.8rem;">尚未設定預算，請點擊上方設定齒輪。</div>'; }
+            if (!hasAnyBudget) { container.innerHTML = '<div style="text-align:center; padding:10px; color:#ccc; font-size:0.8rem;">尚未設定預算，請點擊上方設定齒輪進行分配。</div>'; }
         }
 
         function renderChart(mainExpObj) {
@@ -816,7 +828,8 @@
         function renderReviewPage() {
             const currentCycle = getCycleBoundary(dashboardViewDate, sysSettings.cycleStart); document.getElementById('review-cycle-title').innerText = `${currentCycle.label} 診斷`;
             let mainBudgets = { '固定支出': 0, '變動支出': 0, '預存支出': 0 };
-            for (let mainCat in userEnvelopes) { userEnvelopes[mainCat].forEach(env => { mainBudgets[mainCat] += (budgets[env] || 0); }); }
+            const allDynamicCats = getAllCategoriesGrouped();
+            for (let mainCat in allDynamicCats) { allDynamicCats[mainCat].forEach(env => { mainBudgets[mainCat] += (budgets[env] || 0); }); }
             const cycleTx = transactions.filter(t => { const tDate = new Date(t.date); tDate.setHours(0,0,0,0); return tDate >= currentCycle.start && tDate <= currentCycle.end; });
             let mainActuals = { '固定支出': 0, '變動支出': 0, '預存支出': 0 }; let totalIncome = 0; let totalExp = 0;
             cycleTx.forEach(t => { if (t.type === 'income') { totalIncome += t.amount; } else { totalExp += t.amount; let mCat = t.mainCategory; if (!mCat) mCat = '變動支出'; mainActuals[mCat] += t.amount; } });
@@ -909,27 +922,35 @@
                 let progress = ((debt.initial - debt.current) / debt.initial) * 100;
                 if(progress < 0) progress = 0; if(progress > 100) progress = 100;
                 
+                let remainingTerms = 0;
                 let timeLeftStr = '';
+                
                 if (debt.current <= 0) {
                     timeLeftStr = '<span style="color:var(--success); font-weight:bold;">🎉 恭喜完全解脫！</span>';
                     progress = 100;
+                    remainingTerms = 0;
                 } else if (debt.monthly > 0) {
-                    let monthsLeft = Math.ceil(debt.current / debt.monthly);
-                    let y = Math.floor(monthsLeft / 12); let m = monthsLeft % 12;
-                    timeLeftStr = `預計剩餘：<b>${y > 0 ? y + ' 年 ' : ''}${m} 個月</b>`;
+                    remainingTerms = Math.ceil(debt.current / debt.monthly);
+                    let y = Math.floor(remainingTerms / 12); let m = remainingTerms % 12;
+                    timeLeftStr = `預計剩餘：<b>${y > 0 ? y + ' 年 ' : ''}${m > 0 ? m + ' 個月' : ''}</b>`;
                 } else {
                     timeLeftStr = `<span style="color:var(--warning);">尚未設定每月還款</span>`;
                 }
 
+                let payDateBadge = debt.payDate ? `<span style="background:rgba(176,141,133,0.1); color:var(--accent); padding:2px 8px; border-radius:10px; font-size:0.75rem; margin-left:8px;">每月 ${debt.payDate} 日扣款</span>` : '';
+                
+                let termsDisplay = debt.totalTerms ? `<div style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:5px;">剩餘期數：<b style="color:var(--text-primary);">${remainingTerms}</b> 期 / 總期數：${debt.totalTerms} 期</div>` : '';
+
                 container.innerHTML += `
                     <div style="background:var(--input-bg); padding:15px; border-radius:12px; margin-bottom:15px; border: 1px solid rgba(229, 115, 115, 0.2);">
-                        <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
-                            <span style="font-weight:600; color:var(--text-primary);">${debt.name}</span>
+                        <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
+                            <div><span style="font-weight:600; color:var(--text-primary); font-size:1.05rem;">${debt.name}</span>${payDateBadge}</div>
                             <i class="fas fa-edit edit-btn" style="color:var(--accent);" onclick="openDebtForm(${index})"></i>
                         </div>
-                        <div style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:8px;">
+                        <div style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:4px;">
                             已還款 $${(debt.initial - debt.current).toLocaleString()} / 總額 $${debt.initial.toLocaleString()}
                         </div>
+                        ${termsDisplay}
                         <div class="progress-bar-bg" style="height:8px; margin-bottom:8px;">
                             <div class="progress-bar-fill" style="width:${progress}%; background: ${progress === 100 ? 'var(--success)' : 'var(--danger)'}; transition: 1s ease;"></div>
                         </div>
@@ -945,12 +966,13 @@
         function openDebtForm(index = null) {
             document.getElementById('debt-form-modal').classList.add('show');
             if (index !== null) {
-                editingDebtId = index;
-                const debt = userDebts[index];
+                editingDebtId = index; const debt = userDebts[index];
                 document.getElementById('debt-name').value = debt.name;
                 document.getElementById('debt-initial').value = debt.initial;
                 document.getElementById('debt-current').value = debt.current;
                 document.getElementById('debt-monthly').value = debt.monthly;
+                document.getElementById('debt-total-terms').value = debt.totalTerms || '';
+                document.getElementById('debt-pay-date').value = debt.payDate || '';
                 document.getElementById('debt-delete-btn-container').style.display = 'block';
             } else {
                 editingDebtId = null;
@@ -958,10 +980,11 @@
                 document.getElementById('debt-initial').value = '';
                 document.getElementById('debt-current').value = '';
                 document.getElementById('debt-monthly').value = '';
+                document.getElementById('debt-total-terms').value = '';
+                document.getElementById('debt-pay-date').value = '';
                 document.getElementById('debt-delete-btn-container').style.display = 'none';
             }
         }
-
         function closeDebtForm() { document.getElementById('debt-form-modal').classList.remove('show'); }
 
         function saveDebt() {
@@ -969,13 +992,13 @@
             const initial = parseFloat(document.getElementById('debt-initial').value) || 0;
             const current = parseFloat(document.getElementById('debt-current').value) || 0;
             const monthly = parseFloat(document.getElementById('debt-monthly').value) || 0;
-            if(!name || initial <= 0) { alert('請輸入完整的負債名稱與初始總額！'); return; }
+            const totalTerms = parseInt(document.getElementById('debt-total-terms').value) || 0;
+            const payDate = parseInt(document.getElementById('debt-pay-date').value) || '';
+
+            if(!name || initial <= 0 || monthly <= 0 || totalTerms <= 0) { alert('請輸入完整資訊（含每月還款與總期數）！'); return; }
             
-            if (editingDebtId !== null) {
-                userDebts[editingDebtId] = { name, initial, current, monthly };
-            } else {
-                userDebts.push({ name, initial, current, monthly });
-            }
+            if (editingDebtId !== null) { userDebts[editingDebtId] = { name, initial, current, monthly, totalTerms, payDate }; } 
+            else { userDebts.push({ name, initial, current, monthly, totalTerms, payDate }); }
             localStorage.setItem('bear_debts_tracker', JSON.stringify(userDebts));
             closeDebtForm(); renderDebtTracker();
         }
