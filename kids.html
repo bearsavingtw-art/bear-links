@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>小熊任務分幣法 | Bear.saving 親子理財</title>
+    
+    <link rel="manifest" href="manifest_app.json">
+    <meta name="theme-color" content="#fcfbf9">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Noto+Serif+TC:wght@400;600;700&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        :root {
+            --bg-color: #fcfbf9;
+            --text-primary: #5a4d41;
+            --text-secondary: #968c83;
+            --accent: #b08d85;
+            --card-bg: #ffffff;
+            --apple: #e57373;     /* 蘋果紅 */
+            --rocket: #64b5f6;    /* 火箭藍 */
+            --heart: #f48fb1;     /* 愛心粉 */
+            --input-bg: #fdfbf7;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: 'Montserrat', 'Noto Serif TC', sans-serif;
+            background-color: var(--bg-color); color: var(--text-primary);
+            margin: 0; padding: 0; padding-bottom: 60px;
+        }
+
+        nav {
+            padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;
+            background: rgba(252, 251, 249, 0.95); position: sticky; top: 0; z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .nav-logo { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 600; color: var(--text-primary); text-decoration: none; }
+        .nav-back { font-size: 0.9rem; color: var(--text-secondary); text-decoration: none; display: flex; align-items: center; gap: 5px; }
+
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        
+        .hero-title { text-align: center; margin-bottom: 30px; margin-top: 10px; }
+        .hero-title h1 { font-family: 'Playfair Display', serif; color: var(--accent); margin: 0 0 10px 0; font-size: 1.8rem; }
+        .hero-title p { color: var(--text-secondary); font-size: 0.95rem; margin: 0; line-height: 1.5; }
+
+        /* 三隻小熊介紹卡片 */
+        .bear-cards { display: flex; flex-direction: column; gap: 15px; margin-bottom: 30px; }
+        .bear-card {
+            background: #fff; border-radius: 15px; padding: 20px;
+            display: flex; align-items: center; gap: 15px;
+            box-shadow: 0 5px 15px rgba(90, 77, 65, 0.05);
+            border-left: 5px solid #eee;
+        }
+        .bear-card.apple { border-color: var(--apple); }
+        .bear-card.rocket { border-color: var(--rocket); }
+        .bear-card.heart { border-color: var(--heart); }
+        
+        .bear-icon { font-size: 2.5rem; flex-shrink: 0; }
+        .bear-info h3 { margin: 0 0 5px 0; font-size: 1.1rem; color: var(--text-primary); }
+        .bear-info p { margin: 0; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; }
+
+        /* 零用錢分配器 */
+        .card-box {
+            background: #fff; border-radius: 20px; padding: 25px 20px;
+            box-shadow: 0 8px 25px rgba(90, 77, 65, 0.06); margin-bottom: 30px;
+            border: 1px solid rgba(176, 141, 133, 0.1);
+        }
+        .section-title { font-weight: 700; font-size: 1.1rem; border-bottom: 2px dashed #eee; padding-bottom: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 0.9rem; margin-bottom: 8px; font-weight: 600; }
+        .form-group input {
+            width: 100%; padding: 12px 15px; border: 1px solid #e0e0e0; border-radius: 10px;
+            font-size: 1.1rem; background: var(--input-bg); outline: none; color: var(--text-primary);
+            font-family: 'Montserrat', sans-serif;
+        }
+        .form-group input:focus { border-color: var(--accent); background: #fff; }
+
+        .btn {
+            width: 100%; padding: 14px; border: none; border-radius: 50px;
+            background: var(--text-primary); color: #fff; font-weight: 600; font-size: 1rem;
+            cursor: pointer; transition: 0.3s; margin-top: 10px; display: block; text-align: center;
+        }
+        .btn:active { transform: scale(0.98); }
+        .btn-outline { background: transparent; border: 1px dashed var(--accent); color: var(--accent); margin-top: 10px; }
+
+        .result-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 20px; }
+        .result-box { background: var(--input-bg); padding: 15px 5px; border-radius: 12px; text-align: center; border: 1px solid #eee;}
+        .result-icon { font-size: 1.5rem; margin-bottom: 5px; display: block; }
+        .result-name { font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 5px; font-weight: 600; }
+        .result-val { font-size: 1.2rem; font-weight: 700; color: var(--text-primary); font-family: 'Montserrat', sans-serif; }
+
+        /* 貼紙海報 (互動軌道) */
+        .poster-setup { background: #faf8f5; border-radius: 15px; padding: 15px; margin-bottom: 20px; border: 1px dashed var(--accent); }
+        .poster-setup-row { display: flex; gap: 10px; margin-bottom: 10px; }
+        .poster-setup-row input { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #ddd; }
+        
+        .poster-board {
+            background: #fff; border: 4px solid var(--rocket); border-radius: 20px;
+            padding: 20px; position: relative;
+        }
+        .poster-header { text-align: center; margin-bottom: 20px; }
+        .poster-goal-name { font-size: 1.3rem; font-weight: 700; color: var(--rocket); }
+        .poster-progress-text { font-size: 0.85rem; color: var(--text-secondary); margin-top: 5px; }
+        
+        .sticker-grid {
+            display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;
+        }
+        .sticker-slot {
+            width: 45px; height: 45px; border-radius: 50%;
+            border: 2px dashed #ccc; display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; background: #fdfbf7; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .sticker-slot.filled {
+            border: 2px solid var(--rocket); background: #e3f2fd;
+            transform: scale(1.1); box-shadow: 0 4px 10px rgba(100, 181, 246, 0.3);
+        }
+        
+        .add-money-box { display: flex; gap: 10px; margin-top: 25px; }
+        .add-money-box input { flex: 1; padding: 12px; border-radius: 50px; border: 1px solid #ddd; text-align: center; font-size: 1rem;}
+        .add-btn { background: var(--rocket); color: white; border: none; border-radius: 50px; padding: 0 25px; font-weight: 600; font-size: 1rem;}
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="index.html" class="nav-back"><i class="fas fa-arrow-left"></i> 回首頁</a>
+        <a href="#" class="nav-logo">Bear.kids</a>
+        <div style="width: 70px;"></div>
+    </nav>
+
+    <div class="container">
+        
+        <div class="hero-title">
+            <h1>Bear Coin System</h1>
+            <p>不只是給零用錢，而是給孩子人生的選擇權。<br>讓抽象的數字，變成看得見的成就感。</p>
+        </div>
+
+        <div class="bear-cards">
+            <div class="bear-card apple">
+                <div class="bear-icon">🐻🍎</div>
+                <div class="bear-info">
+                    <h3>蘋果熊 (日常零用)</h3>
+                    <p>給孩子自由支配，買零食或小玩具。就算花光了也要自己承擔，這是練習「選擇與代價」。</p>
+                </div>
+            </div>
+            <div class="bear-card rocket">
+                <div class="bear-icon">🐻🚀</div>
+                <div class="bear-info">
+                    <h3>火箭熊 (夢想儲蓄)</h3>
+                    <p>想買昂貴的樂高或遊戲機？把錢存在這裡。這是訓練「延遲享樂」與目標設定。</p>
+                </div>
+            </div>
+            <div class="bear-card heart">
+                <div class="bear-icon">🐻💖</div>
+                <div class="bear-info">
+                    <h3>愛心熊 (分享與愛)</h3>
+                    <p>存來買家人的生日禮物，或是捐款。培養孩子的「豐盛心態」，體會助人的快樂。</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-box">
+            <div class="section-title">
+                <span>💰 零用錢分配站</span>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: -10px;">領到零用錢的第一步：發薪水給三隻小熊！(建議比例 5 : 4 : 1)</p>
+            
+            <div class="form-group">
+                <input type="number" id="total-allowance" placeholder="請輸入本次領到的總金額 (例: 100)" inputmode="numeric">
+            </div>
+            <button class="btn" onclick="calculateAllowance()">自動分配 <i class="fas fa-magic"></i></button>
+
+            <div class="result-grid hidden" id="allowance-result">
+                <div class="result-box">
+                    <span class="result-icon">🍎</span>
+                    <div class="result-name">蘋果熊 (50%)</div>
+                    <div class="result-val" id="res-apple" style="color: var(--apple);">$0</div>
+                </div>
+                <div class="result-box">
+                    <span class="result-icon">🚀</span>
+                    <div class="result-name">火箭熊 (40%)</div>
+                    <div class="result-val" id="res-rocket" style="color: var(--rocket);">$0</div>
+                </div>
+                <div class="result-box">
+                    <span class="result-icon">💖</span>
+                    <div class="result-name">愛心熊 (10%)</div>
+                    <div class="result-val" id="res-heart" style="color: var(--heart);">$0</div>
+                </div>
+            </div>
+            <p id="alloc-tip" class="hidden" style="font-size: 0.8rem; text-align: center; color: var(--text-secondary); margin-top: 15px;">
+                💡 爸媽請引導孩子，將這些硬幣真實地放入對應的存錢筒中喔！
+            </p>
+        </div>
+
+        <div class="card-box">
+            <div class="section-title">
+                <span>🗺️ 火箭熊夢想軌道</span>
+                <i class="fas fa-cog" style="color:#ccc; cursor:pointer;" onclick="togglePosterSetup()"></i>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: -10px; margin-bottom: 20px;">每存入一點錢，就獲得一張小熊印章。集滿就能達成願望！</p>
+
+            <div id="poster-setup-area" class="poster-setup">
+                <div style="font-size:0.85rem; font-weight:600; margin-bottom:10px;">設定新目標：</div>
+                <div class="poster-setup-row">
+                    <input type="text" id="goal-name" placeholder="想買什麼？(例: 樂高)">
+                </div>
+                <div class="poster-setup-row">
+                    <input type="number" id="goal-total" placeholder="目標總金額" inputmode="numeric">
+                    <input type="number" id="goal-step" placeholder="多少錢換1張貼紙 (例: 50)" inputmode="numeric">
+                </div>
+                <button class="btn" style="padding:10px; background:var(--rocket);" onclick="startNewGoal()">建立夢想軌道 🚀</button>
+            </div>
+
+            <div id="poster-display-area" class="poster-board hidden">
+                <div class="poster-header">
+                    <div class="poster-goal-name" id="display-goal-name">我的夢想</div>
+                    <div class="poster-progress-text" id="display-progress-text">已存 $0 / 目標 $0</div>
+                </div>
+                
+                <div class="sticker-grid" id="sticker-grid"></div>
+
+                <div class="add-money-box">
+                    <input type="number" id="add-amount" placeholder="存入火箭熊的金額" inputmode="numeric">
+                    <button class="add-btn" onclick="addMoneyToGoal()">存入 🐻</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // --- 零用錢分配器邏輯 ---
+        function calculateAllowance() {
+            const total = parseInt(document.getElementById('total-allowance').value);
+            if (!total || total <= 0) return alert("請輸入有效的金額喔！");
+
+            // 預設比例：蘋果50%, 火箭40%, 愛心10%
+            let apple = Math.round(total * 0.5);
+            let rocket = Math.round(total * 0.4);
+            let heart = total - apple - rocket; // 確保總和正確
+
+            document.getElementById('res-apple').innerText = `$${apple}`;
+            document.getElementById('res-rocket').innerText = `$${rocket}`;
+            document.getElementById('res-heart').innerText = `$${heart}`;
+
+            document.getElementById('allowance-result').classList.remove('hidden');
+            document.getElementById('alloc-tip').classList.remove('hidden');
+        }
+
+        // --- 夢想貼紙海報邏輯 ---
+        let kidData = JSON.parse(localStorage.getItem('bear_kids_tracker')) || {
+            active: false, name: '', total: 0, step: 50, current: 0
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderPoster();
+        });
+
+        function togglePosterSetup() {
+            const setup = document.getElementById('poster-setup-area');
+            setup.classList.toggle('hidden');
+        }
+
+        function startNewGoal() {
+            const name = document.getElementById('goal-name').value;
+            const total = parseInt(document.getElementById('goal-total').value);
+            const step = parseInt(document.getElementById('goal-step').value);
+
+            if (!name || !total || !step) return alert("請填寫完整的目標資訊！");
+            if (total / step > 100) return alert("貼紙數量超過 100 張會塞不下喔！建議提高每張貼紙的金額。");
+
+            kidData = { active: true, name: name, total: total, step: step, current: 0 };
+            localStorage.setItem('bear_kids_tracker', JSON.stringify(kidData));
+            
+            document.getElementById('poster-setup-area').classList.add('hidden');
+            renderPoster();
+        }
+
+        function addMoneyToGoal() {
+            const amountInput = document.getElementById('add-amount');
+            const amount = parseInt(amountInput.value);
+            
+            if (!amount || amount <= 0) return alert("請輸入存入的金額！");
+
+            kidData.current += amount;
+            if (kidData.current > kidData.total) kidData.current = kidData.total;
+            
+            localStorage.setItem('bear_kids_tracker', JSON.stringify(kidData));
+            amountInput.value = '';
+            
+            renderPoster();
+            
+            if (kidData.current >= kidData.total) {
+                setTimeout(triggerCelebration, 500);
+            }
+        }
+
+        function renderPoster() {
+            const setupArea = document.getElementById('poster-setup-area');
+            const displayArea = document.getElementById('poster-display-area');
+            const grid = document.getElementById('sticker-grid');
+
+            if (!kidData.active) {
+                setupArea.classList.remove('hidden');
+                displayArea.classList.add('hidden');
+                return;
+            }
+
+            setupArea.classList.add('hidden');
+            displayArea.classList.remove('hidden');
+
+            document.getElementById('display-goal-name').innerText = `🚀 目標：${kidData.name}`;
+            document.getElementById('display-progress-text').innerText = `已存 $${kidData.current.toLocaleString()} / 目標 $${kidData.total.toLocaleString()} (每格 $${kidData.step})`;
+
+            // 計算需要的總貼紙數與已獲得的貼紙數
+            const totalStickers = Math.ceil(kidData.total / kidData.step);
+            const earnedStickers = Math.floor(kidData.current / kidData.step);
+
+            grid.innerHTML = '';
+            for (let i = 0; i < totalStickers; i++) {
+                const slot = document.createElement('div');
+                
+                if (i < earnedStickers) {
+                    slot.className = 'sticker-slot filled';
+                    // 隨機放入小熊或火箭
+                    slot.innerText = Math.random() > 0.3 ? '🐻' : '🚀'; 
+                } else {
+                    slot.className = 'sticker-slot';
+                }
+                grid.appendChild(slot);
+            }
+
+            if (kidData.current >= kidData.total) {
+                document.getElementById('display-progress-text').innerHTML = `<span style="color:var(--success); font-weight:bold;">🎉 恭喜達成目標！可以去買禮物囉！</span><br><a href="#" onclick="resetGoal()" style="color:#aaa; font-size:0.8rem; text-decoration:underline;">設定新目標</a>`;
+                document.querySelector('.add-money-box').style.display = 'none';
+            } else {
+                document.querySelector('.add-money-box').style.display = 'flex';
+            }
+        }
+
+        function resetGoal() {
+            if(confirm("確定要清除目前的軌道，設定新目標嗎？")) {
+                kidData = { active: false, name: '', total: 0, step: 50, current: 0 };
+                localStorage.setItem('bear_kids_tracker', JSON.stringify(kidData));
+                renderPoster();
+                document.getElementById('poster-setup-area').classList.remove('hidden');
+            }
+        }
+
+        function triggerCelebration() {
+            var duration = 3 * 1000;
+            var end = Date.now() + duration;
+
+            (function frame() {
+                confetti({
+                    particleCount: 5,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0 },
+                    colors: ['#64b5f6', '#f48fb1', '#e57373']
+                });
+                confetti({
+                    particleCount: 5,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1 },
+                    colors: ['#64b5f6', '#f48fb1', '#e57373']
+                });
+
+                if (Date.now() < end) {
+                    requestAnimationFrame(frame);
+                }
+            }());
+        }
+    </script>
+</body>
+</html>
