@@ -45,12 +45,6 @@
         .budget-bar-fill { height: 100%; width: 0%; transition: 0.5s ease; border-radius: 10px; }
         .budget-remain { font-size: 0.75rem; color: var(--text-secondary); text-align: right; margin-top: 3px; }
 
-        .sinking-item { background: #fdfbf7; border: 1px solid #f0e6d2; padding: 12px; border-radius: 10px; margin-bottom: 10px; }
-        .sinking-header { display: flex; justify-content: space-between; font-size: 0.9rem; font-weight: 600; margin-bottom: 5px; color: var(--text-primary); }
-        .sinking-stats { font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 8px; display: flex; justify-content: space-between; }
-        .sinking-bar-bg { width: 100%; height: 8px; background: #eee; border-radius: 10px; overflow: hidden; position: relative;}
-        .sinking-bar-fill { height: 100%; background: linear-gradient(90deg, #ffd54f, #d4a373); transition: width 0.5s ease; border-radius: 10px; }
-
         .logic-card { text-align: center; }
         .logic-btn-group { display: flex; gap: 15px; margin-top: 20px; }
         .btn-yes { background: var(--success); flex: 1; border:none; padding:15px; border-radius:10px; color:#fff; font-weight:600; }
@@ -121,7 +115,7 @@
         .nw-history-net { font-weight: 700; font-family: 'Montserrat', sans-serif; font-size: 1.1rem; }
         .nw-history-details { font-size: 0.75rem; color: var(--text-secondary); margin-top: 4px; }
 
-        /* [NEW] 盤點明細輸入框專屬樣式 */
+        /* 盤點明細輸入框專屬樣式 */
         .nw-detail-box { margin-top: 10px; padding: 15px; background: rgba(176,141,133,0.05); border-radius: 12px; border: 1px dashed #ddd; }
         .nw-detail-row { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
         .nw-detail-name { flex: 1; padding: 8px !important; font-size: 0.85rem !important; border-radius: 8px !important; }
@@ -174,16 +168,20 @@
         .snowball-icon { position: absolute; right: -15px; top: -14px; font-size: 1.8rem; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2)); transition: transform 0.3s; z-index: 2; }
         .snowball-text { position: absolute; width: 100%; text-align: center; left: 0; font-size: 0.8rem; color: #fff; font-weight: 700; text-shadow: 0 1px 2px rgba(0,0,0,0.4); line-height: 24px; z-index: 1; }
         .snowball-text-dark { color: var(--text-primary); text-shadow: none; }
+
+        /* [NEW] 自訂分類輸入框切換樣式 */
+        .cat-switch-btn { position: absolute; right: 0; top: 0; font-size: 0.8rem; color: var(--info); cursor: pointer; background: #fff; padding: 2px 8px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); font-weight: 600; }
     </style>
 </head>
 <body>
 
     <header>
         <h1>Bear.saving</h1>
-        <div style="font-size:0.8rem; color:var(--text-secondary);">Financial Cockpit v3.4</div>
+        <div style="font-size:0.8rem; color:var(--text-secondary);">Financial Cockpit v3.5</div>
     </header>
 
     <div id="page-dash" class="page active">
+        
         <div class="install-prompt" onclick="openInstallModal()">
             <i class="fas fa-arrow-circle-down"></i> 將系統安裝至手機桌面，體驗全螢幕 App 👉
         </div>
@@ -254,12 +252,18 @@
                     <option value="收入">收入 (Income)</option>
                 </select>
             </div>
+            
             <div class="form-group" id="sub-category-group">
-                <label>詳細分類 (標籤名稱)</label>
-                <p style="font-size:0.75rem; color:var(--text-secondary); margin-top:0;">💡 點擊可選擇系統建議，或直接打字建立專屬存袋</p>
-                <input type="text" id="input-sub-category" list="sub-category-list" placeholder="請點選或輸入分類名稱">
-                <datalist id="sub-category-list"></datalist>
+                <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:5px;">
+                    <label style="margin:0;">詳細分類</label>
+                    <span class="cat-switch-btn" id="cat-switch-btn" onclick="toggleCustomCatMode()">➕ 新增自訂分類</span>
+                </div>
+                
+                <select id="input-sub-category"></select>
+                
+                <input type="text" id="input-custom-category" placeholder="輸入專屬存袋名稱 (例: 旅費)" class="hidden" style="margin-top:0;">
             </div>
+
             <div class="form-group">
                 <label>支付方式</label>
                 <select id="input-method">
@@ -327,23 +331,16 @@
         
         <div class="card">
             <div class="card-title" id="nw-form-title">更新本月盤點數據</div>
-            <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:0;">切換月份可載入歷史資料。可直接填總額，或展開填寫明細。</p>
+            <p style="font-size:0.85rem; color:var(--text-secondary); margin-top:0;">切換月份可載入歷史資料。可直接填總額，或展開填寫明細。</p>
+            <div class="form-group"><label>盤點月份</label><input type="month" id="nw-input-month"></div>
             
-            <div class="form-group">
-                <label>盤點月份</label>
-                <input type="month" id="nw-input-month">
-            </div>
-
             <div class="form-group">
                 <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:5px;">
                     <label style="margin:0;">💰 銀行存款總額</label>
                     <span class="btn-toggle-detail" onclick="toggleNwDetails('cash')">📝 展開明細</span>
                 </div>
                 <input type="number" id="nw-input-cash" placeholder="可直接填入總額" inputmode="numeric">
-                <div id="nw-details-cash" class="nw-detail-box hidden">
-                    <div id="nw-list-cash"></div>
-                    <span class="btn-add-detail" onclick="addNwDetailRow('cash')">+ 新增帳戶/項目</span>
-                </div>
+                <div id="nw-details-cash" class="nw-detail-box hidden"><div id="nw-list-cash"></div><span class="btn-add-detail" onclick="addNwDetailRow('cash')">+ 新增帳戶/項目</span></div>
             </div>
 
             <div class="form-group">
@@ -352,10 +349,7 @@
                     <span class="btn-toggle-detail" onclick="toggleNwDetails('invest')">📝 展開明細</span>
                 </div>
                 <input type="number" id="nw-input-invest" placeholder="可直接填入總額" inputmode="numeric">
-                <div id="nw-details-invest" class="nw-detail-box hidden">
-                    <div id="nw-list-invest"></div>
-                    <span class="btn-add-detail" onclick="addNwDetailRow('invest')">+ 新增投資項目</span>
-                </div>
+                <div id="nw-details-invest" class="nw-detail-box hidden"><div id="nw-list-invest"></div><span class="btn-add-detail" onclick="addNwDetailRow('invest')">+ 新增投資項目</span></div>
             </div>
 
             <div class="form-group">
@@ -364,10 +358,7 @@
                     <span class="btn-toggle-detail" onclick="toggleNwDetails('debt')">📝 展開明細</span>
                 </div>
                 <input type="number" id="nw-input-debt" placeholder="若無可填0" inputmode="numeric">
-                <div id="nw-details-debt" class="nw-detail-box hidden">
-                    <div id="nw-list-debt"></div>
-                    <span class="btn-add-detail" onclick="addNwDetailRow('debt')">+ 新增負債項目</span>
-                </div>
+                <div id="nw-details-debt" class="nw-detail-box hidden"><div id="nw-list-debt"></div><span class="btn-add-detail" onclick="addNwDetailRow('debt')">+ 新增負債項目</span></div>
             </div>
 
             <button class="btn" onclick="saveNetWorth()">儲存盤點結果 <i class="fas fa-chart-line"></i></button>
@@ -379,7 +370,6 @@
             <div id="debt-tracker-container"></div>
             <button class="btn-outline" style="border-color:var(--danger); color:var(--danger);" onclick="openDebtForm()">＋ 新增負債目標</button>
         </div>
-
         <div class="card"><div class="card-title">歷史盤點紀錄</div><div id="nw-history-list"></div></div>
     </div>
 
@@ -391,7 +381,6 @@
             </div>
             <i class="fas fa-chevron-right" style="font-size:1.2rem;"></i>
         </div>
-
         <div class="card">
             <div class="card-title">系統設定 (System)</div>
             <div class="form-group">
@@ -402,18 +391,12 @@
                 </div>
             </div>
         </div>
-
         <div class="card">
             <div class="card-title">自訂分類與每月預算</div>
             <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:0;">* 點擊文字可重新命名。填寫「每月預算」後自動儲存。「預存支出」將自動乘以 12 換算為年度目標。</p>
             <div id="budget-settings-container"></div>
         </div>
-
-        <div class="card">
-            <div class="card-title">帳務明細 (依帳期排序)</div>
-            <ul class="tx-list" id="full-tx-list"></ul>
-        </div>
-
+        <div class="card"><div class="card-title">帳務明細 (依帳期排序)</div><ul class="tx-list" id="full-tx-list"></ul></div>
         <div class="card">
             <div class="card-title">資料備份</div>
             <button class="btn btn-outline" onclick="exportData()"><i class="fas fa-download"></i> 下載備份 (JSON)</button>
@@ -483,6 +466,7 @@
 
         let myChart = null; let nwChart = null; let reviewBarChart = null; let reviewPieChart = null; 
         let editingId = null; let dashboardViewDate = new Date(); let currentChartFilter = null; let editingDebtId = null;
+        let isCustomCatMode = false; // [NEW] 追蹤當前是不是自訂模式
 
         const logicQuestions = [ { id: 'need', icon: '⚖️', title: '需求閘', desc: '是全新的需求？還是家裡有替代品？', yes: '新需求 (+20)', no: '有替代品 (-50)', val: (y)=>y?20:-50 }, { id: 'cash', icon: '💰', title: '財力閘', desc: '手邊有足夠現金全額支付嗎？', yes: '有錢 (+20)', no: '要分期 (-100)', val: (y)=>y?20:-100 }, { id: 'value', icon: '⏳', title: '價值閘', desc: '看上方工時，值得用生命去換嗎？', yes: '值得 (+10)', no: '不值 (-30)', data: true, val: (y)=>y?10:-30 }, { id: 'cool', icon: '🔥', title: '冷靜閘', desc: '如果沒打折或不能馬上拿到，還買嗎？', yes: '照買 (+30)', no: '那算了 (-30)', val: (y)=>y?30:-30 } ];
 
@@ -490,10 +474,7 @@
             document.getElementById('input-date').valueAsDate = new Date();
             const today = new Date(); document.getElementById('nw-input-month').value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
             document.getElementById('setting-cycle-start').value = sysSettings.cycleStart;
-            
-            // 監聽月份選擇器，自動載入歷史盤點資料
             document.getElementById('nw-input-month').addEventListener('change', function() { loadNetWorthDataForMonth(this.value); });
-
             updateSubCategories(); renderDashboard(); setInterval(updateCountdowns, 1000);
             const urlParams = new URLSearchParams(window.location.search); if (urlParams.get('tab') === 'networth') switchPage('networth');
         });
@@ -511,10 +492,49 @@
             return { '固定支出': Array.from(grouped['固定支出']), '變動支出': Array.from(grouped['變動支出']), '預存支出': Array.from(grouped['預存支出']) };
         }
 
+        // --- [NEW] 切換自訂模式 ---
+        function toggleCustomCatMode(forceMode = null) {
+            const selectEl = document.getElementById('input-sub-category');
+            const inputEl = document.getElementById('input-custom-category');
+            const btnEl = document.getElementById('cat-switch-btn');
+
+            if (forceMode !== null) {
+                isCustomCatMode = forceMode;
+            } else {
+                isCustomCatMode = !isCustomCatMode;
+            }
+
+            if (isCustomCatMode) {
+                selectEl.classList.add('hidden');
+                inputEl.classList.remove('hidden');
+                inputEl.focus();
+                btnEl.innerHTML = '✖ 取消自訂';
+                btnEl.style.color = 'var(--text-secondary)';
+            } else {
+                selectEl.classList.remove('hidden');
+                inputEl.classList.add('hidden');
+                inputEl.value = '';
+                btnEl.innerHTML = '➕ 新增自訂分類';
+                btnEl.style.color = 'var(--info)';
+            }
+        }
+
         function updateSubCategories() {
-            const mainCat = document.getElementById('input-main-category').value; const subInput = document.getElementById('input-sub-category'); const dataList = document.getElementById('sub-category-list');
-            dataList.innerHTML = ''; subInput.value = ''; 
-            if (mainCat === '收入') { incomeCats.forEach(cat => { dataList.innerHTML += `<option value="${cat}">`; }); } else { const allDynamicCats = getAllCategoriesGrouped(); allDynamicCats[mainCat].forEach(sub => { dataList.innerHTML += `<option value="${sub}">`; }); }
+            const mainCat = document.getElementById('input-main-category').value;
+            const subSelect = document.getElementById('input-sub-category');
+            
+            subSelect.innerHTML = '';
+            // 每次切換大類，都重置回預設的下拉選單模式
+            toggleCustomCatMode(false); 
+            
+            if (mainCat === '收入') {
+                incomeCats.forEach(cat => { subSelect.innerHTML += `<option value="${cat}">${cat}</option>`; });
+                document.getElementById('cat-switch-btn').style.display = 'none'; // 收入不給自訂
+            } else {
+                document.getElementById('cat-switch-btn').style.display = 'block';
+                const allDynamicCats = getAllCategoriesGrouped();
+                allDynamicCats[mainCat].forEach(sub => { subSelect.innerHTML += `<option value="${sub}">${sub}</option>`; });
+            }
         }
 
         function getSmartDate(year, month, targetDay) { const lastDayOfMonth = new Date(year, month + 1, 0).getDate(); const actualDay = Math.min(targetDay, lastDayOfMonth); return new Date(year, month, actualDay); }
@@ -545,11 +565,7 @@
             if(pageId === 'dash') { dashboardViewDate = new Date(); currentChartFilter = null; renderDashboard(); }
             if(pageId === 'settings') { renderList(); renderBudgetSettings(); } 
             if(pageId === 'shop') { resetShop(); renderShoppingList(); }
-            if(pageId === 'networth') { 
-                // 載入當前選擇月份的資料
-                loadNetWorthDataForMonth(document.getElementById('nw-input-month').value);
-                renderNetWorthPage(); renderDebtTracker(); 
-            } 
+            if(pageId === 'networth') { loadNetWorthDataForMonth(document.getElementById('nw-input-month').value); renderNetWorthPage(); renderDebtTracker(); } 
             if(pageId === 'review') renderReviewPage(); 
             if(pageId === 'milestones') renderMilestonesPage(); 
         }
@@ -559,11 +575,31 @@
         function sortTransactions() { transactions.sort((a, b) => { const dateDiff = new Date(b.date) - new Date(a.date); if (dateDiff !== 0) return dateDiff; return b.id - a.id; }); }
 
         function saveTransaction() {
-            const date = document.getElementById('input-date').value; const mainCat = document.getElementById('input-main-category').value; let subCat = document.getElementById('input-sub-category').value.trim(); const amount = parseFloat(document.getElementById('input-amount').value); const note = document.getElementById('input-note').value; const method = document.getElementById('input-method').value;
-            if (!date || !amount || !subCat) { alert('請輸入完整資訊與分類名稱！'); return; }
-            const type = (mainCat === '收入') ? 'income' : 'expense'; const saveMainCategory = (type === 'income') ? '收入' : mainCat;
+            const date = document.getElementById('input-date').value; 
+            const mainCat = document.getElementById('input-main-category').value; 
+            const amount = parseFloat(document.getElementById('input-amount').value); 
+            const note = document.getElementById('input-note').value; 
+            const method = document.getElementById('input-method').value;
 
-            if (type === 'expense' && userEnvelopes[mainCat]) { if (!userEnvelopes[mainCat].includes(subCat)) { userEnvelopes[mainCat].push(subCat); localStorage.setItem('bear_custom_envelopes', JSON.stringify(userEnvelopes)); } }
+            // [NEW] 根據模式取得分類名稱
+            let subCat = '';
+            if (isCustomCatMode) {
+                subCat = document.getElementById('input-custom-category').value.trim();
+            } else {
+                subCat = document.getElementById('input-sub-category').value;
+            }
+
+            if (!date || !amount || !subCat) { alert('請輸入完整資訊與分類名稱！'); return; }
+
+            const type = (mainCat === '收入') ? 'income' : 'expense'; 
+            const saveMainCategory = (type === 'income') ? '收入' : mainCat;
+
+            if (type === 'expense' && userEnvelopes[mainCat]) { 
+                if (!userEnvelopes[mainCat].includes(subCat)) { 
+                    userEnvelopes[mainCat].push(subCat); 
+                    localStorage.setItem('bear_custom_envelopes', JSON.stringify(userEnvelopes)); 
+                } 
+            }
 
             if (editingId) {
                 const index = transactions.findIndex(t => t.id === editingId);
@@ -575,7 +611,23 @@
         function editTx(id) {
             const tx = transactions.find(t => t.id === id); if (!tx) return; editingId = id; document.getElementById('input-date').value = tx.date;
             let mainToSet = '變動支出'; if (tx.type === 'income') mainToSet = '收入'; else if (tx.mainCategory) mainToSet = tx.mainCategory;
-            document.getElementById('input-main-category').value = mainToSet; updateSubCategories(); document.getElementById('input-sub-category').value = tx.category; document.getElementById('input-amount').value = tx.amount; document.getElementById('input-note').value = tx.note; document.getElementById('input-method').value = tx.method || 'cash';
+            document.getElementById('input-main-category').value = mainToSet; 
+            updateSubCategories(); 
+            
+            // [NEW] 判斷是在清單內還是要用自訂模式
+            const subSelect = document.getElementById('input-sub-category');
+            let found = false;
+            for (let i=0; i<subSelect.options.length; i++) { if(subSelect.options[i].value === tx.category) { found = true; break; } }
+            
+            if (found) { 
+                toggleCustomCatMode(false);
+                subSelect.value = tx.category; 
+            } else { 
+                toggleCustomCatMode(true);
+                document.getElementById('input-custom-category').value = tx.category; 
+            }
+
+            document.getElementById('input-amount').value = tx.amount; document.getElementById('input-note').value = tx.note; document.getElementById('input-method').value = tx.method || 'cash';
             document.getElementById('add-page-title').innerText = '編輯紀錄'; document.getElementById('save-btn').innerHTML = '確認修改 <i class="fas fa-save"></i>'; document.getElementById('cancel-edit-btn').classList.remove('hidden'); switchPage('add');
         }
 
@@ -632,9 +684,7 @@
             if (currentCycle.isDefault) { datesEl.innerHTML = `(1號 - 月底)`; } else { datesEl.innerHTML = `(${currentCycle.start.getMonth()+1}/${currentCycle.start.getDate()} - ${currentCycle.end.getMonth()+1}/${currentCycle.end.getDate()})`; }
 
             let prefix = '本期'; if (timeStatus === 'past') prefix = '該期'; if (timeStatus === 'future') prefix = '預估'; 
-            document.getElementById('budget-card-title').innerText = `${prefix}本月生活費剩餘`;
-            document.getElementById('chart-card-title').innerText = `${prefix}三大類結構分析`;
-            document.getElementById('balance-card-title').innerText = `${prefix}日常總結餘`;
+            document.getElementById('budget-card-title').innerText = `${prefix}本月生活費剩餘`; document.getElementById('chart-card-title').innerText = `${prefix}三大類結構分析`; document.getElementById('balance-card-title').innerText = `${prefix}日常總結餘`;
 
             const listTitle = document.getElementById('recent-list-title'); const clearBtn = document.getElementById('clear-filter-btn');
             if (currentChartFilter) { listTitle.innerHTML = `<i class="fas fa-filter"></i> ${currentChartFilter} 明細`; clearBtn.classList.remove('hidden'); } else { listTitle.innerHTML = `${prefix}紀錄明細`; clearBtn.classList.add('hidden'); }
@@ -645,8 +695,7 @@
             cycleTx.forEach(t => {
                 if (t.type === 'income') totalInc += t.amount;
                 else {
-                    totalExp += t.amount;
-                    let mCat = t.mainCategory; if (!mCat || !['固定支出', '變動支出', '預存支出'].includes(mCat)) { mCat = ['固定支出', '變動支出', '預存支出'].includes(t.category) ? t.category : '變動支出'; }
+                    totalExp += t.amount; let mCat = t.mainCategory; if (!mCat || !['固定支出', '變動支出', '預存支出'].includes(mCat)) { mCat = ['固定支出', '變動支出', '預存支出'].includes(t.category) ? t.category : '變動支出'; }
                     mainExp[mCat] += t.amount; let subCatDisplay = (t.category === mCat) ? `一般${mCat}` : t.category;
                     if (!envExp[subCatDisplay]) envExp[subCatDisplay] = { spent: 0, mainGroup: mCat }; envExp[subCatDisplay].spent += t.amount;
                 }
@@ -679,13 +728,11 @@
             const container = document.getElementById('sinking-container'); container.innerHTML = '';
             const allDynamicCats = getAllCategoriesGrouped(); const sinkingCats = allDynamicCats['預存支出'];
             if(!sinkingCats || sinkingCats.length === 0) { container.innerHTML = '<div style="text-align:center; padding:10px; color:#ccc; font-size:0.8rem;">目前沒有預存支出項目。</div>'; return; }
-            const currentYear = new Date().getFullYear(); const currentMonth = new Date().getMonth() + 1; 
-            let hasData = false;
+            const currentYear = new Date().getFullYear(); const currentMonth = new Date().getMonth() + 1; let hasData = false;
 
             sinkingCats.forEach(env => {
                 const monthlyBudget = budgets[env] || 0; if(monthlyBudget === 0) return; 
-                hasData = true; const yearlyGoal = monthlyBudget * 12; const expectedSaved = monthlyBudget * currentMonth;
-                let spentThisYear = 0;
+                hasData = true; const yearlyGoal = monthlyBudget * 12; const expectedSaved = monthlyBudget * currentMonth; let spentThisYear = 0;
                 transactions.forEach(t => { const tDate = new Date(t.date); if(tDate.getFullYear() === currentYear && t.type === 'expense' && t.category === env && t.mainCategory === '預存支出') { spentThisYear += t.amount; } });
                 let currentBalance = expectedSaved - spentThisYear; if(currentBalance < 0) currentBalance = 0;
                 let progress = (currentBalance / yearlyGoal) * 100; if(progress > 100) progress = 100;
@@ -703,10 +750,7 @@
                 type: 'doughnut', data: { labels: labels, datasets: [{ data: hasData ? [mainExpObj['固定支出']||0, mainExpObj['變動支出']||0, mainExpObj['預存支出']||0] : [1], backgroundColor: hasData ? ['#5a4d41', '#b08d85', '#d4a373'] : ['#eee'], borderWidth: 0 }] },
                 options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom' } },
                     onClick: (e, activeEls) => {
-                        if(activeEls.length > 0) {
-                            const label = myChart.data.labels[activeEls[0].index];
-                            if (currentChartFilter === label) { clearChartFilter(); } else { currentChartFilter = label; renderDashboard(); setTimeout(() => { document.getElementById('recent-list-title').scrollIntoView({behavior: 'smooth', block: 'center'}); }, 100); }
-                        } else { if(currentChartFilter) clearChartFilter(); }
+                        if(activeEls.length > 0) { const label = myChart.data.labels[activeEls[0].index]; if (currentChartFilter === label) { clearChartFilter(); } else { currentChartFilter = label; renderDashboard(); setTimeout(() => { document.getElementById('recent-list-title').scrollIntoView({behavior: 'smooth', block: 'center'}); }, 100); } } else { if(currentChartFilter) clearChartFilter(); }
                     }
                 }
             });
@@ -751,8 +795,7 @@
             const ctxPie = document.getElementById('reviewPieChart').getContext('2d'); if (reviewPieChart) reviewPieChart.destroy(); const hasActualData = totalExp > 0;
             reviewPieChart = new Chart(ctxPie, { type: 'pie', data: { labels: ['固定支出', '變動支出', '預存支出'], datasets: [{ data: hasActualData ? [mainActuals['固定支出']||0, mainActuals['變動支出']||0, mainActuals['預存支出']||0] : [1], backgroundColor: hasActualData ? ['#5a4d41', '#b08d85', '#d4a373'] : ['#eee'], borderWidth: 1, borderColor: '#fff' }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { boxWidth: 10, font:{size: 10} } } } } });
 
-            const diagContainer = document.getElementById('diagnostic-content'); let diagHtml = '';
-            let isFixedOver = (mainActuals['固定支出'] > mainBudgets['固定支出']) && (mainBudgets['固定支出'] > 0); let isVarOver = (mainActuals['變動支出'] > mainBudgets['變動支出']) && (mainBudgets['變動支出'] > 0);
+            const diagContainer = document.getElementById('diagnostic-content'); let diagHtml = ''; let isFixedOver = (mainActuals['固定支出'] > mainBudgets['固定支出']) && (mainBudgets['固定支出'] > 0); let isVarOver = (mainActuals['變動支出'] > mainBudgets['變動支出']) && (mainBudgets['變動支出'] > 0);
             if (totalExp > totalIncome && totalIncome > 0) { diagHtml = `<div class="diag-status-badge danger">🆘 底氣流失中 (總支出 > 總收入)</div><p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.6;">這個月辛苦了，我們正在透支未來的底氣。請先深呼吸，下個月試著把「變動支出」的預算往下調降 10%，我們一步一步把掌控權拿回來。</p>`; } 
             else if (isFixedOver) { diagHtml = `<div class="diag-status-badge danger">🔴 結構性漏水 (固定支出超標)</div><p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.6;">警報！妳的固定支出超出了預期。請立刻檢查是不是有忘記取消的訂閱，或是日常水電使用過度。固定支出是財務的根基，必須盡快止血。</p>`; } 
             else if (isVarOver) { diagHtml = `<div class="diag-status-badge warning">🟡 慾望小暴走 (變動支出超標)</div><p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.6;">變動支出不小心超標了！下個月請試著在每次消費前，啟動「購物冷靜閘」。別自責，知道哪裡漏水，下個月補起來就好。</p>`; } 
@@ -783,127 +826,31 @@
         }
 
         // --- 6. 淨資產與負債追蹤模組 ---
-        // [NEW] 讀取特定月份的盤點資料，包含展開明細
         function loadNetWorthDataForMonth(monthStr) {
-            // 先清空所有明細與總額，重置狀態
-            ['cash', 'invest', 'debt'].forEach(t => {
-                document.getElementById(`nw-list-${t}`).innerHTML = '';
-                document.getElementById(`nw-input-${t}`).readOnly = false;
-                document.getElementById(`nw-input-${t}`).value = '';
-                document.getElementById(`nw-details-${t}`).classList.add('hidden');
-            });
-
+            ['cash', 'invest', 'debt'].forEach(t => { document.getElementById(`nw-list-${t}`).innerHTML = ''; document.getElementById(`nw-input-${t}`).readOnly = false; document.getElementById(`nw-input-${t}`).value = ''; document.getElementById(`nw-details-${t}`).classList.add('hidden'); });
             if (!monthStr) return;
-
             const data = netWorthData.find(d => d.month === monthStr);
             if (data) {
-                // 載入總額
-                document.getElementById('nw-input-cash').value = data.cash || '';
-                document.getElementById('nw-input-invest').value = data.invest || '';
-                document.getElementById('nw-input-debt').value = data.debt || '';
-
-                // 如果有存過明細，就載入明細並鎖定總額框
-                if (data.details) {
-                    ['cash', 'invest', 'debt'].forEach(t => {
-                        if (data.details[t] && data.details[t].length > 0) {
-                            document.getElementById(`nw-details-${t}`).classList.remove('hidden');
-                            data.details[t].forEach(item => addNwDetailRow(t, item.name, item.val));
-                            sumNwDetails(t);
-                        }
-                    });
-                }
+                document.getElementById('nw-input-cash').value = data.cash || ''; document.getElementById('nw-input-invest').value = data.invest || ''; document.getElementById('nw-input-debt').value = data.debt || '';
+                if (data.details) { ['cash', 'invest', 'debt'].forEach(t => { if (data.details[t] && data.details[t].length > 0) { document.getElementById(`nw-details-${t}`).classList.remove('hidden'); data.details[t].forEach(item => addNwDetailRow(t, item.name, item.val)); sumNwDetails(t); } }); }
             } else {
-                // 如果是本月但沒資料，嘗試去抓取診斷室的負債
-                const diagnosedDebt = localStorage.getItem('bear_diagnosed_debt');
-                const today = new Date();
-                const thisMonthStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
-                
-                if (monthStr === thisMonthStr && diagnosedDebt && parseFloat(diagnosedDebt) > 0) {
-                    document.getElementById('nw-input-debt').value = Math.round(parseFloat(diagnosedDebt));
-                    document.getElementById('nw-form-title').innerHTML = '更新本月盤點數據 <span style="font-size:0.75rem; color:var(--success); font-weight:normal;">(已載入診斷室負債)</span>';
-                } else {
-                    document.getElementById('nw-form-title').innerHTML = '更新本月盤點數據';
-                }
+                const diagnosedDebt = localStorage.getItem('bear_diagnosed_debt'); const today = new Date(); const thisMonthStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+                if (monthStr === thisMonthStr && diagnosedDebt && parseFloat(diagnosedDebt) > 0) { document.getElementById('nw-input-debt').value = Math.round(parseFloat(diagnosedDebt)); document.getElementById('nw-form-title').innerHTML = '更新本月盤點數據 <span style="font-size:0.75rem; color:var(--success); font-weight:normal;">(已載入診斷室負債)</span>'; } else { document.getElementById('nw-form-title').innerHTML = '更新本月盤點數據'; }
             }
         }
 
-        // [NEW] 新增明細列
-        function addNwDetailRow(type, name='', val='') {
-            const list = document.getElementById(`nw-list-${type}`);
-            const row = document.createElement('div');
-            row.className = 'nw-detail-row';
-            row.innerHTML = `
-                <input type="text" class="nw-dtl-name-${type} nw-detail-name" value="${name}" placeholder="名稱 (例: 薪轉戶)">
-                <input type="number" class="nw-dtl-val-${type} nw-detail-val" value="${val}" placeholder="金額" oninput="sumNwDetails('${type}')">
-                <i class="fas fa-trash" style="color:var(--danger); cursor:pointer; padding:5px;" onclick="this.parentElement.remove(); sumNwDetails('${type}')"></i>
-            `;
-            list.appendChild(row);
-            
-            // 只要一加列，就把主輸入框設為唯讀
-            document.getElementById(`nw-input-${type}`).readOnly = true;
-        }
+        function addNwDetailRow(type, name='', val='') { const list = document.getElementById(`nw-list-${type}`); const row = document.createElement('div'); row.className = 'nw-detail-row'; row.innerHTML = `<input type="text" class="nw-dtl-name-${type} nw-detail-name" value="${name}" placeholder="名稱 (例: 薪轉戶)"><input type="number" class="nw-dtl-val-${type} nw-detail-val" value="${val}" placeholder="金額" oninput="sumNwDetails('${type}')"><i class="fas fa-trash" style="color:var(--danger); cursor:pointer; padding:5px;" onclick="this.parentElement.remove(); sumNwDetails('${type}')"></i>`; list.appendChild(row); document.getElementById(`nw-input-${type}`).readOnly = true; }
+        function toggleNwDetails(type) { const container = document.getElementById(`nw-details-${type}`); container.classList.toggle('hidden'); if(!container.classList.contains('hidden') && document.getElementById(`nw-list-${type}`).children.length === 0) { addNwDetailRow(type); } }
+        function sumNwDetails(type) { const vals = document.querySelectorAll(`.nw-dtl-val-${type}`); let total = 0; vals.forEach(input => { total += parseFloat(input.value) || 0; }); const mainInput = document.getElementById(`nw-input-${type}`); mainInput.value = total; if(vals.length === 0) { mainInput.readOnly = false; } else { mainInput.readOnly = true; } }
 
-        // [NEW] 展開或收合明細區塊
-        function toggleNwDetails(type) {
-            const container = document.getElementById(`nw-details-${type}`);
-            container.classList.toggle('hidden');
-            // 如果展開時裡面是空的，自動幫他加一行
-            if(!container.classList.contains('hidden') && document.getElementById(`nw-list-${type}`).children.length === 0) {
-                addNwDetailRow(type);
-            }
-        }
-
-        // [NEW] 計算明細總和並更新到主輸入框
-        function sumNwDetails(type) {
-            const vals = document.querySelectorAll(`.nw-dtl-val-${type}`);
-            let total = 0;
-            vals.forEach(input => { total += parseFloat(input.value) || 0; });
-            
-            const mainInput = document.getElementById(`nw-input-${type}`);
-            mainInput.value = total;
-            
-            // 如果所有明細都被刪光了，解開主輸入框的唯讀
-            if(vals.length === 0) {
-                mainInput.readOnly = false;
-            } else {
-                mainInput.readOnly = true;
-            }
-        }
-
-        // [NEW] 儲存盤點資料 (包含明細)
         function saveNetWorth() {
-            const month = document.getElementById('nw-input-month').value; 
-            const cash = parseFloat(document.getElementById('nw-input-cash').value) || 0; 
-            const invest = parseFloat(document.getElementById('nw-input-invest').value) || 0; 
-            const debt = parseFloat(document.getElementById('nw-input-debt').value) || 0;
-            
+            const month = document.getElementById('nw-input-month').value; const cash = parseFloat(document.getElementById('nw-input-cash').value) || 0; const invest = parseFloat(document.getElementById('nw-input-invest').value) || 0; const debt = parseFloat(document.getElementById('nw-input-debt').value) || 0;
             if(!month) { alert('請選擇盤點月份！'); return; }
-
-            // 收集明細資料
             const details = { cash: [], invest: [], debt: [] };
-            ['cash', 'invest', 'debt'].forEach(t => {
-                const names = document.querySelectorAll(`.nw-dtl-name-${t}`);
-                const vals = document.querySelectorAll(`.nw-dtl-val-${t}`);
-                for(let i=0; i<names.length; i++) {
-                    if (names[i].value || vals[i].value) {
-                        details[t].push({ name: names[i].value || '未命名', val: parseFloat(vals[i].value) || 0 });
-                    }
-                }
-            });
-
-            const net = (cash + invest) - debt; 
-            const existingIndex = netWorthData.findIndex(item => item.month === month);
-            
-            const newData = { month, cash, invest, debt, net, details };
-
-            if (existingIndex !== -1) { netWorthData[existingIndex] = newData; } 
-            else { netWorthData.push(newData); }
-            
-            netWorthData.sort((a, b) => a.month.localeCompare(b.month)); 
-            localStorage.setItem('bear_networth', JSON.stringify(netWorthData)); 
-            alert('盤點資料已更新！🚀');
-            
-            renderNetWorthPage();
+            ['cash', 'invest', 'debt'].forEach(t => { const names = document.querySelectorAll(`.nw-dtl-name-${t}`); const vals = document.querySelectorAll(`.nw-dtl-val-${t}`); for(let i=0; i<names.length; i++) { if (names[i].value || vals[i].value) { details[t].push({ name: names[i].value || '未命名', val: parseFloat(vals[i].value) || 0 }); } } });
+            const net = (cash + invest) - debt; const existingIndex = netWorthData.findIndex(item => item.month === month); const newData = { month, cash, invest, debt, net, details };
+            if (existingIndex !== -1) { netWorthData[existingIndex] = newData; } else { netWorthData.push(newData); }
+            netWorthData.sort((a, b) => a.month.localeCompare(b.month)); localStorage.setItem('bear_networth', JSON.stringify(netWorthData)); alert('盤點資料已更新！🚀'); renderNetWorthPage();
         }
 
         function renderNetWorthPage() {
@@ -916,13 +863,7 @@
                 const reversedData = [...netWorthData].reverse();
                 reversedData.forEach(item => {
                     const parts = item.month.split('-'); const displayMonth = `${parts[0]}年 ${parseInt(parts[1])}月`;
-                    
-                    // 檢查這筆紀錄有沒有存明細，如果有給個小提示
-                    let hasDetailIcon = '';
-                    if (item.details && (item.details.cash.length > 0 || item.details.invest.length > 0 || item.details.debt.length > 0)) {
-                        hasDetailIcon = '<i class="fas fa-list-alt" style="font-size:0.7rem; color:var(--accent); margin-left:5px;" title="包含明細"></i>';
-                    }
-
+                    let hasDetailIcon = ''; if (item.details && (item.details.cash.length > 0 || item.details.invest.length > 0 || item.details.debt.length > 0)) { hasDetailIcon = '<i class="fas fa-list-alt" style="font-size:0.7rem; color:var(--accent); margin-left:5px;" title="包含明細"></i>'; }
                     listContainer.innerHTML += `<div class="nw-history-item" style="cursor:pointer;" onclick="document.getElementById('nw-input-month').value='${item.month}'; loadNetWorthDataForMonth('${item.month}'); window.scrollTo({ top: document.getElementById('nw-form-title').offsetTop - 50, behavior: 'smooth' });"><div><div class="nw-history-month">${displayMonth} ${hasDetailIcon}</div><div class="nw-history-details">存款 $${(item.cash/10000).toFixed(1)}W | 投資 $${(item.invest/10000).toFixed(1)}W | 負債 $${(item.debt/10000).toFixed(1)}W</div></div><div style="display:flex; align-items:center;"><div class="nw-history-net">$${item.net.toLocaleString()}</div><i class="fas fa-trash delete-btn" style="margin-left:15px;" onclick="event.stopPropagation(); deleteNetWorth('${item.month}')"></i></div></div>`;
                 });
             }
@@ -991,18 +932,7 @@
             if (editingDebtId !== null) { userDebts[editingDebtId] = { name, initial, current, monthly, totalTerms, payDate }; } else { userDebts.push({ name, initial, current, monthly, totalTerms, payDate }); }
             localStorage.setItem('bear_debts_tracker', JSON.stringify(userDebts)); closeDebtForm(); renderDebtTracker();
         }
-
         function deleteDebt() { if(editingDebtId !== null && confirm('確定要刪除這筆負債目標嗎？')) { userDebts.splice(editingDebtId, 1); localStorage.setItem('bear_debts_tracker', JSON.stringify(userDebts)); closeDebtForm(); renderDebtTracker(); } }
-
-        function startLogic() { const name = document.getElementById('shop-name').value; const price = parseFloat(document.getElementById('shop-price').value); const salary = parseFloat(document.getElementById('shop-salary').value); if(!name || !price || !salary) { alert('請輸入完整資訊！'); return; } shopItem = { name, price, wage: Math.round(salary/160), costHour: (price/(salary/160)).toFixed(1) }; shopStep = 0; shopScore = 0; document.getElementById('shop-step-1').classList.add('hidden'); document.getElementById('shop-step-2').classList.remove('hidden'); document.getElementById('shop-history-container').classList.add('hidden'); showQuestion(); }
-        function showQuestion() { const q = logicQuestions[shopStep]; document.getElementById('q-icon').innerText = q.icon; document.getElementById('q-title').innerText = q.title; document.getElementById('q-desc').innerText = q.desc; document.getElementById('btn-yes').innerText = q.yes; document.getElementById('btn-no').innerText = q.no; if(q.data) document.getElementById('q-data').innerText = `需花費工時：${shopItem.costHour} 小時`; else document.getElementById('q-data').innerText = ''; }
-        function nextStep(isYes) { shopScore += logicQuestions[shopStep].val(isYes); shopStep++; if(shopStep < logicQuestions.length) showQuestion(); else showShopResult(); }
-        function showShopResult() { document.getElementById('shop-step-2').classList.add('hidden'); document.getElementById('shop-step-3').classList.remove('hidden'); let html = '', resultType = ''; if(shopScore >= 60) { resultType = 'pass'; html = `<span class="result-icon">🟢</span><h3>通過 (PASS)</h3><p>理性投資！符合需求與價值。</p>`; } else if(shopScore >= 0) { resultType = 'wait'; html = `<span class="result-icon">🟡</span><h3>冷靜 (WAIT)</h3><p>建議啟動 72 小時冷靜期。</p>`; } else { resultType = 'stop'; html = `<span class="result-icon">🔴</span><h3>駁回 (STOP)</h3><p>衝動消費！把錢存下來吧。</p>`; } document.getElementById('logic-result-content').innerHTML = html; saveShoppingItem(resultType); }
-        function saveShoppingItem(resultType) { const newItem = { id: Date.now(), name: shopItem.name, price: shopItem.price, costHour: shopItem.costHour, result: resultType, timestamp: Date.now() }; shoppingList.unshift(newItem); localStorage.setItem('bear_shopping_list', JSON.stringify(shoppingList)); }
-        function resetShop() { document.getElementById('shop-step-3').classList.add('hidden'); document.getElementById('shop-step-1').classList.remove('hidden'); document.getElementById('shop-history-container').classList.remove('hidden'); document.getElementById('shop-name').value = ''; document.getElementById('shop-price').value = ''; renderShoppingList(); }
-        function renderShoppingList() { const listContainer = document.getElementById('shop-list-content'); if(!listContainer) return; if(shoppingList.length === 0) { listContainer.innerHTML = '<div style="text-align:center; padding:15px; color:#999; font-size:0.9rem;">目前沒有購物評估紀錄</div>'; return; } listContainer.innerHTML = ''; shoppingList.forEach(item => { let badgeClass = '', badgeText = '', timerHtml = ''; if (item.result === 'pass') { badgeClass = 'status-pass'; badgeText = '通過 ✅'; } else if (item.result === 'wait') { badgeClass = 'status-wait'; badgeText = '冷靜 ⏳'; timerHtml = `<div class="timer-badge" data-ts="${item.timestamp}">計算中...</div>`; } else { badgeClass = 'status-stop'; badgeText = '駁回 🛑'; } listContainer.innerHTML += `<div class="shop-list-item"><div class="shop-info"><div class="shop-name">${item.name} <span style="font-size:0.8rem; font-weight:400;">$${item.price.toLocaleString()}</span></div><div class="shop-meta">工時: ${item.costHour}hr ${timerHtml}</div></div><div style="display:flex; align-items:center;"><span class="shop-status ${badgeClass}">${badgeText}</span><i class="fas fa-trash delete-btn" style="margin-left:15px;" onclick="deleteShopItem(${item.id})"></i></div></div>`; }); updateCountdowns(); }
-        function deleteShopItem(id) { if(confirm('確定刪除這筆紀錄？')) { shoppingList = shoppingList.filter(i => i.id !== id); localStorage.setItem('bear_shopping_list', JSON.stringify(shoppingList)); renderShoppingList(); } }
-        function updateCountdowns() { const timers = document.querySelectorAll('.timer-badge'); const now = Date.now(); timers.forEach(timer => { const diff = parseInt(timer.getAttribute('data-ts')) + (72 * 60 * 60 * 1000) - now; if (diff <= 0) { timer.innerText = "冷靜期結束"; timer.style.background = "#888"; } else { const h = Math.floor(diff / (1000 * 60 * 60)), m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)), s = Math.floor((diff % (1000 * 60)) / 1000); timer.innerText = `${h}h ${m}m ${s}s`; } }); }
 
         function exportData() { const data = { tx: transactions, budget: budgets, shop: shoppingList, networth: netWorthData, settings: sysSettings, envelopes: userEnvelopes, debts: userDebts }; const blob = new Blob([JSON.stringify(data)], {type: "text/json"}); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = "bear_backup_" + new Date().toISOString().slice(0,10) + ".json"; link.click(); }
         function importData(input) { const reader = new FileReader(); reader.onload = function(e) { try { const data = JSON.parse(e.target.result); if (Array.isArray(data)) { transactions = data; } else { transactions = data.tx || []; budgets = data.budget || {}; shoppingList = data.shop || []; netWorthData = data.networth || []; sysSettings = data.settings || { cycleStart: 1 }; userEnvelopes = data.envelopes || null; userDebts = data.debts || []; } localStorage.setItem('bear_transactions', JSON.stringify(transactions)); localStorage.setItem('bear_budgets', JSON.stringify(budgets)); localStorage.setItem('bear_shopping_list', JSON.stringify(shoppingList)); localStorage.setItem('bear_networth', JSON.stringify(netWorthData)); localStorage.setItem('bear_sys_settings', JSON.stringify(sysSettings)); if(userEnvelopes) localStorage.setItem('bear_custom_envelopes', JSON.stringify(userEnvelopes)); localStorage.setItem('bear_debts_tracker', JSON.stringify(userDebts)); alert('匯入成功！'); location.reload(); } catch(err) { alert('檔案錯誤'); } }; reader.readAsText(input.files[0]); }
