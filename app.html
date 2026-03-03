@@ -25,6 +25,7 @@
             --accent: #b08d85; --card-bg: #ffffff; --success: #81c784;
             --warning: #ffd54f; --danger: #e57373; --info: #64b5f6;
             --gold: #d4a373; --bar-bg: #eee;
+            --input-bg: #fdfbf7;
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Montserrat', 'Noto Serif TC', sans-serif; background-color: var(--bg-color); color: var(--text-primary); margin: 0; padding: 0; padding-bottom: 90px; overscroll-behavior-y: none; }
@@ -45,12 +46,13 @@
         .budget-bar-fill { height: 100%; width: 0%; transition: 0.5s ease; border-radius: 10px; }
         .budget-remain { font-size: 0.75rem; color: var(--text-secondary); text-align: right; margin-top: 3px; }
 
-        .sinking-item { background: #fdfbf7; border: 1px solid #f0e6d2; padding: 15px; border-radius: 12px; margin-bottom: 12px; }
+        .sinking-item { background: #fdfbf7; border: 1px solid #f0e6d2; padding: 15px; border-radius: 12px; margin-bottom: 12px; cursor: pointer; transition: 0.3s; }
+        .sinking-item:active { transform: scale(0.98); }
         .sinking-header { display: flex; justify-content: space-between; font-size: 0.95rem; font-weight: 700; margin-bottom: 5px; color: var(--text-primary); }
         .sinking-stats { font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 10px; display: flex; justify-content: space-between; }
         .sinking-bar-bg { width: 100%; height: 10px; background: #eee; border-radius: 10px; overflow: hidden; position: relative;}
         .sinking-bar-fill { height: 100%; background: linear-gradient(90deg, #ffd54f, #d4a373); transition: width 0.5s ease; border-radius: 10px; }
-        .sinking-detail { font-size: 0.7rem; color: #aaa; margin-top: 8px; text-align: right; }
+        .sinking-detail { font-size: 0.75rem; color: #888; margin-top: 10px; display: flex; justify-content: space-between; align-items: center; }
 
         .logic-card { text-align: center; }
         .logic-btn-group { display: flex; gap: 15px; margin-top: 20px; }
@@ -137,11 +139,9 @@
         .chart-wrapper { position: relative; height: 220px; width: 100%; display: flex; justify-content: center; margin-bottom: 15px;}
         .hidden { display: none !important; }
 
-        .install-prompt { background: rgba(176, 141, 133, 0.1); color: var(--accent); padding: 12px; border-radius: 10px; text-align: center; font-size: 0.85rem; font-weight: 600; margin-bottom: 15px; cursor: pointer; border: 1px dashed var(--accent); transition: 0.3s; }
-        .install-prompt:active { transform: scale(0.98); }
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(3px); display: flex; justify-content: center; align-items: center; z-index: 2000; opacity: 0; pointer-events: none; transition: 0.3s; }
         .modal-overlay.show { opacity: 1; pointer-events: auto; }
-        .modal-content { background: #fff; padding: 25px; border-radius: 20px; width: 90%; max-width: 400px; box-shadow: 0 15px 30px rgba(0,0,0,0.2); transform: translateY(20px); transition: 0.3s; text-align: left; }
+        .modal-content { background: #fff; padding: 25px; border-radius: 20px; width: 90%; max-width: 400px; max-height: 85vh; overflow-y: auto; box-shadow: 0 15px 30px rgba(0,0,0,0.2); transform: translateY(20px); transition: 0.3s; text-align: left; }
         .modal-overlay.show .modal-content { transform: translateY(0); }
         
         .diag-status-badge { font-size: 1rem; padding: 12px; border-radius: 10px; text-align: center; display: block; font-weight: 600; margin-bottom: 15px; }
@@ -183,15 +183,11 @@
 
     <header>
         <h1>Bear.saving</h1>
-        <div style="font-size:0.8rem; color:var(--text-secondary);">Financial Cockpit v3.9</div>
+        <div style="font-size:0.8rem; color:var(--text-secondary);">Financial Cockpit v3.91</div>
     </header>
 
     <div id="page-dash" class="page active">
         
-        <div class="install-prompt" onclick="openInstallModal()">
-            <i class="fas fa-arrow-circle-down"></i> 將系統安裝至手機桌面，體驗全螢幕 App 👉
-        </div>
-
         <div class="dashboard-header">
             <button class="month-nav-btn" onclick="changeDashboardMonth(-1)"><i class="fas fa-chevron-left"></i></button>
             <div class="current-cycle-display">
@@ -220,7 +216,7 @@
 
         <div class="card">
             <div class="card-title"><span>年度預存金追蹤 (Sinking Funds)</span></div>
-            <p style="font-size:0.75rem; color:var(--text-secondary); margin-top:-5px; margin-bottom:15px;">水位 = (歷史存入總額) - (歷史花費總額)</p>
+            <p style="font-size:0.75rem; color:var(--text-secondary); margin-top:-5px; margin-bottom:15px;">點擊袋子可查看歷史存入與花費明細。</p>
             <div id="sinking-container"></div>
         </div>
 
@@ -398,7 +394,7 @@
 
         <div class="card">
             <div class="card-title">預算與目標設定 (Max: 10袋)</div>
-            <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:0;">* 系統最多支援 10 個袋子，可自由增減分配給各類別。<br>* 若不想要某個袋子可點擊垃圾桶刪除（刪光將進入無分類模式）。</p>
+            <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:0;">* 點擊文字框可自訂專屬名稱。<br>* 若不想要某個袋子可點擊垃圾桶刪除（刪光將進入無分類模式）。</p>
             
             <div id="budget-settings-container"></div>
 
@@ -451,29 +447,19 @@
         </div>
     </div>
 
+    <div id="sinking-history-modal" class="modal-overlay">
+        <div class="modal-content" style="text-align: left; max-height: 80vh; overflow-y: auto;">
+            <h3 style="margin-top:0; color:var(--text-primary); border-bottom: 2px solid #eee; padding-bottom:10px;" id="sinking-history-title">預存花費紀錄</h3>
+            <div id="sinking-history-list"></div>
+            <button class="btn" style="margin-top:20px;" onclick="closeSinkingHistory()">關閉</button>
+        </div>
+    </div>
+
     <div class="bottom-nav">
         <div class="nav-item active" onclick="switchPage('dash')" id="nav-dash"><i class="fas fa-chart-pie"></i> 儀表板</div>
         <div class="nav-item" onclick="switchPage('networth')" id="nav-networth"><i class="fas fa-coins"></i> 資產盤點</div>
         <div class="nav-item" onclick="openAddPage()" id="nav-add"><i class="fas fa-plus-circle" style="font-size:1.6rem; color:var(--text-primary); transform:translateY(-2px);"></i> 記帳</div>
         <div class="nav-item" onclick="switchPage('settings')" id="nav-settings"><i class="fas fa-list-ul"></i> 設定</div>
-    </div>
-
-    <div id="install-modal" class="modal-overlay">
-        <div class="modal-content">
-            <h3 style="margin-top:0; color:var(--text-primary);"><i class="fas fa-mobile-alt"></i> 安裝 Bear 系統</h3>
-            <p style="font-size:0.9rem; color:var(--text-secondary); margin-bottom:15px;">將駕駛艙升級為手機原生 App，無網址列、全螢幕操作更順暢！</p>
-            <div class="install-guide-box">
-                <div style="font-weight:600; color:var(--accent); margin-bottom:5px; text-align:left;"><i class="fab fa-apple"></i> iOS (Safari 用戶)</div>
-                <ol style="text-align:left; font-size:0.85rem; margin:0 0 15px 0; padding-left:20px; color:var(--text-primary); line-height:1.6;">
-                    <li>點擊螢幕下方的「分享」圖示</li><li>選單往下滑，選擇<strong>「加入主畫面」</strong></li><li>點擊右上角「新增」即可！</li>
-                </ol>
-                <div style="font-weight:600; color:var(--success); margin-bottom:5px; text-align:left;"><i class="fab fa-android"></i> Android (Chrome 用戶)</div>
-                <ol style="text-align:left; font-size:0.85rem; margin:0; padding-left:20px; color:var(--text-primary); line-height:1.6;">
-                    <li>點擊右上角的「選單」圖示</li><li>選擇<strong>「加到主畫面」</strong></li><li>點擊「新增」即可！</li>
-                </ol>
-            </div>
-            <button class="btn" onclick="closeInstallModal()">我知道了</button>
-        </div>
     </div>
 
     <script>
@@ -519,7 +505,6 @@
             return count;
         }
 
-        // --- 記帳下拉選單邏輯 (支援0袋無分類模式) ---
         function updateSubCategories() {
             const mainCatSelect = document.getElementById('input-main-category');
             const mainCat = mainCatSelect.value;
@@ -541,7 +526,6 @@
                 const envelopes = userEnvelopes[realMainCat];
 
                 if (!envelopes || envelopes.length === 0) {
-                    // 如果這個類別被刪到0個袋子，隱藏下拉選單！
                     subGroup.style.display = 'none';
                     subSelect.innerHTML = `<option value="未分類">未分類</option>`;
                 } else {
@@ -604,7 +588,7 @@
                 subCat = document.getElementById('input-sub-category').value;
                 if (!subCat) { alert('請選擇詳細分類！'); return; }
             } else {
-                subCat = '未分類'; // 若使用者刪光了該類別的所有袋子
+                subCat = '未分類';
             }
 
             if (!date || !amount) { alert('請輸入完整金額與日期！'); return; }
@@ -669,7 +653,18 @@
                     let inputsHtml = '';
                     if (mainCat === '預存支出') {
                         let goalVal = yearlyGoals[env] || '';
-                        inputsHtml = `<div class="budget-inputs-wrapper"><input type="number" id="env-budget-${mainCat}-${index}" value="${val}" placeholder="每月預計存" class="env-budget-input" inputmode="numeric" onchange="saveEditedEnv('${mainCat}', ${index})"><input type="number" id="env-goal-${mainCat}-${index}" value="${goalVal}" placeholder="年度總目標" class="env-budget-input" style="background:#fffaf0; border-color:#ffd54f;" inputmode="numeric" onchange="saveEditedEnv('${mainCat}', ${index})"></div>`;
+                        let calcMonthly = goalVal ? Math.ceil(goalVal / 12) : 0;
+                        let calcText = goalVal ? `💡 自動計算：建議每月存 $${calcMonthly.toLocaleString()}` : '💡 輸入年度目標以計算每月建議額度';
+                        
+                        inputsHtml = `
+                            <div style="display:flex; flex-direction:column; width:100%;">
+                                <div class="budget-inputs-wrapper" style="margin-top:5px;">
+                                    <input type="number" id="env-budget-${mainCat}-${index}" value="${val}" placeholder="本月想存多少" class="env-budget-input" inputmode="numeric" onchange="saveEditedEnv('${mainCat}', ${index})">
+                                    <input type="number" id="env-goal-${mainCat}-${index}" value="${goalVal}" placeholder="年度總目標" class="env-budget-input" style="background:#fffaf0; border-color:#ffd54f;" inputmode="numeric" oninput="updateAutoCalc('${mainCat}', ${index})" onchange="saveEditedEnv('${mainCat}', ${index})">
+                                </div>
+                                <div id="calc-text-${mainCat}-${index}" style="font-size:0.75rem; color:var(--info); text-align:right; margin-top:4px;">${calcText}</div>
+                            </div>
+                        `;
                     } else {
                         inputsHtml = `<input type="number" id="env-budget-${mainCat}-${index}" value="${val}" placeholder="每月預算上限" class="env-budget-input" inputmode="numeric" style="width: 120px; padding:8px; font-size:0.9rem;" onchange="saveEditedEnv('${mainCat}', ${index})">`;
                     }
@@ -694,7 +689,18 @@
             }
         }
 
-        // [NEW] 新增袋子邏輯
+        // [NEW] 自動計算年度目標所需月存額
+        function updateAutoCalc(mainCat, index) {
+            let goalInput = document.getElementById(`env-goal-${mainCat}-${index}`).value;
+            let calcText = document.getElementById(`calc-text-${mainCat}-${index}`);
+            let goal = parseFloat(goalInput);
+            if(goal > 0) {
+                calcText.innerHTML = `💡 自動計算：建議每月存 $${Math.ceil(goal / 12).toLocaleString()}`;
+            } else {
+                calcText.innerHTML = `💡 輸入年度目標以計算每月建議額度`;
+            }
+        }
+
         function addNewEnvelope(mainCat) {
             if (getTotalEnvelopesCount() >= 10) return alert('已達 10 袋上限！');
             const newName = prompt(`請輸入新的「${mainCat}」分類名稱：`);
@@ -707,11 +713,9 @@
                 userEnvelopes[mainCat].push(name);
                 localStorage.setItem('bear_custom_envelopes', JSON.stringify(userEnvelopes));
                 renderBudgetSettings();
-                updateSubCategories(); 
             }
         }
 
-        // [NEW] 刪除袋子邏輯
         function deleteEnvelope(mainCat, index) {
             const envName = userEnvelopes[mainCat][index];
             if(confirm(`確定要刪除「${envName}」分類嗎？\n(過去的記帳明細不會消失，只是該分類無法再被選取)`)) {
@@ -721,7 +725,6 @@
                 localStorage.setItem('bear_budgets', JSON.stringify(budgets));
                 if (mainCat === '預存支出') { delete yearlyGoals[envName]; localStorage.setItem('bear_yearly_goals', JSON.stringify(yearlyGoals)); }
                 renderBudgetSettings();
-                updateSubCategories(); 
             }
         }
 
@@ -764,11 +767,9 @@
                 }
                 userEnvelopes = JSON.parse(JSON.stringify(defaultSuggestions));
                 localStorage.setItem('bear_custom_envelopes', JSON.stringify(userEnvelopes)); localStorage.setItem('bear_budgets', JSON.stringify(budgets)); localStorage.setItem('bear_yearly_goals', JSON.stringify(yearlyGoals)); localStorage.setItem('bear_transactions', JSON.stringify(transactions));
-                alert("已成功恢復原廠 10 袋名稱！"); renderBudgetSettings(); updateSubCategories();
+                alert("已成功恢復原廠 10 袋名稱！"); renderBudgetSettings();
             }
         }
-
-        function deleteTx(id) { if(confirm('確定刪除？')) { transactions = transactions.filter(t => t.id !== id); localStorage.setItem('bear_transactions', JSON.stringify(transactions)); renderDashboard(); renderList(); } }
 
         // --- 5. 儀表板與圖表 ---
         function renderDashboard() {
@@ -825,6 +826,7 @@
             if (!hasAnyBudget) { container.innerHTML = '<div style="text-align:center; padding:10px; color:#ccc; font-size:0.8rem;">目前無預算或花費資料。<br>（可至設定頁面新增分類與預算）</div>'; }
         }
 
+        // --- [NEW] 預存金水位計算與點擊看明細 ---
         function renderSinkingFundsTracker() {
             const container = document.getElementById('sinking-container'); container.innerHTML = '';
             const sinkingCats = userEnvelopes['預存支出'];
@@ -836,15 +838,93 @@
                     let totalSaved = 0; transactions.forEach(t => { if(t.type === 'save' && t.category === env) totalSaved += t.amount; });
                     let totalSpent = 0; transactions.forEach(t => { if(t.type === 'expense' && t.mainCategory === '預存支出' && t.category === env) totalSpent += t.amount; });
                     let currentBalance = totalSaved - totalSpent; 
+                    
                     if(yearlyGoal === 0 && currentBalance === 0) return; 
                     hasData = true; 
                     if(currentBalance < 0) currentBalance = 0;
                     let progress = yearlyGoal > 0 ? (currentBalance / yearlyGoal) * 100 : 100; if(progress > 100) progress = 100;
-                    container.innerHTML += `<div class="sinking-item"><div class="sinking-header"><span>${env}</span><span style="color:var(--gold);">$${currentBalance.toLocaleString()}</span></div><div class="sinking-stats"><span>目標 $${yearlyGoal.toLocaleString()}</span><span>歷史累積存入 $${totalSaved.toLocaleString()}</span></div><div class="sinking-bar-bg"><div class="sinking-bar-fill" style="width:${progress}%;"></div></div><div class="sinking-detail">歷史累積花費 -$${totalSpent.toLocaleString()}</div></div>`;
+                    
+                    container.innerHTML += `
+                        <div class="sinking-item" onclick="openSinkingHistory('${env}')">
+                            <div class="sinking-header"><span>${env}</span><span style="color:var(--gold);">$${currentBalance.toLocaleString()}</span></div>
+                            <div class="sinking-stats"><span>目標 $${yearlyGoal.toLocaleString()}</span><span>歷史累積存入 $${totalSaved.toLocaleString()}</span></div>
+                            <div class="sinking-bar-bg"><div class="sinking-bar-fill" style="width:${progress}%;"></div></div>
+                            <div class="sinking-detail">
+                                <span style="color:var(--info); font-weight:600;"><i class="fas fa-search"></i> 點擊看明細</span>
+                                <span>歷史累積花費 -$${totalSpent.toLocaleString()}</span>
+                            </div>
+                        </div>`;
                 });
             }
             if(!hasData) container.innerHTML = '<div style="text-align:center; padding:10px; color:#ccc; font-size:0.8rem;">請在記帳時選擇「存入預備金」，為妳的小豬公餵食！</div>';
         }
+
+        // [NEW] 開啟預存金明細 Modal
+        function openSinkingHistory(envName) {
+            document.getElementById('sinking-history-title').innerHTML = `🎯 ${envName} 歷史明細`;
+            const listContainer = document.getElementById('sinking-history-list');
+            listContainer.innerHTML = '';
+            
+            let monthlyData = {};
+            
+            transactions.forEach(t => {
+                if (t.category === envName && (t.mainCategory === '預存支出' || t.type === 'save')) {
+                    let month = t.date.substring(0, 7);
+                    if (!monthlyData[month]) monthlyData[month] = { spent: 0, saved: 0, txs: [] };
+                    
+                    if (t.type === 'expense') {
+                        monthlyData[month].spent += t.amount;
+                        monthlyData[month].txs.push(t);
+                    } else if (t.type === 'save') {
+                        monthlyData[month].saved += t.amount;
+                        monthlyData[month].txs.push(t);
+                    }
+                }
+            });
+
+            const sortedMonths = Object.keys(monthlyData).sort((a,b) => b.localeCompare(a));
+            
+            if (sortedMonths.length === 0) {
+                listContainer.innerHTML = '<div style="text-align:center; padding:20px; color:#999;">尚未有任何存入或花費紀錄。</div>';
+            } else {
+                sortedMonths.forEach(m => {
+                    const data = monthlyData[m];
+                    const monthLabel = m.replace('-', '年') + '月';
+                    
+                    let html = `
+                        <div style="margin-bottom:15px; padding:12px; background:#fdfbf7; border-radius:10px; border:1px solid #f0e6d2;">
+                            <div style="font-weight:bold; color:var(--text-primary); border-bottom:1px dashed #ddd; padding-bottom:5px; margin-bottom:8px;">
+                                ${monthLabel}
+                            </div>
+                            <div style="font-size:0.85rem; display:flex; justify-content:space-between; margin-bottom:5px; font-weight:600;">
+                                <span style="color:var(--gold);">➕ 存入: $${data.saved.toLocaleString()}</span>
+                                <span style="color:var(--danger);">➖ 花費: $${data.spent.toLocaleString()}</span>
+                            </div>
+                    `;
+                    
+                    if (data.txs.length > 0) {
+                        html += `<ul style="list-style:none; padding:0; margin:8px 0 0 0; font-size:0.8rem; color:var(--text-secondary); border-top:1px dashed #eee; padding-top:8px;">`;
+                        
+                        // 依照日期排序單月明細
+                        data.txs.sort((a,b) => b.date.localeCompare(a.date)).forEach(tx => {
+                            let sign = tx.type === 'save' ? '+' : '-';
+                            let color = tx.type === 'save' ? 'var(--gold)' : 'var(--danger)';
+                            html += `<li style="display:flex; justify-content:space-between; padding:3px 0;">
+                                <span>${tx.date.substring(8,10)}日 - ${tx.note || '無備註'}</span>
+                                <span style="color:${color}; font-weight:600;">${sign}$${tx.amount.toLocaleString()}</span>
+                            </li>`;
+                        });
+                        html += `</ul>`;
+                    }
+                    html += `</div>`;
+                    listContainer.innerHTML += html;
+                });
+            }
+
+            document.getElementById('sinking-history-modal').classList.add('show');
+        }
+
+        function closeSinkingHistory() { document.getElementById('sinking-history-modal').classList.remove('show'); }
 
         function clearChartFilter() { currentChartFilter = null; renderDashboard(); window.scrollTo({ top: document.getElementById('chart-card-title').offsetTop - 100, behavior: 'smooth' }); }
 
