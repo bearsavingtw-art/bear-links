@@ -175,15 +175,17 @@
         .snowball-text { position: absolute; width: 100%; text-align: center; left: 0; font-size: 0.8rem; color: #fff; font-weight: 700; text-shadow: 0 1px 2px rgba(0,0,0,0.4); line-height: 24px; z-index: 1; }
         .snowball-text-dark { color: var(--text-primary); text-shadow: none; }
         
-        .budget-inputs-wrapper { display: flex; gap: 5px; justify-content: flex-end; width: 100%; margin-top: 5px; }
+        .budget-inputs-wrapper { display: flex; gap: 5px; justify-content: flex-end; width: 100%; margin-top: 5px; align-items: center; }
         .budget-inputs-wrapper input { flex: 1; padding: 8px; font-size: 0.85rem; text-align: right; }
+        /* [NEW] 0袋大總管輸入框的樣式 */
+        .master-budget-input { width: 100px; padding: 6px; font-size: 0.85rem; text-align: right; border: 1px solid var(--accent); border-radius: 8px; background: #fff; }
     </style>
 </head>
 <body>
 
     <header>
         <h1>Bear.saving</h1>
-        <div style="font-size:0.8rem; color:var(--text-secondary);">Financial Cockpit v3.91</div>
+        <div style="font-size:0.8rem; color:var(--text-secondary);">Financial Cockpit v4.0</div>
     </header>
 
     <div id="page-dash" class="page active">
@@ -394,7 +396,7 @@
 
         <div class="card">
             <div class="card-title">預算與目標設定 (Max: 10袋)</div>
-            <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:0;">* 點擊文字框可自訂專屬名稱。<br>* 若不想要某個袋子可點擊垃圾桶刪除（刪光將進入無分類模式）。</p>
+            <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:0;">* 點擊文字框可自訂專屬名稱。<br>* 若想刪除請點擊垃圾桶（刪光為0袋時，代表該大類不細分，可直接設定總預算）。</p>
             
             <div id="budget-settings-container"></div>
 
@@ -473,6 +475,8 @@
         
         let transactions = JSON.parse(localStorage.getItem('bear_transactions')) || [];
         let budgets = JSON.parse(localStorage.getItem('bear_budgets')) || {};
+        // [NEW] 儲存 0 袋大總管預算
+        let masterBudgets = JSON.parse(localStorage.getItem('bear_master_budgets')) || { '固定支出': 0, '變動支出': 0, '預存支出': 0 };
         let yearlyGoals = JSON.parse(localStorage.getItem('bear_yearly_goals')) || {}; 
         let shoppingList = JSON.parse(localStorage.getItem('bear_shopping_list')) || [];
         let netWorthData = JSON.parse(localStorage.getItem('bear_networth')) || [];
@@ -505,6 +509,7 @@
             return count;
         }
 
+        // --- 記帳下拉選單邏輯 (0袋隱藏) ---
         function updateSubCategories() {
             const mainCatSelect = document.getElementById('input-main-category');
             const mainCat = mainCatSelect.value;
@@ -640,44 +645,69 @@
             document.getElementById('add-page-title').innerText = '編輯紀錄'; document.getElementById('save-btn').innerHTML = '確認修改 <i class="fas fa-save"></i>'; document.getElementById('cancel-edit-btn').classList.remove('hidden'); switchPage('add');
         }
 
-        // --- 4. 動態且可編輯的預算設定 (總數限制 10袋) ---
+        // --- [NEW] 4. 動態預算設定 (支援 0 袋的總管輸入框) ---
         function renderBudgetSettings() {
             const container = document.getElementById('budget-settings-container'); container.innerHTML = ''; 
             const totalBags = getTotalEnvelopesCount();
 
             for (let mainCat in userEnvelopes) {
-                container.innerHTML += `<div style="font-weight:700; margin: 20px 0 10px; color:var(--accent); font-size:1.05rem; border-bottom:1px solid #eee; padding-bottom:5px;">${mainCat} <span style="font-size:0.8rem; font-weight:normal; color:var(--text-secondary);">(${userEnvelopes[mainCat].length}袋)</span></div>`;
+                let bagCount = userEnvelopes[mainCat].length;
                 
-                userEnvelopes[mainCat].forEach((env, index) => {
-                    let val = budgets[env] || ''; 
-                    let inputsHtml = '';
+                // 如果是 0 袋，標題旁邊出現一個「大總管預算框」
+                let masterBudgetHtml = '';
+                if (bagCount === 0) {
+                    let masterVal = masterBudgets[mainCat] || '';
                     if (mainCat === '預存支出') {
-                        let goalVal = yearlyGoals[env] || '';
-                        let calcMonthly = goalVal ? Math.ceil(goalVal / 12) : 0;
-                        let calcText = goalVal ? `💡 自動計算：建議每月存 $${calcMonthly.toLocaleString()}` : '💡 輸入年度目標以計算每月建議額度';
-                        
-                        inputsHtml = `
-                            <div style="display:flex; flex-direction:column; width:100%;">
-                                <div class="budget-inputs-wrapper" style="margin-top:5px;">
-                                    <input type="number" id="env-budget-${mainCat}-${index}" value="${val}" placeholder="本月想存多少" class="env-budget-input" inputmode="numeric" onchange="saveEditedEnv('${mainCat}', ${index})">
-                                    <input type="number" id="env-goal-${mainCat}-${index}" value="${goalVal}" placeholder="年度總目標" class="env-budget-input" style="background:#fffaf0; border-color:#ffd54f;" inputmode="numeric" oninput="updateAutoCalc('${mainCat}', ${index})" onchange="saveEditedEnv('${mainCat}', ${index})">
-                                </div>
-                                <div id="calc-text-${mainCat}-${index}" style="font-size:0.75rem; color:var(--info); text-align:right; margin-top:4px;">${calcText}</div>
-                            </div>
+                        masterBudgetHtml = `
+                            <input type="number" id="master-budget-${mainCat}" class="master-budget-input" value="${masterVal}" placeholder="年總目標" onchange="saveMasterBudget('${mainCat}')">
                         `;
                     } else {
-                        inputsHtml = `<input type="number" id="env-budget-${mainCat}-${index}" value="${val}" placeholder="每月預算上限" class="env-budget-input" inputmode="numeric" style="width: 120px; padding:8px; font-size:0.9rem;" onchange="saveEditedEnv('${mainCat}', ${index})">`;
+                        masterBudgetHtml = `
+                            <input type="number" id="master-budget-${mainCat}" class="master-budget-input" value="${masterVal}" placeholder="月總預算" onchange="saveMasterBudget('${mainCat}')">
+                        `;
                     }
+                }
 
-                    container.innerHTML += `
-                    <div class="env-setting-row" style="display:flex; flex-direction:column; margin-bottom:15px; border-bottom:1px dashed #f0f0f0; padding-bottom:10px;">
-                        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:5px;">
-                            <input type="text" id="env-name-${mainCat}-${index}" value="${env}" data-old="${env}" data-main="${mainCat}" class="env-name-input" style="flex:1; padding:8px 5px; font-size:0.9rem;" onchange="saveEditedEnv('${mainCat}', ${index})" placeholder="分類名稱">
-                            <i class="fas fa-trash delete-btn" style="color:#e57373; padding-left:15px;" onclick="deleteEnvelope('${mainCat}', ${index})"></i>
-                        </div>
-                        <div style="display:flex; justify-content:flex-end;">${inputsHtml}</div>
-                    </div>`;
-                });
+                container.innerHTML += `
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin: 20px 0 10px; border-bottom:1px solid #eee; padding-bottom:5px;">
+                        <span style="font-weight:700; color:var(--accent); font-size:1.05rem;">${mainCat} <span style="font-size:0.8rem; font-weight:normal; color:var(--text-secondary);">(${bagCount}袋)</span></span>
+                        ${masterBudgetHtml}
+                    </div>
+                `;
+                
+                // 如果有袋子，印出每一個袋子
+                if (bagCount > 0) {
+                    userEnvelopes[mainCat].forEach((env, index) => {
+                        let val = budgets[env] || ''; 
+                        let inputsHtml = '';
+                        if (mainCat === '預存支出') {
+                            let goalVal = yearlyGoals[env] || '';
+                            let calcMonthly = goalVal ? Math.ceil(goalVal / 12) : 0;
+                            let calcText = goalVal ? `💡 自動計算：建議每月存 $${calcMonthly.toLocaleString()}` : '💡 輸入年度目標以計算每月建議額度';
+                            
+                            inputsHtml = `
+                                <div style="display:flex; flex-direction:column; width:100%;">
+                                    <div class="budget-inputs-wrapper" style="margin-top:5px;">
+                                        <input type="number" id="env-budget-${mainCat}-${index}" value="${val}" placeholder="本月想存多少" class="env-budget-input" inputmode="numeric" onchange="saveEditedEnv('${mainCat}', ${index})">
+                                        <input type="number" id="env-goal-${mainCat}-${index}" value="${goalVal}" placeholder="年度總目標" class="env-budget-input" style="background:#fffaf0; border-color:#ffd54f;" inputmode="numeric" oninput="updateAutoCalc('${mainCat}', ${index})" onchange="saveEditedEnv('${mainCat}', ${index})">
+                                    </div>
+                                    <div id="calc-text-${mainCat}-${index}" style="font-size:0.75rem; color:var(--info); text-align:right; margin-top:4px;">${calcText}</div>
+                                </div>
+                            `;
+                        } else {
+                            inputsHtml = `<input type="number" id="env-budget-${mainCat}-${index}" value="${val}" placeholder="每月預算上限" class="env-budget-input" inputmode="numeric" style="width: 120px; padding:8px; font-size:0.9rem;" onchange="saveEditedEnv('${mainCat}', ${index})">`;
+                        }
+
+                        container.innerHTML += `
+                        <div class="env-setting-row" style="display:flex; flex-direction:column; margin-bottom:15px; border-bottom:1px dashed #f0f0f0; padding-bottom:10px;">
+                            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:5px;">
+                                <input type="text" id="env-name-${mainCat}-${index}" value="${env}" data-old="${env}" data-main="${mainCat}" class="env-name-input" style="flex:1; padding:8px 5px; font-size:0.9rem;" onchange="saveEditedEnv('${mainCat}', ${index})" placeholder="分類名稱">
+                                <i class="fas fa-trash delete-btn" style="color:#e57373; padding-left:15px;" onclick="deleteEnvelope('${mainCat}', ${index})"></i>
+                            </div>
+                            <div style="display:flex; justify-content:flex-end;">${inputsHtml}</div>
+                        </div>`;
+                    });
+                }
 
                 if (totalBags < 10) {
                     container.innerHTML += `<div style="text-align:right;"><span class="btn-add-detail" onclick="addNewEnvelope('${mainCat}')">+ 新增 ${mainCat} 分類</span></div>`;
@@ -689,16 +719,19 @@
             }
         }
 
-        // [NEW] 自動計算年度目標所需月存額
+        // [NEW] 儲存大總管預算
+        function saveMasterBudget(mainCat) {
+            const val = parseFloat(document.getElementById(`master-budget-${mainCat}`).value) || 0;
+            masterBudgets[mainCat] = val;
+            localStorage.setItem('bear_master_budgets', JSON.stringify(masterBudgets));
+        }
+
         function updateAutoCalc(mainCat, index) {
             let goalInput = document.getElementById(`env-goal-${mainCat}-${index}`).value;
             let calcText = document.getElementById(`calc-text-${mainCat}-${index}`);
             let goal = parseFloat(goalInput);
-            if(goal > 0) {
-                calcText.innerHTML = `💡 自動計算：建議每月存 $${Math.ceil(goal / 12).toLocaleString()}`;
-            } else {
-                calcText.innerHTML = `💡 輸入年度目標以計算每月建議額度`;
-            }
+            if(goal > 0) { calcText.innerHTML = `💡 自動計算：建議每月存 $${Math.ceil(goal / 12).toLocaleString()}`; } 
+            else { calcText.innerHTML = `💡 輸入年度目標以計算每月建議額度`; }
         }
 
         function addNewEnvelope(mainCat) {
@@ -713,18 +746,20 @@
                 userEnvelopes[mainCat].push(name);
                 localStorage.setItem('bear_custom_envelopes', JSON.stringify(userEnvelopes));
                 renderBudgetSettings();
+                updateSubCategories(); 
             }
         }
 
         function deleteEnvelope(mainCat, index) {
             const envName = userEnvelopes[mainCat][index];
-            if(confirm(`確定要刪除「${envName}」分類嗎？\n(過去的記帳明細不會消失，只是該分類無法再被選取)`)) {
+            if(confirm(`確定要刪除「${envName}」分類嗎？\n(若刪到 0 袋，則直接由大類別控管總預算)`)) {
                 userEnvelopes[mainCat].splice(index, 1);
                 localStorage.setItem('bear_custom_envelopes', JSON.stringify(userEnvelopes));
                 delete budgets[envName]; 
                 localStorage.setItem('bear_budgets', JSON.stringify(budgets));
                 if (mainCat === '預存支出') { delete yearlyGoals[envName]; localStorage.setItem('bear_yearly_goals', JSON.stringify(yearlyGoals)); }
                 renderBudgetSettings();
+                updateSubCategories(); 
             }
         }
 
@@ -767,11 +802,11 @@
                 }
                 userEnvelopes = JSON.parse(JSON.stringify(defaultSuggestions));
                 localStorage.setItem('bear_custom_envelopes', JSON.stringify(userEnvelopes)); localStorage.setItem('bear_budgets', JSON.stringify(budgets)); localStorage.setItem('bear_yearly_goals', JSON.stringify(yearlyGoals)); localStorage.setItem('bear_transactions', JSON.stringify(transactions));
-                alert("已成功恢復原廠 10 袋名稱！"); renderBudgetSettings();
+                alert("已成功恢復原廠 10 袋名稱！"); renderBudgetSettings(); updateSubCategories();
             }
         }
 
-        // --- 5. 儀表板與圖表 ---
+        // --- 5. 儀表板與圖表 (支援 0袋 總管顯示) ---
         function renderDashboard() {
             sortTransactions(); const currentCycle = getCycleBoundary(dashboardViewDate, sysSettings.cycleStart); const realTodayCycle = getCycleBoundary(new Date(), sysSettings.cycleStart);
             let timeStatus = 'current'; const currentCycleTime = currentCycle.start.getTime(); const realTodayCycleTime = realTodayCycle.start.getTime();
@@ -789,6 +824,9 @@
             const cycleTx = transactions.filter(t => { const tDate = new Date(t.date); tDate.setHours(0,0,0,0); return tDate >= currentCycle.start && tDate <= currentCycle.end; });
             let totalInc = 0, totalExp = 0; let mainExp = { '固定支出': 0, '變動支出': 0 }; let envExp = {}; 
 
+            // [NEW] 計算大類總花費 (給0袋模式用)
+            let masterSpent = { '固定支出': 0, '變動支出': 0 };
+
             cycleTx.forEach(t => {
                 if (t.type === 'income') {
                     totalInc += t.amount;
@@ -796,6 +834,8 @@
                     if (t.mainCategory !== '預存支出') {
                         totalExp += t.amount; 
                         if(mainExp[t.mainCategory] !== undefined) mainExp[t.mainCategory] += t.amount; 
+                        masterSpent[t.mainCategory] += t.amount;
+                        
                         let subCatDisplay = t.category;
                         if (!envExp[subCatDisplay]) envExp[subCatDisplay] = { spent: 0, mainGroup: t.mainCategory }; 
                         envExp[subCatDisplay].spent += t.amount;
@@ -804,35 +844,80 @@
             });
             document.getElementById('display-income').innerText = `$${totalInc.toLocaleString()}`; document.getElementById('display-expense').innerText = `$${totalExp.toLocaleString()}`; document.getElementById('display-balance').innerText = `$${(totalInc - totalExp).toLocaleString()}`;
             
-            renderBudgetBars(envExp); renderSinkingFundsTracker(); renderChart(mainExp); renderDashList(cycleTx, currentChartFilter); 
+            renderBudgetBars(envExp, masterSpent); renderSinkingFundsTracker(); renderChart(mainExp); renderDashList(cycleTx, currentChartFilter); 
         }
 
-        function renderBudgetBars(envExp) {
+        // [NEW] 渲染預算條 (支援 0袋)
+        function renderBudgetBars(envExp, masterSpent) {
             const container = document.getElementById('budget-container'); container.innerHTML = ''; let hasAnyBudget = false; 
+            
             ['固定支出', '變動支出'].forEach(mainCat => {
-                if(userEnvelopes[mainCat].length === 0) return;
-                let html = `<div class="budget-group-title"><i class="fas fa-folder-open"></i> ${mainCat}</div>`; let groupHasBudget = false;
-                userEnvelopes[mainCat].forEach(env => {
-                    const budget = budgets[env] || 0; const spentData = envExp[env] || { spent: 0 }; const spent = spentData.spent;
+                let bagCount = userEnvelopes[mainCat].length;
+                
+                if (bagCount === 0) {
+                    // 0 袋模式：印出大總管進度條
+                    const budget = masterBudgets[mainCat] || 0;
+                    const spent = masterSpent[mainCat] || 0;
                     if (budget > 0 || spent > 0) {
-                        groupHasBudget = true; hasAnyBudget = true; let percent = 0, colorVar = '--success';
+                        hasAnyBudget = true;
+                        let percent = 0, colorVar = '--success';
                         if (budget > 0) { percent = (spent / budget) * 100; if (percent > 100) colorVar = '--danger'; else if (percent > 80) colorVar = '--warning'; }
                         const remaining = budget - spent; const width = Math.min(percent, 100);
-                        html += `<div class="budget-item"><div class="budget-header"><span>${env}</span><span>$${spent.toLocaleString()} / $${budget.toLocaleString()}</span></div><div class="budget-bar-bg"><div class="budget-bar-fill" style="width:${width}%; background:var(${colorVar});"></div></div><div class="budget-remain">剩餘: <span style="color:var(${remaining < 0 ? '--danger' : '--text-primary'})">$${remaining.toLocaleString()}</span></div></div>`;
+                        container.innerHTML += `
+                            <div class="budget-group-title"><i class="fas fa-folder"></i> ${mainCat} (總額控管)</div>
+                            <div class="budget-item">
+                                <div class="budget-header"><span>全項目總和</span><span>$${spent.toLocaleString()} / $${budget.toLocaleString()}</span></div>
+                                <div class="budget-bar-bg"><div class="budget-bar-fill" style="width:${width}%; background:var(${colorVar});"></div></div>
+                                <div class="budget-remain">剩餘: <span style="color:var(${remaining < 0 ? '--danger' : '--text-primary'})">$${remaining.toLocaleString()}</span></div>
+                            </div>`;
                     }
-                });
-                if(groupHasBudget) container.innerHTML += html;
+                } else {
+                    // 多袋模式：正常印出每個袋子
+                    let html = `<div class="budget-group-title"><i class="fas fa-folder-open"></i> ${mainCat}</div>`; let groupHasBudget = false;
+                    userEnvelopes[mainCat].forEach(env => {
+                        const budget = budgets[env] || 0; const spentData = envExp[env] || { spent: 0 }; const spent = spentData.spent;
+                        if (budget > 0 || spent > 0) {
+                            groupHasBudget = true; hasAnyBudget = true; let percent = 0, colorVar = '--success';
+                            if (budget > 0) { percent = (spent / budget) * 100; if (percent > 100) colorVar = '--danger'; else if (percent > 80) colorVar = '--warning'; }
+                            const remaining = budget - spent; const width = Math.min(percent, 100);
+                            html += `<div class="budget-item"><div class="budget-header"><span>${env}</span><span>$${spent.toLocaleString()} / $${budget.toLocaleString()}</span></div><div class="budget-bar-bg"><div class="budget-bar-fill" style="width:${width}%; background:var(${colorVar});"></div></div><div class="budget-remain">剩餘: <span style="color:var(${remaining < 0 ? '--danger' : '--text-primary'})">$${remaining.toLocaleString()}</span></div></div>`;
+                        }
+                    });
+                    if(groupHasBudget) container.innerHTML += html;
+                }
             });
+
             if (!hasAnyBudget) { container.innerHTML = '<div style="text-align:center; padding:10px; color:#ccc; font-size:0.8rem;">目前無預算或花費資料。<br>（可至設定頁面新增分類與預算）</div>'; }
         }
 
-        // --- [NEW] 預存金水位計算與點擊看明細 ---
+        // [NEW] 預存金年度追蹤器 (支援 0袋 總管顯示)
         function renderSinkingFundsTracker() {
             const container = document.getElementById('sinking-container'); container.innerHTML = '';
             const sinkingCats = userEnvelopes['預存支出'];
+            const bagCount = sinkingCats.length;
             let hasData = false;
 
-            if(sinkingCats) {
+            if (bagCount === 0) {
+                // 預存 0 袋模式
+                const yearlyGoal = masterBudgets['預存支出'] || 0;
+                let totalSaved = 0; transactions.forEach(t => { if(t.type === 'save') totalSaved += t.amount; });
+                let totalSpent = 0; transactions.forEach(t => { if(t.type === 'expense' && t.mainCategory === '預存支出') totalSpent += t.amount; });
+                let currentBalance = totalSaved - totalSpent; 
+                
+                if(yearlyGoal === 0 && currentBalance === 0) return; 
+                hasData = true; 
+                if(currentBalance < 0) currentBalance = 0;
+                let progress = yearlyGoal > 0 ? (currentBalance / yearlyGoal) * 100 : 100; if(progress > 100) progress = 100;
+                
+                container.innerHTML += `
+                    <div class="sinking-item" onclick="openSinkingHistory('未分類預存金')">
+                        <div class="sinking-header"><span>預存總資金池</span><span style="color:var(--gold);">$${currentBalance.toLocaleString()}</span></div>
+                        <div class="sinking-stats"><span>總目標 $${yearlyGoal.toLocaleString()}</span><span>歷史累積存入 $${totalSaved.toLocaleString()}</span></div>
+                        <div class="sinking-bar-bg"><div class="sinking-bar-fill" style="width:${progress}%;"></div></div>
+                        <div class="sinking-detail"><span style="color:var(--info); font-weight:600;"><i class="fas fa-search"></i> 點擊看明細</span><span>歷史累積花費 -$${totalSpent.toLocaleString()}</span></div>
+                    </div>`;
+
+            } else {
                 sinkingCats.forEach(env => {
                     const yearlyGoal = yearlyGoals[env] || 0;
                     let totalSaved = 0; transactions.forEach(t => { if(t.type === 'save' && t.category === env) totalSaved += t.amount; });
@@ -849,81 +934,56 @@
                             <div class="sinking-header"><span>${env}</span><span style="color:var(--gold);">$${currentBalance.toLocaleString()}</span></div>
                             <div class="sinking-stats"><span>目標 $${yearlyGoal.toLocaleString()}</span><span>歷史累積存入 $${totalSaved.toLocaleString()}</span></div>
                             <div class="sinking-bar-bg"><div class="sinking-bar-fill" style="width:${progress}%;"></div></div>
-                            <div class="sinking-detail">
-                                <span style="color:var(--info); font-weight:600;"><i class="fas fa-search"></i> 點擊看明細</span>
-                                <span>歷史累積花費 -$${totalSpent.toLocaleString()}</span>
-                            </div>
+                            <div class="sinking-detail"><span style="color:var(--info); font-weight:600;"><i class="fas fa-search"></i> 點擊看明細</span><span>歷史累積花費 -$${totalSpent.toLocaleString()}</span></div>
                         </div>`;
                 });
             }
+
             if(!hasData) container.innerHTML = '<div style="text-align:center; padding:10px; color:#ccc; font-size:0.8rem;">請在記帳時選擇「存入預備金」，為妳的小豬公餵食！</div>';
         }
 
-        // [NEW] 開啟預存金明細 Modal
+        // [NEW] 開啟預存金明細 Modal (支援0袋)
         function openSinkingHistory(envName) {
             document.getElementById('sinking-history-title').innerHTML = `🎯 ${envName} 歷史明細`;
-            const listContainer = document.getElementById('sinking-history-list');
-            listContainer.innerHTML = '';
-            
+            const listContainer = document.getElementById('sinking-history-list'); listContainer.innerHTML = '';
             let monthlyData = {};
             
             transactions.forEach(t => {
-                if (t.category === envName && (t.mainCategory === '預存支出' || t.type === 'save')) {
+                let match = false;
+                if (envName === '未分類預存金') {
+                    if (t.mainCategory === '預存支出' || t.type === 'save') match = true;
+                } else {
+                    if (t.category === envName && (t.mainCategory === '預存支出' || t.type === 'save')) match = true;
+                }
+
+                if (match) {
                     let month = t.date.substring(0, 7);
                     if (!monthlyData[month]) monthlyData[month] = { spent: 0, saved: 0, txs: [] };
-                    
-                    if (t.type === 'expense') {
-                        monthlyData[month].spent += t.amount;
-                        monthlyData[month].txs.push(t);
-                    } else if (t.type === 'save') {
-                        monthlyData[month].saved += t.amount;
-                        monthlyData[month].txs.push(t);
-                    }
+                    if (t.type === 'expense') { monthlyData[month].spent += t.amount; monthlyData[month].txs.push(t); } 
+                    else if (t.type === 'save') { monthlyData[month].saved += t.amount; monthlyData[month].txs.push(t); }
                 }
             });
 
             const sortedMonths = Object.keys(monthlyData).sort((a,b) => b.localeCompare(a));
             
-            if (sortedMonths.length === 0) {
-                listContainer.innerHTML = '<div style="text-align:center; padding:20px; color:#999;">尚未有任何存入或花費紀錄。</div>';
-            } else {
+            if (sortedMonths.length === 0) { listContainer.innerHTML = '<div style="text-align:center; padding:20px; color:#999;">尚未有任何存入或花費紀錄。</div>'; } 
+            else {
                 sortedMonths.forEach(m => {
-                    const data = monthlyData[m];
-                    const monthLabel = m.replace('-', '年') + '月';
-                    
-                    let html = `
-                        <div style="margin-bottom:15px; padding:12px; background:#fdfbf7; border-radius:10px; border:1px solid #f0e6d2;">
-                            <div style="font-weight:bold; color:var(--text-primary); border-bottom:1px dashed #ddd; padding-bottom:5px; margin-bottom:8px;">
-                                ${monthLabel}
-                            </div>
-                            <div style="font-size:0.85rem; display:flex; justify-content:space-between; margin-bottom:5px; font-weight:600;">
-                                <span style="color:var(--gold);">➕ 存入: $${data.saved.toLocaleString()}</span>
-                                <span style="color:var(--danger);">➖ 花費: $${data.spent.toLocaleString()}</span>
-                            </div>
-                    `;
-                    
+                    const data = monthlyData[m]; const monthLabel = m.replace('-', '年') + '月';
+                    let html = `<div style="margin-bottom:15px; padding:12px; background:#fdfbf7; border-radius:10px; border:1px solid #f0e6d2;"><div style="font-weight:bold; color:var(--text-primary); border-bottom:1px dashed #ddd; padding-bottom:5px; margin-bottom:8px;">${monthLabel}</div><div style="font-size:0.85rem; display:flex; justify-content:space-between; margin-bottom:5px; font-weight:600;"><span style="color:var(--gold);">➕ 存入: $${data.saved.toLocaleString()}</span><span style="color:var(--danger);">➖ 花費: $${data.spent.toLocaleString()}</span></div>`;
                     if (data.txs.length > 0) {
                         html += `<ul style="list-style:none; padding:0; margin:8px 0 0 0; font-size:0.8rem; color:var(--text-secondary); border-top:1px dashed #eee; padding-top:8px;">`;
-                        
-                        // 依照日期排序單月明細
                         data.txs.sort((a,b) => b.date.localeCompare(a.date)).forEach(tx => {
-                            let sign = tx.type === 'save' ? '+' : '-';
-                            let color = tx.type === 'save' ? 'var(--gold)' : 'var(--danger)';
-                            html += `<li style="display:flex; justify-content:space-between; padding:3px 0;">
-                                <span>${tx.date.substring(8,10)}日 - ${tx.note || '無備註'}</span>
-                                <span style="color:${color}; font-weight:600;">${sign}$${tx.amount.toLocaleString()}</span>
-                            </li>`;
+                            let sign = tx.type === 'save' ? '+' : '-'; let color = tx.type === 'save' ? 'var(--gold)' : 'var(--danger)';
+                            html += `<li style="display:flex; justify-content:space-between; padding:3px 0;"><span>${tx.date.substring(8,10)}日 - ${tx.note || '無備註'}</span><span style="color:${color}; font-weight:600;">${sign}$${tx.amount.toLocaleString()}</span></li>`;
                         });
                         html += `</ul>`;
                     }
-                    html += `</div>`;
-                    listContainer.innerHTML += html;
+                    html += `</div>`; listContainer.innerHTML += html;
                 });
             }
-
             document.getElementById('sinking-history-modal').classList.add('show');
         }
-
         function closeSinkingHistory() { document.getElementById('sinking-history-modal').classList.remove('show'); }
 
         function clearChartFilter() { currentChartFilter = null; renderDashboard(); window.scrollTo({ top: document.getElementById('chart-card-title').offsetTop - 100, behavior: 'smooth' }); }
@@ -956,9 +1016,13 @@
                 else { color = 'amount-exp'; sign = '-'; catPrefix = `[${t.mainCategory}] `; }
                 
                 const methodIcon = getMethodIcon(t.method); 
-                let catDisplay = catPrefix + t.category;
+                // [NEW] 如果是未分類(0袋)，就不顯示分類名稱，只顯示備註
+                let displayCat = t.category === '未分類' ? (t.note || '未填寫備註') : t.category;
+                let displayNote = t.category === '未分類' ? '' : (t.note ? `<small style="color:#888;">${t.note}</small>` : '');
                 
-                list.innerHTML += `<li class="tx-item"><div class="tx-info"><span class="tx-cat">${catDisplay} <small style="color:#888;">${t.note}</small></span><span class="tx-date">${t.date} <span style="font-size:0.8rem; margin-left:5px;">${methodIcon}</span></span></div><div class="action-btns"><span class="tx-amount ${color}">${sign}$${t.amount.toLocaleString()}</span><i class="fas fa-edit edit-btn" onclick="editTx(${t.id})"></i><i class="fas fa-trash delete-btn" onclick="deleteTx(${t.id})"></i></div></li>`;
+                let catDisplay = catPrefix + displayCat + ' ' + displayNote;
+                
+                list.innerHTML += `<li class="tx-item"><div class="tx-info"><span class="tx-cat">${catDisplay}</span><span class="tx-date">${t.date} <span style="font-size:0.8rem; margin-left:5px;">${methodIcon}</span></span></div><div class="action-btns"><span class="tx-amount ${color}">${sign}$${t.amount.toLocaleString()}</span><i class="fas fa-edit edit-btn" onclick="editTx(${t.id})"></i><i class="fas fa-trash delete-btn" onclick="deleteTx(${t.id})"></i></div></li>`;
             });
             if(!filterCategory && cycleTx.length > 10) { list.innerHTML += `<div style="text-align:center; padding:10px; color:var(--accent); font-size:0.8rem; cursor:pointer;" onclick="switchPage('settings')">查看更多歷史明細 <i class="fas fa-arrow-right"></i></div>`; }
         }
@@ -976,15 +1040,27 @@
                 else { color = 'amount-exp'; sign = '-'; catPrefix = `[${t.mainCategory}] `; }
                 
                 const methodIcon = getMethodIcon(t.method); 
-                let catDisplay = catPrefix + t.category;
-                list.innerHTML += `<li class="tx-item"><div class="tx-info"><span class="tx-cat">${catDisplay} <small style="color:#888;">${t.note}</small></span><span class="tx-date">${t.date} <span style="font-size:0.8rem; margin-left:5px;">${methodIcon}</span></span></div><div class="action-btns"><span class="tx-amount ${color}">${sign}$${t.amount.toLocaleString()}</span><i class="fas fa-edit edit-btn" onclick="editTx(${t.id})"></i><i class="fas fa-trash delete-btn" onclick="deleteTx(${t.id})"></i></div></li>`;
+                let displayCat = t.category === '未分類' ? (t.note || '未填寫備註') : t.category;
+                let displayNote = t.category === '未分類' ? '' : (t.note ? `<small style="color:#888;">${t.note}</small>` : '');
+                
+                let catDisplay = catPrefix + displayCat + ' ' + displayNote;
+                list.innerHTML += `<li class="tx-item"><div class="tx-info"><span class="tx-cat">${catDisplay}</span><span class="tx-date">${t.date} <span style="font-size:0.8rem; margin-left:5px;">${methodIcon}</span></span></div><div class="action-btns"><span class="tx-amount ${color}">${sign}$${t.amount.toLocaleString()}</span><i class="fas fa-edit edit-btn" onclick="editTx(${t.id})"></i><i class="fas fa-trash delete-btn" onclick="deleteTx(${t.id})"></i></div></li>`;
             });
         }
 
         function renderReviewPage() {
             const currentCycle = getCycleBoundary(dashboardViewDate, sysSettings.cycleStart); document.getElementById('review-cycle-title').innerText = `${currentCycle.label} 診斷`;
             let mainBudgets = { '固定支出': 0, '變動支出': 0 }; 
-            ['固定支出', '變動支出'].forEach(mainCat => { if(userEnvelopes[mainCat]) userEnvelopes[mainCat].forEach(env => { mainBudgets[mainCat] += (budgets[env] || 0); }); });
+            
+            // [NEW] 計算報表預算 (支援0袋總管)
+            ['固定支出', '變動支出'].forEach(mainCat => { 
+                if(userEnvelopes[mainCat].length === 0) {
+                    mainBudgets[mainCat] = masterBudgets[mainCat] || 0;
+                } else {
+                    userEnvelopes[mainCat].forEach(env => { mainBudgets[mainCat] += (budgets[env] || 0); }); 
+                }
+            });
+
             const cycleTx = transactions.filter(t => { const tDate = new Date(t.date); tDate.setHours(0,0,0,0); return tDate >= currentCycle.start && tDate <= currentCycle.end; });
             let mainActuals = { '固定支出': 0, '變動支出': 0 }; let totalIncome = 0; let totalExp = 0;
             cycleTx.forEach(t => { if (t.type === 'income') { totalIncome += t.amount; } else if (t.type === 'expense' && t.mainCategory !== '預存支出') { totalExp += t.amount; mainActuals[t.mainCategory] += t.amount; } });
@@ -1125,8 +1201,8 @@
         function deleteShopItem(id) { if(confirm('確定刪除這筆紀錄？')) { shoppingList = shoppingList.filter(i => i.id !== id); localStorage.setItem('bear_shopping_list', JSON.stringify(shoppingList)); renderShoppingList(); } }
         function updateCountdowns() { const timers = document.querySelectorAll('.timer-badge'); const now = Date.now(); timers.forEach(timer => { const diff = parseInt(timer.getAttribute('data-ts')) + (72 * 60 * 60 * 1000) - now; if (diff <= 0) { timer.innerText = "冷靜期結束"; timer.style.background = "#888"; } else { const h = Math.floor(diff / (1000 * 60 * 60)), m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)), s = Math.floor((diff % (1000 * 60)) / 1000); timer.innerText = `${h}h ${m}m ${s}s`; } }); }
 
-        function exportData() { const data = { tx: transactions, budget: budgets, shop: shoppingList, networth: netWorthData, settings: sysSettings, envelopes: userEnvelopes, debts: userDebts, yearlyGoals: yearlyGoals }; const blob = new Blob([JSON.stringify(data)], {type: "text/json"}); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = "bear_backup_" + new Date().toISOString().slice(0,10) + ".json"; link.click(); }
-        function importData(input) { const reader = new FileReader(); reader.onload = function(e) { try { const data = JSON.parse(e.target.result); if (Array.isArray(data)) { transactions = data; } else { transactions = data.tx || []; budgets = data.budget || {}; shoppingList = data.shop || []; netWorthData = data.networth || []; sysSettings = data.settings || { cycleStart: 1 }; userEnvelopes = data.envelopes || null; userDebts = data.debts || []; yearlyGoals = data.yearlyGoals || {}; } localStorage.setItem('bear_transactions', JSON.stringify(transactions)); localStorage.setItem('bear_budgets', JSON.stringify(budgets)); localStorage.setItem('bear_shopping_list', JSON.stringify(shoppingList)); localStorage.setItem('bear_networth', JSON.stringify(netWorthData)); localStorage.setItem('bear_sys_settings', JSON.stringify(sysSettings)); if(userEnvelopes) localStorage.setItem('bear_custom_envelopes', JSON.stringify(userEnvelopes)); localStorage.setItem('bear_debts_tracker', JSON.stringify(userDebts)); localStorage.setItem('bear_yearly_goals', JSON.stringify(yearlyGoals)); alert('匯入成功！'); location.reload(); } catch(err) { alert('檔案錯誤'); } }; reader.readAsText(input.files[0]); }
+        function exportData() { const data = { tx: transactions, budget: budgets, shop: shoppingList, networth: netWorthData, settings: sysSettings, envelopes: userEnvelopes, debts: userDebts, yearlyGoals: yearlyGoals, masterBudgets: masterBudgets }; const blob = new Blob([JSON.stringify(data)], {type: "text/json"}); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = "bear_backup_" + new Date().toISOString().slice(0,10) + ".json"; link.click(); }
+        function importData(input) { const reader = new FileReader(); reader.onload = function(e) { try { const data = JSON.parse(e.target.result); if (Array.isArray(data)) { transactions = data; } else { transactions = data.tx || []; budgets = data.budget || {}; shoppingList = data.shop || []; netWorthData = data.networth || []; sysSettings = data.settings || { cycleStart: 1 }; userEnvelopes = data.envelopes || null; userDebts = data.debts || []; yearlyGoals = data.yearlyGoals || {}; masterBudgets = data.masterBudgets || { '固定支出': 0, '變動支出': 0, '預存支出': 0 }; } localStorage.setItem('bear_transactions', JSON.stringify(transactions)); localStorage.setItem('bear_budgets', JSON.stringify(budgets)); localStorage.setItem('bear_shopping_list', JSON.stringify(shoppingList)); localStorage.setItem('bear_networth', JSON.stringify(netWorthData)); localStorage.setItem('bear_sys_settings', JSON.stringify(sysSettings)); if(userEnvelopes) localStorage.setItem('bear_custom_envelopes', JSON.stringify(userEnvelopes)); localStorage.setItem('bear_debts_tracker', JSON.stringify(userDebts)); localStorage.setItem('bear_yearly_goals', JSON.stringify(yearlyGoals)); localStorage.setItem('bear_master_budgets', JSON.stringify(masterBudgets)); alert('匯入成功！'); location.reload(); } catch(err) { alert('檔案錯誤'); } }; reader.readAsText(input.files[0]); }
         function clearData() { if(confirm('確定清空所有資料？（此動作無法復原）')) { localStorage.clear(); location.reload(); } }
 
         if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(err => { console.log('ServiceWorker 註冊失敗: ', err); }); }); }
