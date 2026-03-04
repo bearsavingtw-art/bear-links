@@ -183,7 +183,6 @@
         .master-budget-input { width: 100px; padding: 6px; font-size: 0.85rem; text-align: right; border: 1px solid var(--accent); border-radius: 8px; background: #fff; }
         .cat-switch-btn { position: absolute; right: 0; top: 0; font-size: 0.8rem; color: var(--info); cursor: pointer; background: #fff; padding: 2px 8px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); font-weight: 600; }
         
-        /* [NEW] 預存金 12 個月矩陣樣式 */
         .month-matrix { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; background: #f9f9f9; padding: 10px; border-radius: 8px; }
         .month-cell { display: flex; flex-direction: column; width: calc(25% - 4px); }
         .month-cell label { font-size: 0.65rem; color: var(--text-secondary); margin-bottom: 2px; text-align: center;}
@@ -489,8 +488,6 @@
         let masterBudgets = JSON.parse(localStorage.getItem('bear_master_budgets')) || { '固定支出': 0, '變動支出': 0, '預存支出': 0 };
         let yearlyGoals = JSON.parse(localStorage.getItem('bear_yearly_goals')) || {}; 
         let initSaved = JSON.parse(localStorage.getItem('bear_init_saved')) || {}; 
-        
-        // [NEW] 儲存預存金 1~12 月的陣列資料
         let monthlySavedPlans = JSON.parse(localStorage.getItem('bear_monthly_saved_plans')) || {};
 
         let shoppingList = JSON.parse(localStorage.getItem('bear_shopping_list')) || [];
@@ -616,7 +613,17 @@
             document.getElementById('add-page-title').innerText = '編輯紀錄'; document.getElementById('save-btn').innerHTML = '確認修改 <i class="fas fa-save"></i>'; document.getElementById('cancel-edit-btn').classList.remove('hidden'); switchPage('add');
         }
 
-        // --- [NEW] 4. 動態預算設定 (預存金 12 個月矩陣 UI) ---
+        // [NEW] 修復垃圾桶刪除功能
+        function deleteTx(id) { 
+            if(confirm('確定刪除這筆紀錄？')) { 
+                transactions = transactions.filter(t => t.id !== id); 
+                localStorage.setItem('bear_transactions', JSON.stringify(transactions)); 
+                renderDashboard(); 
+                renderList(); // 重新渲染設定頁面的清單
+            } 
+        }
+
+        // --- 4. 動態預算設定 (預存金 12 個月矩陣 UI 保持不變) ---
         function renderBudgetSettings() {
             const container = document.getElementById('budget-settings-container'); container.innerHTML = ''; 
             const totalBags = getTotalEnvelopesCount();
@@ -643,7 +650,6 @@
                             let goalVal = yearlyGoals[env] || '';
                             let initVal = initSaved[env] || ''; 
                             
-                            // [NEW] 繪製 12 個月的輸入框
                             if (!monthlySavedPlans[env]) monthlySavedPlans[env] = Array(12).fill('');
                             
                             let monthMatrixHtml = '<div class="month-matrix">';
@@ -693,13 +699,11 @@
             }
             if (totalBags >= 10) { container.innerHTML += `<div style="text-align:center; color:var(--danger); font-size:0.85rem; margin-top:20px; padding:10px; background:#ffebee; border-radius:8px;">⚠️ 總分類已達 10 袋上限，請先刪除不使用的分類才能新增。</div>`; }
             
-            // 初始化計算文字
             if(userEnvelopes['預存支出']) {
                 userEnvelopes['預存支出'].forEach((env, i) => updateAutoCalc('預存支出', i));
             }
         }
 
-        // [NEW] 儲存 1~12 月的預定存入數字
         function saveMonthlyPlan(envName, index) {
             if(!monthlySavedPlans[envName]) monthlySavedPlans[envName] = Array(12).fill('');
             for(let m=1; m<=12; m++) {
@@ -710,7 +714,6 @@
             updateAutoCalc('預存支出', index);
         }
 
-        // [NEW] 即時顯示今年總共排定了多少錢
         function updateAutoCalc(mainCat, index) {
             const nameInput = document.getElementById(`env-name-${mainCat}-${index}`);
             if(!nameInput) return;
@@ -874,7 +877,7 @@
             if (!hasAnyBudget) { container.innerHTML = '<div style="text-align:center; padding:10px; color:#ccc; font-size:0.8rem;">目前無預算或花費資料。<br>（可至設定頁面新增分類與預算）</div>'; }
         }
 
-        // [NEW] 精準的預存金水位計算 (含 1-12 月矩陣相加)
+        // --- [NEW] 精準的預存金水位計算 ---
         function renderSinkingFundsTracker() {
             const container = document.getElementById('sinking-container'); container.innerHTML = '';
             const sinkingCats = userEnvelopes['預存支出'];
@@ -899,7 +902,6 @@
                     const yearlyGoal = yearlyGoals[env] || 0;
                     const initialVal = initSaved[env] || 0;
                     
-                    // 1. 根據 1-12月矩陣，計算今年「到目前為止」理應存下的金額
                     let plannedSaved = 0;
                     if(monthlySavedPlans[env]) {
                         for(let m=1; m<=currentMonth; m++) {
@@ -908,16 +910,11 @@
                         }
                     }
                     
-                    // 2. 記帳手動餵豬公的存入額
                     let manualSaved = 0; transactions.forEach(t => { if(t.type === 'save' && t.category === env) manualSaved += t.amount; });
-                    
-                    // 總存入 = 起點 + 今年已排定 + 額外手動存入
                     let totalSaved = initialVal + plannedSaved + manualSaved;
-
-                    // 3. 歷史總花費
                     let totalSpent = 0; transactions.forEach(t => { if(t.type === 'expense' && t.mainCategory === '預存支出' && t.category === env) totalSpent += t.amount; });
-                    
                     let currentBalance = totalSaved - totalSpent; 
+                    
                     if(yearlyGoal === 0 && currentBalance === 0 && initialVal === 0 && plannedSaved === 0) return; 
                     
                     hasData = true; if(currentBalance < 0) currentBalance = 0;
