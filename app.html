@@ -193,7 +193,7 @@
 
     <header>
         <h1>Bear.saving</h1>
-        <div style="font-size:0.8rem; color:var(--text-secondary);">Financial Cockpit v4.2</div>
+        <div style="font-size:0.8rem; color:var(--text-secondary);">Financial Cockpit v4.4 (Smart Merge)</div>
     </header>
 
     <div id="page-dash" class="page active">
@@ -245,7 +245,19 @@
 
         <div class="card" style="text-align:center;">
             <div class="stat-label" id="balance-card-title">本期日常總結餘</div>
-            <div class="stat-value balance" id="display-balance" style="font-size:1.8rem; margin-bottom:15px;">$0</div>
+            <div class="stat-value balance" id="display-balance" style="font-size:1.8rem; margin-bottom:10px;">$0</div>
+            
+            <div style="background: rgba(176,141,133,0.05); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px dashed rgba(176,141,133,0.3); text-align: left;">
+                <div style="font-size: 0.85rem; color: var(--text-secondary); display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span>🛡️ 本月圈存防呆 (計畫與手動取高)</span>
+                    <span id="display-planned-save" style="color: var(--gold); font-weight:600;">-$0</span>
+                </div>
+                <div style="font-size: 1rem; color: var(--text-primary); display: flex; justify-content: space-between; font-weight: 700; border-top: 1px solid rgba(0,0,0,0.05); padding-top: 8px;">
+                    <span>✨ 真實可動用餘額</span>
+                    <span id="display-true-balance">$0</span>
+                </div>
+            </div>
+
             <button class="btn" style="background:#5a4d41;" onclick="switchPage('review')">📊 產生本期結算診斷報告</button>
         </div>
     </div>
@@ -554,9 +566,7 @@
         function getCycleBoundary(dateObj, startDay) { let year = dateObj.getFullYear(); let month = dateObj.getMonth(); let cycleStartDate, cycleEndDate, labelStr; if (startDay === 1) { cycleStartDate = new Date(year, month, 1); cycleEndDate = new Date(year, month + 1, 0); labelStr = `${year}年 ${month + 1}月`; } else { const thisMonthStart = getSmartDate(year, month, startDay); const lastMonthStart = getSmartDate(year, month - 1, startDay); if (dateObj >= thisMonthStart) { cycleStartDate = thisMonthStart; cycleEndDate = new Date(getSmartDate(year, month + 1, startDay).getTime() - 86400000); labelStr = `${month + 1}月帳期`; } else { cycleStartDate = lastMonthStart; cycleEndDate = new Date(thisMonthStart.getTime() - 86400000); let labelMonth = month === 0 ? 12 : month; labelStr = `${labelMonth}月帳期`; } } return { start: cycleStartDate, end: cycleEndDate, label: labelStr, isDefault: (startDay === 1) }; }
         function changeDashboardMonth(offset) { dashboardViewDate.setMonth(dashboardViewDate.getMonth() + offset); renderDashboard(); }
         function saveSysSettings() { let startDay = parseInt(document.getElementById('setting-cycle-start').value) || 1; if (startDay < 1) startDay = 1; if (startDay > 31) startDay = 31; document.getElementById('setting-cycle-start').value = startDay; sysSettings.cycleStart = startDay; localStorage.setItem('bear_sys_settings', JSON.stringify(sysSettings)); alert('帳單週期設定已更新！'); dashboardViewDate = new Date(); renderDashboard(); renderList(); }
-        function openInstallModal() { document.getElementById('install-modal').classList.add('show'); }
-        function closeInstallModal() { document.getElementById('install-modal').classList.remove('show'); }
-
+        
         function switchPage(pageId) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.getElementById('page-' + pageId).classList.add('active');
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -613,17 +623,15 @@
             document.getElementById('add-page-title').innerText = '編輯紀錄'; document.getElementById('save-btn').innerHTML = '確認修改 <i class="fas fa-save"></i>'; document.getElementById('cancel-edit-btn').classList.remove('hidden'); switchPage('add');
         }
 
-        // [NEW] 修復垃圾桶刪除功能
         function deleteTx(id) { 
             if(confirm('確定刪除這筆紀錄？')) { 
                 transactions = transactions.filter(t => t.id !== id); 
                 localStorage.setItem('bear_transactions', JSON.stringify(transactions)); 
                 renderDashboard(); 
-                renderList(); // 重新渲染設定頁面的清單
+                renderList(); 
             } 
         }
 
-        // --- 4. 動態預算設定 (預存金 12 個月矩陣 UI 保持不變) ---
         function renderBudgetSettings() {
             const container = document.getElementById('budget-settings-container'); container.innerHTML = ''; 
             const totalBags = getTotalEnvelopesCount();
@@ -712,6 +720,7 @@
             }
             localStorage.setItem('bear_monthly_saved_plans', JSON.stringify(monthlySavedPlans));
             updateAutoCalc('預存支出', index);
+            renderDashboard(); // [NEW] 同步更新首頁儀表板
         }
 
         function updateAutoCalc(mainCat, index) {
@@ -816,7 +825,7 @@
             }
         }
 
-        // --- 5. 儀表板與圖表 ---
+        // --- 5. 儀表板邏輯 (加入防呆合併修正) ---
         function renderDashboard() {
             sortTransactions(); const currentCycle = getCycleBoundary(dashboardViewDate, sysSettings.cycleStart); const realTodayCycle = getCycleBoundary(new Date(), sysSettings.cycleStart);
             let timeStatus = 'current'; const currentCycleTime = currentCycle.start.getTime(); const realTodayCycleTime = realTodayCycle.start.getTime();
@@ -833,6 +842,9 @@
 
             const cycleTx = transactions.filter(t => { const tDate = new Date(t.date); tDate.setHours(0,0,0,0); return tDate >= currentCycle.start && tDate <= currentCycle.end; });
             let totalInc = 0, totalExp = 0; let mainExp = { '固定支出': 0, '變動支出': 0 }; let envExp = {}; let masterSpent = { '固定支出': 0, '變動支出': 0 };
+            
+            // [NEW] 統計本期手動記帳的預備金存入 (用於防呆合併)
+            let manualSavesInCycle = {}; 
 
             cycleTx.forEach(t => {
                 if (t.type === 'income') { totalInc += t.amount; } 
@@ -842,8 +854,44 @@
                         let subCatDisplay = t.category; if (!envExp[subCatDisplay]) envExp[subCatDisplay] = { spent: 0, mainGroup: t.mainCategory }; envExp[subCatDisplay].spent += t.amount;
                     }
                 }
+                else if (t.type === 'save') { 
+                    if (!manualSavesInCycle[t.category]) manualSavesInCycle[t.category] = 0;
+                    manualSavesInCycle[t.category] += t.amount;
+                }
             });
-            document.getElementById('display-income').innerText = `$${totalInc.toLocaleString()}`; document.getElementById('display-expense').innerText = `$${totalExp.toLocaleString()}`; document.getElementById('display-balance').innerText = `$${(totalInc - totalExp).toLocaleString()}`;
+            
+            document.getElementById('display-income').innerText = `$${totalInc.toLocaleString()}`; 
+            document.getElementById('display-expense').innerText = `$${totalExp.toLocaleString()}`; 
+            
+            let currentBalance = totalInc - totalExp;
+            document.getElementById('display-balance').innerText = `$${currentBalance.toLocaleString()}`;
+            
+            const cycleMonthIndex = currentCycle.start.getMonth(); 
+            let totalLockedSave = 0;
+            
+            if (userEnvelopes['預存支出']) {
+                userEnvelopes['預存支出'].forEach(env => {
+                    let planned = 0;
+                    if (monthlySavedPlans[env] && monthlySavedPlans[env][cycleMonthIndex]) {
+                        planned = parseFloat(monthlySavedPlans[env][cycleMonthIndex]) || 0;
+                    }
+                    let manual = manualSavesInCycle[env] || 0;
+                    // 核心修正：取計畫與手動的最高值，完美防呆合併！
+                    let locked = Math.max(planned, manual);
+                    totalLockedSave += locked;
+                });
+            }
+            
+            let trueBalance = currentBalance - totalLockedSave;
+            
+            document.getElementById('display-planned-save').innerText = `-$${totalLockedSave.toLocaleString()}`;
+            const trueBalanceEl = document.getElementById('display-true-balance');
+            trueBalanceEl.innerText = `$${trueBalance.toLocaleString()}`;
+            if (trueBalance < 0) {
+                trueBalanceEl.style.color = 'var(--danger)';
+            } else {
+                trueBalanceEl.style.color = 'var(--text-primary)';
+            }
             
             renderBudgetBars(envExp, masterSpent); renderSinkingFundsTracker(); renderChart(mainExp); renderDashList(cycleTx, currentChartFilter); 
         }
@@ -877,15 +925,14 @@
             if (!hasAnyBudget) { container.innerHTML = '<div style="text-align:center; padding:10px; color:#ccc; font-size:0.8rem;">目前無預算或花費資料。<br>（可至設定頁面新增分類與預算）</div>'; }
         }
 
-        // --- [NEW] 精準的預存金水位計算 ---
+        // --- 預存金進度條防呆同步 ---
         function renderSinkingFundsTracker() {
             const container = document.getElementById('sinking-container'); container.innerHTML = '';
             const sinkingCats = userEnvelopes['預存支出'];
             const bagCount = sinkingCats.length;
             let hasData = false;
 
-            const currentYear = new Date().getFullYear(); 
-            const currentMonth = new Date().getMonth() + 1;
+            const currentMonth = new Date().getMonth() + 1; // 1-12
 
             if (bagCount === 0) {
                 const yearlyGoal = masterBudgets['預存支出'] || 0;
@@ -902,20 +949,37 @@
                     const yearlyGoal = yearlyGoals[env] || 0;
                     const initialVal = initSaved[env] || 0;
                     
-                    let plannedSaved = 0;
-                    if(monthlySavedPlans[env]) {
-                        for(let m=1; m<=currentMonth; m++) {
-                            let val = monthlySavedPlans[env][m-1];
-                            if(val) plannedSaved += parseFloat(val);
+                    // [NEW] 防呆計算：先按月份統計手動存入
+                    let manualSavesByMonth = Array(12).fill(0);
+                    transactions.forEach(t => {
+                        if(t.type === 'save' && t.category === env) {
+                            let mIndex = new Date(t.date).getMonth(); // 0-11
+                            manualSavesByMonth[mIndex] += t.amount;
+                        }
+                    });
+
+                    let effectiveSaved = 0;
+                    for(let m=0; m<12; m++) {
+                        let planned = 0;
+                        if(monthlySavedPlans[env] && monthlySavedPlans[env][m]) {
+                            planned = parseFloat(monthlySavedPlans[env][m]) || 0;
+                        }
+                        let manual = manualSavesByMonth[m];
+                        
+                        // 過去與現在的月份，合併計算（防呆不重複扣）
+                        if (m < currentMonth) {
+                            effectiveSaved += Math.max(planned, manual);
+                        } else {
+                            // 未來月份只算有偷跑手動存入的
+                            effectiveSaved += manual;
                         }
                     }
                     
-                    let manualSaved = 0; transactions.forEach(t => { if(t.type === 'save' && t.category === env) manualSaved += t.amount; });
-                    let totalSaved = initialVal + plannedSaved + manualSaved;
+                    let totalSaved = initialVal + effectiveSaved;
                     let totalSpent = 0; transactions.forEach(t => { if(t.type === 'expense' && t.mainCategory === '預存支出' && t.category === env) totalSpent += t.amount; });
                     let currentBalance = totalSaved - totalSpent; 
                     
-                    if(yearlyGoal === 0 && currentBalance === 0 && initialVal === 0 && plannedSaved === 0) return; 
+                    if(yearlyGoal === 0 && currentBalance === 0 && initialVal === 0 && effectiveSaved === 0) return; 
                     
                     hasData = true; if(currentBalance < 0) currentBalance = 0;
                     let progress = yearlyGoal > 0 ? (currentBalance / yearlyGoal) * 100 : 100; if(progress > 100) progress = 100;
