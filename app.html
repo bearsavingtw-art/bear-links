@@ -193,7 +193,7 @@
 
     <header>
         <h1>Bear.saving</h1>
-        <div style="font-size:0.8rem; color:var(--text-secondary);">Financial Cockpit v4.5 (Smart Decimal)</div>
+        <div style="font-size:0.8rem; color:var(--text-secondary);">Financial Cockpit v4.6 (Smart NPER)</div>
     </header>
 
     <div id="page-dash" class="page active">
@@ -456,13 +456,16 @@
         <div class="modal-content" style="text-align: left;">
             <h3 style="margin-top:0; color:var(--danger); border-bottom: 2px solid #ffebee; padding-bottom:10px;"><i class="fas fa-fire"></i> 新增 / 更新負債目標</h3>
             <div class="form-group"><label>負債名稱 (如:學貸)</label><input type="text" id="debt-name" placeholder="請輸入負債名稱"></div>
+            
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                 <div class="form-group"><label>初始總額 ($)</label><input type="number" step="any" id="debt-initial" placeholder="總欠款" inputmode="decimal"></div>
                 <div class="form-group"><label>目前剩餘 ($)</label><input type="number" step="any" id="debt-current" placeholder="現欠款" inputmode="decimal"></div>
                 <div class="form-group"><label>每月還款 ($)</label><input type="number" step="any" id="debt-monthly" placeholder="每月預定" inputmode="decimal"></div>
+                <div class="form-group"><label>年利率 (%)</label><input type="number" step="any" id="debt-rate" placeholder="例: 2.5 (無則空)" inputmode="decimal"></div>
                 <div class="form-group"><label>總期數 (期)</label><input type="number" id="debt-total-terms" placeholder="例如: 48" inputmode="numeric"></div>
+                <div class="form-group"><label>每月扣款日</label><input type="number" id="debt-pay-date" min="1" max="31" placeholder="例: 5" inputmode="numeric"></div>
             </div>
-            <div class="form-group"><label>每月扣款日 (選填)</label><input type="number" id="debt-pay-date" min="1" max="31" placeholder="例如：5 (即每月5號)" inputmode="numeric"></div>
+
             <div style="display:flex; gap:10px; margin-top:20px;">
                 <button class="btn" style="background:var(--danger); margin-top:0; flex:1;" onclick="saveDebt()">儲存目標</button>
                 <button class="btn-outline" style="margin-top:0; flex:1;" onclick="closeDebtForm()">取消</button>
@@ -487,26 +490,18 @@
     </div>
 
     <script>
-        // --- [NEW] 智慧數字格式化函數 (支援小數點與千分位) ---
         function formatMoney(amount) {
             if (amount == null || isNaN(amount)) return '0';
-            // 將數字轉為字串
             const numStr = amount.toString();
-            // 檢查是否包含小數點
             if (numStr.includes('.')) {
-                // 如果有小數點，先分割整數與小數部分
                 const parts = numStr.split('.');
-                // 整數部分加上千分位
                 const integerPart = parseInt(parts[0], 10).toLocaleString('en-US');
-                // 回傳組合結果
                 return `${integerPart}.${parts[1]}`;
             } else {
-                // 如果是整數，直接使用原生的 toLocaleString (不加小數點)
                 return parseInt(amount, 10).toLocaleString('en-US');
             }
         }
 
-        // --- 1. 資料與初始化 ---
         const defaultSuggestions = {
             '固定支出': ['🏠 居住水電', '🚌 交通通訊', '🛡️ 訂閱保險'],
             '變動支出': ['🍱 伙食餐飲', '🧻 日常雜支', '🎉 娛樂社交', '✨ 變美治裝'],
@@ -609,7 +604,6 @@
         function saveTransaction() {
             const date = document.getElementById('input-date').value; const mainCatRaw = document.getElementById('input-main-category').value; 
             const amountStr = document.getElementById('input-amount').value;
-            // [MODIFIED] 使用 parseFloat 而不使用 parseInt，以支援小數點
             const amount = parseFloat(amountStr); 
             const note = document.getElementById('input-note').value; const method = document.getElementById('input-method').value;
             const subGroup = document.getElementById('sub-category-group'); let subCat = '';
@@ -881,7 +875,6 @@
                 }
             });
             
-            // [MODIFIED] 使用 formatMoney
             document.getElementById('display-income').innerText = `$${formatMoney(totalInc)}`; 
             document.getElementById('display-expense').innerText = `$${formatMoney(totalExp)}`; 
             
@@ -1173,25 +1166,74 @@
         function toggleNwDetails(type) { const container = document.getElementById(`nw-details-${type}`); container.classList.toggle('hidden'); if(!container.classList.contains('hidden') && document.getElementById(`nw-list-${type}`).children.length === 0) { addNwDetailRow(type); } }
         function sumNwDetails(type) { const vals = document.querySelectorAll(`.nw-dtl-val-${type}`); let total = 0; vals.forEach(input => { total += parseFloat(input.value) || 0; }); const mainInput = document.getElementById(`nw-input-${type}`); mainInput.value = total; if(vals.length === 0) { mainInput.readOnly = false; } else { mainInput.readOnly = true; } }
 
+        // --- [NEW] NPER 房貸/信貸 本息平均攤還計算演算法 ---
+        function calculateRemainingTerms(currentDebt, monthlyPayment, annualRate) {
+            if (currentDebt <= 0) return 0;
+            if (monthlyPayment <= 0) return -1; // 尚未設定每月還款
+            if (!annualRate || annualRate <= 0) return Math.ceil(currentDebt / monthlyPayment); // 0 利率算法
+
+            const r = (annualRate / 100) / 12; // 月利率
+            if (monthlyPayment <= currentDebt * r) return -2; // 警告：還款金額連利息都付不起！永遠還不完
+
+            // NPER 核心公式： -log(1 - (r * PV) / PMT) / log(1 + r)
+            const terms = -Math.log(1 - (currentDebt * r) / monthlyPayment) / Math.log(1 + r);
+            return Math.ceil(terms);
+        }
+
         function renderDebtTracker() {
             const container = document.getElementById('debt-tracker-container'); container.innerHTML = '';
             if(userDebts.length === 0) { container.innerHTML = '<div style="text-align:center; padding:15px; color:#999; font-size:0.85rem; border:1px dashed #eee; border-radius:10px; margin-bottom:15px;">尚未新增負債目標。<br>勇敢面對是解脫的第一步！</div>'; return; }
+            
+            // [NEW] 總負債儀表板
+            let totalCurrentDebt = 0;
+            userDebts.forEach(d => totalCurrentDebt += d.current);
+            container.innerHTML = `
+                <div style="background:var(--danger); color:#fff; padding:15px; border-radius:12px; margin-bottom:20px; text-align:center; box-shadow:0 4px 10px rgba(229,115,115,0.3);">
+                    <div style="font-size:0.85rem; opacity:0.9;">目前所有負債總額</div>
+                    <div style="font-size:1.8rem; font-weight:700; font-family:'Montserrat', sans-serif;">$${formatMoney(totalCurrentDebt)}</div>
+                </div>
+            `;
+
             userDebts.forEach((debt, index) => {
                 let progress = ((debt.initial - debt.current) / debt.initial) * 100;
                 if(progress < 0) progress = 0; if(progress > 100) progress = 100;
-                let isDone = progress === 100; let remainingTerms = 0; let timeLeftStr = '';
-                if (isDone) { timeLeftStr = '<span style="color:var(--success); font-weight:bold;">🎉 恭喜完全解脫！</span>'; remainingTerms = 0; } 
-                else if (debt.monthly > 0) { remainingTerms = Math.ceil(debt.current / debt.monthly); let y = Math.floor(remainingTerms / 12); let m = remainingTerms % 12; timeLeftStr = `預計剩餘：<b>${y > 0 ? y + ' 年 ' : ''}${m > 0 ? m + ' 個月' : ''}</b>`; } 
-                else { timeLeftStr = `<span style="color:var(--warning);">尚未設定每月還款</span>`; }
+                let isDone = progress === 100; 
+                
+                // [NEW] 導入 NPER 計算期數
+                let remainingTerms = calculateRemainingTerms(debt.current, debt.monthly, debt.rate);
+                let timeLeftStr = '';
+                
+                if (isDone) { 
+                    timeLeftStr = '<span style="color:var(--success); font-weight:bold;">🎉 恭喜完全解脫！</span>'; 
+                } 
+                else if (remainingTerms === -1) { 
+                    timeLeftStr = `<span style="color:var(--warning);">尚未設定每月還款</span>`; 
+                } 
+                else if (remainingTerms === -2) {
+                    timeLeftStr = `<span style="color:var(--danger); font-weight:bold;">⚠️ 還款金低於利息，永遠還不完！</span>`; 
+                }
+                else { 
+                    let y = Math.floor(remainingTerms / 12); let m = remainingTerms % 12; 
+                    let timeText = '';
+                    if (y > 0) timeText += y + ' 年 ';
+                    if (m > 0) timeText += m + ' 個月';
+                    if (y === 0 && m === 0) timeText = '少於 1 個月'; // 剛好要還完的最後一個月
+                    timeLeftStr = `預計剩餘：<b>${timeText}</b>`; 
+                }
 
                 let payDateBadge = debt.payDate ? `<span style="background:rgba(176,141,133,0.1); color:var(--accent); padding:2px 8px; border-radius:10px; font-size:0.75rem; margin-left:8px;">每月 ${debt.payDate} 日扣款</span>` : '';
-                let termsDisplay = debt.totalTerms ? `<div style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:5px;">剩餘期數：<b style="color:var(--text-primary);">${remainingTerms}</b> 期 / 總期數：${debt.totalTerms} 期</div>` : '';
+                let rateBadge = debt.rate ? `<span style="background:rgba(229,115,115,0.1); color:var(--danger); padding:2px 8px; border-radius:10px; font-size:0.75rem; margin-left:8px;">年利率 ${debt.rate}%</span>` : '';
+                
+                let termsDisplay = debt.totalTerms ? `<div style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:5px;">剩餘期數：<b style="color:var(--text-primary);">${remainingTerms > 0 ? remainingTerms : '-'}</b> 期 / 總期數：${debt.totalTerms} 期</div>` : '';
                 let textClass = progress > 15 ? 'snowball-text' : 'snowball-text snowball-text-dark';
 
                 container.innerHTML += `
                     <div style="background:var(--input-bg); padding:15px 20px; border-radius:15px; margin-bottom:15px; border: 1px solid rgba(229, 115, 115, 0.2); box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
-                        <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;"><div><span style="font-weight:700; color:var(--text-primary); font-size:1.05rem;">${debt.name}</span>${payDateBadge}</div><i class="fas fa-edit edit-btn" style="color:var(--accent);" onclick="openDebtForm(${index})"></i></div>
-                        <div style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:4px;">已還款 $${formatMoney(debt.initial - debt.current)} / 總額 $${formatMoney(debt.initial)}</div>
+                        <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
+                            <div><span style="font-weight:700; color:var(--text-primary); font-size:1.05rem;">${debt.name}</span>${payDateBadge}${rateBadge}</div>
+                            <i class="fas fa-edit edit-btn" style="color:var(--accent);" onclick="openDebtForm(${index})"></i>
+                        </div>
+                        <div style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:4px;">已還本金 $${formatMoney(debt.initial - debt.current)} / 總額 $${formatMoney(debt.initial)}</div>
                         ${termsDisplay}
                         <div class="snowball-track"><div class="snowball-fill ${isDone ? 'done' : ''}" style="width:${progress}%;"><div class="snowball-icon">${isDone ? '🎉' : '🐻‍❄️'}</div></div><div class="${textClass}">${progress.toFixed(1)}%</div></div>
                         <div style="font-size:0.8rem; color:var(--text-primary); display:flex; justify-content:flex-end;"><span>${timeLeftStr}</span></div>
@@ -1199,9 +1241,58 @@
                 `;
             });
         }
-        function openDebtForm(index = null) { document.getElementById('debt-form-modal').classList.add('show'); if (index !== null) { editingDebtId = index; const debt = userDebts[index]; document.getElementById('debt-name').value = debt.name; document.getElementById('debt-initial').value = debt.initial; document.getElementById('debt-current').value = debt.current; document.getElementById('debt-monthly').value = debt.monthly; document.getElementById('debt-total-terms').value = debt.totalTerms || ''; document.getElementById('debt-pay-date').value = debt.payDate || ''; document.getElementById('debt-delete-btn-container').style.display = 'block'; } else { editingDebtId = null; document.getElementById('debt-name').value = ''; document.getElementById('debt-initial').value = ''; document.getElementById('debt-current').value = ''; document.getElementById('debt-monthly').value = ''; document.getElementById('debt-total-terms').value = ''; document.getElementById('debt-pay-date').value = ''; document.getElementById('debt-delete-btn-container').style.display = 'none'; } }
+        
+        function openDebtForm(index = null) { 
+            document.getElementById('debt-form-modal').classList.add('show'); 
+            if (index !== null) { 
+                editingDebtId = index; const debt = userDebts[index]; 
+                document.getElementById('debt-name').value = debt.name; 
+                document.getElementById('debt-initial').value = debt.initial; 
+                document.getElementById('debt-current').value = debt.current; 
+                document.getElementById('debt-monthly').value = debt.monthly; 
+                document.getElementById('debt-rate').value = debt.rate || ''; 
+                document.getElementById('debt-total-terms').value = debt.totalTerms || ''; 
+                document.getElementById('debt-pay-date').value = debt.payDate || ''; 
+                document.getElementById('debt-delete-btn-container').style.display = 'block'; 
+            } else { 
+                editingDebtId = null; 
+                document.getElementById('debt-name').value = ''; 
+                document.getElementById('debt-initial').value = ''; 
+                document.getElementById('debt-current').value = ''; 
+                document.getElementById('debt-monthly').value = ''; 
+                document.getElementById('debt-rate').value = ''; 
+                document.getElementById('debt-total-terms').value = ''; 
+                document.getElementById('debt-pay-date').value = ''; 
+                document.getElementById('debt-delete-btn-container').style.display = 'none'; 
+            } 
+        }
+        
         function closeDebtForm() { document.getElementById('debt-form-modal').classList.remove('show'); }
-        function saveDebt() { const name = document.getElementById('debt-name').value; const initial = parseFloat(document.getElementById('debt-initial').value) || 0; const current = parseFloat(document.getElementById('debt-current').value) || 0; const monthly = parseFloat(document.getElementById('debt-monthly').value) || 0; const totalTerms = parseInt(document.getElementById('debt-total-terms').value) || 0; const payDate = parseInt(document.getElementById('debt-pay-date').value) || ''; if(!name || initial <= 0 || monthly <= 0 || totalTerms <= 0) { alert('請輸入完整資訊（含每月還款與總期數）！'); return; } if (editingDebtId !== null) { userDebts[editingDebtId] = { name, initial, current, monthly, totalTerms, payDate }; } else { userDebts.push({ name, initial, current, monthly, totalTerms, payDate }); } localStorage.setItem('bear_debts_tracker', JSON.stringify(userDebts)); closeDebtForm(); renderDebtTracker(); }
+        
+        function saveDebt() { 
+            const name = document.getElementById('debt-name').value; 
+            const initial = parseFloat(document.getElementById('debt-initial').value) || 0; 
+            const current = parseFloat(document.getElementById('debt-current').value) || 0; 
+            const monthly = parseFloat(document.getElementById('debt-monthly').value) || 0; 
+            const rate = parseFloat(document.getElementById('debt-rate').value) || 0; 
+            const totalTerms = parseInt(document.getElementById('debt-total-terms').value) || 0; 
+            const payDate = parseInt(document.getElementById('debt-pay-date').value) || ''; 
+            
+            if(!name || initial <= 0 || monthly <= 0 || totalTerms <= 0) { 
+                alert('請輸入完整資訊（含每月還款與總期數）！'); return; 
+            } 
+            
+            if (editingDebtId !== null) { 
+                userDebts[editingDebtId] = { name, initial, current, monthly, rate, totalTerms, payDate }; 
+            } else { 
+                userDebts.push({ name, initial, current, monthly, rate, totalTerms, payDate }); 
+            } 
+            
+            localStorage.setItem('bear_debts_tracker', JSON.stringify(userDebts)); 
+            closeDebtForm(); 
+            renderDebtTracker(); 
+        }
+        
         function deleteDebt() { if(editingDebtId !== null && confirm('確定要刪除這筆負債目標嗎？')) { userDebts.splice(editingDebtId, 1); localStorage.setItem('bear_debts_tracker', JSON.stringify(userDebts)); closeDebtForm(); renderDebtTracker(); } }
 
         function startLogic() { const name = document.getElementById('shop-name').value; const price = parseFloat(document.getElementById('shop-price').value); const salary = parseFloat(document.getElementById('shop-salary').value); if(!name || !price || !salary) { alert('請輸入完整資訊！'); return; } shopItem = { name, price, wage: Math.round(salary/160), costHour: (price/(salary/160)).toFixed(1) }; shopStep = 0; shopScore = 0; document.getElementById('shop-step-1').classList.add('hidden'); document.getElementById('shop-step-2').classList.remove('hidden'); document.getElementById('shop-history-container').classList.add('hidden'); showQuestion(); }
