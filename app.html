@@ -188,29 +188,27 @@
         .month-cell label { font-size: 0.65rem; color: var(--text-secondary); margin-bottom: 2px; text-align: center;}
         .month-cell input { padding: 6px 2px; font-size: 0.75rem; text-align: center; border-radius: 4px; border: 1px solid #ddd;}
 
-        /* 還款按鈕與 Checklist 樣式 */
-        .btn-repay { background: var(--success); color: #fff; border: none; padding: 8px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.3s; box-shadow: 0 2px 5px rgba(129, 199, 132, 0.4); margin-top: 10px;}
-        .btn-repay:active { transform: scale(0.95); }
-        .btn-repay.disabled { background: #e0e0e0; color: #9e9e9e; cursor: not-allowed; box-shadow: none; pointer-events: none;}
-        
-        /* [NEW] Checklist 專屬樣式 */
+        /* [NEW] 全期數攤還表 (Accordion) 專屬樣式 */
         .btn-checklist { background: #fff; color: var(--text-primary); border: 1px solid var(--text-primary); padding: 12px; border-radius: 12px; font-size: 0.9rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.3s; width: 100%; margin-top: 20px;}
         .btn-checklist:active { transform: scale(0.98); background: #f9f9f9;}
-        .checklist-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border: 1px solid #eee; border-radius: 12px; margin-bottom: 10px; background: #fdfbf7;}
-        .checklist-info { flex: 1; }
-        .checklist-name { font-weight: 700; font-size: 1rem; color: var(--text-primary); margin-bottom: 4px;}
-        .checklist-details { font-size: 0.8rem; color: var(--text-secondary); }
-        .checklist-action { margin-left: 15px; }
-        .btn-check { background: var(--success); color: #fff; border: none; padding: 10px 15px; border-radius: 50px; font-weight: 600; font-size: 0.85rem; cursor: pointer; box-shadow: 0 3px 8px rgba(129,199,132,0.3); transition: 0.3s;}
-        .btn-check:active { transform: scale(0.95); }
-        .btn-check.done { background: #f0f0f0; color: #aaa; box-shadow: none; pointer-events: none; }
+        
+        .debt-accordion { border: 1px solid #eee; border-radius: 12px; margin-bottom: 15px; overflow: hidden; background: #fff; }
+        .debt-accordion-head { background: #fdfbf7; padding: 15px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-weight: 600; color: var(--text-primary); }
+        .debt-accordion-body { padding: 0; display: none; max-height: 400px; overflow-y: auto; background: #fff; }
+        .debt-accordion-body.open { display: block; }
+        .term-row { display: flex; justify-content: space-between; padding: 12px 15px; border-bottom: 1px dashed #eee; font-size: 0.85rem; align-items: center; }
+        .term-row:last-child { border-bottom: none; }
+        .term-status.done { color: #aaa; text-decoration: line-through; }
+        .term-status.active-btn { background: var(--success); color: #fff; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.3s; box-shadow: 0 2px 5px rgba(129, 199, 132, 0.3);}
+        .term-status.active-btn:active { transform: scale(0.95); }
+        .term-status.locked { color: #ccc; font-size: 0.8rem; }
     </style>
 </head>
 <body>
 
     <header>
         <h1>Bear.saving</h1>
-        <div style="font-size:0.8rem; color:var(--text-secondary);">Financial Cockpit v4.8 (Debt Checklist)</div>
+        <div style="font-size:0.8rem; color:var(--text-secondary);">Financial Cockpit v4.9 (Full Amortization)</div>
     </header>
 
     <div id="page-dash" class="page active">
@@ -412,7 +410,7 @@
             <button class="btn-outline" style="border-color:var(--danger); color:var(--danger);" onclick="openDebtForm()">＋ 新增負債目標</button>
             
             <button class="btn-checklist" onclick="openChecklistModal()">
-                <i class="fas fa-tasks"></i> 債務狀況盤點 & Checklist
+                <i class="fas fa-tasks"></i> 展開所有期數盤點 (Checklist)
             </button>
         </div>
 
@@ -484,7 +482,7 @@
                 <div class="form-group"><label>目前剩餘 ($)</label><input type="number" step="any" id="debt-current" placeholder="現欠款" inputmode="decimal"></div>
                 <div class="form-group"><label>每月還款 ($)</label><input type="number" step="any" id="debt-monthly" placeholder="每月預定" inputmode="decimal"></div>
                 <div class="form-group"><label>年利率 (%)</label><input type="number" step="any" id="debt-rate" placeholder="例: 2.5 (無則空)" inputmode="decimal"></div>
-                <div class="form-group"><label>總期數 (期)</label><input type="number" id="debt-total-terms" placeholder="例如: 48" inputmode="numeric"></div>
+                <div class="form-group"><label>總期數 (期)</label><input type="number" id="debt-total-terms" placeholder="選填, 若空自動精算" inputmode="numeric"></div>
                 <div class="form-group"><label>每月扣款日</label><input type="number" id="debt-pay-date" min="1" max="31" placeholder="例: 5" inputmode="numeric"></div>
             </div>
 
@@ -497,20 +495,14 @@
     </div>
 
     <div id="checklist-modal" class="modal-overlay">
-        <div class="modal-content" style="text-align: left; background: #fff; max-height: 85vh; display: flex; flex-direction: column;">
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 15px;">
-                <h3 style="margin:0; color:var(--text-primary);"><i class="fas fa-tasks" style="color:var(--accent);"></i> 本月債務盤點</h3>
+        <div class="modal-content" style="text-align: left; background: #f9f9f9; padding: 20px; max-height: 85vh; display: flex; flex-direction: column;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ddd; padding-bottom: 15px; margin-bottom: 15px;">
+                <h3 style="margin:0; color:var(--text-primary);"><i class="fas fa-tasks" style="color:var(--accent);"></i> 全期數打卡盤點表</h3>
                 <i class="fas fa-times" style="font-size: 1.2rem; color: #aaa; cursor: pointer;" onclick="closeChecklistModal()"></i>
             </div>
-            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0;">點擊勾選即可同步完成雪球系統的「打卡還款」！</p>
             
             <div id="checklist-container" style="overflow-y: auto; flex: 1; padding-right: 5px;">
                 </div>
-            
-            <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed #eee; text-align: center;">
-                <div style="font-size: 0.8rem; color: var(--text-secondary);">本月應繳總額</div>
-                <div id="checklist-total" style="font-size: 1.5rem; font-weight: 700; font-family: 'Montserrat', sans-serif; color: var(--danger);">$0</div>
-            </div>
         </div>
     </div>
 
@@ -555,11 +547,9 @@
         let yearlyGoals = JSON.parse(localStorage.getItem('bear_yearly_goals')) || {}; 
         let initSaved = JSON.parse(localStorage.getItem('bear_init_saved')) || {}; 
         let monthlySavedPlans = JSON.parse(localStorage.getItem('bear_monthly_saved_plans')) || {};
-
         let shoppingList = JSON.parse(localStorage.getItem('bear_shopping_list')) || [];
         let netWorthData = JSON.parse(localStorage.getItem('bear_networth')) || [];
         let sysSettings = JSON.parse(localStorage.getItem('bear_sys_settings')) || { cycleStart: 1 };
-        
         let userDebts = JSON.parse(localStorage.getItem('bear_debts_tracker')) || [];
 
         let userEnvelopes = JSON.parse(localStorage.getItem('bear_custom_envelopes'));
@@ -1146,7 +1136,7 @@
             let maxNetWorth = 0; if (netWorthData.length > 0) { maxNetWorth = Math.max(...netWorthData.map(n => n.net)); }
             const milestones = {
                 habit: [ { id: 'h1', icon: '🌱', title: '第一滴露水', desc: '成功記下第一筆帳，萬事起頭難，妳已經跨出找回底氣的第一步！', condition: txCount >= 1, progress: `${txCount}/1` }, { id: 'h2', icon: '🌿', title: '記帳熟練者', desc: '累積記錄 50 筆帳務，妳已經證明自己能持續追蹤金錢流向。', condition: txCount >= 50, progress: `${txCount}/50` }, { id: 'h3', icon: '🛡️', title: '冷靜之盾', desc: '使用冷靜閘成功「駁回」3 次衝動消費，守住了未來的生命時間！', condition: rejectedShops >= 3, progress: `${rejectedShops}/3` } ],
-                asset: [ { id: 'a1', icon: '🚀', title: '突破零點', desc: '淨資產大於 $0！正式擺脫負債的引力，這是一個偉大的起點。', condition: maxNetWorth > 0, progress: `目前最高 $${formatMoney(maxNetWorth)}` }, { id: 'a2', icon: '💧', title: '初級蓄水池', desc: '淨資產突破 10 萬元！妳為自己存下了第一筆能應付突發狀況的底氣。', condition: maxNetWorth >= 100000, progress: `目前最高 $${formatMoney(maxNetWorth)}` }, { id: 'a3', icon: '🌊', title: '微退休預備', desc: '淨資產突破 50 萬元！妳拥有了說「不」的權利，能優雅地面對爛工作。', condition: maxNetWorth >= 500000, progress: `目前最高 $${formatMoney(maxNetWorth)}` } ]
+                asset: [ { id: 'a1', icon: '🚀', title: '突破零點', desc: '淨資產大於 $0！正式擺脫負債的引力，這是一個偉大的起點。', condition: maxNetWorth > 0, progress: `目前最高 $${formatMoney(maxNetWorth)}` }, { id: 'a2', icon: '💧', title: '初級蓄水池', desc: '淨資產突破 10 萬元！妳為自己存下了第一筆能應付突發狀況的底氣。', condition: maxNetWorth >= 100000, progress: `目前最高 $${formatMoney(maxNetWorth)}` }, { id: 'a3', icon: '🌊', title: '微退休預備', desc: '淨資產突破 50 萬元！妳擁有了說「不」的權利，能優雅地面對爛工作。', condition: maxNetWorth >= 500000, progress: `目前最高 $${formatMoney(maxNetWorth)}` } ]
             };
             const gridHabit = document.getElementById('ms-grid-habit'); gridHabit.innerHTML = ''; milestones.habit.forEach(m => { let classStr = m.condition ? 'milestone-item unlocked' : 'milestone-item'; gridHabit.innerHTML += `<div class="${classStr}"><span class="milestone-icon">${m.icon}</span><div class="milestone-title">${m.title}</div><div class="milestone-desc">${m.desc}</div><div class="milestone-progress">進度: ${m.progress}</div></div>`; });
             const gridAsset = document.getElementById('ms-grid-asset'); gridAsset.innerHTML = ''; milestones.asset.forEach(m => { let classStr = m.condition ? 'milestone-item unlocked' : 'milestone-item'; gridAsset.innerHTML += `<div class="${classStr}"><span class="milestone-icon">${m.icon}</span><div class="milestone-title">${m.title}</div><div class="milestone-desc">${m.desc}</div><div class="milestone-progress">進度: ${m.progress}</div></div>`; });
@@ -1250,7 +1240,6 @@
                 
                 localStorage.setItem('bear_debts_tracker', JSON.stringify(userDebts));
                 
-                // 同時更新雪球畫面與 Checklist 畫面
                 renderDebtTracker();
                 if(document.getElementById('checklist-modal').classList.contains('show')){
                     renderChecklist();
@@ -1273,59 +1262,10 @@
                 let isDone = progress === 100; 
                 
                 let remainingTerms = calculateRemainingTerms(debt.current, debt.monthly, debt.rate);
-                let timeLeftStr = '';
-                
-                if (isDone) { 
-                    timeLeftStr = '<span style="color:var(--success); font-weight:bold;">🎉 完全解脫！</span>'; 
-                } 
-                else if (remainingTerms === -1) { 
-                    timeLeftStr = `<span style="color:var(--warning);">未設還款</span>`; 
-                } 
-                else if (remainingTerms === -2) {
-                    timeLeftStr = `<span style="color:var(--danger); font-weight:bold;">⚠️ 永遠還不完</span>`; 
-                }
-                else { 
-                    let y = Math.floor(remainingTerms / 12); let m = remainingTerms % 12; 
-                    let timeText = '';
-                    if (y > 0) timeText += y + ' 年 ';
-                    if (m > 0) timeText += m + ' 月';
-                    if (y === 0 && m === 0) timeText = '< 1 月'; 
-                    timeLeftStr = `預計剩餘：<b>${timeText}</b>`; 
-                }
-
-                let payDateBadge = debt.payDate ? `<span style="background:rgba(176,141,133,0.1); color:var(--accent); padding:2px 8px; border-radius:10px; font-size:0.75rem; margin-left:8px;">${debt.payDate} 日扣款</span>` : '';
-                
-                let termsDisplay = debt.totalTerms ? `<div style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:5px;">剩餘期數：<b style="color:var(--text-primary);">${remainingTerms > 0 ? remainingTerms : '-'}</b> 期 / 總期數：${debt.totalTerms} 期</div>` : '';
-                let textClass = progress > 15 ? 'snowball-text' : 'snowball-text snowball-text-dark';
-
-                let repayBtnHtml = '';
-                if (!isDone && remainingTerms !== -1 && remainingTerms !== -2) {
-                    if (debt.lastPaidMonth === currentMonthStr) {
-                        repayBtnHtml = `<span style="color:var(--success); font-weight:bold; font-size:0.85rem;"><i class="fas fa-check-circle"></i> 本月已打卡</span>`;
-                    } else {
-                        repayBtnHtml = `<span style="color:var(--warning); font-weight:bold; font-size:0.85rem;"><i class="fas fa-exclamation-circle"></i> 尚未打卡</span>`;
-                    }
-                }
-
-                container.innerHTML += `
-                    <div style="background:var(--input-bg); padding:15px 20px; border-radius:15px; margin-bottom:15px; border: 1px solid rgba(229, 115, 115, 0.2); box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
-                        <div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center;">
-                            <div><span style="font-weight:700; color:var(--text-primary); font-size:1.05rem;">${debt.name}</span>${payDateBadge}</div>
-                            <i class="fas fa-edit edit-btn" style="color:var(--accent);" onclick="openDebtForm(${index})"></i>
-                        </div>
-                        <div style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:4px;">剩餘本金 <span style="color:var(--danger); font-weight:bold;">$${formatMoney(debt.current)}</span> / 總額 $${formatMoney(debt.initial)}</div>
-                        ${termsDisplay}
-                        <div class="snowball-track"><div class="snowball-fill ${isDone ? 'done' : ''}" style="width:${progress}%;"><div class="snowball-icon">${isDone ? '🎉' : '🐻‍❄️'}</div></div><div class="${textClass}">${progress.toFixed(1)}%</div></div>
-                        <div style="display:flex; justify-content:space-between; align-items:flex-end;">
-                            ${repayBtnHtml}
-                            <div style="font-size:0.8rem; color:var(--text-primary);"><span>${timeLeftStr}</span></div>
-                        </div>
-                    </div>
-                `;
             });
         }
 
-        // --- [NEW] Checklist 功能 ---
+        // --- [NEW] 全期數攤還表 (Accordion Checklist) 功能 ---
         function openChecklistModal() {
             document.getElementById('checklist-modal').classList.add('show');
             renderChecklist();
@@ -1337,41 +1277,63 @@
 
         function renderChecklist() {
             const container = document.getElementById('checklist-container');
+            
+            // 紀錄目前打開的手風琴狀態
+            const prevOpenStates = Array.from(document.querySelectorAll('.debt-accordion-body')).map(el => el.classList.contains('open'));
             container.innerHTML = '';
             
-            const currentMonthStr = `${new Date().getFullYear()}-${new Date().getMonth() + 1}`;
-            let totalMonthlyPayment = 0;
             let hasActiveDebt = false;
 
-            // 篩選出需要還款的債務 (尚未還清，且有設定每月還款金)
             userDebts.forEach((debt, index) => {
                 if (debt.current > 0 && debt.monthly > 0) {
                     hasActiveDebt = true;
-                    totalMonthlyPayment += debt.monthly;
                     
-                    const isPaid = (debt.lastPaidMonth === currentMonthStr);
-                    const btnClass = isPaid ? 'btn-check done' : 'btn-check';
-                    const btnText = isPaid ? '<i class="fas fa-check"></i> 已完成' : '✅ 點擊打卡';
+                    let remainingTerms = calculateRemainingTerms(debt.current, debt.monthly, debt.rate);
+                    let rowsHtml = '';
+                    
+                    if (remainingTerms === -1 || remainingTerms === -2) {
+                        rowsHtml = `<div style="padding:20px; text-align:center; color:var(--danger); font-size:0.85rem;">⚠️ 每月還款金額設定異常（低於利息或為0），無法產生攤還表。請至設定修改。</div>`;
+                    } else {
+                        // 動態精算：總期數若未填，用初始金額反推。若反推期數小於剩餘期數，以剩餘期數為準。
+                        let totalTermsBase = debt.totalTerms > 0 ? debt.totalTerms : calculateRemainingTerms(debt.initial, debt.monthly, debt.rate);
+                        if (totalTermsBase < remainingTerms) totalTermsBase = remainingTerms;
+                        
+                        let paidTerms = Math.max(0, totalTermsBase - remainingTerms);
+                        
+                        for(let i=1; i<=totalTermsBase; i++) {
+                            if (i <= paidTerms) {
+                                rowsHtml += `<div class="term-row"><span class="term-status done">第 ${i} 期</span><span style="color:var(--success); font-weight:600;"><i class="fas fa-check-circle"></i> 已結清</span></div>`;
+                            } else if (i === paidTerms + 1) {
+                                const currentMonthStr = `${new Date().getFullYear()}-${new Date().getMonth() + 1}`;
+                                if (debt.lastPaidMonth === currentMonthStr) {
+                                    rowsHtml += `<div class="term-row" style="background:#f4fbf5;"><span style="font-weight:600; color:var(--text-primary);">第 ${i} 期 (本期)</span><span style="color:var(--success); font-size:0.8rem; font-weight:600;"><i class="fas fa-check-circle"></i> 本月已打卡</span></div>`;
+                                } else {
+                                    rowsHtml += `<div class="term-row" style="background:#fffaf0; border-color:var(--warning);"><span style="font-weight:600; color:var(--text-primary);">第 ${i} 期 (本期應繳)</span><button class="term-status active-btn" onclick="markDebtPaid(${index})">打卡 $${formatMoney(debt.monthly)}</button></div>`;
+                                }
+                            } else {
+                                rowsHtml += `<div class="term-row"><span class="term-status locked">第 ${i} 期</span><span class="term-status locked"><i class="fas fa-lock"></i> 未到期</span></div>`;
+                            }
+                        }
+                    }
+
                     const payDateText = debt.payDate ? `每月 ${debt.payDate} 日` : '未設扣款日';
 
                     container.innerHTML += `
-                        <div class="checklist-item">
-                            <div class="checklist-info">
-                                <div class="checklist-name">${debt.name}</div>
-                                <div class="checklist-details">
-                                    <i class="far fa-calendar-alt"></i> ${payDateText} <br>
-                                    <span style="color:var(--danger); font-weight:600; font-size:0.9rem; margin-top:4px; display:inline-block;">應繳：$${formatMoney(debt.monthly)}</span>
+                        <div class="debt-accordion">
+                            <div class="debt-accordion-head" onclick="this.nextElementSibling.classList.toggle('open'); this.querySelector('.fa-chevron-down').classList.toggle('fa-rotate-180');">
+                                <div>
+                                    <div style="font-size:1rem; margin-bottom:4px; color:var(--text-primary);">${debt.name} <span style="font-size:0.7rem; color:var(--accent); font-weight:normal; background:rgba(176,141,133,0.1); padding:2px 6px; border-radius:10px; margin-left:5px;">剩 ${remainingTerms > 0 ? remainingTerms : '?'} 期</span></div>
+                                    <div style="font-size:0.75rem; color:var(--text-secondary); font-weight:normal;">${payDateText} 應繳 $${formatMoney(debt.monthly)}</div>
                                 </div>
+                                <i class="fas fa-chevron-down" style="transition:0.3s; color:#ccc;"></i>
                             </div>
-                            <div class="checklist-action">
-                                <button class="${btnClass}" onclick="markDebtPaid(${index})">${btnText}</button>
+                            <div class="debt-accordion-body">
+                                ${rowsHtml}
                             </div>
                         </div>
                     `;
                 }
             });
-
-            document.getElementById('checklist-total').innerText = `$${formatMoney(totalMonthlyPayment)}`;
 
             if (!hasActiveDebt) {
                 container.innerHTML = `
@@ -1381,7 +1343,14 @@
                         <div style="font-size:0.9rem;">目前沒有需要盤點的債務項目。<br>妳已經拿回了財務的掌控權！</div>
                     </div>
                 `;
-                document.getElementById('checklist-total').innerText = '$0';
+            } else {
+                // 恢復剛剛打開的手風琴狀態
+                document.querySelectorAll('.debt-accordion-body').forEach((el, i) => {
+                    if(prevOpenStates[i]) {
+                        el.classList.add('open');
+                        el.previousElementSibling.querySelector('.fa-chevron-down').classList.add('fa-rotate-180');
+                    }
+                });
             }
         }
         
@@ -1421,8 +1390,8 @@
             const totalTerms = parseInt(document.getElementById('debt-total-terms').value) || 0; 
             const payDate = parseInt(document.getElementById('debt-pay-date').value) || ''; 
             
-            if(!name || initial <= 0 || monthly <= 0 || totalTerms <= 0) { 
-                alert('請輸入完整資訊（含每月還款與總期數）！'); return; 
+            if(!name || initial <= 0 || monthly <= 0) { 
+                alert('請輸入完整資訊（含初始總額與每月還款）！'); return; 
             } 
             
             if (editingDebtId !== null) { 
