@@ -83,7 +83,6 @@
         }
         .hero-content { opacity: 0; transform: translateY(30px); animation: fadeUp 1.5s ease forwards 0.5s; padding: 20px; }
         
-        /* [復原] 首屏英文標題與原版小字 */
         .hero h1 {
             font-family: 'Playfair Display', serif; font-size: 2.5rem; color: #fff;
             margin-bottom: 10px; text-shadow: 0 2px 10px rgba(0,0,0,0.2); letter-spacing: 1px;
@@ -148,7 +147,7 @@
         .news-desc { font-size: 0.9rem; color: var(--text-secondary); }
         .news-item-support { background: rgba(229, 115, 115, 0.05); border: 1px solid #ffebee; border-left: 4px solid var(--danger); padding: 15px; border-radius: 8px; }
 
-        /* 引言聲明區塊 (轉移過來的霸氣宣言) */
+        /* 引言聲明區塊 */
         .statement-box {
             background: linear-gradient(135deg, rgba(176, 141, 133, 0.05) 0%, rgba(252, 251, 249, 1) 100%);
             border: 1px dashed rgba(176, 141, 133, 0.3);
@@ -258,12 +257,15 @@
 
         /* FAQ & Footer */
         .faq-container { text-align: left; max-width: 700px; margin: 0 auto; }
+        .faq-category-title { font-size: 1.1rem; color: var(--accent); margin: 40px 0 15px; border-bottom: 1px dashed #eee; padding-bottom: 10px; font-weight: 600; }
+        .faq-category-title:first-child { margin-top: 0; }
         .faq-item { border-bottom: 1px solid #eee; margin-bottom: 15px; padding-bottom: 10px; }
         .faq-question { font-weight: 600; cursor: pointer; display: flex; justify-content: space-between; align-items: center; padding: 15px 0; color: var(--text-primary); transition: 0.3s; }
         .faq-question:hover { color: var(--accent); }
         .faq-icon { font-size: 0.9rem; transition: transform 0.3s; color: var(--accent); }
         .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6; }
-        .faq-item.active .faq-answer { max-height: 400px; padding-bottom: 15px; }
+        /* 更新：調高展開高度以容納長篇回答 */
+        .faq-item.active .faq-answer { max-height: 800px; padding-bottom: 15px; }
         .faq-item.active .faq-icon { transform: rotate(180deg); }
 
         .social-container { display: flex; flex-direction: column; gap: 20px; align-items: center; }
@@ -602,6 +604,9 @@
         <h2 style="font-family:'Playfair Display'; margin-bottom:30px;">Q & A</h2>
         
         <div class="faq-container">
+
+            <div class="faq-category-title">系統運作與安全</div>
+
             <div class="faq-item">
                 <div class="faq-question">預存金（例如年度保費）花掉的那天，算進當月支出會不會讓圖表大爆表？<i class="fas fa-chevron-down faq-icon"></i></div>
                 <div class="faq-answer">
@@ -630,6 +635,74 @@
                     所有記帳數據都採用 Web 本地端技術 (Local Storage)，只存放在妳自己的手機或電腦瀏覽器裡，不會上傳到任何外部伺服器。更棒的是，系統內建「一鍵匯出 Excel 報表」功能，隨時可以將資料備份到自己的裝置，拒絕資料綁架。
                 </div>
             </div>
+
+            <div class="faq-category-title">信用卡與發薪日卡關</div>
+
+            <div class="faq-item">
+                <div class="faq-question">我的信用卡結帳日是 21 號，但薪水是 5 號入帳，帳務總是對不上怎麼辦？<i class="fas fa-chevron-down faq-icon"></i></div>
+                <div class="faq-answer">
+                    既然每個月 5 號領薪水，那妳的財務週期就是「每個月的 5 號到下個月的 4 號」！所有的預算規劃都在這一天重新分配，完全不需要去管信用卡的結帳日是幾號~<br><br>
+                    請把信用卡當成純粹的「支付工具」。假設今天用信用卡刷了 500 元的餐費，請立刻在記帳系統的「餐費」項目扣除 500 元，然後把這 500 元的額度，轉移到一個名為「準備繳卡費」的專屬存袋裡~<br><br>
+                    當下個月 5 號信用卡帳單截止、同時也是發薪水的時候，妳「絕對不要」拿剛發下來的新薪水去繳卡費。妳要拿去繳費的錢，是上個月每一次刷卡時，就已經陸續存進「準備繳卡費」存袋裡的錢。剛發下來的薪水，是完整留給這個月生活用的！
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">剛開始用現金分配，但之前累積的卡費還沒存起來，下個月要直接編入支出嗎？<i class="fas fa-chevron-down faq-icon"></i></div>
+                <div class="faq-answer">
+                    沒錯！過去累積的卡費就像是過去的負債，必須在下個月的預算中先切一塊出來還掉。妳可以把它列為「過去卡費填坑」之類的變動支出~<br><br>
+                    雖然這個月生活費會被嚴重壓縮，但只要從現在開始徹底執行「刷卡當下就圈存現金」的原則，撐過這段過渡期，未來的卡費就不會再吃掉妳當月的薪水了！
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">這個月刷了三人機票錢，扣掉固定支出後，發現完全沒錢吃飯了該怎麼辦？<i class="fas fa-chevron-down faq-icon"></i></div>
+                <div class="faq-answer">
+                    遇到單月超大筆異常支出（像是出國機票），代表這筆錢本來就不該從「當月的單月薪水」硬擠出來！<br><br>
+                    這種大型支出，應該要從過去提早累積的「年度旅遊基金」去扣除。如果之前沒有存這筆錢，那這個月勢必得面臨赤字。解法是：先把這個月絕對必要的餐費跟通勤費保留下來維持生存，機票錢如果還沒繳清，可能需要先動用「緊急備用金」或「緩衝池」先墊付，然後在接下來幾個月的預算裡，慢慢把這個洞補回來~
+                </div>
+            </div>
+
+            <div class="faq-category-title">家庭與個人預算分配</div>
+
+            <div class="faq-item">
+                <div class="faq-question">老公是軍人常不在家，我跟小孩的餐費怎麼算才不會太複雜？<i class="fas fa-chevron-down faq-icon"></i></div>
+                <div class="faq-answer">
+                    放棄算人頭，改用「情境分袋」！<br><br>
+                    準備兩個不同的餐費存袋：一個是「平日個人餐費」，另一個是「週末母子共食費」。平日自己吃飯扣個人餐費；只要是帶小孩去吃飯（無論平日或假日），那一整張帳單就直接從「母子共食費」全額扣除，完全不需要拆帳~ 老公在的時候讓他全包，那天的餐費支出就是零！<br><br>
+                    難得平日能跟孩子一起提早吃飯，是很珍貴的時光。結帳時直接從共食費付掉就好，把省下來的心思留給跟孩子好好聊天！
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">這週的餐費提早花完了，離下次起始日還有 4 天，該拿緊急備用金來用嗎？<i class="fas fa-chevron-down faq-icon"></i></div>
+                <div class="faq-answer">
+                    這時候請先去檢查其他的「彈性預算袋」（例如娛樂費、治裝費）還有沒有剩餘的錢可以挪用過來貼補~<br><br>
+                    如果真的都沒有，請選擇「預支下週餐費」，然後下週乖乖吃清淡一點還債！「緊急備用金」是留給真正的大型突發狀況用的，不能因為日常超支就輕易動用！
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">每個月有追星預算，但賣掉週邊的收入也想流回這筆預算，系統裡該怎麼記？<i class="fas fa-chevron-down faq-icon"></i></div>
+                <div class="faq-answer">
+                    月初的時候，一樣先放固定的金額在妳的追星預算裡~<br><br>
+                    當賣東西的收入進來之後，先把這筆錢記在「收入」，接著利用系統內的「轉帳」或「預算追加」功能，把這筆錢補進當月的追星預算袋中！這樣既能清楚知道自己賣東西賺了多少，也能讓追星預算有源源不絕的活水，這是很棒的專款專用觀念！
+                </div>
+            </div>
+
+            <div class="faq-category-title">系統週期與大型財務決策</div>
+
+            <div class="faq-item">
+                <div class="faq-question">發薪日不固定（有時 15 號、有時 12 號），財務駕駛艙的週期跑掉怎麼辦？<i class="fas fa-chevron-down faq-icon"></i></div>
+                <div class="faq-answer">
+                    遇到發薪日浮動，最高原則是「設定一個最晚發薪日作為固定週期」！<br><br>
+                    例如公司最晚 15 號發薪，系統週期就固定設在 15 號~ 如果提早拿到薪水（例如 12 號），這幾天先不要動這筆錢，把它當作「暫存狀態」，等到 15 號週期重置的那天，再正式把錢分配到各個預算袋裡。這樣系統的週期就不會亂掉，妳的記帳節奏也會很穩定！
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">想報名補習班，猶豫要「現金分 3 期」還是「零卡分期」，該怎麼選？<i class="fas fa-chevron-down faq-icon"></i></div>
+                <div class="faq-answer">
+                    這個情況我強烈建議選擇「保留現金流」的方案（零卡分期）！<br><br>
+                    如果現金分 3 期會把身上的現金全部 All in，代表妳的「緩衝池」會完全乾涸，只要有一點突發狀況就會周轉不靈~ 雖然零卡分期有利息，但妳可以把這個利息當作「買現金流保險」的費用。維持手邊有足夠的現金，才能讓妳安心準備考試，不會每天為了生活費提心吊膽！
+                </div>
+            </div>
+
         </div>
     </section>
 
