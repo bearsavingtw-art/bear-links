@@ -211,7 +211,7 @@
 
     <header>
         <h1>Bear.saving</h1>
-        <div style="font-size:0.8rem; color:var(--text-secondary);">Financial Cockpit v5.0 (Excel Export)</div>
+        <div style="font-size:0.8rem; color:var(--text-secondary);">Financial Cockpit v5.1 (Smart Export)</div>
     </header>
 
     <div id="page-dash" class="page active">
@@ -461,7 +461,8 @@
 
         <div class="card">
             <div class="card-title">資料備份與報表匯出</div>
-            <button class="btn btn-outline" style="border-color:var(--success); color:var(--success); margin-bottom:10px;" onclick="exportToExcel()"><i class="fas fa-file-excel"></i> 匯出專屬月報表 (Excel)</button>
+            <p style="font-size:0.75rem; color:var(--info); margin-top:0; margin-bottom:10px;">💡 點擊下方按鈕，系統將自動擷取「儀表板當前停留的月份」與「所有歷史明細」生成精美 Excel 報表！</p>
+            <button class="btn btn-outline" style="border-color:var(--success); color:var(--success); margin-bottom:10px; background:#f4fbf5;" onclick="exportToExcel()"><i class="fas fa-file-excel"></i> 匯出專屬月報表 (Excel)</button>
             <div style="display:flex; gap:10px;">
                 <button class="btn btn-outline" style="flex:1; margin-top:0;" onclick="exportData()"><i class="fas fa-download"></i> 系統備份 (JSON)</button>
                 <button class="btn btn-outline" style="flex:1; margin-top:0;" onclick="document.getElementById('import-file').click()"><i class="fas fa-upload"></i> 匯入備份</button>
@@ -1543,9 +1544,10 @@
         function deleteShopItem(id) { if(confirm('確定刪除這筆紀錄？')) { shoppingList = shoppingList.filter(i => i.id !== id); localStorage.setItem('bear_shopping_list', JSON.stringify(shoppingList)); renderShoppingList(); } }
         function updateCountdowns() { const timers = document.querySelectorAll('.timer-badge'); const now = Date.now(); timers.forEach(timer => { const diff = parseInt(timer.getAttribute('data-ts')) + (72 * 60 * 60 * 1000) - now; if (diff <= 0) { timer.innerText = "冷靜期結束"; timer.style.background = "#888"; } else { const h = Math.floor(diff / (1000 * 60 * 60)), m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)), s = Math.floor((diff % (1000 * 60)) / 1000); timer.innerText = `${h}h ${m}m ${s}s`; } }); }
 
-        // [NEW] Excel 報表匯出功能 (V5.0)
+        // [NEW] Excel 報表匯出功能 (V5.1 Smart Export)
         function exportToExcel() {
-            const currentCycle = getCycleBoundary(new Date(), sysSettings.cycleStart);
+            // [修正] 匯出當前儀表板停留的月份，而非現實時間的當月
+            const currentCycle = getCycleBoundary(dashboardViewDate, sysSettings.cycleStart);
             const cycleTx = transactions.filter(t => { const tDate = new Date(t.date); tDate.setHours(0,0,0,0); return tDate >= currentCycle.start && tDate <= currentCycle.end; });
             
             let totalInc = 0, fixedExp = 0, varExp = 0, saveExp = 0;
@@ -1575,29 +1577,31 @@
             let html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';
             html += '<head><meta charset="utf-8"><style>';
             html += 'table { border-collapse: collapse; font-family: "Microsoft JhengHei", Arial, sans-serif; } ';
-            html += 'th, td { border: 1px solid #e0e0e0; padding: 10px; } ';
-            html += '.title-row { background-color: #5a4d41; color: #ffffff; font-size: 18pt; font-weight: bold; text-align: center; } ';
+            html += 'th, td { border: 1px solid #e0e0e0; padding: 10px; vertical-align: middle; } ';
+            html += '.title-row { background-color: #5a4d41; color: #ffffff; font-size: 18pt; font-weight: bold; text-align: center; height: 50px;} ';
             html += '.copyright-row { background-color: #fff2cc; color: #d32f2f; font-size: 10pt; font-weight: bold; text-align: center; } ';
-            html += '.header-row { background-color: #b08d85; color: #ffffff; font-size: 12pt; font-weight: bold; text-align: center; } ';
-            html += '.sub-header { background-color: #f3f3f3; font-weight: bold; text-align: center; } ';
-            html += '.num { text-align: right; } ';
+            html += '.header-row td { background-color: #b08d85; color: #ffffff; font-size: 12pt; font-weight: bold; text-align: center; } ';
+            html += '.sub-header td { background-color: #f3f3f3; font-weight: bold; text-align: center; } ';
+            html += '.num { text-align: right; mso-number-format:"\\#\\,\\#\\#0"; } ';
             html += '.highlight { color: #d32f2f; font-weight: bold; } ';
             html += '.good { color: #2e7d32; font-weight: bold; } ';
             html += '</style></head><body>';
+            
             html += '<table>';
             
+            // --- 上半部：月度診斷報告 ---
             html += `<tr><td colspan="6" class="title-row">🐻 Bear.saving 財務駕駛艙 - ${currentCycle.label} 深度盤點報告</td></tr>`;
             html += `<tr><td colspan="6" class="copyright-row">⚠️ 財務駕駛艙 ( app.html all copyright 所有 bear.saving )<br>嚴禁任何形式之轉售、公開散佈、複製、修改後再授權或用於商業用途，違者必究。</td></tr>`;
-            html += `<tr><td colspan="6"></td></tr>`;
+            html += `<tr><td colspan="6" style="height: 20px;"></td></tr>`;
 
-            html += `<tr><td colspan="6" class="header-row">📊 核心儀表板 (Executive Summary)</td></tr>`;
+            html += `<tr class="header-row"><td colspan="6">📊 核心儀表板 (Executive Summary)</td></tr>`;
             html += `<tr class="sub-header"><td colspan="2">本期總收入</td><td colspan="2">本期總支出 (固定+變動)</td><td colspan="2">本期真實結餘</td></tr>`;
             html += `<tr><td colspan="2" class="num" style="font-size: 16pt; color: #2e7d32; font-weight:bold;">$${totalInc.toLocaleString()}</td>`;
             html += `<td colspan="2" class="num" style="font-size: 16pt; color: #d32f2f; font-weight:bold;">$${totalExp.toLocaleString()}</td>`;
             html += `<td colspan="2" class="num" style="font-size: 16pt; color: #5a4d41; font-weight:bold;">$${balance.toLocaleString()}</td></tr>`;
-            html += `<tr><td colspan="6"></td></tr>`;
+            html += `<tr><td colspan="6" style="height: 20px;"></td></tr>`;
 
-            html += `<tr><td colspan="6" class="header-row">🩺 財務健康度自動診斷</td></tr>`;
+            html += `<tr class="header-row"><td colspan="6">🩺 財務健康度自動診斷</td></tr>`;
             html += `<tr class="sub-header"><td>項目</td><td>實際花費</td><td>佔收入比例</td><td>Bear 建議比例</td><td colspan="2">系統診斷與建議</td></tr>`;
             
             let fixedDiag = fixedPct > 60 ? "🚨 警訊：固定支出過高！生活容錯率低，請檢視訂閱與房租。" : "✅ 良好：生存基石穩固。";
@@ -1608,9 +1612,9 @@
             
             let saveDiag = savePct < 10 ? "🛑 危險：儲蓄力不足！請從每天省下一杯飲料開始。" : "🏆 優秀：底氣持續累積中！";
             html += `<tr><td>儲蓄與結餘 (未來底氣)</td><td class="num">$${balance.toLocaleString()}</td><td class="num">${savePct}%</td><td class="num">20%</td><td colspan="2" style="color:${savePct<10?'#d32f2f':'#2e7d32'}; font-weight:bold;">${saveDiag}</td></tr>`;
-            html += `<tr><td colspan="6"></td></tr>`;
+            html += `<tr><td colspan="6" style="height: 20px;"></td></tr>`;
 
-            html += `<tr><td colspan="6" class="header-row">🗂️ 10袋系統：預算執行穿透表</td></tr>`;
+            html += `<tr class="header-row"><td colspan="6">🗂️ 10袋系統：預算執行穿透表</td></tr>`;
             html += `<tr class="sub-header"><td>大分類</td><td>專屬存袋名稱</td><td>預算上限</td><td>實際花費</td><td>剩餘可用</td><td>狀態</td></tr>`;
             
             ['固定支出', '變動支出'].forEach(mainCat => {
@@ -1624,9 +1628,9 @@
                     });
                 }
             });
-            html += `<tr><td colspan="6"></td></tr>`;
+            html += `<tr><td colspan="6" style="height: 20px;"></td></tr>`;
 
-            html += `<tr><td colspan="6" class="header-row">🎯 預存金 (Sinking Funds) 水位追蹤</td></tr>`;
+            html += `<tr class="header-row"><td colspan="6">🎯 預存金 (Sinking Funds) 水位追蹤</td></tr>`;
             html += `<tr class="sub-header"><td colspan="2">預存目標名稱</td><td>年度總目標</td><td>歷史累積存入</td><td>歷史累積花費</td><td>目前水位 (安全感)</td></tr>`;
             let hasSinking = false;
             if (userEnvelopes['預存支出'] && userEnvelopes['預存支出'].length > 0) {
@@ -1649,9 +1653,9 @@
                 });
             }
             if(!hasSinking) html += `<tr><td colspan="6" style="text-align:center; color:#999;">尚未建立預存目標</td></tr>`;
-            html += `<tr><td colspan="6"></td></tr>`;
+            html += `<tr><td colspan="6" style="height: 20px;"></td></tr>`;
 
-            html += `<tr><td colspan="6" class="header-row">❄️ 負債雪球倒數與打卡紀錄</td></tr>`;
+            html += `<tr class="header-row"><td colspan="6">❄️ 負債雪球倒數與打卡紀錄</td></tr>`;
             html += `<tr class="sub-header"><td>債務名稱</td><td>初始總額</td><td>目前剩餘欠款</td><td>每月還款</td><td>推估剩餘期數</td><td>狀態</td></tr>`;
             
             if (userDebts && userDebts.length > 0) {
@@ -1667,11 +1671,48 @@
                 html += `<tr><td colspan="6" style="text-align:center; color:#999;">目前無負債紀錄，太棒了！</td></tr>`;
             }
 
+            html += `<tr><td colspan="6" style="height: 50px;"></td></tr>`; // 大分隔區塊
+
+            // --- [NEW] 下半部：統整所有月份的記帳明細總表 ---
+            html += `<tr><td colspan="6" class="title-row" style="background-color: #3e332a;">📚 歷史總帳本 (All Transactions)</td></tr>`;
+            html += `<tr class="header-row"><td>帳單週期 (Cycle)</td><td>日期 (Date)</td><td>收支類型</td><td>分類 (Category)</td><td>金額 (Amount)</td><td>備註與方式</td></tr>`;
+
+            // 將所有紀錄依日期由新到舊排序
+            let allTx = [...transactions].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            if (allTx.length === 0) {
+                html += `<tr><td colspan="6" style="text-align:center; color:#999;">尚未有任何記帳紀錄</td></tr>`;
+            } else {
+                allTx.forEach(t => {
+                    const tDateObj = new Date(t.date);
+                    const cycleInfo = getCycleBoundary(tDateObj, sysSettings.cycleStart);
+                    
+                    let typeLabel = '';
+                    let colorStyle = '';
+                    if(t.type === 'income') { typeLabel = '收入'; colorStyle = 'color:#2e7d32;'; }
+                    else if(t.type === 'save') { typeLabel = '存入預備金'; colorStyle = 'color:#d4a373;'; }
+                    else { typeLabel = '支出'; colorStyle = 'color:#d32f2f;'; }
+
+                    let catDisplay = `[${t.mainCategory}] ${t.category}`;
+                    let noteMethod = `${t.note ? t.note + ' ' : ''}(${t.method === 'cash' ? '現金' : (t.method === 'card' ? '刷卡' : '轉帳')})`;
+
+                    html += `<tr>
+                        <td style="text-align:center;">${cycleInfo.label}</td>
+                        <td style="text-align:center;">${t.date}</td>
+                        <td style="text-align:center; font-weight:bold; ${colorStyle}">${typeLabel}</td>
+                        <td>${catDisplay}</td>
+                        <td class="num" style="font-weight:bold; ${colorStyle}">$${t.amount.toLocaleString()}</td>
+                        <td>${noteMethod}</td>
+                    </tr>`;
+                });
+            }
+
             html += '</table></body></html>';
             
             const blob = new Blob([html], {type: 'application/vnd.ms-excel'});
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
+            // 檔名加上匯出的帳期
             link.download = `Bear財務駕駛艙_月報表_${currentCycle.label}.xls`;
             link.click();
         }
