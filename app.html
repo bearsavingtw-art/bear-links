@@ -205,6 +205,7 @@
         .term-status.active-btn { background: var(--success); color: #fff; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.3s; box-shadow: 0 2px 5px rgba(129, 199, 132, 0.3);}
         .term-status.active-btn:active { transform: scale(0.95); }
         .term-status.locked { color: #ccc; font-size: 0.8rem; }
+        .privacy-blur { filter: blur(6px); user-select: none; transition: filter 0.3s ease; }
     </style>
 </head>
 <body>
@@ -223,7 +224,12 @@
             </div>
             <button class="month-nav-btn" onclick="changeDashboardMonth(1)"><i class="fas fa-chevron-right"></i></button>
         </div>
-
+        <div style="text-align: right; margin-bottom: 10px; padding-right: 5px;">
+            <span onclick="togglePrivacyMode()" style="cursor: pointer; color: var(--text-secondary); font-size: 0.9rem; font-weight: 600; transition: 0.3s;" id="privacy-btn">
+                <i class="fas fa-eye" id="privacy-icon"></i> 隱私模式
+            </span>
+        </div>
+        
         <div class="stat-grid">
             <div class="stat-box"><div class="stat-label">本期收入</div><div class="stat-value income" id="display-income">$0</div></div>
             <div class="stat-box"><div class="stat-label">本期支出 (固定+變動)</div><div class="stat-value expense" id="display-expense">$0</div></div>
@@ -1720,7 +1726,32 @@
         function exportData() { const data = { tx: transactions, budget: budgets, shop: shoppingList, networth: netWorthData, settings: sysSettings, envelopes: userEnvelopes, debts: userDebts, yearlyGoals: yearlyGoals, initSaved: initSaved, masterBudgets: masterBudgets, monthlySavedPlans: monthlySavedPlans }; const blob = new Blob([JSON.stringify(data)], {type: "text/json"}); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = "bear_backup_" + new Date().toISOString().slice(0,10) + ".json"; link.click(); }
         function importData(input) { const reader = new FileReader(); reader.onload = function(e) { try { const data = JSON.parse(e.target.result); if (Array.isArray(data)) { transactions = data; } else { transactions = data.tx || []; budgets = data.budget || {}; shoppingList = data.shop || []; netWorthData = data.networth || []; sysSettings = data.settings || { cycleStart: 1 }; userEnvelopes = data.envelopes || null; userDebts = data.debts || []; yearlyGoals = data.yearlyGoals || {}; initSaved = data.initSaved || {}; masterBudgets = data.masterBudgets || { '固定支出': 0, '變動支出': 0, '預存支出': 0 }; monthlySavedPlans = data.monthlySavedPlans || {}; } localStorage.setItem('bear_transactions', JSON.stringify(transactions)); localStorage.setItem('bear_budgets', JSON.stringify(budgets)); localStorage.setItem('bear_shopping_list', JSON.stringify(shoppingList)); localStorage.setItem('bear_networth', JSON.stringify(netWorthData)); localStorage.setItem('bear_sys_settings', JSON.stringify(sysSettings)); if(userEnvelopes) localStorage.setItem('bear_custom_envelopes', JSON.stringify(userEnvelopes)); localStorage.setItem('bear_debts_tracker', JSON.stringify(userDebts)); localStorage.setItem('bear_yearly_goals', JSON.stringify(yearlyGoals)); localStorage.setItem('bear_init_saved', JSON.stringify(initSaved)); localStorage.setItem('bear_master_budgets', JSON.stringify(masterBudgets)); localStorage.setItem('bear_monthly_saved_plans', JSON.stringify(monthlySavedPlans)); alert('匯入成功！'); location.reload(); } catch(err) { alert('檔案錯誤'); } }; reader.readAsText(input.files[0]); }
         function clearData() { if(confirm('確定清空所有資料？（此動作無法復原）')) { localStorage.clear(); location.reload(); } }
-
+        let privacyMode = false;
+        function togglePrivacyMode() {
+            privacyMode = !privacyMode;
+            const elements = ['display-income', 'display-expense', 'display-balance', 'display-planned-save', 'display-true-balance'];
+            const icon = document.getElementById('privacy-icon');
+            const btn = document.getElementById('privacy-btn');
+            
+            elements.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    if (privacyMode) el.classList.add('privacy-blur');
+                    else el.classList.remove('privacy-blur');
+                }
+            });
+            
+            if (privacyMode) {
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+                btn.style.color = 'var(--accent)';
+            } else {
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+                btn.style.color = 'var(--text-secondary)';
+            }
+        }
+        
         if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(err => { console.log('ServiceWorker 註冊失敗: ', err); }); }); }
     </script>
 </body>
