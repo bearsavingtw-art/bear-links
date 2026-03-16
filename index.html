@@ -83,10 +83,10 @@
         }
         .hero-content { opacity: 0; transform: translateY(30px); animation: fadeUp 1.5s ease forwards 0.5s; padding: 20px; }
         .hero h1 {
-            font-family: 'Playfair Display', serif; font-size: 2.5rem; color: #fff;
-            margin-bottom: 10px; text-shadow: 0 2px 10px rgba(0,0,0,0.2); letter-spacing: 1px;
+            font-family: 'Noto Serif TC', serif; font-size: 2.2rem; color: #fff;
+            margin-bottom: 15px; text-shadow: 0 2px 10px rgba(0,0,0,0.2); letter-spacing: 1px; line-height: 1.4; font-weight: 700;
         }
-        .hero p { color: rgba(255,255,255,0.95); font-size: 1rem; margin-bottom: 35px; font-weight: 400; }
+        .hero p { color: rgba(255,255,255,0.95); font-size: 0.95rem; margin-bottom: 35px; font-weight: 400; line-height: 1.8; max-width: 600px; margin-left: auto; margin-right: auto;}
 
         .btn-elegant {
             display: inline-block; padding: 14px 35px;
@@ -170,17 +170,17 @@
 
         /* 系統優勢強調 */
         .feature-grid { 
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); 
-            gap: 15px; margin-bottom: 40px; max-width: 700px; margin-left: auto; margin-right: auto;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+            gap: 15px; margin-bottom: 40px; max-width: 800px; margin-left: auto; margin-right: auto;
         }
         .feature-card { 
-            background: var(--input-bg); padding: 20px 15px; border-radius: 15px; 
-            text-align: center; border: 1px dashed #e0e0e0; transition: 0.3s; 
+            background: #fff; padding: 25px 20px; border-radius: 15px; 
+            text-align: center; border: 1px solid #eee; transition: 0.3s; box-shadow: var(--card-shadow);
         }
-        .feature-card:hover { border-color: var(--accent); background: #fff; transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-        .feature-icon { font-size: 1.8rem; color: var(--accent); margin-bottom: 10px; }
-        .feature-title { font-weight: 700; font-size: 0.95rem; color: var(--text-primary); margin-bottom: 5px; }
-        .feature-desc { font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4; }
+        .feature-card:hover { border-color: var(--accent); transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.06); }
+        .feature-icon { font-size: 2rem; color: var(--accent); margin-bottom: 15px; }
+        .feature-title { font-weight: 700; font-size: 1rem; color: var(--text-primary); margin-bottom: 10px; }
+        .feature-desc { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; }
 
         /* 服務與禮物 */
         .service-card {
@@ -237,7 +237,7 @@
         .faq-question:hover { color: var(--accent); }
         .faq-icon { font-size: 0.9rem; transition: transform 0.3s; color: var(--accent); }
         .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6; }
-        .faq-item.active .faq-answer { max-height: 300px; padding-bottom: 15px; }
+        .faq-item.active .faq-answer { max-height: 400px; padding-bottom: 15px; }
         .faq-item.active .faq-icon { transform: rotate(180deg); }
 
         .social-container { display: flex; flex-direction: column; gap: 20px; align-items: center; }
@@ -276,10 +276,10 @@
             <source src="hero.mp4" type="video/mp4">
         </video>
         <div class="hero-content">
-            <h1>Make Ordinary<br>Life Confident.</h1>
-            <p>在理財的邏輯裡，找回生活的餘裕。</p>
-            <a href="https://myship.7-11.com.tw/general/detail/GM2502152714662?utm_source=ig&utm_medium=social" target="_blank" class="btn-elegant">
-                點我！前往存錢工具賣場 <i class="fas fa-arrow-right" style="margin-left:8px; font-size:0.8em;"></i>
+            <h1>拒絕無效記帳。<br>奪回財務掌控權。</h1>
+            <p>Bear 財務駕駛艙 v5.1 跨海升級版 🚀<br>這不是一本讓妳越記越焦慮的流水帳。這是一套內建「衝動防呆」、「預存鎖定」與「雪球還債」的自動化財務防禦系統。幫助妳在微退休的路上，走得比別人更有底氣。</p>
+            <a href="app.html" class="btn-elegant">
+                立即啟動我的駕駛艙 <i class="fas fa-arrow-right" style="margin-left:8px; font-size:0.8em;"></i>
             </a>
         </div>
         <div class="scroll-indicator">
@@ -302,7 +302,7 @@
                 <i class="fas fa-book news-icon"></i>
                 <div>
                     <span class="news-title-text">原創記帳本</span>
-                    <span class="news-desc">已售完，年後印刷中，預計 <strong>3月中</strong> 補貨上架！</span>
+                    <span class="news-desc">已售完，年後印刷中，預計 <strong>3月底~4月初</strong> 補貨上架！</span>
                 </div>
             </div>
             <div class="news-item">
@@ -312,18 +312,40 @@
                     <span class="news-desc">
                         • (常態販售書衣) <strong>預購中</strong><br>
                         • (期間限定黑/奶油愛心) 現貨：約 <strong>3月底</strong> 補貨<br>
-                        • (新品) 迷你書衣❤兔兔小花：3月中補貨<br>
+                        • (新品) 迷你書衣❤兔兔小花：3月底補貨<br>
                     </span>
                 </div>
             </div>
             <div class="news-item">
                 <i class="fas fa-bag-shopping news-icon"></i>
                 <div>
-                    <span class="news-title-text">真皮包 / 錢包快閃團</span>
-                    <span class="news-desc">現貨米白/大象灰快閃團開放中! 售完為止。<br>3月中預購團(肩背包等)請鎖定 IG 限動。<br>
+                    <span class="news-title-text">真皮包 / 錢包團購</span>
+                    <span class="news-desc">3/14團購結束! 下一團請鎖定 IG 限動!<br>
                     <a href="https://www.instagram.com/bear.saving/" target="_blank" style="color:var(--accent); text-decoration: underline;">👉 點此追蹤 IG 不漏接</a>
                     </span>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section fade-in" style="padding-top: 40px; padding-bottom: 0;">
+        <h2 style="font-family:'Playfair Display'; margin-bottom:5px;">System Bugs?</h2>
+        <p style="color:var(--text-secondary); font-size:0.95rem; margin-bottom:30px; font-weight:600;">妳的記帳方法，是不是早就出現 Bug 了？</p>
+        <div class="feature-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-wallet" style="color: var(--danger);"></i></div>
+                <div class="feature-title">記完帳還是存不到錢</div>
+                <div class="feature-desc">每個月都在記花了多少，但月底看到餘額還是只能嘆氣，記帳變成了無效的流水帳。</div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-calendar-times" style="color: var(--danger);"></i></div>
+                <div class="feature-title">大筆支出總是被突襲</div>
+                <div class="feature-desc">繳保費、繳稅季一到，原本的存款瞬間歸零，平時建立的安全感瞬間被擊垮。</div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-file-invoice-dollar" style="color: var(--danger);"></i></div>
+                <div class="feature-title">被負債壓得喘不過氣</div>
+                <div class="feature-desc">永遠搞不懂銀行的利息怎麼算，看著帳單只覺得這輩子都還不完。</div>
             </div>
         </div>
     </section>
@@ -354,7 +376,7 @@
                     </div>
                 </div>
                 <div class="trilogy-desc">專為手機設計的「財務駕駛艙」。最新版讓妳實現「100%分類自由」（自訂存袋名稱），還有超紓壓的「慢慢熊推雪球還債計算機」與「底氣里程碑徽章」，把存錢變成破關遊戲！</div>
-                <a href="app.html" class="trilogy-btn btn-step-2">開啟財務駕駛艙 v3.7 <i class="fas fa-arrow-right"></i></a>
+                <a href="app.html" class="trilogy-btn btn-step-2">開啟財務駕駛艙 v5.1 <i class="fas fa-arrow-right"></i></a>
             </div>
 
             <div class="trilogy-card card-step-3">
@@ -372,29 +394,29 @@
     </section>
 
     <section class="section fade-in" style="padding-top: 50px;">
-        <h2 style="font-family:'Playfair Display'; margin-bottom:5px;">Free Resources</h2>
-        <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:30px;">工程師邏輯打造，給妳滿滿的安全感。</p>
+        <h2 style="font-family:'Playfair Display'; margin-bottom:5px;">Core Features & Resources</h2>
+        <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:30px;">4 大核彈級功能，將冰冷的數字轉化為真實的底氣</p>
 
-        <div class="feature-grid">
+        <div class="feature-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
             <div class="feature-card">
-                <div class="feature-icon"><i class="fas fa-tags"></i></div>
-                <div class="feature-title">100% 分類自由</div>
-                <div class="feature-desc">不再綁死 10 袋！自訂妳專屬的存錢名目，系統自動幫妳長出預算框。</div>
+                <div class="feature-icon"><i class="fas fa-lock"></i></div>
+                <div class="feature-title">預存金防呆鎖死 ＋ 真實餘額</div>
+                <div class="feature-desc">系統自動把明年的保費、旅遊金「鎖進保險箱」，給妳扣除預存金後的「真實可動用餘額」。</div>
             </div>
             <div class="feature-card">
-                <div class="feature-icon"><i class="fas fa-medal"></i></div>
-                <div class="feature-title">底氣成就解鎖</div>
-                <div class="feature-desc">連續記帳、淨資產破新高，點亮專屬彩色徽章，存錢不再沒動力！</div>
+                <div class="feature-icon"><i class="fas fa-brain"></i></div>
+                <div class="feature-title">購物冷靜・邏輯閘</div>
+                <div class="feature-desc">輸入價格，系統自動換算成「生命工時」。當包包要花掉妳 60 小時生命，衝動瞬間灰飛煙滅。</div>
             </div>
             <div class="feature-card">
-                <div class="feature-icon"><i class="fas fa-chart-pie"></i></div>
-                <div class="feature-title">一鍵圓餅圖抓漏</div>
-                <div class="feature-desc">點擊儀表板圓餅圖，瞬間過濾該類別明細。更有 AI 月結報告幫妳覆盤。</div>
+                <div class="feature-icon"><i class="fas fa-hand-holding-usd"></i></div>
+                <div class="feature-title">負債雪球精準複利引擎</div>
+                <div class="feature-desc">內建銀行級「本息平均攤還」演算法與「全期數打卡表」，讓還債變成會上癮的破關遊戲！</div>
             </div>
             <div class="feature-card">
-                <div class="feature-icon"><i class="fas fa-save"></i></div>
-                <div class="feature-title">資產明細神記憶</div>
-                <div class="feature-desc">盤點時系統自動帶入上個月的銀行明細，只要微調數字就搞定！</div>
+                <div class="feature-icon"><i class="fas fa-file-excel"></i></div>
+                <div class="feature-title">專屬 Excel 報表一鍵匯出</div>
+                <div class="feature-desc">一鍵秒生當月精美報表，內建財務健康度自動診斷與 10 袋預算穿透表，資料自己完全掌握。</div>
             </div>
         </div>
 
@@ -428,7 +450,7 @@
         <a href="app.html" class="service-card">
             <div class="service-icon" style="background:#f0f4f8; color:#546e7a;"><i class="fas fa-tachometer-alt"></i></div>
             <div>
-                <div style="font-weight:600; font-size:1.05rem;">Bear 財務駕駛艙 v3.7</div>
+                <div style="font-weight:600; font-size:1.05rem;">Bear 財務駕駛艙 v5.1</div>
                 <div style="font-size:0.85rem; color:var(--text-secondary); margin-top:5px;">自由分類 x 慢慢熊還債計算機 x 里程碑</div>
             </div>
             <i class="fas fa-chevron-right" style="margin-left:auto; color:#ddd;"></i>
@@ -537,32 +559,31 @@
         
         <div class="faq-container">
             <div class="faq-item">
-                <div class="faq-question">Bear 的系統跟一般的記帳 App 或 Excel 有什麼不同？<i class="fas fa-chevron-down faq-icon"></i></div>
+                <div class="faq-question">預存金（例如年度保費）花掉的那天，算進當月支出會不會讓圖表大爆表？<i class="fas fa-chevron-down faq-icon"></i></div>
                 <div class="faq-answer">
-                    <strong>因為它是「活」的！</strong> 一般的表格只是在紀錄過去的屍體，但 Bear 的系統是妳的專屬管家。<br><br>
-                    從「財務診斷室」幫妳抓漏、算預算，到「財務駕駛艙」能自訂妳的專屬存袋、記住妳的資產明細、甚至在妳衝動購物前用「冷靜閘」攔住妳。還有超療癒的「慢慢熊推雪球還債器」陪妳破關！這是一套有防呆、有溫度的底氣生態系。
+                    <strong>絕對不會！這就是駕駛艙最聰明的地方。</strong><br><br>
+                    當妳每個月存錢進去時，系統早就把它從可動用資金扣除了。實際花費時只是「從保險箱把錢拿出來付」，系統有獨立的「年度預存金追蹤」區塊記錄明細，幫妳完美避開「雙重扣款」的視覺恐慌！
                 </div>
             </div>
             <div class="faq-item">
-                <div class="faq-question">我是嚴重的數字白痴，真的學得會嗎？<i class="fas fa-chevron-down faq-icon"></i></div>
+                <div class="faq-question">銀行的貸款都有算利息，這個系統的雪球計算機真的準嗎？<i class="fas fa-chevron-down faq-icon"></i></div>
                 <div class="faq-answer">
-                    <strong>這套系統就是為妳設計的！</strong> 我們最自豪的就是「無腦防呆」設計。<br><br>
-                    妳不需要懂複雜的會計，只要順著我們的「底氣三部曲」走：第一步診斷現況、第二步設定預算、第三步開始記帳。只要妳輸入數字，進度條、圓餅圖、AI 月結報告，系統通通會自動幫妳畫好。理財從未如此簡單！
+                    <strong>非常精準！系統內建多種計息模式。</strong><br><br>
+                    不管是銀行算好的「本息合一固定分期」、會狂咬本金的「循環計息」，還是親友間的「零利率」，系統都能精準切換。如果妳的還款金連利息都付不起，系統還會亮紅燈殘酷警告妳，絕對不讓妳做白工。搭配「打卡還款」功能，讓還債變成超有成就感的破關遊戲！
                 </div>
             </div>
             <div class="faq-item">
-                <div class="faq-question">這麼強大的財務診斷室與駕駛艙，居然是免費的？<i class="fas fa-chevron-down faq-icon"></i></div>
+                <div class="faq-question">我是海外用戶（例如香港），幣值有小數點可以使用嗎？<i class="fas fa-chevron-down faq-icon"></i></div>
                 <div class="faq-answer">
-                    <strong>是的，這是我送給所有正在為錢焦慮的人的禮物。</strong><br><br>
-                    因為我也曾經歷過那段沒有底氣的日子，所以我請工程師把最核心的邏輯寫成了網頁版 App（PWA），不收訂閱費，不用看廣告，就是希望能陪妳撐過陣痛期。建議妳立刻「加到手機主畫面」，當作原生 App 使用！
+                    <strong>沒問題！系統已全面支援小數點輸入與精準顯示。</strong><br><br>
+                    而且系統非常聰明，如果妳是台灣用戶輸入整數，畫面依然會保持乾淨俐落，不會出現多餘的尾數；如果有輸入小數點，才會精準呈現。
                 </div>
             </div>
             <div class="faq-item">
-                <div class="faq-question">既然網頁是免費的，我還需要買實體記帳本嗎？<i class="fas fa-chevron-down faq-icon"></i></div>
+                <div class="faq-question">這套系統需要綁定銀行帳戶嗎？我的財務隱私安全嗎？<i class="fas fa-chevron-down faq-icon"></i></div>
                 <div class="faq-answer">
-                    <strong>數位系統管大局，實體手帳管細節與儀式感！</strong><br><br>
-                    網頁能幫妳快速計算進度，但「書寫」的過程才是真正讓大腦冷靜、梳理思緒的魔法。我們的原創記帳本與質感書衣，能讓妳在睡前擁有最期待的獨處時光。虛實結合，才是拿回 100% 掌控權的最快捷徑！<br><br>
-                    👉 <a href="https://myship.7-11.com.tw/general/detail/GM2502152714662?utm_source=ig&utm_medium=social" target="_blank" style="color:var(--danger); font-weight:bold; text-decoration:underline;">點我立即逛逛實體工具</a>
+                    <strong>不需要綁定任何銀行，隱私 100% 掌握在妳手裡！</strong><br><br>
+                    所有記帳數據都採用 Web 本地端技術 (Local Storage)，只存放在妳自己的手機或電腦瀏覽器裡，不會上傳到任何外部伺服器。更棒的是，系統內建「一鍵匯出 Excel 報表」功能，隨時可以將資料備份到自己的裝置，拒絕資料綁架。
                 </div>
             </div>
         </div>
