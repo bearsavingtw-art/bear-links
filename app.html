@@ -1543,7 +1543,7 @@
         function deleteShopItem(id) { if(confirm('確定刪除這筆紀錄？')) { shoppingList = shoppingList.filter(i => i.id !== id); localStorage.setItem('bear_shopping_list', JSON.stringify(shoppingList)); renderShoppingList(); } }
         function updateCountdowns() { const timers = document.querySelectorAll('.timer-badge'); const now = Date.now(); timers.forEach(timer => { const diff = parseInt(timer.getAttribute('data-ts')) + (72 * 60 * 60 * 1000) - now; if (diff <= 0) { timer.innerText = "冷靜期結束"; timer.style.background = "#888"; } else { const h = Math.floor(diff / (1000 * 60 * 60)), m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)), s = Math.floor((diff % (1000 * 60)) / 1000); timer.innerText = `${h}h ${m}m ${s}s`; } }); }
 
-        // [NEW] Excel 報表匯出功能
+        // [NEW] Excel 報表匯出功能 (V5.0)
         function exportToExcel() {
             const currentCycle = getCycleBoundary(new Date(), sysSettings.cycleStart);
             const cycleTx = transactions.filter(t => { const tDate = new Date(t.date); tDate.setHours(0,0,0,0); return tDate >= currentCycle.start && tDate <= currentCycle.end; });
@@ -1567,46 +1567,67 @@
 
             let totalExp = fixedExp + varExp;
             let balance = totalInc - totalExp;
+            
+            let fixedPct = totalInc > 0 ? ((fixedExp / totalInc) * 100).toFixed(1) : 0;
+            let varPct = totalInc > 0 ? ((varExp / totalInc) * 100).toFixed(1) : 0;
+            let savePct = totalInc > 0 ? (((totalInc - totalExp) / totalInc) * 100).toFixed(1) : 0;
 
             let html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';
-            html += '<head><meta charset="utf-8"></head><body>';
-            html += '<table border="1" style="border-collapse: collapse; font-family: sans-serif;">';
+            html += '<head><meta charset="utf-8"><style>';
+            html += 'table { border-collapse: collapse; font-family: "Microsoft JhengHei", Arial, sans-serif; } ';
+            html += 'th, td { border: 1px solid #e0e0e0; padding: 10px; } ';
+            html += '.title-row { background-color: #5a4d41; color: #ffffff; font-size: 18pt; font-weight: bold; text-align: center; } ';
+            html += '.copyright-row { background-color: #fff2cc; color: #d32f2f; font-size: 10pt; font-weight: bold; text-align: center; } ';
+            html += '.header-row { background-color: #b08d85; color: #ffffff; font-size: 12pt; font-weight: bold; text-align: center; } ';
+            html += '.sub-header { background-color: #f3f3f3; font-weight: bold; text-align: center; } ';
+            html += '.num { text-align: right; } ';
+            html += '.highlight { color: #d32f2f; font-weight: bold; } ';
+            html += '.good { color: #2e7d32; font-weight: bold; } ';
+            html += '</style></head><body>';
+            html += '<table>';
             
-            // 標題與版權
-            html += `<tr><td colspan="4" style="background-color: #b08d85; color: #ffffff; font-size: 16pt; font-weight: bold; text-align: center; padding: 15px;">🐻 慢慢熊財務駕駛艙 - 總覽報表</td></tr>`;
-            html += `<tr><td colspan="4" style="background-color: #fff2cc; color: #d32f2f; font-size: 10pt; font-weight: bold; text-align: center; padding: 10px;">⚠️ 財務駕駛艙 (app.html all copyright 所有 bear.saving) - 嚴禁抄襲、轉售或商業用途。</td></tr>`;
-            html += `<tr><td colspan="4"></td></tr>`;
+            html += `<tr><td colspan="6" class="title-row">🐻 Bear.saving 財務駕駛艙 - ${currentCycle.label} 深度盤點報告</td></tr>`;
+            html += `<tr><td colspan="6" class="copyright-row">⚠️ 財務駕駛艙 ( app.html all copyright 所有 bear.saving )<br>嚴禁任何形式之轉售、公開散佈、複製、修改後再授權或用於商業用途，違者必究。</td></tr>`;
+            html += `<tr><td colspan="6"></td></tr>`;
 
-            // 1. 收支總覽
-            html += `<tr><td colspan="4" style="background-color: #5a4d41; color: #ffffff; font-weight: bold; text-align: center;">1. 本期收支總覽 (${currentCycle.label})</td></tr>`;
-            html += `<tr style="background-color: #fcfbf9;"><td colspan="2">本期總收入</td><td colspan="2" style="text-align: right; color: #81c784; font-weight: bold;">$${totalInc.toLocaleString()}</td></tr>`;
-            html += `<tr><td colspan="2">本期總支出 (固定+變動)</td><td colspan="2" style="text-align: right; color: #e57373; font-weight: bold;">$${totalExp.toLocaleString()}</td></tr>`;
-            html += `<tr style="background-color: #fcfbf9;"><td colspan="2">本期日常結餘</td><td colspan="2" style="text-align: right; color: #5a4d41; font-weight: bold;">$${balance.toLocaleString()}</td></tr>`;
-            html += `<tr><td colspan="4"></td></tr>`;
+            html += `<tr><td colspan="6" class="header-row">📊 核心儀表板 (Executive Summary)</td></tr>`;
+            html += `<tr class="sub-header"><td colspan="2">本期總收入</td><td colspan="2">本期總支出 (固定+變動)</td><td colspan="2">本期真實結餘</td></tr>`;
+            html += `<tr><td colspan="2" class="num" style="font-size: 16pt; color: #2e7d32; font-weight:bold;">$${totalInc.toLocaleString()}</td>`;
+            html += `<td colspan="2" class="num" style="font-size: 16pt; color: #d32f2f; font-weight:bold;">$${totalExp.toLocaleString()}</td>`;
+            html += `<td colspan="2" class="num" style="font-size: 16pt; color: #5a4d41; font-weight:bold;">$${balance.toLocaleString()}</td></tr>`;
+            html += `<tr><td colspan="6"></td></tr>`;
 
-            // 2. 預算執行狀況
-            html += `<tr><td colspan="4" style="background-color: #5a4d41; color: #ffffff; font-weight: bold; text-align: center;">2. 預算執行狀況</td></tr>`;
-            html += `<tr style="background-color: #eee; font-weight: bold;"><td>大分類</td><td>子分類</td><td>實際花費</td><td>預算上限</td></tr>`;
+            html += `<tr><td colspan="6" class="header-row">🩺 財務健康度自動診斷</td></tr>`;
+            html += `<tr class="sub-header"><td>項目</td><td>實際花費</td><td>佔收入比例</td><td>Bear 建議比例</td><td colspan="2">系統診斷與建議</td></tr>`;
+            
+            let fixedDiag = fixedPct > 60 ? "🚨 警訊：固定支出過高！生活容錯率低，請檢視訂閱與房租。" : "✅ 良好：生存基石穩固。";
+            html += `<tr><td>固定支出 (生存基石)</td><td class="num">$${fixedExp.toLocaleString()}</td><td class="num">${fixedPct}%</td><td class="num">50%</td><td colspan="2" style="color:${fixedPct>60?'#d32f2f':'#2e7d32'}; font-weight:bold;">${fixedDiag}</td></tr>`;
+            
+            let varDiag = varPct > 40 ? "⚠️ 警告：慾望花費超標！請啟動購物冷靜閘。" : "✅ 良好：生活品質與預算平衡。";
+            html += `<tr><td>變動支出 (慾望花費)</td><td class="num">$${varExp.toLocaleString()}</td><td class="num">${varPct}%</td><td class="num">30%</td><td colspan="2" style="color:${varPct>40?'#d32f2f':'#2e7d32'}; font-weight:bold;">${varDiag}</td></tr>`;
+            
+            let saveDiag = savePct < 10 ? "🛑 危險：儲蓄力不足！請從每天省下一杯飲料開始。" : "🏆 優秀：底氣持續累積中！";
+            html += `<tr><td>儲蓄與結餘 (未來底氣)</td><td class="num">$${balance.toLocaleString()}</td><td class="num">${savePct}%</td><td class="num">20%</td><td colspan="2" style="color:${savePct<10?'#d32f2f':'#2e7d32'}; font-weight:bold;">${saveDiag}</td></tr>`;
+            html += `<tr><td colspan="6"></td></tr>`;
+
+            html += `<tr><td colspan="6" class="header-row">🗂️ 10袋系統：預算執行穿透表</td></tr>`;
+            html += `<tr class="sub-header"><td>大分類</td><td>專屬存袋名稱</td><td>預算上限</td><td>實際花費</td><td>剩餘可用</td><td>狀態</td></tr>`;
             
             ['固定支出', '變動支出'].forEach(mainCat => {
                 if (userEnvelopes[mainCat] && userEnvelopes[mainCat].length > 0) {
                     userEnvelopes[mainCat].forEach(env => {
                         let b = budgets[env] || 0;
                         let s = envExp[env] || 0;
-                        html += `<tr><td>${mainCat}</td><td>${env}</td><td style="text-align: right; color: #e57373;">$${s.toLocaleString()}</td><td style="text-align: right;">$${b.toLocaleString()}</td></tr>`;
+                        let rem = b - s;
+                        let status = rem < 0 ? "🔥 超支" : "🟢 守住";
+                        html += `<tr><td>${mainCat}</td><td>${env}</td><td class="num">$${b.toLocaleString()}</td><td class="num highlight">$${s.toLocaleString()}</td><td class="num" style="color:${rem<0?'#d32f2f':'#5a4d41'}; font-weight:bold;">$${rem.toLocaleString()}</td><td style="text-align:center; font-weight:bold;">${status}</td></tr>`;
                     });
-                } else if (masterBudgets[mainCat] > 0) {
-                    let b = masterBudgets[mainCat] || 0;
-                    let s = mainCat === '固定支出' ? fixedExp : varExp;
-                    html += `<tr><td>${mainCat}</td><td>(未細分總額)</td><td style="text-align: right; color: #e57373;">$${s.toLocaleString()}</td><td style="text-align: right;">$${b.toLocaleString()}</td></tr>`;
                 }
             });
-            html += `<tr><td colspan="4"></td></tr>`;
+            html += `<tr><td colspan="6"></td></tr>`;
 
-            // 3. 年度預存金進度
-            html += `<tr><td colspan="4" style="background-color: #5a4d41; color: #ffffff; font-weight: bold; text-align: center;">3. 年度預存資金池狀態</td></tr>`;
-            html += `<tr style="background-color: #eee; font-weight: bold;"><td>預存目標</td><td>年度總目標</td><td>已存入水位</td><td>花費明細</td></tr>`;
-            
+            html += `<tr><td colspan="6" class="header-row">🎯 預存金 (Sinking Funds) 水位追蹤</td></tr>`;
+            html += `<tr class="sub-header"><td colspan="2">預存目標名稱</td><td>年度總目標</td><td>歷史累積存入</td><td>歷史累積花費</td><td>目前水位 (安全感)</td></tr>`;
             let hasSinking = false;
             if (userEnvelopes['預存支出'] && userEnvelopes['預存支出'].length > 0) {
                 userEnvelopes['預存支出'].forEach(env => {
@@ -1623,23 +1644,27 @@
                     if(current < 0) current = 0;
                     if (goal > 0 || current > 0) {
                         hasSinking = true;
-                        html += `<tr><td>${env}</td><td style="text-align: right;">$${goal.toLocaleString()}</td><td style="text-align: right; color: #d4a373; font-weight: bold;">$${current.toLocaleString()}</td><td style="text-align: right;">-$${spent.toLocaleString()}</td></tr>`;
+                        html += `<tr><td colspan="2">${env}</td><td class="num">$${goal.toLocaleString()}</td><td class="num">$${(init+saved).toLocaleString()}</td><td class="num" style="color:#e57373;">-$${spent.toLocaleString()}</td><td class="num" style="color:#b08d85; font-weight:bold;">$${current.toLocaleString()}</td></tr>`;
                     }
                 });
             }
-            if(!hasSinking) html += `<tr><td colspan="4" style="text-align:center; color:#999;">尚未建立預存目標</td></tr>`;
-            html += `<tr><td colspan="4"></td></tr>`;
+            if(!hasSinking) html += `<tr><td colspan="6" style="text-align:center; color:#999;">尚未建立預存目標</td></tr>`;
+            html += `<tr><td colspan="6"></td></tr>`;
 
-            // 4. 債務雪球進度
-            html += `<tr><td colspan="4" style="background-color: #5a4d41; color: #ffffff; font-weight: bold; text-align: center;">4. 債務雪球進度</td></tr>`;
-            html += `<tr style="background-color: #eee; font-weight: bold;"><td>債務名稱</td><td>初始總額</td><td>目前剩餘欠款</td><td>每月還款</td></tr>`;
+            html += `<tr><td colspan="6" class="header-row">❄️ 負債雪球倒數與打卡紀錄</td></tr>`;
+            html += `<tr class="sub-header"><td>債務名稱</td><td>初始總額</td><td>目前剩餘欠款</td><td>每月還款</td><td>推估剩餘期數</td><td>狀態</td></tr>`;
             
             if (userDebts && userDebts.length > 0) {
                 userDebts.forEach(d => {
-                    html += `<tr><td>${d.name}</td><td style="text-align: right;">$${d.initial.toLocaleString()}</td><td style="text-align: right; color: #e57373; font-weight: bold;">$${d.current.toLocaleString()}</td><td style="text-align: right;">$${d.monthly.toLocaleString()}</td></tr>`;
+                    let remTerms = calculateRemainingTerms(d.current, d.monthly, d.rate, d.calcType);
+                    let termStr = remTerms > 0 ? `${remTerms} 期` : (remTerms === 0 ? "已結清" : "計算異常");
+                    let isPaidThisMonth = (d.lastPaidMonth === `${new Date().getFullYear()}-${new Date().getMonth() + 1}`);
+                    let paidStr = isPaidThisMonth ? "✅ 本月已打卡" : "⏳ 尚未打卡";
+                    
+                    html += `<tr><td>${d.name}</td><td class="num">$${d.initial.toLocaleString()}</td><td class="num highlight">$${d.current.toLocaleString()}</td><td class="num">$${d.monthly.toLocaleString()}</td><td class="num" style="font-weight:bold;">${termStr}</td><td style="text-align:center; font-weight:bold;">${paidStr}</td></tr>`;
                 });
             } else {
-                html += `<tr><td colspan="4" style="text-align:center; color:#999;">目前無負債紀錄，太棒了！</td></tr>`;
+                html += `<tr><td colspan="6" style="text-align:center; color:#999;">目前無負債紀錄，太棒了！</td></tr>`;
             }
 
             html += '</table></body></html>';
@@ -1647,7 +1672,7 @@
             const blob = new Blob([html], {type: 'application/vnd.ms-excel'});
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
-            link.download = `Bear財務報表_${currentCycle.label}.xls`;
+            link.download = `Bear財務駕駛艙_月報表_${currentCycle.label}.xls`;
             link.click();
         }
 
