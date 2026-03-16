@@ -211,7 +211,7 @@
 
     <header>
         <h1>Bear.saving</h1>
-        <div style="font-size:0.8rem; color:var(--text-secondary);">Financial Cockpit v4.9.6 (Smart Debt Update)</div>
+        <div style="font-size:0.8rem; color:var(--text-secondary);">Financial Cockpit v5.0 (Excel Export)</div>
     </header>
 
     <div id="page-dash" class="page active">
@@ -460,9 +460,12 @@
         </div>
 
         <div class="card">
-            <div class="card-title">資料備份</div>
-            <button class="btn btn-outline" onclick="exportData()"><i class="fas fa-download"></i> 下載備份 (JSON)</button>
-            <button class="btn btn-outline" onclick="document.getElementById('import-file').click()"><i class="fas fa-upload"></i> 匯入備份</button>
+            <div class="card-title">資料備份與報表匯出</div>
+            <button class="btn btn-outline" style="border-color:var(--success); color:var(--success); margin-bottom:10px;" onclick="exportToExcel()"><i class="fas fa-file-excel"></i> 匯出專屬月報表 (Excel)</button>
+            <div style="display:flex; gap:10px;">
+                <button class="btn btn-outline" style="flex:1; margin-top:0;" onclick="exportData()"><i class="fas fa-download"></i> 系統備份 (JSON)</button>
+                <button class="btn btn-outline" style="flex:1; margin-top:0;" onclick="document.getElementById('import-file').click()"><i class="fas fa-upload"></i> 匯入備份</button>
+            </div>
             <input type="file" id="import-file" style="display:none;" onchange="importData(this)">
             <button class="btn btn-outline" style="border-color:#e57373; color:#e57373;" onclick="clearData()"><i class="fas fa-trash"></i> 清空資料</button>
         </div>
@@ -1224,7 +1227,6 @@
         function toggleNwDetails(type) { const container = document.getElementById(`nw-details-${type}`); container.classList.toggle('hidden'); if(!container.classList.contains('hidden') && document.getElementById(`nw-list-${type}`).children.length === 0) { addNwDetailRow(type); } }
         function sumNwDetails(type) { const vals = document.querySelectorAll(`.nw-dtl-val-${type}`); let total = 0; vals.forEach(input => { total += parseFloat(input.value) || 0; }); const mainInput = document.getElementById(`nw-input-${type}`); mainInput.value = total; if(vals.length === 0) { mainInput.readOnly = false; } else { mainInput.readOnly = true; } }
 
-        // [NEW] 處理利率類型選項的動態註解
         function updateDebtFields() {
             const type = document.getElementById('debt-calc-type').value;
             const rateGroup = document.getElementById('group-debt-rate');
@@ -1379,7 +1381,7 @@
                         <div style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:4px;">剩餘本金 <span style="color:var(--danger); font-weight:bold;">$${formatMoney(debt.current)}</span> / 總額 $${formatMoney(debt.initial)}</div>
                         ${termsDisplay}
                         <div class="snowball-track"><div class="snowball-fill ${isDone ? 'done' : ''}" style="width:${progress}%;"><div class="snowball-icon">${isDone ? '🎉' : '🐻‍❄️'}</div></div><div class="${textClass}">${progress.toFixed(1)}%</div></div>
-                        <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-top:5px;">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-end;">
                             ${repayBtnHtml}
                             <div style="font-size:0.8rem; color:var(--text-primary);"><span>${timeLeftStr}</span></div>
                         </div>
@@ -1498,7 +1500,7 @@
                 document.getElementById('debt-pay-date').value = ''; 
                 document.getElementById('debt-delete-btn-container').style.display = 'none'; 
             } 
-            updateDebtFields(); // 初始化時呼叫一次以顯示正確註解
+            updateDebtFields(); 
         }
         
         function closeDebtForm() { document.getElementById('debt-form-modal').classList.remove('show'); }
@@ -1540,6 +1542,114 @@
         function renderShoppingList() { const listContainer = document.getElementById('shop-list-content'); if(!listContainer) return; if(shoppingList.length === 0) { listContainer.innerHTML = '<div style="text-align:center; padding:15px; color:#999; font-size:0.9rem;">目前沒有購物評估紀錄</div>'; return; } listContainer.innerHTML = ''; shoppingList.forEach(item => { let badgeClass = '', badgeText = '', timerHtml = ''; if (item.result === 'pass') { badgeClass = 'status-pass'; badgeText = '通過 ✅'; } else if (item.result === 'wait') { badgeClass = 'status-wait'; badgeText = '冷靜 ⏳'; timerHtml = `<div class="timer-badge" data-ts="${item.timestamp}">計算中...</div>`; } else { badgeClass = 'status-stop'; badgeText = '駁回 🛑'; } listContainer.innerHTML += `<div class="shop-list-item"><div class="shop-info"><div class="shop-name">${item.name} <span style="font-size:0.8rem; font-weight:400;">$${formatMoney(item.price)}</span></div><div class="shop-meta">工時: ${item.costHour}hr ${timerHtml}</div></div><div style="display:flex; align-items:center;"><span class="shop-status ${badgeClass}">${badgeText}</span><i class="fas fa-trash delete-btn" style="margin-left:15px;" onclick="deleteShopItem(${item.id})"></i></div></div>`; }); updateCountdowns(); }
         function deleteShopItem(id) { if(confirm('確定刪除這筆紀錄？')) { shoppingList = shoppingList.filter(i => i.id !== id); localStorage.setItem('bear_shopping_list', JSON.stringify(shoppingList)); renderShoppingList(); } }
         function updateCountdowns() { const timers = document.querySelectorAll('.timer-badge'); const now = Date.now(); timers.forEach(timer => { const diff = parseInt(timer.getAttribute('data-ts')) + (72 * 60 * 60 * 1000) - now; if (diff <= 0) { timer.innerText = "冷靜期結束"; timer.style.background = "#888"; } else { const h = Math.floor(diff / (1000 * 60 * 60)), m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)), s = Math.floor((diff % (1000 * 60)) / 1000); timer.innerText = `${h}h ${m}m ${s}s`; } }); }
+
+        // [NEW] Excel 報表匯出功能
+        function exportToExcel() {
+            const currentCycle = getCycleBoundary(new Date(), sysSettings.cycleStart);
+            const cycleTx = transactions.filter(t => { const tDate = new Date(t.date); tDate.setHours(0,0,0,0); return tDate >= currentCycle.start && tDate <= currentCycle.end; });
+            
+            let totalInc = 0, fixedExp = 0, varExp = 0, saveExp = 0;
+            let envExp = {};
+            
+            cycleTx.forEach(t => { 
+                if (t.type === 'income') totalInc += t.amount; 
+                else if (t.type === 'expense') {
+                    if (t.mainCategory === '固定支出') fixedExp += t.amount;
+                    else if (t.mainCategory === '變動支出') varExp += t.amount;
+                    
+                    if (!envExp[t.category]) envExp[t.category] = 0;
+                    envExp[t.category] += t.amount;
+                }
+                else if (t.type === 'save') {
+                    saveExp += t.amount;
+                }
+            });
+
+            let totalExp = fixedExp + varExp;
+            let balance = totalInc - totalExp;
+
+            let html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';
+            html += '<head><meta charset="utf-8"></head><body>';
+            html += '<table border="1" style="border-collapse: collapse; font-family: sans-serif;">';
+            
+            // 標題與版權
+            html += `<tr><td colspan="4" style="background-color: #b08d85; color: #ffffff; font-size: 16pt; font-weight: bold; text-align: center; padding: 15px;">🐻 慢慢熊財務駕駛艙 - 總覽報表</td></tr>`;
+            html += `<tr><td colspan="4" style="background-color: #fff2cc; color: #d32f2f; font-size: 10pt; font-weight: bold; text-align: center; padding: 10px;">⚠️ 財務駕駛艙 (app.html all copyright 所有 bear.saving) - 嚴禁抄襲、轉售或商業用途。</td></tr>`;
+            html += `<tr><td colspan="4"></td></tr>`;
+
+            // 1. 收支總覽
+            html += `<tr><td colspan="4" style="background-color: #5a4d41; color: #ffffff; font-weight: bold; text-align: center;">1. 本期收支總覽 (${currentCycle.label})</td></tr>`;
+            html += `<tr style="background-color: #fcfbf9;"><td colspan="2">本期總收入</td><td colspan="2" style="text-align: right; color: #81c784; font-weight: bold;">$${totalInc.toLocaleString()}</td></tr>`;
+            html += `<tr><td colspan="2">本期總支出 (固定+變動)</td><td colspan="2" style="text-align: right; color: #e57373; font-weight: bold;">$${totalExp.toLocaleString()}</td></tr>`;
+            html += `<tr style="background-color: #fcfbf9;"><td colspan="2">本期日常結餘</td><td colspan="2" style="text-align: right; color: #5a4d41; font-weight: bold;">$${balance.toLocaleString()}</td></tr>`;
+            html += `<tr><td colspan="4"></td></tr>`;
+
+            // 2. 預算執行狀況
+            html += `<tr><td colspan="4" style="background-color: #5a4d41; color: #ffffff; font-weight: bold; text-align: center;">2. 預算執行狀況</td></tr>`;
+            html += `<tr style="background-color: #eee; font-weight: bold;"><td>大分類</td><td>子分類</td><td>實際花費</td><td>預算上限</td></tr>`;
+            
+            ['固定支出', '變動支出'].forEach(mainCat => {
+                if (userEnvelopes[mainCat] && userEnvelopes[mainCat].length > 0) {
+                    userEnvelopes[mainCat].forEach(env => {
+                        let b = budgets[env] || 0;
+                        let s = envExp[env] || 0;
+                        html += `<tr><td>${mainCat}</td><td>${env}</td><td style="text-align: right; color: #e57373;">$${s.toLocaleString()}</td><td style="text-align: right;">$${b.toLocaleString()}</td></tr>`;
+                    });
+                } else if (masterBudgets[mainCat] > 0) {
+                    let b = masterBudgets[mainCat] || 0;
+                    let s = mainCat === '固定支出' ? fixedExp : varExp;
+                    html += `<tr><td>${mainCat}</td><td>(未細分總額)</td><td style="text-align: right; color: #e57373;">$${s.toLocaleString()}</td><td style="text-align: right;">$${b.toLocaleString()}</td></tr>`;
+                }
+            });
+            html += `<tr><td colspan="4"></td></tr>`;
+
+            // 3. 年度預存金進度
+            html += `<tr><td colspan="4" style="background-color: #5a4d41; color: #ffffff; font-weight: bold; text-align: center;">3. 年度預存資金池狀態</td></tr>`;
+            html += `<tr style="background-color: #eee; font-weight: bold;"><td>預存目標</td><td>年度總目標</td><td>已存入水位</td><td>花費明細</td></tr>`;
+            
+            let hasSinking = false;
+            if (userEnvelopes['預存支出'] && userEnvelopes['預存支出'].length > 0) {
+                userEnvelopes['預存支出'].forEach(env => {
+                    let goal = yearlyGoals[env] || 0;
+                    let init = initSaved[env] || 0;
+                    let saved = 0, spent = 0;
+                    transactions.forEach(t => {
+                        if(t.category === env) {
+                            if(t.type === 'save') saved += t.amount;
+                            if(t.type === 'expense' && t.mainCategory === '預存支出') spent += t.amount;
+                        }
+                    });
+                    let current = init + saved - spent;
+                    if(current < 0) current = 0;
+                    if (goal > 0 || current > 0) {
+                        hasSinking = true;
+                        html += `<tr><td>${env}</td><td style="text-align: right;">$${goal.toLocaleString()}</td><td style="text-align: right; color: #d4a373; font-weight: bold;">$${current.toLocaleString()}</td><td style="text-align: right;">-$${spent.toLocaleString()}</td></tr>`;
+                    }
+                });
+            }
+            if(!hasSinking) html += `<tr><td colspan="4" style="text-align:center; color:#999;">尚未建立預存目標</td></tr>`;
+            html += `<tr><td colspan="4"></td></tr>`;
+
+            // 4. 債務雪球進度
+            html += `<tr><td colspan="4" style="background-color: #5a4d41; color: #ffffff; font-weight: bold; text-align: center;">4. 債務雪球進度</td></tr>`;
+            html += `<tr style="background-color: #eee; font-weight: bold;"><td>債務名稱</td><td>初始總額</td><td>目前剩餘欠款</td><td>每月還款</td></tr>`;
+            
+            if (userDebts && userDebts.length > 0) {
+                userDebts.forEach(d => {
+                    html += `<tr><td>${d.name}</td><td style="text-align: right;">$${d.initial.toLocaleString()}</td><td style="text-align: right; color: #e57373; font-weight: bold;">$${d.current.toLocaleString()}</td><td style="text-align: right;">$${d.monthly.toLocaleString()}</td></tr>`;
+                });
+            } else {
+                html += `<tr><td colspan="4" style="text-align:center; color:#999;">目前無負債紀錄，太棒了！</td></tr>`;
+            }
+
+            html += '</table></body></html>';
+            
+            const blob = new Blob([html], {type: 'application/vnd.ms-excel'});
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `Bear財務報表_${currentCycle.label}.xls`;
+            link.click();
+        }
 
         function exportData() { const data = { tx: transactions, budget: budgets, shop: shoppingList, networth: netWorthData, settings: sysSettings, envelopes: userEnvelopes, debts: userDebts, yearlyGoals: yearlyGoals, initSaved: initSaved, masterBudgets: masterBudgets, monthlySavedPlans: monthlySavedPlans }; const blob = new Blob([JSON.stringify(data)], {type: "text/json"}); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = "bear_backup_" + new Date().toISOString().slice(0,10) + ".json"; link.click(); }
         function importData(input) { const reader = new FileReader(); reader.onload = function(e) { try { const data = JSON.parse(e.target.result); if (Array.isArray(data)) { transactions = data; } else { transactions = data.tx || []; budgets = data.budget || {}; shoppingList = data.shop || []; netWorthData = data.networth || []; sysSettings = data.settings || { cycleStart: 1 }; userEnvelopes = data.envelopes || null; userDebts = data.debts || []; yearlyGoals = data.yearlyGoals || {}; initSaved = data.initSaved || {}; masterBudgets = data.masterBudgets || { '固定支出': 0, '變動支出': 0, '預存支出': 0 }; monthlySavedPlans = data.monthlySavedPlans || {}; } localStorage.setItem('bear_transactions', JSON.stringify(transactions)); localStorage.setItem('bear_budgets', JSON.stringify(budgets)); localStorage.setItem('bear_shopping_list', JSON.stringify(shoppingList)); localStorage.setItem('bear_networth', JSON.stringify(netWorthData)); localStorage.setItem('bear_sys_settings', JSON.stringify(sysSettings)); if(userEnvelopes) localStorage.setItem('bear_custom_envelopes', JSON.stringify(userEnvelopes)); localStorage.setItem('bear_debts_tracker', JSON.stringify(userDebts)); localStorage.setItem('bear_yearly_goals', JSON.stringify(yearlyGoals)); localStorage.setItem('bear_init_saved', JSON.stringify(initSaved)); localStorage.setItem('bear_master_budgets', JSON.stringify(masterBudgets)); localStorage.setItem('bear_monthly_saved_plans', JSON.stringify(monthlySavedPlans)); alert('匯入成功！'); location.reload(); } catch(err) { alert('檔案錯誤'); } }; reader.readAsText(input.files[0]); }
