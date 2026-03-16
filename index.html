@@ -82,11 +82,13 @@
             object-fit: cover; z-index: -1; filter: brightness(0.9);
         }
         .hero-content { opacity: 0; transform: translateY(30px); animation: fadeUp 1.5s ease forwards 0.5s; padding: 20px; }
+        
+        /* [復原] 首屏英文標題與原版小字 */
         .hero h1 {
-            font-family: 'Noto Serif TC', serif; font-size: 2.2rem; color: #fff;
-            margin-bottom: 15px; text-shadow: 0 2px 10px rgba(0,0,0,0.2); letter-spacing: 1px; line-height: 1.4; font-weight: 700;
+            font-family: 'Playfair Display', serif; font-size: 2.5rem; color: #fff;
+            margin-bottom: 10px; text-shadow: 0 2px 10px rgba(0,0,0,0.2); letter-spacing: 1px;
         }
-        .hero p { color: rgba(255,255,255,0.95); font-size: 0.95rem; margin-bottom: 35px; font-weight: 400; line-height: 1.8; max-width: 600px; margin-left: auto; margin-right: auto;}
+        .hero p { color: rgba(255,255,255,0.95); font-size: 1rem; margin-bottom: 35px; font-weight: 400; }
 
         .btn-elegant {
             display: inline-block; padding: 14px 35px;
@@ -105,6 +107,20 @@
         .scroll-indicator span { font-size: 0.85rem; letter-spacing: 1px; font-family: 'Noto Serif TC', serif; text-shadow: 0 2px 5px rgba(0,0,0,0.3); }
         .scroll-indicator i { margin-top: 8px; font-size: 1.2rem; opacity: 0.8; text-shadow: 0 2px 5px rgba(0,0,0,0.3); }
         @keyframes bounce { 0%, 20%, 50%, 80%, 100% { transform: translateY(0) translateX(-50%); } 40% { transform: translateY(-10px) translateX(-50%); } 60% { transform: translateY(-5px) translateX(-50%); } }
+
+        /* 點擊提示閃爍動畫 */
+        @keyframes pulseAlert {
+            0% { transform: scale(1); box-shadow: 0 4px 10px rgba(176,141,133,0.3); }
+            50% { transform: scale(1.05); box-shadow: 0 6px 15px rgba(176,141,133,0.5); }
+            100% { transform: scale(1); box-shadow: 0 4px 10px rgba(176,141,133,0.3); }
+        }
+        .click-alert-badge {
+            display: inline-block;
+            background: var(--accent); color: white;
+            padding: 6px 20px; border-radius: 20px;
+            font-size: 0.9rem; font-weight: 600; letter-spacing: 1px;
+            animation: pulseAlert 2s infinite; margin-bottom: 15px;
+        }
 
         /* 通用區塊 */
         .section { padding: 80px 20px; max-width: 900px; margin: 0 auto; text-align: center; }
@@ -131,6 +147,16 @@
         .news-title-text { font-weight: 600; display: block; margin-bottom: 3px; color: var(--text-primary); }
         .news-desc { font-size: 0.9rem; color: var(--text-secondary); }
         .news-item-support { background: rgba(229, 115, 115, 0.05); border: 1px solid #ffebee; border-left: 4px solid var(--danger); padding: 15px; border-radius: 8px; }
+
+        /* 引言聲明區塊 (轉移過來的霸氣宣言) */
+        .statement-box {
+            background: linear-gradient(135deg, rgba(176, 141, 133, 0.05) 0%, rgba(252, 251, 249, 1) 100%);
+            border: 1px dashed rgba(176, 141, 133, 0.3);
+            border-radius: 20px; padding: 40px 25px; text-align: center;
+            max-width: 700px; margin: 0 auto; box-shadow: 0 10px 30px rgba(0,0,0,0.02);
+        }
+        .statement-title { font-size: 1.3rem; font-weight: 700; color: var(--text-primary); margin-bottom: 15px; line-height: 1.5; }
+        .statement-desc { font-size: 0.95rem; color: var(--text-secondary); line-height: 1.8; }
 
         /* The Bear System (底氣三部曲) */
         .system-trilogy { display: flex; flex-direction: column; gap: 20px; max-width: 700px; margin: 0 auto; }
@@ -276,10 +302,10 @@
             <source src="hero.mp4" type="video/mp4">
         </video>
         <div class="hero-content">
-            <h1>拒絕無效記帳。<br>奪回財務掌控權。</h1>
-            <p>Bear 財務駕駛艙 v5.1 跨海升級版 🚀<br>這不是一本讓妳越記越焦慮的流水帳。這是一套內建「衝動防呆」、「預存鎖定」與「雪球還債」的自動化財務防禦系統。幫助妳在微退休的路上，走得比別人更有底氣。</p>
-            <a href="app.html" class="btn-elegant">
-                立即啟動我的駕駛艙 <i class="fas fa-arrow-right" style="margin-left:8px; font-size:0.8em;"></i>
+            <h1>Make Ordinary<br>Life Confident.</h1>
+            <p>在理財的邏輯裡，找回生活的餘裕。</p>
+            <a href="https://myship.7-11.com.tw/general/detail/GM2502152714662?utm_source=ig&utm_medium=social" target="_blank" class="btn-elegant">
+                點我！前往存錢工具賣場 <i class="fas fa-arrow-right" style="margin-left:8px; font-size:0.8em;"></i>
             </a>
         </div>
         <div class="scroll-indicator">
@@ -302,7 +328,7 @@
                 <i class="fas fa-book news-icon"></i>
                 <div>
                     <span class="news-title-text">原創記帳本</span>
-                    <span class="news-desc">已售完，年後印刷中，預計 <strong>3月底~4月初</strong> 補貨上架！</span>
+                    <span class="news-desc">已售完，年後印刷中，預計 <strong>3月中</strong> 補貨上架！</span>
                 </div>
             </div>
             <div class="news-item">
@@ -312,18 +338,30 @@
                     <span class="news-desc">
                         • (常態販售書衣) <strong>預購中</strong><br>
                         • (期間限定黑/奶油愛心) 現貨：約 <strong>3月底</strong> 補貨<br>
-                        • (新品) 迷你書衣❤兔兔小花：3月底補貨<br>
+                        • (新品) 迷你書衣❤兔兔小花：3月中補貨<br>
                     </span>
                 </div>
             </div>
             <div class="news-item">
                 <i class="fas fa-bag-shopping news-icon"></i>
                 <div>
-                    <span class="news-title-text">真皮包 / 錢包團購</span>
-                    <span class="news-desc">3/14團購結束! 下一團請鎖定 IG 限動!<br>
+                    <span class="news-title-text">真皮包 / 錢包快閃團</span>
+                    <span class="news-desc">現貨米白/大象灰快閃團開放中! 售完為止。<br>3月中預購團(肩背包等)請鎖定 IG 限動。<br>
                     <a href="https://www.instagram.com/bear.saving/" target="_blank" style="color:var(--accent); text-decoration: underline;">👉 點此追蹤 IG 不漏接</a>
                     </span>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section fade-in" style="padding-top: 50px; padding-bottom: 20px;">
+        <div class="statement-box">
+            <div class="statement-title">拒絕無效記帳。<br>奪回財務掌控權。</div>
+            <div class="statement-desc">
+                Bear 財務駕駛艙 v5.1 跨海升級版 🚀<br><br>
+                這不是一本讓妳越記越焦慮的流水帳。<br>
+                這是一套內建「衝動防呆」、「預存鎖定」與「雪球還債」的自動化財務防禦系統。<br>
+                幫助妳在微退休的路上，走得比別人更有底氣。
             </div>
         </div>
     </section>
@@ -418,6 +456,12 @@
                 <div class="feature-title">專屬 Excel 報表一鍵匯出</div>
                 <div class="feature-desc">一鍵秒生當月精美報表，內建財務健康度自動診斷與 10 袋預算穿透表，資料自己完全掌握。</div>
             </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 40px; margin-bottom: 20px;">
+            <span class="click-alert-badge">
+                👇 以下可以點擊！快點我 👇
+            </span>
         </div>
 
         <a href="rocket.html" class="service-card" style="border-color: var(--accent); background: #fdfbf7;">
