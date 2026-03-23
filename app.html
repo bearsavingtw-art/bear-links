@@ -450,7 +450,7 @@
         </div>
 
         <div class="card">
-            <div class="card-title">預算與目標設定 (Max: 10袋)</div>
+            <div class="card-title">預算與目標設定 (Max: 15袋)</div>
             <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:0;">* 點擊文字框可自訂專屬名稱。<br>* 若想刪除請點擊垃圾桶（刪光為0袋時，代表該大類不細分，可直接設定總預算）。</p>
             
             <div id="budget-settings-container"></div>
@@ -787,9 +787,9 @@
                         </div>`;
                     });
                 }
-                if (totalBags < 10) { container.innerHTML += `<div style="text-align:right;"><span class="btn-add-detail" onclick="addNewEnvelope('${mainCat}')">+ 新增 ${mainCat} 分類</span></div>`; }
+                if (totalBags < 15) { container.innerHTML += `<div style="text-align:right;"><span class="btn-add-detail" onclick="addNewEnvelope('${mainCat}')">+ 新增 ${mainCat} 分類</span></div>`; }
             }
-            if (totalBags >= 10) { container.innerHTML += `<div style="text-align:center; color:var(--danger); font-size:0.85rem; margin-top:20px; padding:10px; background:#ffebee; border-radius:8px;">⚠️ 總分類已達 10 袋上限，請先刪除不使用的分類才能新增。</div>`; }
+            if (totalBags >= 10) { container.innerHTML += `<div style="text-align:center; color:var(--danger); font-size:0.85rem; margin-top:20px; padding:10px; background:#ffebee; border-radius:8px;">⚠️ 總分類已達 15 袋上限，請先刪除不使用的分類才能新增。</div>`; }
             
             if(userEnvelopes['預存支出']) {
                 userEnvelopes['預存支出'].forEach((env, i) => updateAutoCalc('預存支出', i));
@@ -827,7 +827,7 @@
         function saveMasterBudget(mainCat) { const val = parseFloat(document.getElementById(`master-budget-${mainCat}`).value) || 0; masterBudgets[mainCat] = val; localStorage.setItem('bear_master_budgets', JSON.stringify(masterBudgets)); }
 
         function addNewEnvelope(mainCat) {
-            if (getTotalEnvelopesCount() >= 10) return alert('已達 10 袋上限！');
+            if (getTotalEnvelopesCount() >= 15) return alert('已達 15 袋上限！');
             const newName = prompt(`請輸入新的「${mainCat}」分類名稱：`);
             if (newName && newName.trim()) {
                 const name = newName.trim(); let isDup = false; for (let cat in userEnvelopes) { if (userEnvelopes[cat].includes(name)) isDup = true; }
@@ -1617,7 +1617,7 @@
             html += `<tr><td>儲蓄與結餘 (未來底氣)</td><td class="num">$${balance.toLocaleString()}</td><td class="num">${savePct}%</td><td class="num">20%</td><td colspan="2" style="color:${savePct<10?'#d32f2f':'#2e7d32'}; font-weight:bold;">${saveDiag}</td></tr>`;
             html += `<tr><td colspan="6" style="height: 20px;"></td></tr>`;
 
-            html += `<tr class="header-row"><td colspan="6">🗂️ 10袋系統：預算執行穿透表</td></tr>`;
+            html += `<tr class="header-row"><td colspan="6">🗂️ 專屬存袋系統：預算執行穿透表</td></tr>`;
             html += `<tr class="sub-header"><td>大分類</td><td>專屬存袋名稱</td><td>預算上限</td><td>實際花費</td><td>剩餘可用</td><td>狀態</td></tr>`;
             ['固定支出', '變動支出'].forEach(mainCat => {
                 if (userEnvelopes[mainCat] && userEnvelopes[mainCat].length > 0) {
@@ -1712,7 +1712,7 @@
             csvContent += "1. 核心儀表板\n本期總收入,本期總支出,本期真實結餘\n";
             csvContent += `${totalInc},${totalExp},${balance}\n\n`;
 
-            csvContent += "2. 10袋系統：預算執行穿透表\n大分類,專屬存袋名稱,預算上限,實際花費,剩餘可用\n";
+            csvContent += "2. 專屬存袋系統：預算執行穿透表\n大分類,專屬存袋名稱,預算上限,實際花費,剩餘可用\n";
             ['固定支出', '變動支出'].forEach(mainCat => {
                 if (userEnvelopes[mainCat] && userEnvelopes[mainCat].length > 0) {
                     userEnvelopes[mainCat].forEach(env => {
