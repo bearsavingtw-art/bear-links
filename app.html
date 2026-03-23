@@ -789,7 +789,7 @@
                 }
                 if (totalBags < 15) { container.innerHTML += `<div style="text-align:right;"><span class="btn-add-detail" onclick="addNewEnvelope('${mainCat}')">+ 新增 ${mainCat} 分類</span></div>`; }
             }
-            if (totalBags >= 10) { container.innerHTML += `<div style="text-align:center; color:var(--danger); font-size:0.85rem; margin-top:20px; padding:10px; background:#ffebee; border-radius:8px;">⚠️ 總分類已達 15 袋上限，請先刪除不使用的分類才能新增。</div>`; }
+            if (totalBags >= 15) { container.innerHTML += `<div style="text-align:center; color:var(--danger); font-size:0.85rem; margin-top:20px; padding:10px; background:#ffebee; border-radius:8px;">⚠️ 總分類已達 15 袋上限，請先刪除不使用的分類才能新增。</div>`; }
             
             if(userEnvelopes['預存支出']) {
                 userEnvelopes['預存支出'].forEach((env, i) => updateAutoCalc('預存支出', i));
