@@ -549,6 +549,7 @@
         </div>
     </div>
     <div id="guide-modal" class="modal-overlay">
+        <div id="guide-modal" class="modal-overlay">
         <div class="modal-content" style="max-height: 85vh; overflow-y: auto; background: #fdfbf7;">
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 15px;">
                 <h3 style="margin:0; color:var(--text-primary);"><i class="fas fa-book-open" style="color:var(--accent);"></i> 駕駛艙使用指南</h3>
@@ -558,36 +559,32 @@
             <div style="font-size: 0.9rem; line-height: 1.6; color: var(--text-secondary);">
                 <p style="margin-top:0;">這不是一本讓妳越記越焦慮的流水帳，而是一套內建防呆機制的自動化系統。</p>
                 
-                <h4 style="color:var(--text-primary); border-left:3px solid var(--accent); padding-left:8px; margin-top:20px;">階段一：初始設定（打造專屬防禦陣地）</h4>
+                <h4 style="color:var(--text-primary); border-left:3px solid var(--accent); padding-left:8px; margin-top:20px;">第一步：設定專屬財務週期</h4>
                 <ul style="padding-left:20px; margin-bottom:15px;">
-                    <li>「設定專屬財務週期」：請打破每月 1 號記到月底的迷思。請至底部的「設定」，直接將發薪日設定為週期的第一天。</li>
+                    <li>「設定專屬發薪日」：請打破每月 1 號記到月底的迷思。請至底部的「設定」，直接將發薪日設定為週期的第一天。</li>
+                    <li>「自由業專用發薪日」：若是自由業或領薪時間不固定的人，請自己設定一個屬於自己的領薪日期。收入都先放到蓄水池內，時間到了再自己固定發薪水給自己。</li>
+                </ul>
+
+                <h4 style="color:var(--text-primary); border-left:3px solid var(--accent); padding-left:8px; margin-top:20px;">第二步：設定預算與存袋</h4>
+                <ul style="padding-left:20px; margin-bottom:15px;">
                     <li>「自訂專屬存袋」：請依照在財務診斷室算出的結果，把預算分配建立起來。</li>
+                    <li>「預存支出防呆機制」：如何設定年繳保費或年度大筆支出？請在「預存支出」區塊新增存袋，填寫「年度總目標」金額。接著在十二宮格分配 1~12 月預定存入金額，已經存的就填上數字，進度條就會跑動了！</li>
+                    <li>「控制分類數量」：請控制所有分類不超過 15 類，固定支出與變動支出建議控制在「10類以內」，記帳復盤才不會眼花撩亂。</li>
                 </ul>
+                <a href="https://bearsavingtw-art.github.io/bear-links/envelopes.html" target="_blank" class="btn-outline" style="display:inline-block; text-align:center; padding:8px 15px; font-size:0.85rem; margin-bottom:15px; width:100%; text-decoration:none;"><i class="fas fa-envelope-open-text"></i> 不知道怎麼分？參考 10 袋分配邏輯</a>
 
-                <h4 style="color:var(--text-primary); border-left:3px solid var(--accent); padding-left:8px; margin-top:20px;">階段二：日常無腦操作（讓記帳變成反射動作）</h4>
+                <h4 style="color:var(--text-primary); border-left:3px solid var(--accent); padding-left:8px; margin-top:20px;">第三步：開始記帳與日常操作</h4>
                 <ul style="padding-left:20px; margin-bottom:15px;">
-                    <li>「收入進帳，先支付自己」：發薪當天，請立刻將總金額依照比例分配進各個存袋。</li>
-                    <li>「支出扣款，從存袋拿錢」：每次消費後，直接在對應的存袋扣除金額。</li>
-                    <li>「預存金防呆鎖死機制」：遇到明年才要繳的保費，請每月撥進年度預存袋。系統會自動把這筆錢鎖進保險箱。</li>
-                </ul>
-
-                <h4 style="color:var(--text-primary); border-left:3px solid var(--accent); padding-left:8px; margin-top:20px;">階段三：底氣外掛模組（破解財務焦慮）</h4>
-                <ul style="padding-left:20px; margin-bottom:15px;">
-                    <li>「慢慢熊推雪球計算機」：至「資產盤點」將卡債或學貸輸入，系統會自動以本息平均攤還演算法幫妳排定打卡表。</li>
+                    <li>「收入進帳，先支付自己」：領薪日輸入收入，按照設定好的分類記帳。</li>
+                    <li>「隨時掌握預算」：隨時回到儀表板看每個項目的消耗情況，還有多少餘額。</li>
                     <li>「購物冷靜邏輯閘」：衝動購物前，輸入商品價格，系統自動換算成妳的生命工時。</li>
+                    <li>「每月回顧結算」：一個月花費一目了然！請利用儀表板最下方的「產生本期結算診斷報告」，或到設定最下方點擊「匯出 Excel」。</li>
                 </ul>
 
-                <h4 style="color:var(--text-primary); border-left:3px solid var(--accent); padding-left:8px; margin-top:20px;">階段四：月結算與隱私保護</h4>
+                <h4 style="color:var(--text-primary); border-left:3px solid var(--accent); padding-left:8px; margin-top:20px;">第四步：資產盤點與底氣追蹤</h4>
                 <ul style="padding-left:20px; margin-bottom:15px;">
-                    <li>「專屬 Excel 一鍵匯出」：每月底至設定頁面點擊匯出，系統秒生當月精美報表。</li>
-                    <li>「100% 隱私安全」：完全不綁定銀行，所有數據存於本機。</li>
-                </ul>
-
-                <h4 style="color:var(--text-primary); border-left:3px solid var(--accent); padding-left:8px; margin-top:20px;">💡 實用技巧：如何設定「年繳保費 / 年度大筆支出」？</h4>
-                <ul style="padding-left:20px; margin-bottom:15px;">
-                    <li>前往「設定」滑到下方，在「預存支出」區塊新增一個存袋（例如：年度保費）。</li>
-                    <li>填寫妳的「年度總目標」金額。</li>
-                    <li>分配 1 到 12 月：設定 1~12 月預定存入金額的十二宮格。已經存的就填上數字, 進度條就會跑動了!
+                    <li>「更新淨資產」：結束一個月就可以來到「資產盤點」更新妳的總資產與總負債（100% 隱私安全，完全不綁定銀行，所有數據存於本機）。</li>
+                    <li>「慢慢熊推雪球計算機」：至「資產盤點」將卡債或學貸輸入，系統會自動以本息平均攤還演算法幫妳排定打卡表。</li>
                 </ul>
             </div>
             
