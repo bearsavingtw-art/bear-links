@@ -234,6 +234,13 @@
             <div class="stat-box"><div class="stat-label">本期收入</div><div class="stat-value income" id="display-income">$0</div></div>
             <div class="stat-box"><div class="stat-label">本期支出 (固定+變動)</div><div class="stat-value expense" id="display-expense">$0</div></div>
         </div>
+        <div class="achievement-banner" onclick="openGuideModal()" style="background: linear-gradient(135deg, #fdfbf7 0%, #f0e6d2 100%); color: var(--text-primary); border: 1px dashed var(--accent); margin-bottom: 15px;">
+            <div>
+                <div style="font-weight:700; font-size:1rem; margin-bottom:2px;"><i class="fas fa-book-open" style="color:var(--accent);"></i> 新手必看！駕駛艙使用指南</div>
+                <div style="font-size:0.8rem; color:var(--text-secondary);">4 個步驟，打造專屬金錢防護罩</div>
+            </div>
+            <i class="fas fa-chevron-right" style="color:var(--accent);"></i>
+        </div>
         
         <div class="btn btn-tool" onclick="switchPage('shop')" style="display:flex; justify-content:center; align-items:center; gap:10px;">
             <i class="fas fa-brain"></i> 啟動購物冷靜・邏輯閘
@@ -539,6 +546,46 @@
             
             <div id="checklist-container" style="overflow-y: auto; flex: 1; padding-right: 5px;">
                 </div>
+        </div>
+    </div>
+    <div id="guide-modal" class="modal-overlay">
+        <div class="modal-content" style="max-height: 85vh; overflow-y: auto; background: #fdfbf7;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 15px;">
+                <h3 style="margin:0; color:var(--text-primary);"><i class="fas fa-book-open" style="color:var(--accent);"></i> 駕駛艙使用指南</h3>
+                <i class="fas fa-times" style="font-size: 1.2rem; color: #aaa; cursor: pointer;" onclick="closeGuideModal()"></i>
+            </div>
+            
+            <div style="font-size: 0.9rem; line-height: 1.6; color: var(--text-secondary);">
+                <p style="margin-top:0;">這不是一本讓妳越記越焦慮的流水帳，而是一套內建防呆機制的自動化系統。</p>
+                
+                <h4 style="color:var(--text-primary); border-left:3px solid var(--accent); padding-left:8px; margin-top:20px;">階段一：初始設定（打造專屬防禦陣地）</h4>
+                <ul style="padding-left:20px; margin-bottom:15px;">
+                    <li>「設定專屬財務週期」：請打破每月 1 號記到月底的迷思。請至底部的「設定」，直接將發薪日設定為週期的第一天。</li>
+                    <li>「自訂專屬存袋」：請依照在財務診斷室算出的結果，把預算分配建立起來。</li>
+                    <li>「輸入期初餘額」：把目前手邊真正的可用現金與存款數字填入。</li>
+                </ul>
+
+                <h4 style="color:var(--text-primary); border-left:3px solid var(--accent); padding-left:8px; margin-top:20px;">階段二：日常無腦操作（讓記帳變成反射動作）</h4>
+                <ul style="padding-left:20px; margin-bottom:15px;">
+                    <li>「收入進帳，先支付自己」：發薪當天，請立刻將總金額依照比例分配進各個存袋。</li>
+                    <li>「支出扣款，從存袋拿錢」：每次消費後，直接在對應的存袋扣除金額。</li>
+                    <li>「預存金防呆鎖死機制」：遇到明年才要繳的保費，請每月撥進年度預存袋。系統會自動把這筆錢鎖進保險箱。</li>
+                </ul>
+
+                <h4 style="color:var(--text-primary); border-left:3px solid var(--accent); padding-left:8px; margin-top:20px;">階段三：底氣外掛模組（破解財務焦慮）</h4>
+                <ul style="padding-left:20px; margin-bottom:15px;">
+                    <li>「慢慢熊推雪球計算機」：至「資產盤點」將卡債或學貸輸入，系統會自動以本息平均攤還演算法幫妳排定打卡表。</li>
+                    <li>「購物冷靜邏輯閘」：衝動購物前，輸入商品價格，系統自動換算成妳的生命工時。</li>
+                </ul>
+
+                <h4 style="color:var(--text-primary); border-left:3px solid var(--accent); padding-left:8px; margin-top:20px;">階段四：月結算與隱私保護</h4>
+                <ul style="padding-left:20px; margin-bottom:15px;">
+                    <li>「專屬 Excel 一鍵匯出」：每月底至設定頁面點擊匯出，系統秒生當月精美報表。</li>
+                    <li>「100% 隱私安全」：完全不綁定銀行，所有數據存於本機。</li>
+                </ul>
+            </div>
+            
+            <button class="btn" style="margin-top:20px;" onclick="closeGuideModal()">我了解了，開始打造底氣！</button>
         </div>
     </div>
 
@@ -1114,13 +1161,18 @@
             document.getElementById('sinking-history-modal').classList.add('show');
         }
         function closeSinkingHistory() { document.getElementById('sinking-history-modal').classList.remove('show'); }
-        function clearChartFilter() { currentChartFilter = null; renderDashboard(); window.scrollTo({ top: document.getElementById('chart-card-title').offsetTop - 100, behavior: 'smooth' }); }
+        
+        /* 新增：開啟與關閉使用指南彈窗 */
+        function openGuideModal() { document.getElementById('guide-modal').classList.add('show'); }
+        function closeGuideModal() { document.getElementById('guide-modal').classList.remove('show'); }
 
-        function renderChart(mainExpObj) {
-            const ctx = document.getElementById('expenseChart').getContext('2d'); const hasData = Object.values(mainExpObj).some(val => val > 0); const labels = ['固定支出', '變動支出'];
-            if (myChart) myChart.destroy();
-            myChart = new Chart(ctx, { type: 'doughnut', data: { labels: labels, datasets: [{ data: hasData ? [mainExpObj['固定支出']||0, mainExpObj['變動支出']||0] : [1], backgroundColor: hasData ? ['#5a4d41', '#b08d85'] : ['#eee'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom' } }, onClick: (e, activeEls) => { if(activeEls.length > 0) { const label = myChart.data.labels[activeEls[0].index]; if (currentChartFilter === label) { clearChartFilter(); } else { currentChartFilter = label; renderDashboard(); setTimeout(() => { document.getElementById('recent-list-title').scrollIntoView({behavior: 'smooth', block: 'center'}); }, 100); } } else { if(currentChartFilter) clearChartFilter(); } } } });
-        }
+        function clearChartFilter() { currentChartFilter = null; renderDashboard(); window.scrollTo({ top: document.getElementById('chart-card-title').offsetTop - 100, behavior: 'smooth' }); }
+
+        function renderChart(mainExpObj) {
+            const ctx = document.getElementById('expenseChart').getContext('2d'); const hasData = Object.values(mainExpObj).some(val => val > 0); const labels = ['固定支出', '變動支出'];
+            if (myChart) myChart.destroy();
+            myChart = new Chart(ctx, { type: 'doughnut', data: { labels: labels, datasets: [{ data: hasData ? [mainExpObj['固定支出']||0, mainExpObj['變動支出']||0] : [1], backgroundColor: hasData ? ['#5a4d41', '#b08d85'] : ['#eee'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom' } }, onClick: (e, activeEls) => { if(activeEls.length > 0) { const label = myChart.data.labels[activeEls[0].index]; if (currentChartFilter === label) { clearChartFilter(); } else { currentChartFilter = label; renderDashboard(); setTimeout(() => { document.getElementById('recent-list-title').scrollIntoView({behavior: 'smooth', block: 'center'}); }, 100); } } else { if(currentChartFilter) clearChartFilter(); } } } });
+        }
 
         function getMethodIcon(method) { if (method === 'card') return '💳'; if (method === 'other') return '🏦'; return '💵'; }
         function renderDashList(cycleTx, filterCategory) {
