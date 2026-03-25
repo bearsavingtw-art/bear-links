@@ -231,7 +231,7 @@
         </div>
         
         <div class="stat-grid">
-            <div class="stat-box"><div class="stat-label">本期收入</div><div class="stat-value income" id="display-income">$0</div></div>
+            <div class="stat-box" onclick="openIncomeDetailModal()" style="cursor:pointer;"><div class="stat-label">本期收入 <i class="fas fa-chevron-right" style="font-size:0.7rem;"></i></div><div class="stat-value income" id="display-income">$0</div><div style="font-size:0.72rem; color:var(--text-secondary); margin-top:4px;">點擊查看 / 編輯收入</div></div>
             <div class="stat-box"><div class="stat-label">本期支出 (固定+變動)</div><div class="stat-value expense" id="display-expense">$0</div></div>
         </div>
         <div class="achievement-banner" onclick="openGuideModal()" style="background: linear-gradient(135deg, #fdfbf7 0%, #f0e6d2 100%); color: var(--text-primary); border: 1px dashed var(--accent); margin-bottom: 15px;">
@@ -264,7 +264,10 @@
         </div>
 
         <div class="card">
-            <div class="card-title" id="chart-card-title">本期日常花費結構</div>
+            <div class="card-title" style="display:flex; justify-content:space-between; align-items:center;">
+                <span id="chart-card-title">本期日常花費結構</span>
+                <button class="btn-outline" id="chart-mode-toggle-btn" style="width:auto; padding:6px 12px; margin:0; font-size:0.75rem;" onclick="toggleChartMode()">切換為十袋模式</button>
+            </div>
             <p style="font-size:0.75rem; color:var(--text-secondary); margin-top:0; margin-bottom: 10px; text-align: center;">💡 點擊下方圖表區塊，可過濾查看該類別明細</p>
             <div class="chart-wrapper" style="cursor: pointer;"><canvas id="expenseChart"></canvas></div>
         </div>
@@ -572,6 +575,22 @@
             <button class="btn btn-outline" style="margin-top:10px;" onclick="skipGuide()">先跳過，晚點再看</button>
         </div>
     </div>
+
+    <div id="income-detail-modal" class="modal-overlay">
+        <div class="modal-content" style="text-align: left; max-height: 80vh; overflow-y: auto;">
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 2px solid #eee; padding-bottom:10px; margin-bottom:15px;">
+                <div>
+                    <h3 style="margin:0; color:var(--text-primary);">💰 本期收入明細</h3>
+                    <div id="income-detail-cycle" style="font-size:0.8rem; color:var(--text-secondary); margin-top:4px;"></div>
+                </div>
+                <i class="fas fa-times" style="font-size: 1.2rem; color: #aaa; cursor: pointer;" onclick="closeIncomeDetailModal()"></i>
+            </div>
+            <div id="income-detail-list"></div>
+            <button class="btn" style="margin-top:15px;" onclick="openAddIncomeFromModal()">＋ 新增收入</button>
+            <button class="btn btn-outline" style="margin-top:10px;" onclick="closeIncomeDetailModal()">關閉</button>
+        </div>
+    </div>
+
     <div id="sinking-history-modal" class="modal-overlay">
         <div class="modal-content" style="text-align: left; max-height: 80vh; overflow-y: auto;">
             <h3 style="margin-top:0; color:var(--text-primary); border-bottom: 2px solid #eee; padding-bottom:10px;" id="sinking-history-title">預存花費紀錄</h3>
@@ -626,6 +645,7 @@
 
         let myChart = null; let nwChart = null; let reviewBarChart = null; let reviewPieChart = null; 
         let editingId = null; let dashboardViewDate = new Date(); let currentChartFilter = null; let editingDebtId = null;
+        let currentChartMode = localStorage.getItem('bear_chart_mode') || 'main';
         let isCustomCatMode = false; 
 
         let guideStep = 0;
@@ -799,6 +819,7 @@
                 localStorage.setItem('bear_transactions', JSON.stringify(transactions)); 
                 renderDashboard(); 
                 renderList(); 
+                if (document.getElementById('income-detail-modal') && document.getElementById('income-detail-modal').classList.contains('show')) renderIncomeDetailList();
             } 
         }
 
@@ -995,7 +1016,99 @@
             }
         }
 
-        function renderDashboard() {
+
+        function getCurrentDashboardCycleIncomeTx() {
+            const currentCycle = getCycleBoundary(dashboardViewDate, sysSettings.cycleStart);
+            return transactions.filter(t => {
+                const tDate = new Date(t.date);
+                tDate.setHours(0,0,0,0);
+                return t.type === 'income' && tDate >= currentCycle.start && tDate <= currentCycle.end;
+            });
+        }
+
+        function openIncomeDetailModal() {
+            renderIncomeDetailList();
+            document.getElementById('income-detail-modal').classList.add('show');
+        }
+
+        function closeIncomeDetailModal() {
+            document.getElementById('income-detail-modal').classList.remove('show');
+        }
+
+        function openAddIncomeFromModal() {
+            closeIncomeDetailModal();
+            resetForm();
+            switchPage('add');
+            document.getElementById('input-main-category').value = '收入';
+            updateSubCategories();
+        }
+
+        function renderIncomeDetailList() {
+            const list = document.getElementById('income-detail-list');
+            const cycleLabel = document.getElementById('income-detail-cycle');
+            if (!list || !cycleLabel) return;
+
+            const currentCycle = getCycleBoundary(dashboardViewDate, sysSettings.cycleStart);
+            cycleLabel.innerText = currentCycle.isDefault
+                ? `${currentCycle.label}（1號 - 月底）`
+                : `${currentCycle.label}（${currentCycle.start.getMonth()+1}/${currentCycle.start.getDate()} - ${currentCycle.end.getMonth()+1}/${currentCycle.end.getDate()}）`;
+
+            const incomeTx = getCurrentDashboardCycleIncomeTx().sort((a, b) => {
+                const dateDiff = new Date(b.date) - new Date(a.date);
+                if (dateDiff !== 0) return dateDiff;
+                return b.id - a.id;
+            });
+
+            if (incomeTx.length === 0) {
+                list.innerHTML = '<div style="text-align:center; padding:20px 10px; color:#999; font-size:0.9rem;">本期還沒有收入紀錄<br><span style="font-size:0.8rem;">到「記帳」頁把資金流向切到「收入」即可新增</span></div>';
+                return;
+            }
+
+            let html = '';
+            incomeTx.forEach(t => {
+                const methodIcon = getMethodIcon(t.method);
+                const source = t.category || '收入';
+                const noteHtml = t.note ? `<small style="color:#888;">${t.note}</small>` : '';
+                html += `<li class="tx-item">
+                    <div class="tx-info">
+                        <span class="tx-cat">${source} ${noteHtml}</span>
+                        <span class="tx-date">${t.date} <span style="font-size:0.8rem; margin-left:5px;">${methodIcon}</span></span>
+                    </div>
+                    <div class="action-btns">
+                        <span class="tx-amount amount-inc">+$${formatMoney(t.amount)}</span>
+                        <i class="fas fa-edit edit-btn" onclick="editIncomeTxFromModal(${t.id})"></i>
+                        <i class="fas fa-trash delete-btn" onclick="deleteIncomeTxFromModal(${t.id})"></i>
+                    </div>
+                </li>`;
+            });
+            list.innerHTML = `<ul class="tx-list">${html}</ul>`;
+        }
+
+        function editIncomeTxFromModal(id) {
+            closeIncomeDetailModal();
+            editTx(id);
+        }
+
+        function deleteIncomeTxFromModal(id) {
+            deleteTx(id);
+            renderIncomeDetailList();
+        }
+
+                function getChartPalette(count) {
+            const palette = ['#5a4d41', '#b08d85', '#d4a373', '#81c784', '#64b5f6', '#ffd54f', '#e57373', '#968c83', '#90a4ae', '#ba68c8', '#ff8a65', '#4db6ac', '#9575cd', '#aed581', '#f06292'];
+            const colors = [];
+            for (let i = 0; i < count; i++) colors.push(palette[i % palette.length]);
+            return colors;
+        }
+
+        function toggleChartMode() {
+            currentChartMode = currentChartMode === 'main' ? 'envelope' : 'main';
+            localStorage.setItem('bear_chart_mode', currentChartMode);
+            currentChartFilter = null;
+            renderDashboard();
+        }
+
+function renderDashboard() {
             sortTransactions(); const currentCycle = getCycleBoundary(dashboardViewDate, sysSettings.cycleStart); const realTodayCycle = getCycleBoundary(new Date(), sysSettings.cycleStart);
             let timeStatus = 'current'; const currentCycleTime = currentCycle.start.getTime(); const realTodayCycleTime = realTodayCycle.start.getTime();
             if (currentCycleTime < realTodayCycleTime) { timeStatus = 'past'; } else if (currentCycleTime > realTodayCycleTime) { timeStatus = 'future'; }
@@ -1004,14 +1117,18 @@
             if (currentCycle.isDefault) { datesEl.innerHTML = `(1號 - 月底)`; } else { datesEl.innerHTML = `(${currentCycle.start.getMonth()+1}/${currentCycle.start.getDate()} - ${currentCycle.end.getMonth()+1}/${currentCycle.end.getDate()})`; }
 
             let prefix = '本期'; if (timeStatus === 'past') prefix = '該期'; if (timeStatus === 'future') prefix = '預估'; 
-            document.getElementById('budget-card-title').innerText = `${prefix}本月生活費剩餘`; document.getElementById('chart-card-title').innerText = `${prefix}日常花費結構`; document.getElementById('balance-card-title').innerText = `${prefix}日常總結餘`;
+            document.getElementById('budget-card-title').innerText = `${prefix}本月生活費剩餘`; 
+            document.getElementById('chart-card-title').innerText = currentChartMode === 'main' ? `${prefix}日常花費結構（固定 / 變動）` : `${prefix}日常花費結構（十袋 / 自訂分類）`;
+            document.getElementById('balance-card-title').innerText = `${prefix}日常總結餘`;
+            const modeBtn = document.getElementById('chart-mode-toggle-btn');
+            if (modeBtn) modeBtn.innerText = currentChartMode === 'main' ? '切換為十袋模式' : '切換為固定/變動';
 
             const listTitle = document.getElementById('recent-list-title'); const clearBtn = document.getElementById('clear-filter-btn');
             if (currentChartFilter) { listTitle.innerHTML = `<i class="fas fa-filter"></i> ${currentChartFilter} 明細`; clearBtn.classList.remove('hidden'); } else { listTitle.innerHTML = `${prefix}紀錄明細`; clearBtn.classList.add('hidden'); }
 
             const cycleTx = transactions.filter(t => { const tDate = new Date(t.date); tDate.setHours(0,0,0,0); return tDate >= currentCycle.start && tDate <= currentCycle.end; });
             let totalInc = 0, totalExp = 0; let mainExp = { '固定支出': 0, '變動支出': 0 }; let envExp = {}; let masterSpent = { '固定支出': 0, '變動支出': 0 };
-            
+
             let manualSavesInCycle = {}; 
 
             cycleTx.forEach(t => {
@@ -1027,16 +1144,16 @@
                     manualSavesInCycle[t.category] += t.amount;
                 }
             });
-            
+
             document.getElementById('display-income').innerText = `$${formatMoney(totalInc)}`; 
             document.getElementById('display-expense').innerText = `$${formatMoney(totalExp)}`; 
-            
+
             let currentBalance = totalInc - totalExp;
             document.getElementById('display-balance').innerText = `$${formatMoney(currentBalance)}`;
-            
+
             const cycleMonthIndex = currentCycle.start.getMonth(); 
             let totalLockedSave = 0;
-            
+
             if (userEnvelopes['預存支出'] && userEnvelopes['預存支出'].length > 0) {
                 userEnvelopes['預存支出'].forEach(env => {
                     let planned = 0;
@@ -1053,9 +1170,9 @@
                 for (let cat in manualSavesInCycle) { totalManual += manualSavesInCycle[cat]; }
                 totalLockedSave = Math.max(planned, totalManual);
             }
-            
+
             let trueBalance = currentBalance - totalLockedSave;
-            
+
             document.getElementById('display-planned-save').innerText = `-$${formatMoney(totalLockedSave)}`;
             const trueBalanceEl = document.getElementById('display-true-balance');
             trueBalanceEl.innerText = `$${formatMoney(trueBalance)}`;
@@ -1064,11 +1181,12 @@
             } else {
                 trueBalanceEl.style.color = 'var(--text-primary)';
             }
-            
-            renderBudgetBars(envExp, masterSpent); renderSinkingFundsTracker(); renderChart(mainExp); renderDashList(cycleTx, currentChartFilter); 
+
+            renderBudgetBars(envExp, masterSpent); renderSinkingFundsTracker(); renderChart(mainExp, envExp); renderDashList(cycleTx, currentChartFilter); if (document.getElementById('income-detail-modal') && document.getElementById('income-detail-modal').classList.contains('show')) renderIncomeDetailList(); 
         }
 
-        function renderBudgetBars(envExp, masterSpent) {
+
+function renderBudgetBars(envExp, masterSpent) {
             const container = document.getElementById('budget-container'); container.innerHTML = ''; let hasAnyBudget = false; 
             ['固定支出', '變動支出'].forEach(mainCat => {
                 let bagCount = userEnvelopes[mainCat].length;
@@ -1252,16 +1370,78 @@
 
         function clearChartFilter() { currentChartFilter = null; renderDashboard(); window.scrollTo({ top: document.getElementById('chart-card-title').offsetTop - 100, behavior: 'smooth' }); }
 
-        function renderChart(mainExpObj) {
-            const ctx = document.getElementById('expenseChart').getContext('2d'); const hasData = Object.values(mainExpObj).some(val => val > 0); const labels = ['固定支出', '變動支出'];
+        function renderChart(mainExpObj, envExpObj) {
+            const ctx = document.getElementById('expenseChart').getContext('2d');
+            let labels = [];
+            let data = [];
+            let colors = [];
+
+            if (currentChartMode === 'main') {
+                labels = ['固定支出', '變動支出'];
+                data = [mainExpObj['固定支出'] || 0, mainExpObj['變動支出'] || 0];
+                colors = ['#5a4d41', '#b08d85'];
+            } else {
+                const envEntries = Object.entries(envExpObj)
+                    .filter(([_, info]) => (info.spent || 0) > 0)
+                    .sort((a, b) => b[1].spent - a[1].spent);
+                labels = envEntries.map(([name]) => name);
+                data = envEntries.map(([_, info]) => info.spent || 0);
+                colors = getChartPalette(labels.length);
+            }
+
+            const hasData = data.some(val => val > 0);
+            if (!hasData) {
+                labels = ['尚無資料'];
+                data = [1];
+                colors = ['#eee'];
+            }
+
             if (myChart) myChart.destroy();
-            myChart = new Chart(ctx, { type: 'doughnut', data: { labels: labels, datasets: [{ data: hasData ? [mainExpObj['固定支出']||0, mainExpObj['變動支出']||0] : [1], backgroundColor: hasData ? ['#5a4d41', '#b08d85'] : ['#eee'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom' } }, onClick: (e, activeEls) => { if(activeEls.length > 0) { const label = myChart.data.labels[activeEls[0].index]; if (currentChartFilter === label) { clearChartFilter(); } else { currentChartFilter = label; renderDashboard(); setTimeout(() => { document.getElementById('recent-list-title').scrollIntoView({behavior: 'smooth', block: 'center'}); }, 100); } } else { if(currentChartFilter) clearChartFilter(); } } } });
+            myChart = new Chart(ctx, { 
+                type: 'doughnut', 
+                data: { 
+                    labels: labels, 
+                    datasets: [{ 
+                        data: data, 
+                        backgroundColor: colors, 
+                        borderWidth: 0 
+                    }] 
+                }, 
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    cutout: '70%', 
+                    plugins: { legend: { position: 'bottom' } }, 
+                    onClick: (e, activeEls) => { 
+                        if (!hasData) return;
+                        if(activeEls.length > 0) { 
+                            const label = myChart.data.labels[activeEls[0].index]; 
+                            if (currentChartFilter === label) { 
+                                clearChartFilter(); 
+                            } else { 
+                                currentChartFilter = label; 
+                                renderDashboard(); 
+                                setTimeout(() => { 
+                                    document.getElementById('recent-list-title').scrollIntoView({behavior: 'smooth', block: 'center'}); 
+                                }, 100); 
+                            } 
+                        } else { 
+                            if(currentChartFilter) clearChartFilter(); 
+                        } 
+                    } 
+                } 
+            });
         }
 
         function getMethodIcon(method) { if (method === 'card') return '💳'; if (method === 'other') return '🏦'; return '💵'; }
         function renderDashList(cycleTx, filterCategory) {
             const list = document.getElementById('recent-tx-list'); list.innerHTML = ''; let dataToShow = cycleTx;
-            if (filterCategory) { dataToShow = cycleTx.filter(t => { return t.mainCategory === filterCategory && t.type === 'expense'; }); }
+            if (filterCategory) { 
+                dataToShow = cycleTx.filter(t => { 
+                    if (t.type !== 'expense' || t.mainCategory === '預存支出') return false;
+                    return currentChartMode === 'main' ? t.mainCategory === filterCategory : t.category === filterCategory;
+                }); 
+            }
             if(dataToShow.length === 0) { let msg = filterCategory ? `本期尚未有「${filterCategory}」的紀錄` : '該期尚未有任何紀錄'; list.innerHTML = `<div style="text-align:center; padding:20px 10px; color:#ccc; font-size:0.85rem;">${msg}</div>`; return; }
             if (!filterCategory) dataToShow = dataToShow.slice(0, 10);
             dataToShow.forEach(t => {
