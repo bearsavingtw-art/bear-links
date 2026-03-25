@@ -549,99 +549,29 @@
         </div>
     </div>
     <div id="guide-modal" class="modal-overlay">
-    <div class="modal-content" style="max-height: 85vh; overflow-y: auto; background: #fdfbf7;">
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 15px;">
-            <h3 style="margin:0; color:var(--text-primary);"><i class="fas fa-book-open" style="color:var(--accent);"></i> 駕駛艙使用指南</h3>
-            <i class="fas fa-times" style="font-size: 1.2rem; color: #aaa; cursor: pointer;" onclick="closeGuideModal()"></i>
+        <div class="modal-content" style="max-height: 85vh; overflow-y: auto; background: #fdfbf7;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 15px;">
+                <h3 style="margin:0; color:var(--text-primary);">
+                    <i class="fas fa-book-open" style="color:var(--accent);"></i>
+                    新手使用引導
+                </h3>
+                <i class="fas fa-times" style="font-size: 1.2rem; color: #aaa; cursor: pointer;" onclick="closeGuideModal()"></i>
+            </div>
+
+            <div style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:10px;">
+                第 <span id="guide-step-num">1</span> / 4 步
+            </div>
+
+            <div id="guide-step-content" style="font-size: 0.95rem; line-height: 1.7; color: var(--text-secondary);"></div>
+
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button class="btn btn-outline" id="guide-prev-btn" style="flex:1; margin-top:0;" onclick="prevGuideStep()">上一步</button>
+                <button class="btn" id="guide-next-btn" style="flex:1; margin-top:0;" onclick="nextGuideStep()">下一步</button>
+            </div>
+
+            <button class="btn btn-outline" style="margin-top:10px;" onclick="skipGuide()">先跳過，晚點再看</button>
         </div>
-        
-        <div style="font-size: 0.9rem; line-height: 1.7; color: var(--text-secondary);">
-            <p style="margin-top:0;">
-                這不是一本讓妳越記越焦慮的流水帳，而是一套幫妳看清金錢流向、留住安全感的自動化系統。
-                妳不用一次做很難，只要照著下面 4 步驟走，就能慢慢把自己的底氣建立起來。
-            </p>
-
-            <h4 style="color:var(--text-primary); border-left:3px solid var(--accent); padding-left:8px; margin-top:20px;">第一步：先設定妳的發薪日（建立自己的財務週期）</h4>
-            <ul style="padding-left:20px; margin-bottom:15px;">
-                <li>請先到底部的「設定」，設定妳的<strong>每月帳單起始日</strong>，也就是妳的發薪日。</li>
-                <li>這個系統不是強迫妳一定從每月 1 號記到月底，而是依照妳真正的領薪節奏來看錢。</li>
-                <li>如果妳是<strong>自由業、接案、收入時間不固定</strong>的人，也可以自己設定一個屬於自己的「發薪日」。</li>
-                <li>收入都可以先放進自己的蓄水池，但妳要練習<strong>固定發薪水給自己</strong>，這樣預算才有節奏，生活也比較不會忽高忽低。</li>
-            </ul>
-
-            <h4 style="color:var(--text-primary); border-left:3px solid var(--accent); padding-left:8px; margin-top:20px;">第二步：設定預算（把錢先安排好位置）</h4>
-            <ul style="padding-left:20px; margin-bottom:15px;">
-                <li>前往「設定」頁，建立妳的固定支出、變動支出與預存支出分類。</li>
-                <li>如果妳不知道怎麼分，可以先參考十袋分配邏輯。</li>
-            </ul>
-
-            <div style="background: rgba(176,141,133,0.08); border: 1px dashed var(--accent); border-radius: 12px; padding: 12px; margin-bottom: 15px;">
-                <div style="font-size: 0.85rem; color: var(--text-primary); font-weight: 700; margin-bottom: 8px;">💡 預算編列參考</div>
-                <a href="https://bearsavingtw-art.github.io/bear-links/envelopes.html" target="_blank" rel="noopener noreferrer" class="btn btn-outline" style="margin-top:0; text-align:center;">
-                    <i class="fas fa-up-right-from-square"></i> 打開十袋分配邏輯
-                </a>
-            </div>
-
-            <div style="background: rgba(255, 213, 79, 0.12); border-left: 4px solid #ffd54f; padding: 12px; border-radius: 10px; margin-bottom: 15px; color: var(--text-primary);">
-                <strong>重點提醒：</strong><br>
-                請控制所有分類<strong>不超過 15 類</strong>；其中「固定支出 + 變動支出」建議控制在<strong>10 類以內</strong>。<br>
-                類別太多，記帳和復盤會很容易眼花撩亂，也比較難看出真正的問題。
-            </div>
-
-            <h4 style="color:var(--text-primary); border-left:3px solid var(--accent); padding-left:8px; margin-top:20px;">預存支出怎麼設定？（例如年繳保費 / 年度大筆支出）</h4>
-            <ul style="padding-left:20px; margin-bottom:15px;">
-                <li>前往「設定」頁，滑到下方，在「預存支出」區塊新增一個存袋（例如：年度保費、旅費、稅金）。</li>
-                <li>填寫妳的<strong>年度總目標</strong>金額。</li>
-                <li>再把 1～12 月預定要存的金額填進十二宮格。</li>
-                <li>已經存的就填上數字，進度條就會跑動，妳會更清楚現在的水位。</li>
-                <li>這類支出不是突然爆炸，而是平常就先留位置給未來。</li>
-            </ul>
-
-            <h4 style="color:var(--text-primary); border-left:3px solid var(--accent); padding-left:8px; margin-top:20px;">第三步：開始記帳（把金錢流向記進系統）</h4>
-            <ul style="padding-left:20px; margin-bottom:15px;">
-                <li>領薪日先輸入收入，再按照妳的分類開始記帳。</li>
-                <li>每次花錢後，直接記進對應分類，就能隨時回到儀表板看每個項目消耗了多少、還剩多少餘額。</li>
-                <li>這裡的目的不是讓妳內疚，而是讓妳知道錢現在正在往哪裡流。</li>
-            </ul>
-
-            <div style="background: rgba(100,181,246,0.08); border-left: 4px solid var(--info); padding: 12px; border-radius: 10px; margin-bottom: 15px; color: var(--text-primary);">
-                <strong>購物冷靜邏輯閘：</strong><br>
-                衝動購物前，先輸入商品價格，系統會自動幫妳換算成生命工時。<br>
-                有些東西不是不能買，而是要先確認：它值不值得妳花這段人生去換。
-            </div>
-
-            <h4 style="color:var(--text-primary); border-left:3px solid var(--accent); padding-left:8px; margin-top:20px;">每月回顧：看懂這個月到底發生了什麼</h4>
-            <ul style="padding-left:20px; margin-bottom:15px;">
-                <li>每個月都可以到底部儀表板最下方，點擊<strong>「產生本期結算診斷報告」</strong>。</li>
-                <li>也可以到「設定」頁最下方，點擊<strong>「匯出 Excel」</strong>，把整個月的花費整理成報表。</li>
-                <li>這一步很重要，因為記帳不是為了記而已，而是為了讓妳看見：哪些地方守住了、哪些地方正在漏水。</li>
-            </ul>
-
-            <h4 style="color:var(--text-primary); border-left:3px solid var(--accent); padding-left:8px; margin-top:20px;">第四步：更新資產盤點（累積妳的底氣）</h4>
-            <ul style="padding-left:20px; margin-bottom:15px;">
-                <li>結束一個月後，可以到「資產盤點」更新妳目前的<strong>總資產</strong>與<strong>總負債</strong>。</li>
-                <li>這不是要妳一次變有錢，而是讓妳每個月都能看見自己是不是比上個月更穩一點。</li>
-                <li>當妳持續更新，淨資產成長曲線就會慢慢跑出來，那會是很真實的安全感來源。</li>
-            </ul>
-
-            <div style="background: rgba(229,115,115,0.08); border-left: 4px solid var(--danger); padding: 12px; border-radius: 10px; margin-bottom: 15px; color: var(--text-primary);">
-                <strong>慢慢熊推雪球計算機：</strong><br>
-                到「資產盤點」把卡債、學貸或其他負債輸入進去，系統會幫妳排出還款節奏與打卡進度。<br>
-                妳不用每天焦慮，只要一個月一個月往前推。
-            </div>
-
-            <h4 style="color:var(--text-primary); border-left:3px solid var(--accent); padding-left:8px; margin-top:20px;">最後：隱私與資料安全</h4>
-            <ul style="padding-left:20px; margin-bottom:15px;">
-                <li>這個系統<strong>不綁定銀行</strong>，所有資料都存在妳自己的裝置本機。</li>
-                <li>妳也可以使用備份與匯出功能，把自己的資料留存下來。</li>
-                <li>如果在外面開頁面不想被別人看到數字，也可以開啟<strong>隱私模式</strong>。</li>
-            </ul>
-        </div>
-        
-        <button class="btn" style="margin-top:20px;" onclick="closeGuideModal()">我了解了，開始打造底氣！</button>
     </div>
-</div>
-
     <div id="sinking-history-modal" class="modal-overlay">
         <div class="modal-content" style="text-align: left; max-height: 80vh; overflow-y: auto;">
             <h3 style="margin-top:0; color:var(--text-primary); border-bottom: 2px solid #eee; padding-bottom:10px;" id="sinking-history-title">預存花費紀錄</h3>
@@ -698,6 +628,62 @@
         let editingId = null; let dashboardViewDate = new Date(); let currentChartFilter = null; let editingDebtId = null;
         let isCustomCatMode = false; 
 
+        let guideStep = 0;
+        const guideSteps = [
+            {
+                title: '第一步：先設定妳的發薪日',
+                content: `
+                    <div style="font-size:1.1rem; font-weight:700; color:var(--text-primary); margin-bottom:10px;">第一步：先設定妳的發薪日</div>
+                    <p>請先到「設定」頁，把每月帳單起始日設成妳的發薪日。</p>
+                    <ul style="padding-left:20px;">
+                        <li>這樣系統才會按照妳真正的收入節奏跑。</li>
+                        <li>如果妳是自由業或收入不固定，也可以自己訂一個固定發薪日。</li>
+                        <li>收入先進蓄水池，再固定發薪給自己，預算才會穩。</li>
+                    </ul>
+                `
+            },
+            {
+                title: '第二步：設定預算與分類',
+                content: `
+                    <div style="font-size:1.1rem; font-weight:700; color:var(--text-primary); margin-bottom:10px;">第二步：設定預算與分類</div>
+                    <p>前往「設定」頁，建立固定支出、變動支出、預存支出。</p>
+                    <ul style="padding-left:20px;">
+                        <li>不知道怎麼分，可以先看十袋分配邏輯。</li>
+                        <li>所有分類請控制在 15 類內。</li>
+                        <li>固定支出 + 變動支出，建議 10 類以內，復盤比較清楚。</li>
+                    </ul>
+                    <a href="https://bearsavingtw-art.github.io/bear-links/envelopes.html" target="_blank" rel="noopener noreferrer" class="btn btn-outline" style="margin-top:10px; text-align:center;">
+                        <i class="fas fa-up-right-from-square"></i> 打開十袋分配邏輯
+                    </a>
+                `
+            },
+            {
+                title: '第三步：開始記帳',
+                content: `
+                    <div style="font-size:1.1rem; font-weight:700; color:var(--text-primary); margin-bottom:10px;">第三步：開始記帳</div>
+                    <p>領薪日先輸入收入，花錢後再記進對應分類。</p>
+                    <ul style="padding-left:20px;">
+                        <li>妳可以隨時回到儀表板，看每個項目花了多少、剩多少。</li>
+                        <li>這不是要讓妳焦慮，而是讓妳知道錢流去哪裡。</li>
+                        <li>衝動購物前，也可以用購物冷靜邏輯閘。</li>
+                    </ul>
+                `
+            },
+            {
+                title: '第四步：每月更新資產盤點',
+                content: `
+                    <div style="font-size:1.1rem; font-weight:700; color:var(--text-primary); margin-bottom:10px;">第四步：每月更新資產盤點</div>
+                    <p>每個月結束後，到「資產盤點」更新總資產和總負債。</p>
+                    <ul style="padding-left:20px;">
+                        <li>有負債就用慢慢熊推雪球，幫妳看還款進度。</li>
+                        <li>也可以回到儀表板看結算診斷報告，或到設定頁匯出 Excel。</li>
+                        <li>妳要追蹤的不是完美，而是底氣有沒有慢慢增加。</li>
+                    </ul>
+                `
+            }
+        ];
+
+
         const logicQuestions = [ { id: 'need', icon: '⚖️', title: '需求閘', desc: '是全新的需求？還是家裡有替代品？', yes: '新需求 (+20)', no: '有替代品 (-50)', val: (y)=>y?20:-50 }, { id: 'cash', icon: '💰', title: '財力閘', desc: '手邊有足夠現金全額支付嗎？', yes: '有錢 (+20)', no: '要分期 (-100)', val: (y)=>y?20:-100 }, { id: 'value', icon: '⏳', title: '價值閘', desc: '看上方工時，值得用生命去換嗎？', yes: '值得 (+10)', no: '不值 (-30)', data: true, val: (y)=>y?10:-30 }, { id: 'cool', icon: '🔥', title: '冷靜閘', desc: '如果沒打折或不能馬上拿到，還買嗎？', yes: '照買 (+30)', no: '那算了 (-30)', val: (y)=>y?30:-30 } ];
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -707,7 +693,7 @@
             document.getElementById('nw-input-month').addEventListener('change', function() { loadNetWorthDataForMonth(this.value); });
             updateSubCategories(); renderDashboard(); setInterval(updateCountdowns, 1000);
             const urlParams = new URLSearchParams(window.location.search); if (urlParams.get('tab') === 'networth') switchPage('networth');
-        });
+});
 
         function getTotalEnvelopesCount() { let count = 0; for (let cat in userEnvelopes) { count += userEnvelopes[cat].length; } return count; }
 
@@ -1215,9 +1201,54 @@
         }
         function closeSinkingHistory() { document.getElementById('sinking-history-modal').classList.remove('show'); }
         
-        /* 新增：開啟與關閉使用指南彈窗 */
-        function openGuideModal() { document.getElementById('guide-modal').classList.add('show'); }
+
+        function renderGuideStep() {
+            const step = guideSteps[guideStep];
+            document.getElementById('guide-step-num').innerText = guideStep + 1;
+            document.getElementById('guide-step-content').innerHTML = step.content;
+
+            const prevBtn = document.getElementById('guide-prev-btn');
+            const nextBtn = document.getElementById('guide-next-btn');
+
+            prevBtn.style.visibility = guideStep === 0 ? 'hidden' : 'visible';
+
+            if (guideStep === guideSteps.length - 1) {
+                nextBtn.innerText = '完成並前往設定';
+            } else {
+                nextBtn.innerText = '下一步';
+            }
+        }
+
+        function openGuideModal() {
+            guideStep = 0;
+            renderGuideStep();
+            document.getElementById('guide-modal').classList.add('show');
+        }
+
         function closeGuideModal() { document.getElementById('guide-modal').classList.remove('show'); }
+
+        function nextGuideStep() {
+            if (guideStep < guideSteps.length - 1) {
+                guideStep++;
+                renderGuideStep();
+            } else {
+                localStorage.setItem('bear_guide_seen', 'yes');
+                closeGuideModal();
+                switchPage('settings');
+            }
+        }
+
+        function prevGuideStep() {
+            if (guideStep > 0) {
+                guideStep--;
+                renderGuideStep();
+            }
+        }
+
+        function skipGuide() {
+            localStorage.setItem('bear_guide_seen', 'yes');
+            closeGuideModal();
+        }
 
         function clearChartFilter() { currentChartFilter = null; renderDashboard(); window.scrollTo({ top: document.getElementById('chart-card-title').offsetTop - 100, behavior: 'smooth' }); }
 
@@ -1943,6 +1974,19 @@
             }
         }
         
+
+        // 首次進站自動打開新手引導
+        function autoOpenGuideOnFirstVisit() {
+            const hasSeenGuide = localStorage.getItem('bear_guide_seen');
+            if (!hasSeenGuide) {
+                setTimeout(() => {
+                    openGuideModal();
+                }, 900);
+            }
+        }
+
+        window.addEventListener('load', autoOpenGuideOnFirstVisit);
+
         if ('serviceWorker' in navigator) { 
             window.addEventListener('load', () => { 
                 navigator.serviceWorker.register('sw.js').catch(err => { console.log('ServiceWorker 註冊失敗: ', err); }); 
