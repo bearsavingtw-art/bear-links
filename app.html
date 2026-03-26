@@ -222,18 +222,11 @@
         .backup-status-value { font-size:0.95rem; color:var(--text-primary); font-weight:700; line-height:1.4; }
 
 
-        .entry-mode-switch { display:flex; gap:10px; margin-bottom:15px; }
-        .entry-mode-btn { flex:1; border:1px solid rgba(176,141,133,0.25); background:#fff; color:var(--text-primary); border-radius:12px; padding:12px; font-weight:700; cursor:pointer; }
-        .entry-mode-btn.active { background:rgba(176,141,133,0.12); color:var(--accent); border-color:var(--accent); }
-        .batch-table-wrap { overflow-x:auto; margin-top:15px; }
-        .batch-table { width:100%; border-collapse:collapse; min-width:760px; }
-        .batch-table th, .batch-table td { border-bottom:1px dashed #eee; padding:8px 6px; vertical-align:top; text-align:left; }
-        .batch-table th { font-size:0.78rem; color:var(--text-secondary); font-weight:700; }
-        .batch-table input, .batch-table select { padding:8px; font-size:0.85rem; border-radius:8px; }
-        .batch-mini-btn { border:none; background:#fff; color:var(--accent); font-weight:700; cursor:pointer; padding:8px 10px; border-radius:10px; border:1px solid rgba(176,141,133,0.2); }
-        .batch-mini-btn.danger { color:var(--danger); border-color:rgba(229,115,115,0.25); }
-        .batch-helper { font-size:0.78rem; color:var(--text-secondary); line-height:1.5; margin-top:8px; }
-        .batch-top-actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
+        .multi-entry-wrap { margin-top: 22px; padding-top: 18px; border-top: 1px dashed #eee; }
+        .extra-entry-card { background: #fdfbf7; border: 1px dashed rgba(176,141,133,0.35); border-radius: 14px; padding: 16px; margin-top: 12px; box-shadow: 0 4px 10px rgba(90,77,65,0.03); }
+        .extra-entry-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+        .extra-entry-title { font-size:0.9rem; font-weight:700; color:var(--text-primary); }
+        .extra-entry-del { border:none; background:none; color:var(--danger); cursor:pointer; font-weight:700; }
 
     </style>
 </head>
@@ -342,18 +335,15 @@
         </div>
     </div>
 
-    <div id="page-add" class="page">
-        <div class="card">
-            <div class="card-title" id="add-page-title">新增一筆紀錄</div>
-            <div class="entry-mode-switch">
-                <button class="entry-mode-btn active" id="single-entry-btn" onclick="switchEntryMode('single')">單筆輸入</button>
-                <button class="entry-mode-btn" id="batch-entry-btn" onclick="switchEntryMode('batch')">月底補登模式</button>
-            </div>
-            <div class="batch-helper" id="entry-mode-helper">平常記一筆、存一筆。若妳先寫在紙本上，也可以切到「月底補登模式」一次補進系統。</div>
+    
+<div id="page-add" class="page">
+    <div class="card">
+        <div class="card-title" id="add-page-title">新增一筆紀錄</div>
+        <div class="batch-helper" id="entry-mode-helper" style="margin-bottom:12px;">先輸入第一筆；如果今天不只一筆，下面可以直接按「＋ 再加一筆」。</div>
 
-            <div id="single-entry-area">
+        <div id="single-entry-area">
             <div class="form-group"><label>日期</label><input type="date" id="input-date"></div>
-            
+
             <div class="form-group">
                 <label>資金流向</label>
                 <select id="input-main-category" onchange="updateSubCategories()">
@@ -364,7 +354,7 @@
                     <option value="收入">💰 收入 (Income)</option>
                 </select>
             </div>
-            
+
             <div class="form-group" id="sub-category-group">
                 <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:5px;">
                     <label id="sub-cat-label" style="margin:0;">詳細分類</label>
@@ -382,36 +372,26 @@
                     <option value="other">🏦 轉帳/其他 (Other)</option>
                 </select>
             </div>
+
             <div class="form-group"><label>金額</label><input type="number" step="any" id="input-amount" placeholder="0" inputmode="decimal"></div>
             <div class="form-group"><label>備註 (選填)</label><input type="text" id="input-note" placeholder="例如：午餐、全聯..."></div>
+
             <button class="btn" id="save-btn" onclick="saveTransaction()">確認儲存 <i class="fas fa-check"></i></button>
             <button class="btn btn-cancel hidden" id="cancel-edit-btn" onclick="resetForm()">取消修改</button>
-            </div>
 
-            
-<div id="batch-entry-area" class="hidden">
-                <div style="background: rgba(176,141,133,0.06); border:1px dashed rgba(176,141,133,0.3); border-radius:12px; padding:12px;">
-                    <div style="font-size:0.9rem; font-weight:700; color:var(--text-primary); margin-bottom:6px;">紙本先記了沒關係，這裡可以一次補登進系統</div>
-                    <div class="batch-helper">一筆一張卡片，會比表格更好補登。每張卡都可以選資金流向、分類、支付方式，再一次全部儲存。</div>
-                    <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin-top:10px;">
-                        <div class="backup-chip" id="batch-row-count">目前 0 筆</div>
-                        <div class="batch-top-actions" style="margin-top:0;">
-                            <button type="button" id="batch-add-card-btn" class="batch-mini-btn">＋ 新增一筆</button>
-                            <button type="button" id="batch-fill-today-btn" class="batch-mini-btn">空白日期填今天</button>
-                            <button type="button" id="batch-clear-empty-btn" class="batch-mini-btn danger">清掉空白卡片</button>
-                        </div>
-                    </div>
+            <div class="multi-entry-wrap" id="multi-entry-wrap">
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+                    <div style="font-size:0.8rem; color:var(--text-secondary);">今天還有其他記錄嗎？可以直接在下面再加一筆。</div>
+                    <button type="button" class="batch-mini-btn" id="add-more-entry-btn" onclick="addExtraEntryCard()">＋ 再加一筆</button>
                 </div>
-
-                <div id="batch-card-container" style="display:flex; flex-direction:column; gap:10px; margin-top:12px;"></div>
-
-                <button type="button" id="batch-save-btn" class="btn">全部儲存 <i class="fas fa-layer-group"></i></button>
+                <div id="extra-entry-container"></div>
             </div>
-
         </div>
     </div>
+</div>
 
-    <div id="page-review" class="page">
+<div id="page-review" class="page">
+
         <div class="card">
             <div class="card-title">
                 <span id="review-cycle-title">結算診斷</span>
@@ -568,9 +548,7 @@
                 <div style="display:flex; gap:10px; flex-wrap:wrap;">
                     <button class="btn-small btn-small-primary" onclick="exportData(true)"><i class="fas fa-download"></i> 立即備份 JSON</button>
                     <button class="btn-small btn-small-outline" onclick="restoreFromAutoBackup()"><i class="fas fa-rotate-left"></i> 還原瀏覽器最近快照</button>
-                    <button class="btn-small btn-small-outline" onclick="document.getElementById('import-file').click()"><i class="fas fa-upload"></i> 匯入備份</button>
                 </div>
-                <div style="font-size:0.78rem; color:var(--text-secondary); line-height:1.6; margin-top:10px;">匯入備份說明：請先把 JSON 檔存到「檔案」，再從這裡選取匯入。</div>
             </div>
             <p style="font-size:0.75rem; color:var(--info); margin-top:0; margin-bottom:10px;">💡 匯出報表會保存全部歷史資料：Excel 會依月份分成不同工作表；CSV 會把全部資料整理在同一張表。</p>
             
@@ -802,7 +780,7 @@
             const today = new Date(); document.getElementById('nw-input-month').value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
             document.getElementById('setting-cycle-start').value = sysSettings.cycleStart;
             document.getElementById('nw-input-month').addEventListener('change', function() { loadNetWorthDataForMonth(this.value); });
-            updateSubCategories(); renderDashboard(); setInterval(updateCountdowns, 1000);
+            updateSubCategories(); renderDashboard(); initExtraEntryArea(); setInterval(updateCountdowns, 1000);
             const urlParams = new URLSearchParams(window.location.search); if (urlParams.get('tab') === 'networth') switchPage('networth');
 });
 
@@ -855,279 +833,199 @@
             window.scrollTo(0, 0);
             if(pageId === 'dash') { dashboardViewDate = new Date(); currentChartFilter = null; renderDashboard(); }
             if(pageId === 'settings') { renderList(); renderBudgetSettings(); renderBackupStatus(); } 
-            if(pageId === 'add') { initBatchEntry(false); bindBatchButtons(); }
             if(pageId === 'shop') { resetShop(); renderShoppingList(); }
             if(pageId === 'networth') { loadNetWorthDataForMonth(document.getElementById('nw-input-month').value); renderNetWorthPage(); renderDebtTracker(); } 
             if(pageId === 'review') renderReviewPage(); 
             if(pageId === 'milestones') renderMilestonesPage(); 
         }
 
-        function openAddPage() { resetForm(); switchPage('add'); switchEntryMode('single'); }
-        function resetForm() { editingId = null; document.getElementById('add-page-title').innerText = '新增一筆紀錄'; document.getElementById('save-btn').innerHTML = '確認儲存 <i class="fas fa-check"></i>'; document.getElementById('cancel-edit-btn').classList.add('hidden'); document.getElementById('input-date').valueAsDate = new Date(); document.getElementById('input-main-category').value = '支出-變動'; updateSubCategories(); document.getElementById('input-amount').value = ''; document.getElementById('input-note').value = ''; document.getElementById('input-method').value = 'cash'; switchEntryMode('single'); }
-        function sortTransactions() { transactions.sort((a, b) => { const dateDiff = new Date(b.date) - new Date(a.date); if (dateDiff !== 0) return dateDiff; return b.id - a.id; }); }
-
-
-        
-function switchEntryMode(mode) {
-            entryMode = mode;
-            const singleBtn = document.getElementById('single-entry-btn');
-            const batchBtn = document.getElementById('batch-entry-btn');
-            const singleArea = document.getElementById('single-entry-area');
-            const batchArea = document.getElementById('batch-entry-area');
+        function openAddPage() { resetForm(); switchPage('add'); }
+        function resetForm() { 
+            editingId = null; 
+            document.getElementById('add-page-title').innerText = '新增一筆紀錄'; 
+            document.getElementById('save-btn').innerHTML = '確認儲存 <i class="fas fa-check"></i>'; 
+            document.getElementById('cancel-edit-btn').classList.add('hidden'); 
+            document.getElementById('input-date').valueAsDate = new Date(); 
+            document.getElementById('input-main-category').value = '支出-變動'; 
+            updateSubCategories(); 
+            document.getElementById('input-amount').value = ''; 
+            document.getElementById('input-note').value = ''; 
+            document.getElementById('input-method').value = 'cash'; 
+            const multi = document.getElementById('multi-entry-wrap');
+            if (multi) multi.classList.remove('hidden');
+            initExtraEntryArea();
             const helper = document.getElementById('entry-mode-helper');
-            if (!singleBtn || !batchBtn || !singleArea || !batchArea || !helper) return;
-
-            const isSingle = mode === 'single';
-            singleBtn.classList.toggle('active', isSingle);
-            batchBtn.classList.toggle('active', !isSingle);
-            singleArea.classList.toggle('hidden', !isSingle);
-            batchArea.classList.toggle('hidden', isSingle);
-            helper.innerText = isSingle
-                ? '平常記一筆、存一筆。若妳先寫在紙本上，也可以切到「月底補登模式」一次補進系統。'
-                : '適合把紙本記錄一張一張補進網站，再去看分析和匯出報表。';
-
-            if (!isSingle) {
-                initBatchEntry(false);
-                bindBatchButtons();
-            }
+            if (helper) helper.innerText = '先輸入第一筆；如果今天不只一筆，下面可以直接按「＋ 再加一筆」。';
         }
 
-        function initBatchEntry(forceReset = false) {
-            const container = document.getElementById('batch-card-container');
-            if (!container) return;
-            if (forceReset) container.innerHTML = '';
-            if (container.children.length === 0) {
-                for (let i = 0; i < 3; i++) addBatchCard();
-            }
-            updateBatchRowCount();
-        }
-
-        function updateBatchRowCount() {
-            const container = document.getElementById('batch-card-container');
-            const badge = document.getElementById('batch-row-count');
-            if (!container || !badge) return;
-            badge.innerText = `目前 ${container.children.length} 筆`;
-        }
-
-        function bindBatchButtons() {
-            const bindings = [
-                ['batch-add-card-btn', () => addBatchCard()],
-                ['batch-fill-today-btn', () => fillBatchToday()],
-                ['batch-clear-empty-btn', () => clearEmptyBatchCards()],
-                ['batch-save-btn', () => saveBatchTransactions()],
-            ];
-            bindings.forEach(([id, fn]) => {
-                const btn = document.getElementById(id);
-                if (!btn || btn.dataset.bound === 'yes') return;
-                btn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    fn();
-                });
-                btn.dataset.bound = 'yes';
-            });
-        }
-
-        function getSubcategoryOptionsForMainCat(mainCatRaw) {
+        function getSubcategoryOptionsHtml(mainCatRaw, selected = '') {
+            let options = [];
             if (mainCatRaw === '收入') {
-                return incomeCats.map(cat => ({ value: cat, label: cat }));
+                options = incomeCats.map(cat => ({ value: cat, label: cat }));
+            } else {
+                let realMainCat = mainCatRaw;
+                if (mainCatRaw === '存入預備金') realMainCat = '預存支出';
+                else if (mainCatRaw.startsWith('支出-')) realMainCat = mainCatRaw.replace('支出-', '') + '支出';
+                const envelopes = userEnvelopes[realMainCat];
+                if (!envelopes || envelopes.length === 0) options = [{ value: '未分類', label: '未分類' }];
+                else options = envelopes.map(cat => ({ value: cat, label: cat }));
             }
-            let realMainCat = mainCatRaw;
-            if (mainCatRaw === '存入預備金') realMainCat = '預存支出';
-            else if (mainCatRaw.startsWith('支出-')) realMainCat = mainCatRaw.replace('支出-', '') + '支出';
-
-            const envelopes = userEnvelopes[realMainCat];
-            if (!envelopes || envelopes.length === 0) return [{ value: '未分類', label: '未分類' }];
-            return envelopes.map(cat => ({ value: cat, label: cat }));
-        }
-
-        function buildBatchSubcategoryOptions(mainCatRaw, selected = '') {
-            const options = getSubcategoryOptionsForMainCat(mainCatRaw);
             return options.map(opt => `<option value="${opt.value}" ${opt.value === selected ? 'selected' : ''}>${opt.label}</option>`).join('');
         }
 
-        function addBatchCard(defaults = {}) {
-            const container = document.getElementById('batch-card-container');
+        function initExtraEntryArea() {
+            const container = document.getElementById('extra-entry-container');
+            if (container) container.innerHTML = '';
+            extraEntryCounter = 0;
+        }
+
+        function addExtraEntryCard(defaults = {}) {
+            const container = document.getElementById('extra-entry-container');
             if (!container) return;
-            batchRowCounter += 1;
-            const cardId = batchRowCounter;
+            extraEntryCounter += 1;
+            const id = extraEntryCounter;
             const today = new Date().toISOString().slice(0, 10);
             const mainCat = defaults.mainCat || '支出-變動';
 
             const card = document.createElement('div');
-            card.className = 'card';
-            card.dataset.cardId = cardId;
+            card.className = 'extra-entry-card';
+            card.dataset.extraId = String(id);
             card.innerHTML = `
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                    <div style="font-weight:700; color:var(--text-primary);">補登第 ${cardId} 筆</div>
-                    <button type="button" class="batch-mini-btn danger" onclick="removeBatchCard(${cardId})">刪除</button>
+                <div class="extra-entry-head">
+                    <div class="extra-entry-title">追加記帳 ${id}</div>
+                    <button type="button" class="extra-entry-del" onclick="removeExtraEntryCard(${id})">刪除</button>
                 </div>
-                <div class="form-group"><label>日期</label><input type="date" id="batch-date-${cardId}" value="${defaults.date || today}"></div>
+                <div class="form-group"><label>日期</label><input type="date" id="extra-date-${id}" value="${defaults.date || today}"></div>
                 <div class="form-group">
                     <label>資金流向</label>
-                    <select id="batch-main-${cardId}" onchange="updateBatchCardSubcategory(${cardId})">
+                    <select id="extra-main-${id}" onchange="updateExtraSubCategories(${id})">
                         <option value="支出-變動" ${mainCat === '支出-變動' ? 'selected' : ''}>💸 支出 (變動)</option>
                         <option value="支出-固定" ${mainCat === '支出-固定' ? 'selected' : ''}>🏠 支出 (固定)</option>
                         <option value="支出-預存" ${mainCat === '支出-預存' ? 'selected' : ''}>🎯 支出 (花掉預存金)</option>
-                        <option value="存入預備金" ${mainCat === '存入預備金' ? 'selected' : ''}>🐖 存入預備金</option>
-                        <option value="收入" ${mainCat === '收入' ? 'selected' : ''}>💰 收入</option>
+                        <option value="存入預備金" ${mainCat === '存入預備金' ? 'selected' : ''}>🐖 存入預備金 (Save)</option>
+                        <option value="收入" ${mainCat === '收入' ? 'selected' : ''}>💰 收入 (Income)</option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label>詳細分類</label>
-                    <select id="batch-sub-${cardId}">${buildBatchSubcategoryOptions(mainCat, defaults.subCat || '')}</select>
+                    <select id="extra-sub-${id}">${getSubcategoryOptionsHtml(mainCat, defaults.subCat || '')}</select>
                 </div>
                 <div class="form-group">
                     <label>支付方式</label>
-                    <select id="batch-method-${cardId}">
-                        <option value="cash" ${(defaults.method || 'cash') === 'cash' ? 'selected' : ''}>💵 現金</option>
-                        <option value="card" ${(defaults.method || '') === 'card' ? 'selected' : ''}>💳 信用卡/行動支付</option>
-                        <option value="other" ${(defaults.method || '') === 'other' ? 'selected' : ''}>🏦 轉帳/其他</option>
+                    <select id="extra-method-${id}">
+                        <option value="cash" ${(defaults.method || 'cash') === 'cash' ? 'selected' : ''}>💵 現金 (Cash)</option>
+                        <option value="card" ${(defaults.method || '') === 'card' ? 'selected' : ''}>💳 信用卡/行動支付 (Card)</option>
+                        <option value="other" ${(defaults.method || '') === 'other' ? 'selected' : ''}>🏦 轉帳/其他 (Other)</option>
                     </select>
                 </div>
-                <div class="form-group"><label>金額</label><input type="number" step="any" id="batch-amount-${cardId}" value="${defaults.amount || ''}" placeholder="0"></div>
-                <div class="form-group"><label>備註</label><input type="text" id="batch-note-${cardId}" value="${defaults.note || ''}" placeholder="例如：午餐、全聯..."></div>
+                <div class="form-group"><label>金額</label><input type="number" step="any" id="extra-amount-${id}" value="${defaults.amount || ''}" placeholder="0" inputmode="decimal"></div>
+                <div class="form-group"><label>備註 (選填)</label><input type="text" id="extra-note-${id}" value="${defaults.note || ''}" placeholder="例如：午餐、全聯..."></div>
             `;
             container.appendChild(card);
-            updateBatchRowCount();
-            return cardId;
         }
 
-        function updateBatchCardSubcategory(cardId) {
-            const mainCat = document.getElementById(`batch-main-${cardId}`)?.value || '支出-變動';
-            const subSelect = document.getElementById(`batch-sub-${cardId}`);
-            if (!subSelect) return;
-            subSelect.innerHTML = buildBatchSubcategoryOptions(mainCat);
+        function updateExtraSubCategories(id) {
+            const mainCat = document.getElementById(`extra-main-${id}`)?.value || '支出-變動';
+            const sub = document.getElementById(`extra-sub-${id}`);
+            if (sub) sub.innerHTML = getSubcategoryOptionsHtml(mainCat);
         }
 
-        function removeBatchCard(cardId) {
-            const card = document.querySelector(`[data-card-id="${cardId}"]`);
+        function removeExtraEntryCard(id) {
+            const card = document.querySelector(`[data-extra-id="${id}"]`);
             if (card) card.remove();
-            const container = document.getElementById('batch-card-container');
-            if (container && container.children.length === 0) {
-                addBatchCard();
+        }
+
+        function collectEntryPayload(date, mainCatRaw, subCat, method, amount, note) {
+            let type, saveMainCategory;
+            if (mainCatRaw === '收入') {
+                type = 'income';
+                saveMainCategory = '收入';
+            } else if (mainCatRaw === '存入預備金') {
+                type = 'save';
+                saveMainCategory = '預存支出';
+            } else {
+                type = 'expense';
+                saveMainCategory = mainCatRaw.replace('支出-', '') + '支出';
             }
-            updateBatchRowCount();
+            return { date, type, category: subCat, mainCategory: saveMainCategory, amount, note, method };
         }
 
-        function fillBatchToday() {
-            const today = new Date().toISOString().slice(0, 10);
-            document.querySelectorAll('[id^="batch-date-"]').forEach(el => {
-                if (!el.value) el.value = today;
-            });
-        }
 
-        function clearEmptyBatchCards() {
-            const cards = Array.from(document.querySelectorAll('#batch-card-container [data-card-id]'));
-            cards.forEach(card => {
-                const cardId = card.dataset.cardId;
-                const amount = document.getElementById(`batch-amount-${cardId}`)?.value;
-                const note = document.getElementById(`batch-note-${cardId}`)?.value;
-                if (!amount && !note) card.remove();
-            });
-            const container = document.getElementById('batch-card-container');
-            if (container && container.children.length === 0) {
-                addBatchCard();
+        let extraEntryCounter = 0;
+
+        
+        function saveTransaction() {
+            const date = document.getElementById('input-date').value;
+            const mainCatRaw = document.getElementById('input-main-category').value;
+            const amount = parseFloat(document.getElementById('input-amount').value);
+            const note = document.getElementById('input-note').value;
+            const method = document.getElementById('input-method').value;
+            const subGroup = document.getElementById('sub-category-group');
+            let subCat = '';
+            if (subGroup.style.display !== 'none') {
+                subCat = isCustomCatMode ? document.getElementById('input-custom-category').value.trim() : document.getElementById('input-sub-category').value;
+                if (!subCat) { alert('請選擇詳細分類！'); return; }
+            } else {
+                subCat = '未分類';
             }
-            updateBatchRowCount();
-        }
+            if (!date || isNaN(amount) || amount <= 0) { alert('請輸入完整金額與日期！'); return; }
 
-        function saveBatchTransactions() {
-            const cards = Array.from(document.querySelectorAll('#batch-card-container [data-card-id]'));
-            const newEntries = [];
+            if (editingId) {
+                const payload = collectEntryPayload(date, mainCatRaw, subCat, method, amount, note);
+                const index = transactions.findIndex(t => t.id === editingId);
+                if (index !== -1) {
+                    transactions[index] = { id: editingId, ...payload };
+                    alert('修改成功！✏️');
+                }
+                sortTransactions();
+                localStorage.setItem('bear_transactions', JSON.stringify(transactions));
+                writeAutoBackup('transaction-edit');
+                resetForm();
+                switchPage('dash');
+                return;
+            }
+
+            const entries = [{ id: Date.now(), ...collectEntryPayload(date, mainCatRaw, subCat, method, amount, note) }];
+            const extraCards = Array.from(document.querySelectorAll('#extra-entry-container .extra-entry-card'));
             const errors = [];
 
-            cards.forEach((card, index) => {
-                const cardId = card.dataset.cardId;
-                const date = document.getElementById(`batch-date-${cardId}`)?.value || '';
-                const mainCatRaw = document.getElementById(`batch-main-${cardId}`)?.value || '支出-變動';
-                const subCat = document.getElementById(`batch-sub-${cardId}`)?.value || '未分類';
-                const method = document.getElementById(`batch-method-${cardId}`)?.value || 'cash';
-                const amount = parseFloat(document.getElementById(`batch-amount-${cardId}`)?.value);
-                const note = document.getElementById(`batch-note-${cardId}`)?.value || '';
+            extraCards.forEach((card, idx) => {
+                const id = card.dataset.extraId;
+                const xDate = document.getElementById(`extra-date-${id}`)?.value || '';
+                const xMain = document.getElementById(`extra-main-${id}`)?.value || '支出-變動';
+                const xSub = document.getElementById(`extra-sub-${id}`)?.value || '未分類';
+                const xMethod = document.getElementById(`extra-method-${id}`)?.value || 'cash';
+                const xAmount = parseFloat(document.getElementById(`extra-amount-${id}`)?.value);
+                const xNote = document.getElementById(`extra-note-${id}`)?.value || '';
 
-                const emptyCard = !date && !subCat && !method && !note && (isNaN(amount) || amount <= 0);
-                if (emptyCard) return;
-
-                if (!date || isNaN(amount) || amount <= 0) {
-                    errors.push(`第 ${index + 1} 張卡片資料不完整`);
+                const empty = !xDate && !xSub && !xMethod && !xNote && (isNaN(xAmount) || xAmount <= 0);
+                if (empty) return;
+                if (!xDate || isNaN(xAmount) || xAmount <= 0) {
+                    errors.push(`追加記帳 ${idx + 1} 資料不完整`);
                     return;
                 }
-
-                let type, saveMainCategory;
-                if (mainCatRaw === '收入') {
-                    type = 'income';
-                    saveMainCategory = '收入';
-                } else if (mainCatRaw === '存入預備金') {
-                    type = 'save';
-                    saveMainCategory = '預存支出';
-                } else {
-                    type = 'expense';
-                    saveMainCategory = mainCatRaw.replace('支出-', '') + '支出';
-                }
-
-                if (type === 'expense' && userEnvelopes[saveMainCategory] && subCat !== '未分類' && !userEnvelopes[saveMainCategory].includes(subCat)) {
-                    userEnvelopes[saveMainCategory].push(subCat);
-                }
-
-                newEntries.push({
-                    id: Date.now() + index,
-                    date,
-                    type,
-                    category: subCat,
-                    mainCategory: saveMainCategory,
-                    amount,
-                    note,
-                    method
-                });
+                entries.push({ id: Date.now() + idx + 1, ...collectEntryPayload(xDate, xMain, xSub, xMethod, xAmount, xNote) });
             });
 
             if (errors.length > 0) {
-                alert(errors.join('\\n') + '\\n\\n請先修正後再儲存。');
+                alert(errors.join('\\n'));
                 return;
             }
 
-            if (newEntries.length === 0) {
-                alert('目前沒有可儲存的有效資料。');
-                return;
-            }
+            entries.forEach(entry => {
+                if (entry.type === 'expense' && userEnvelopes[entry.mainCategory] && entry.category !== '未分類') {
+                    if (!userEnvelopes[entry.mainCategory].includes(entry.category)) userEnvelopes[entry.mainCategory].push(entry.category);
+                }
+                transactions.push(entry);
+            });
 
-            transactions.push(...newEntries);
             sortTransactions();
             localStorage.setItem('bear_transactions', JSON.stringify(transactions));
             localStorage.setItem('bear_custom_envelopes', JSON.stringify(userEnvelopes));
-            writeAutoBackup('batch-transaction');
-
-            const container = document.getElementById('batch-card-container');
-            if (container) container.innerHTML = '';
-            initBatchEntry(true);
-            renderDashboard();
-            renderList();
-            alert(`已成功補登 ${newEntries.length} 筆資料！`);
+            writeAutoBackup('transaction-multi');
+            alert(`成功儲存 ${entries.length} 筆紀錄！`);
+            resetForm();
             switchPage('dash');
-        }
-
-        function saveTransaction() {
-            const date = document.getElementById('input-date').value; const mainCatRaw = document.getElementById('input-main-category').value; 
-            const amountStr = document.getElementById('input-amount').value;
-            const amount = parseFloat(amountStr); 
-            const note = document.getElementById('input-note').value; const method = document.getElementById('input-method').value;
-            const subGroup = document.getElementById('sub-category-group'); let subCat = '';
-            if (subGroup.style.display !== 'none') { subCat = isCustomCatMode ? document.getElementById('input-custom-category').value.trim() : document.getElementById('input-sub-category').value; if (!subCat) { alert('請選擇詳細分類！'); return; } } else { subCat = '未分類'; }
-            if (!date || isNaN(amount) || amount <= 0) { alert('請輸入完整金額與日期！'); return; }
-
-            let type, saveMainCategory;
-            if (mainCatRaw === '收入') { type = 'income'; saveMainCategory = '收入'; } else if (mainCatRaw === '存入預備金') { type = 'save'; saveMainCategory = '預存支出'; } else { type = 'expense'; saveMainCategory = mainCatRaw.replace('支出-', '') + '支出'; }
-
-            if (type === 'expense' && userEnvelopes[saveMainCategory] && subGroup.style.display !== 'none') { if (!userEnvelopes[saveMainCategory].includes(subCat)) { userEnvelopes[saveMainCategory].push(subCat); localStorage.setItem('bear_custom_envelopes', JSON.stringify(userEnvelopes)); } }
-
-            if (editingId) {
-                const index = transactions.findIndex(t => t.id === editingId);
-                if (index !== -1) { transactions[index] = { id: editingId, date, type, category: subCat, mainCategory: saveMainCategory, amount, note, method }; alert('修改成功！✏️'); }
-            } else { 
-                transactions.push({ id: Date.now(), date, type, category: subCat, mainCategory: saveMainCategory, amount, note, method }); 
-                if (type === 'save') alert('太棒了！成功餵食小豬公 🐖💰'); else alert('記帳成功！💰'); 
-            }
-            sortTransactions(); localStorage.setItem('bear_transactions', JSON.stringify(transactions)); writeAutoBackup('transaction'); resetForm(); switchPage('dash');
         }
 
         function editTx(id) {
@@ -1142,8 +1040,7 @@ function switchEntryMode(mode) {
             } else { document.getElementById('input-note').value = tx.note; }
 
             document.getElementById('input-amount').value = tx.amount; document.getElementById('input-method').value = tx.method || 'cash';
-            document.getElementById('add-page-title').innerText = '編輯紀錄'; document.getElementById('save-btn').innerHTML = '確認修改 <i class="fas fa-save"></i>'; document.getElementById('cancel-edit-btn').classList.remove('hidden'); switchPage('add'); switchEntryMode('single');
-        }
+            document.getElementById('add-page-title').innerText = '編輯紀錄'; document.getElementById('save-btn').innerHTML = '確認修改 <i class="fas fa-save"></i>'; document.getElementById('cancel-edit-btn').classList.remove('hidden'); switchPage('add'); const multi = document.getElementById('multi-entry-wrap'); if (multi) multi.classList.add('hidden'); document.getElementById('multi-entry-wrap').classList.add('hidden');         }
 
         function deleteTx(id) { 
             if(confirm('確定刪除這筆紀錄？')) { 
@@ -2670,6 +2567,32 @@ function exportToExcel() {
 
         window.addEventListener('beforeunload', () => {
             if (hasAnyUserData()) writeAutoBackup('beforeunload');
+        });
+
+
+        function forceRefreshDashboardHeader() {
+            try {
+                const currentCycle = getCycleBoundary(new Date(), sysSettings?.cycleStart || 1);
+                const titleEl = document.getElementById('dash-cycle-title');
+                const datesEl = document.getElementById('dash-cycle-dates');
+                if (titleEl) titleEl.innerHTML = currentCycle.label;
+                if (datesEl) {
+                    datesEl.innerHTML = currentCycle.isDefault
+                        ? `(1號 - 月底)`
+                        : `(${currentCycle.start.getMonth()+1}/${currentCycle.start.getDate()} - ${currentCycle.end.getMonth()+1}/${currentCycle.end.getDate()})`;
+                }
+            } catch (e) {
+                console.error('forceRefreshDashboardHeader error', e);
+            }
+        }
+
+        window.addEventListener('load', () => {
+            try {
+                renderDashboard();
+            } catch (e) {
+                console.error('renderDashboard on load error', e);
+            }
+            forceRefreshDashboardHeader();
         });
 
         if ('serviceWorker' in navigator) { 
