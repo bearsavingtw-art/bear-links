@@ -346,10 +346,10 @@
         <div class="card">
             <div class="card-title" id="add-page-title">新增一筆紀錄</div>
             <div class="entry-mode-switch">
-                <button type="button" class="entry-mode-btn active" id="single-entry-btn" onclick="switchEntryMode('single')">單筆輸入</button>
-                <button type="button" class="entry-mode-btn" id="batch-entry-btn" onclick="switchEntryMode('batch')">月底補登模式</button>
+                <button class="entry-mode-btn active" id="single-entry-btn" onclick="switchEntryMode('single')">單筆輸入</button>
+                <button class="entry-mode-btn" id="batch-entry-btn" onclick="switchEntryMode('batch')">月底補登模式</button>
             </div>
-            <div class="batch-helper" id="entry-mode-helper">平常記一筆、存一筆。若妳先寫在紙本上，也可以切到「月底補登模式」一次補進系統。</div>
+            <div class="batch-helper" id="entry-mode-helper">平常記一筆、存一筆。若妳先寫在紙本上，也可以切到「貼上式批次輸入」一次補進系統。</div>
 
             <div id="single-entry-area">
             <div class="form-group"><label>日期</label><input type="date" id="input-date"></div>
@@ -388,38 +388,52 @@
             <button class="btn btn-cancel hidden" id="cancel-edit-btn" onclick="resetForm()">取消修改</button>
             </div>
 
-            <div id="batch-entry-area" class="hidden">
+            
+<div id="batch-entry-area" class="hidden">
                 <div style="background: rgba(176,141,133,0.06); border:1px dashed rgba(176,141,133,0.3); border-radius:12px; padding:12px;">
-                    <div style="font-size:0.9rem; font-weight:700; color:var(--text-primary); margin-bottom:6px;">紙本先記了沒關係，這裡可以一次補登進系統</div>
-                    <div class="batch-helper">建議先把同一天的資料一起輸入。支援收入、固定支出、變動支出、預存支出與存入預備金。</div>
-                    <div class="batch-top-actions">
-                        <button type="button" class="batch-mini-btn" id="batch-add-one-btn" onclick="addBatchRow()">＋ 新增一列</button>
-                        <button type="button" class="batch-mini-btn" id="batch-add-five-btn" onclick="addBatchRows(5)">＋ 一次新增 5 列</button>
-                        <button type="button" class="batch-mini-btn" id="batch-fill-today-btn" onclick="fillBatchToday()">日期填今天</button>
-                        <button type="button" class="batch-mini-btn danger" id="batch-clear-empty-btn" onclick="clearEmptyBatchRows()">清掉空白列</button>
+                    <div style="font-size:0.9rem; font-weight:700; color:var(--text-primary); margin-bottom:6px;">紙本先記了沒關係，這裡可以貼上式批次輸入</div>
+                    <div class="batch-helper">把妳紙本整理好的內容一行貼一筆，系統會先幫妳拆成表格，再一次存進網站。</div>
+                    <div style="background:#fff; border-radius:10px; padding:10px; margin-top:10px; border:1px solid rgba(176,141,133,0.15);">
+                        <div style="font-size:0.78rem; color:var(--text-secondary); line-height:1.6; margin-bottom:8px;">
+                            建議格式：<br>
+                            日期,資金流向,詳細分類,支付方式,金額,備註<br>
+                            例如：<br>
+                            2026-03-01,支出-變動,🍱 伙食餐飲,cash,120,早餐<br>
+                            2026-03-01,收入,薪資收入,other,40000,三月薪水
+                        </div>
+                        <textarea id="batch-paste-input" style="width:100%; min-height:180px; border:1px solid #eee; border-radius:10px; padding:12px; font-size:0.9rem; line-height:1.6; resize:vertical;" placeholder="把多筆資料貼在這裡，一行一筆"></textarea>
+                        <div class="batch-top-actions">
+                            <button type="button" id="batch-parse-btn" class="batch-mini-btn" onclick="parseBatchPaste()">解析內容</button>
+                            <button type="button" id="batch-clear-paste-btn" class="batch-mini-btn danger" onclick="clearBatchPaste()">清空文字</button>
+                        </div>
                     </div>
                 </div>
 
-                <div class="batch-table-wrap">
-                    <table class="batch-table">
-                        <thead>
-                            <tr>
-                                <th style="width:120px;">日期</th>
-                                <th style="width:140px;">資金流向</th>
-                                <th style="width:160px;">詳細分類</th>
-                                <th style="width:130px;">支付方式</th>
-                                <th style="width:110px;">金額</th>
-                                <th>備註</th>
-                                <th style="width:70px;">操作</th>
-                            </tr>
-                        </thead>
-                        <tbody id="batch-tbody"></tbody>
-                    </table>
+                <div id="batch-preview-area" class="hidden" style="margin-top:15px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
+                        <div class="backup-chip" id="batch-row-count">目前 0 筆待匯入</div>
+                        <div class="batch-helper" style="margin-top:0;">解析後可先檢查，再一次儲存。</div>
+                    </div>
+                    <div class="batch-table-wrap">
+                        <table class="batch-table">
+                            <thead>
+                                <tr>
+                                    <th style="width:120px;">日期</th>
+                                    <th style="width:140px;">資金流向</th>
+                                    <th style="width:160px;">詳細分類</th>
+                                    <th style="width:130px;">支付方式</th>
+                                    <th style="width:110px;">金額</th>
+                                    <th>備註</th>
+                                    <th style="width:70px;">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="batch-tbody"></tbody>
+                        </table>
+                    </div>
+                    <button type="button" id="batch-save-btn" class="btn" onclick="saveBatchTransactions()">全部儲存 <i class="fas fa-layer-group"></i></button>
                 </div>
-
-                <div class="batch-helper">儲存前可先檢查分類是否正確。若某列「詳細分類」看不到想要的分類，可直接切回設定新增後再回來補登。</div>
-                <button type="button" class="btn" id="batch-save-btn" onclick="saveBatchTransactions()">全部儲存 <i class="fas fa-layer-group"></i></button>
             </div>
+
         </div>
     </div>
 
@@ -564,37 +578,36 @@
             <div style="background: rgba(176,141,133,0.06); border:1px dashed rgba(176,141,133,0.35); border-radius:12px; padding:14px; margin-bottom:15px;">
                 <div style="font-size:0.9rem; color:var(--text-primary); font-weight:700; margin-bottom:8px;">🐻 備份守護模式</div>
                 <div style="font-size:0.8rem; color:var(--text-secondary); line-height:1.6; margin-bottom:12px;">
-                    系統會自動把目前資料做成本機快照，但如果瀏覽器快取被清掉，資料還是可能一起消失。<br>
-                    建議妳定期下載一份 JSON 備份，讓辛苦累積的底氣有第二份保險。
+                    「瀏覽器最近快照」只會還原這台裝置、這個瀏覽器裡最近一次自動保存的資料，不會讀取妳電腦裡手動下載的 JSON 檔。<br>
+                    如果妳想救回自己下載的備份檔，請用下方的「匯入備份」。
                 </div>
                 <div class="backup-status-grid">
                     <div class="backup-status-box">
-                        <div class="backup-status-label">最近自動快照</div>
+                        <div class="backup-status-label">瀏覽器最近快照</div>
                         <div class="backup-status-value" id="backup-last-auto">尚未建立</div>
                     </div>
                     <div class="backup-status-box">
-                        <div class="backup-status-label">最近手動備份</div>
+                        <div class="backup-status-label">最近下載的 JSON 備份</div>
                         <div class="backup-status-value" id="backup-last-manual">尚未備份</div>
                     </div>
                 </div>
                 <div style="display:flex; gap:10px; flex-wrap:wrap;">
                     <button class="btn-small btn-small-primary" onclick="exportData(true)"><i class="fas fa-download"></i> 立即備份 JSON</button>
-                    <button class="btn-small btn-small-outline" onclick="restoreFromAutoBackup()"><i class="fas fa-rotate-left"></i> 從自動快照還原</button>
+                    <button class="btn-small btn-small-outline" onclick="restoreFromAutoBackup()"><i class="fas fa-rotate-left"></i> 還原瀏覽器最近快照</button>
+                    <button class="btn-small btn-small-outline" onclick="document.getElementById('import-file').click()"><i class="fas fa-upload"></i> 匯入備份</button>
+                </div>
+                <div style="font-size:0.78rem; color:var(--text-secondary); line-height:1.6; margin-top:10px;">
+                    匯入備份說明：請先把 JSON 備份檔存到妳的「檔案」裡，再從這裡選取匯入。
                 </div>
             </div>
-            <p style="font-size:0.75rem; color:var(--info); margin-top:0; margin-bottom:10px;">💡 匯出報表會保存全部歷史資料：Excel 會依月份分成不同工作表；CSV 會把全部資料整理在同一張表。</p>
+            <p style="font-size:0.75rem; color:var(--info); margin-top:0; margin-bottom:10px;">💡 匯出報表會保存全部歷史資料：Excel 會依月份分成不同分頁；CSV 會把全部資料整理在同一張表。JSON 備份則是完整系統還原檔。</p>
             
             <div style="display:flex; flex-direction:column; gap:10px; margin-bottom: 5px;">
-                <button class="btn btn-outline" style="border-color:var(--success); color:var(--success); margin-top:0; background:#f4fbf5;" onclick="exportToExcel()"><i class="fas fa-file-excel"></i> 匯出完整歷史 Excel（每月分頁）</button>
+                <button class="btn btn-outline" style="border-color:var(--success); color:var(--success); margin-top:0; background:#f4fbf5;" onclick="exportToExcel()"><i class="fas fa-file-excel"></i> 匯出完整歷史 Excel（全部月份）</button>
                 <button class="btn btn-outline" style="border-color:#546e7a; color:#546e7a; margin-top:0; background:#f0f4f8;" onclick="exportToCSV()"><i class="fas fa-table"></i> 匯出完整歷史 CSV（單表彙整）</button>
             </div>
             
             <p style="font-size:0.75rem; color:var(--danger); margin-top:0; margin-bottom:15px; line-height: 1.5;">⚠️ Excel 版本適合完整整理與月份分頁查看；若在蘋果手機、IG 內建瀏覽器或 Google 試算表開啟有相容問題，請改用 CSV 版本。</p>
-
-            <div style="display:flex; gap:10px;">
-                <button class="btn btn-outline" style="flex:1; margin-top:0;" onclick="exportData(true)"><i class="fas fa-download"></i> 系統備份 (JSON)</button>
-                <button class="btn btn-outline" style="flex:1; margin-top:0;" onclick="document.getElementById('import-file').click()"><i class="fas fa-upload"></i> 匯入備份</button>
-            </div>
             <input type="file" id="import-file" style="display:none;" onchange="importData(this)">
             <button class="btn btn-outline" style="border-color:#e57373; color:#e57373;" onclick="clearData()"><i class="fas fa-trash"></i> 清空資料</button>
         </div>
@@ -896,30 +909,46 @@
             singleArea.classList.toggle('hidden', !isSingle);
             batchArea.classList.toggle('hidden', isSingle);
             helper.innerText = isSingle
-                ? '平常記一筆、存一筆。若妳先寫在紙本上，也可以切到「月底補登模式」一次補進系統。'
-                : '適合把紙本記錄一次補登進網站，再去看分析和匯出報表。';
-
-            if (!isSingle) {
-                initBatchEntry();
-            const addOneBtn = document.getElementById('batch-add-one-btn');
-            const addFiveBtn = document.getElementById('batch-add-five-btn');
-            const fillTodayBtn = document.getElementById('batch-fill-today-btn');
-            const clearEmptyBtn = document.getElementById('batch-clear-empty-btn');
-            const batchSaveBtn = document.getElementById('batch-save-btn');
-            if (addOneBtn) addOneBtn.addEventListener('click', () => addBatchRow());
-            if (addFiveBtn) addFiveBtn.addEventListener('click', () => addBatchRows(5));
-            if (fillTodayBtn) fillTodayBtn.addEventListener('click', () => fillBatchToday());
-            if (clearEmptyBtn) clearEmptyBtn.addEventListener('click', () => clearEmptyBatchRows());
-            if (batchSaveBtn) batchSaveBtn.addEventListener('click', () => saveBatchTransactions());
-            }
+                ? '平常記一筆、存一筆。若妳先寫在紙本上，也可以切到「貼上式批次輸入」一次補進系統。'
+                : '適合把紙本記錄整理成多行文字後，直接貼上批次匯入網站。';
         }
 
-        function initBatchEntry() {
+        function initBatchEntry(forceReset = false) {
+            const input = document.getElementById('batch-paste-input');
+            const preview = document.getElementById('batch-preview-area');
             const tbody = document.getElementById('batch-tbody');
-            if (!tbody) return;
-            if (tbody.children.length === 0) {
-                addBatchRows(5);
+            if (!input || !preview || !tbody) return;
+            if (forceReset) {
+                input.value = '';
+                tbody.innerHTML = '';
+                preview.classList.add('hidden');
             }
+            updateBatchRowCount();
+        }
+
+        function updateBatchRowCount() {
+            const tbody = document.getElementById('batch-tbody');
+            const badge = document.getElementById('batch-row-count');
+            if (!tbody || !badge) return;
+            badge.innerText = `目前 ${tbody.children.length} 筆待匯入`;
+        }
+
+        function rebuildBatchRows() {
+            return;
+        }
+
+        function bindBatchButtons() {
+            const pairs = [
+                ['batch-parse-btn', () => parseBatchPaste()],
+                ['batch-clear-paste-btn', () => clearBatchPaste()],
+                ['batch-save-btn', () => saveBatchTransactions()],
+            ];
+            pairs.forEach(([id, handler]) => {
+                const el = document.getElementById(id);
+                if (!el || el.dataset.bound === 'yes') return;
+                el.addEventListener('click', handler);
+                el.dataset.bound = 'yes';
+            });
         }
 
         function getSubcategoryOptionsForMainCat(mainCatRaw) {
@@ -973,10 +1002,11 @@
                 <td><button class="batch-mini-btn danger" onclick="removeBatchRow(${rowId})">刪除</button></td>
             `;
             tbody.appendChild(tr);
+            updateBatchRowCount();
         }
 
-        function addBatchRows(count = 5) {
-            for (let i = 0; i < count; i++) addBatchRow();
+        function addBatchRows() {
+            return;
         }
 
         function updateBatchSubcategory(rowId) {
@@ -991,25 +1021,79 @@
             if (row) row.remove();
             const tbody = document.getElementById('batch-tbody');
             if (tbody && tbody.children.length === 0) addBatchRow();
+            updateBatchRowCount();
         }
 
         function fillBatchToday() {
-            const today = new Date().toISOString().slice(0, 10);
-            document.querySelectorAll('[id^="batch-date-"]').forEach(el => {
-                if (!el.value) el.value = today;
-            });
+            return;
         }
 
         function clearEmptyBatchRows() {
-            const rows = Array.from(document.querySelectorAll('#batch-tbody tr'));
-            rows.forEach(row => {
-                const rowId = row.getAttribute('data-row-id');
-                const amount = document.getElementById(`batch-amount-${rowId}`)?.value;
-                const note = document.getElementById(`batch-note-${rowId}`)?.value;
-                if (!amount && !note) row.remove();
-            });
+            return;
+        }
+
+
+        function clearBatchPaste() {
+            const input = document.getElementById('batch-paste-input');
             const tbody = document.getElementById('batch-tbody');
-            if (tbody && tbody.children.length === 0) addBatchRow();
+            const preview = document.getElementById('batch-preview-area');
+            if (input) input.value = '';
+            if (tbody) tbody.innerHTML = '';
+            if (preview) preview.classList.add('hidden');
+            updateBatchRowCount();
+        }
+
+        function parseBatchPasteLine(line) {
+            const parts = line.split(',').map(s => s.trim());
+            if (parts.length < 5) return null;
+            return {
+                date: parts[0] || '',
+                mainCat: parts[1] || '支出-變動',
+                subCat: parts[2] || '未分類',
+                method: parts[3] || 'cash',
+                amount: parts[4] || '',
+                note: parts.slice(5).join(',') || ''
+            };
+        }
+
+        function parseBatchPaste() {
+            const input = document.getElementById('batch-paste-input');
+            const tbody = document.getElementById('batch-tbody');
+            const preview = document.getElementById('batch-preview-area');
+            if (!input || !tbody || !preview) return;
+
+            const raw = input.value.trim();
+            if (!raw) {
+                alert('請先貼上資料內容。');
+                return;
+            }
+
+            const lines = raw.split('\n').map(s => s.trim()).filter(Boolean);
+            tbody.innerHTML = '';
+            let parsedCount = 0;
+            let failedLines = [];
+
+            lines.forEach((line, idx) => {
+                const parsed = parseBatchPasteLine(line);
+                if (!parsed) {
+                    failedLines.push(idx + 1);
+                    return;
+                }
+                addBatchRow(parsed);
+                parsedCount++;
+            });
+
+            preview.classList.toggle('hidden', parsedCount === 0);
+            updateBatchRowCount();
+
+            if (parsedCount === 0) {
+                alert('沒有成功解析的資料。請確認格式為：日期,資金流向,詳細分類,支付方式,金額,備註');
+                return;
+            }
+
+            if (failedLines.length > 0) {
+                alert(`已解析 ${parsedCount} 筆。\n第 ${failedLines.join('、')} 行格式不完整，請檢查後再貼上。`);
+            }
         }
 
         function saveBatchTransactions() {
@@ -2456,8 +2540,8 @@ function exportToExcel() {
             const bannerText = document.getElementById('backup-reminder-text');
             const bannerChip = document.getElementById('backup-reminder-chip');
 
-            if (autoEl) autoEl.innerText = backupMeta.lastAutoSave ? `${formatRelativeTime(backupMeta.lastAutoSave)}` : '尚未建立';
-            if (manualEl) manualEl.innerText = backupMeta.lastManualBackup ? `${formatRelativeTime(backupMeta.lastManualBackup)}` : '尚未備份';
+            if (autoEl) autoEl.innerText = backupMeta.lastAutoSave ? `${formatRelativeTime(backupMeta.lastAutoSave)}（這台裝置）` : '尚未建立';
+            if (manualEl) manualEl.innerText = backupMeta.lastManualBackup ? `${formatRelativeTime(backupMeta.lastManualBackup)}（下載時間）` : '尚未備份';
 
             if (!banner || !bannerText || !bannerChip) return;
 
@@ -2504,7 +2588,7 @@ function exportToExcel() {
                 alert('目前還沒有可用的自動快照。');
                 return;
             }
-            if (!confirm('確定要用最近一次自動快照覆蓋目前資料嗎？\n（建議先手動下載一份 JSON 備份）')) return;
+            if (!confirm('確定要用這個瀏覽器最近一次自動快照覆蓋目前資料嗎？\n\n注意：這裡不會讀取妳電腦裡手動下載的 JSON 檔。\n如果妳要救回 JSON 備份，請改用「匯入備份」。')) return;
 
             try {
                 const data = JSON.parse(raw);
@@ -2631,6 +2715,15 @@ function exportToExcel() {
         
 
         // 首次進站自動打開新手引導
+
+        function initBatchEntrySystem() {
+            bindBatchButtons();
+            initBatchEntry(true);
+            updateBatchRowCount();
+        }
+
+        window.addEventListener('load', initBatchEntrySystem);
+
         function autoOpenGuideOnFirstVisit() {
             const hasSeenGuide = localStorage.getItem('bear_guide_seen');
             if (!hasSeenGuide) {
