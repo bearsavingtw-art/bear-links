@@ -2068,35 +2068,71 @@ function renderBudgetBars(envExp, masterSpent) {
         function markDebtPaid(index) {
             const debt = userDebts[index];
             if (!debt) return;
-            
+
             const currentMonthStr = `${new Date().getFullYear()}-${new Date().getMonth() + 1}`;
             if (debt.lastPaidMonth === currentMonthStr) {
                 alert('這個月已經打卡還過款囉！慢慢熊感謝妳的努力！🐻‍❄️');
                 return;
             }
 
-            if(confirm(`確定要打卡本月還款 $${formatMoney(debt.monthly)} 嗎？\n(系統將自動扣除剩餘本金，若有設定利率會先扣利息)`)) {
+            if(confirm(`確定要打卡本月還款 $${formatMoney(debt.monthly)} 嗎？
+(系統將自動扣除剩餘本金，若有設定利率會先扣利息)`)) {
                 let principalToDeduct = debt.monthly;
-                
+
                 if (debt.calcType === 'compound' && debt.rate && debt.rate > 0) {
                     const monthlyRate = (debt.rate / 100) / 12;
                     const interest = debt.current * monthlyRate;
                     principalToDeduct = debt.monthly - interest;
-                    
+
                     if (principalToDeduct <= 0) {
                         alert('⚠️ 警告：妳的還款金額連利息都付不起！請提高每月還款金！');
                         return;
                     }
                 }
-                
+
                 debt.current -= principalToDeduct;
                 if (debt.current < 0) debt.current = 0;
-                
+
                 debt.lastPaidMonth = currentMonthStr;
-                
+
+                // 連動新增一筆記帳：固定支出 → 還債｜債務名稱
+                const repayDate = new Date().toISOString().slice(0, 10);
+                const repayCategory = `還債｜${debt.name}`;
+
+                if (userEnvelopes['固定支出'] && !userEnvelopes['固定支出'].includes(repayCategory)) {
+                    userEnvelopes['固定支出'].push(repayCategory);
+                    localStorage.setItem('bear_custom_envelopes', JSON.stringify(userEnvelopes));
+                }
+
+                const alreadyLogged = transactions.some(t =>
+                    t.type === 'expense' &&
+                    t.mainCategory === '固定支出' &&
+                    t.category === repayCategory &&
+                    t.amount === debt.monthly &&
+                    t.note === '雪球打卡自動記帳' &&
+                    t.date === repayDate
+                );
+
+                if (!alreadyLogged) {
+                    transactions.push({
+                        id: Date.now(),
+                        date: repayDate,
+                        type: 'expense',
+                        category: repayCategory,
+                        mainCategory: '固定支出',
+                        amount: debt.monthly,
+                        note: '雪球打卡自動記帳',
+                        method: 'other'
+                    });
+                    sortTransactions();
+                    localStorage.setItem('bear_transactions', JSON.stringify(transactions));
+                }
+
                 localStorage.setItem('bear_debts_tracker', JSON.stringify(userDebts));
                 writeAutoBackup('debt-paid');
-                
+
+                renderDashboard();
+                renderList();
                 renderDebtTracker();
                 if(document.getElementById('checklist-modal').classList.contains('show')){
                     renderChecklist();
