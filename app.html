@@ -145,6 +145,10 @@
         .nav-sub { font-size: 0.62rem; color: var(--text-secondary); letter-spacing: 0.02em; }
         .nav-item.active { color: var(--accent); font-weight: 600; }
         .nav-item.active .nav-sub { color: var(--accent); opacity: 0.85; }
+
+        .shared-bottom-nav { display:none; }
+        body.shared-mode .bottom-nav.default-bottom-nav { display:none; }
+        body.shared-mode .shared-bottom-nav { display:flex; }
         .chart-wrapper { position: relative; height: 220px; width: 100%; display: flex; justify-content: center; margin-bottom: 15px;}
         .hidden { display: none !important; }
 
@@ -265,6 +269,12 @@
         .shared-mini-note { font-size:0.75rem; color:var(--text-secondary); margin-top:8px; line-height:1.5; }
         .shared-badge { display:inline-flex; align-items:center; gap:4px; font-size:0.68rem; padding:3px 8px; border-radius:999px; background:rgba(125,168,199,0.1); color:var(--info); font-weight:700; margin-left:6px; vertical-align:middle; }
 
+        .account-switch-wrap { padding: 10px 20px 0; }
+        .account-switch { display:flex; gap:8px; background:rgba(255,253,249,0.92); border:1px solid rgba(92,75,66,0.08); border-radius:18px; padding:6px; box-shadow:0 8px 18px rgba(92,75,66,0.06); }
+        .account-switch-btn { flex:1; border:none; background:transparent; color:var(--text-secondary); border-radius:14px; padding:11px 12px; font-weight:700; cursor:pointer; font-size:0.9rem; }
+        .account-switch-btn small { display:block; font-size:0.68rem; font-weight:600; opacity:0.8; margin-top:2px; }
+        .account-switch-btn.active { background:linear-gradient(135deg, #fff8f1 0%, #f1e4d7 100%); color:var(--accent-deep); box-shadow:0 4px 10px rgba(184,135,107,0.12); }
+
     </style>
 </head>
 <body>
@@ -273,6 +283,19 @@
         <h1>Bear.saving</h1>
         <div style="font-size:0.78rem; color:var(--text-secondary); margin-top:4px;">不只是財務工具,這裡是一個接住你財務焦慮的地方</div>
     </header>
+
+    <div class="account-switch-wrap">
+        <div class="account-switch">
+            <button type="button" class="account-switch-btn active" id="account-mode-mine-btn" onclick="setAccountMode('mine')">
+                我的帳戶
+                <small>我自己的錢</small>
+            </button>
+            <button type="button" class="account-switch-btn" id="account-mode-shared-btn" onclick="setAccountMode('shared')">
+                共同帳戶
+                <small>一起生活的錢</small>
+            </button>
+        </div>
+    </div>
 
     <div id="page-dash" class="page active">
         <div class="page-intro">
@@ -319,37 +342,6 @@
                 <button class="btn-small btn-small-outline" onclick="dismissBackupReminder(3)">3天後提醒我</button>
             </div>
         </div>
-
-        <div id="shared-budget-card" class="card shared-budget-card hidden" onclick="openSharedBudgetModal()" style="cursor:pointer;">
-            <div class="card-title" style="margin-bottom:10px;">
-                <span><i class="fas fa-heart-circle-plus" style="color:var(--danger);"></i> 共同預算</span>
-                <small style="font-weight:600; color:var(--accent);">點擊看本期明細 <i class="fas fa-chevron-right"></i></small>
-            </div>
-            <div class="soft-note" id="shared-budget-summary-text">一起生活不是全部都要五五分，而是把錢的默契說清楚。</div>
-            <div class="shared-budget-grid">
-                <div class="shared-budget-box">
-                    <div class="label">本期共同花費</div>
-                    <div class="value" id="shared-total-spent">$0</div>
-                </div>
-                <div class="shared-budget-box">
-                    <div class="label">共同預算剩餘</div>
-                    <div class="value" id="shared-budget-remaining">$0</div>
-                </div>
-                <div class="shared-budget-box">
-                    <div class="label">我先付了</div>
-                    <div class="value" id="shared-my-paid">$0</div>
-                </div>
-                <div class="shared-budget-box">
-                    <div class="label">結算差額</div>
-                    <div class="value" id="shared-settlement">$0</div>
-                </div>
-            </div>
-            <div class="shared-chip-row">
-                <span class="shared-chip" id="shared-partner-chip">對方：另一半</span>
-                <span class="shared-chip" id="shared-split-chip">分攤：五五分</span>
-            </div>
-        </div>
-        
         <div class="btn btn-tool" onclick="switchPage('shop')" style="display:flex; justify-content:center; align-items:center; gap:10px;">
             <i class="fas fa-brain"></i> 啟動購物冷靜・邏輯閘
         </div>
@@ -449,25 +441,10 @@
                     <option value="other">🏦 轉帳/其他 (Other)</option>
                 </select>
             </div>
-            <div class="shared-inline-box hidden" id="shared-expense-box">
-                <label style="margin-bottom:8px; display:flex; align-items:center; gap:8px;">
-                    <input type="checkbox" id="input-shared-enabled" style="width:auto; transform:translateY(1px);">
-                    這筆列入共同預算
-                </label>
-                <div class="shared-inline-row hidden" id="shared-expense-detail-row">
-                    <div>
-                        <label>誰先付</label>
-                        <select id="input-shared-payer">
-                            <option value="me">我先付</option>
-                            <option value="partner">對方先付</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label>共同標籤</label>
-                        <input type="text" id="input-shared-label" placeholder="例如：晚餐 / 房租 / 旅行">
-                    </div>
-                </div>
-                <div class="shared-mini-note">適合共同餐飲、房租、旅行、採買。系統會幫妳算本期共同花費、我先墊多少，以及誰該補誰。</div>
+            <div class="shared-inline-box" id="shared-expense-box">
+                <div style="font-weight:700; color:var(--text-primary); margin-bottom:6px;">這筆是一起花的嗎？</div>
+                <div class="shared-mini-note">→ 請到「共同」頁記進共同帳戶。共同花費現在有自己的預算、分類與入金紀錄，不再和個人記帳混在一起。</div>
+                <button type="button" class="btn btn-outline" style="margin-top:10px;" onclick="switchPage('shared')"><i class="fas fa-heart-circle-plus"></i> 前往共同帳戶</button>
             </div>
             <div class="form-group"><label>金額</label><input type="number" step="any" id="input-amount" placeholder="0" inputmode="decimal"></div>
             <div class="form-group"><label>備註 (選填)</label><input type="text" id="input-note" placeholder="例如：午餐、全聯..."></div>
@@ -625,6 +602,118 @@
         <div class="card"><div class="card-title">歷史盤點紀錄</div><div id="nw-history-list"></div></div>
     </div>
 
+    
+    <div id="page-shared" class="page">
+        <div class="page-intro">
+            <div class="section-kicker"><i class="fas fa-heart-circle-plus"></i> 共同帳戶</div>
+            <div class="page-intro-title">一起過生活的錢，最好有自己的位置。</div>
+            <div class="page-intro-desc">把共同花費獨立成一個小帳戶：有自己的預算、自己的分類、自己的花費明細。這樣你們就不用在個人帳裡互相猜。</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">本期共同帳戶總覽</div>
+            <div class="soft-note" id="shared-page-summary-text">先把共同生活的錢放進共同帳戶，再從共同帳戶支出，會比每次都算誰欠誰輕鬆很多。</div>
+            <div class="shared-budget-grid">
+                <div class="shared-budget-box">
+                    <div class="label">本月花費總額</div>
+                    <div class="value" id="shared-page-total-spent">$0</div>
+                </div>
+                <div class="shared-budget-box">
+                    <div class="label">共同帳戶總餘額</div>
+                    <div class="value" id="shared-page-account-balance">$0</div>
+                </div>
+                <div class="shared-budget-box">
+                    <div class="label">本月共同入金總額</div>
+                    <div class="value" id="shared-page-total-deposit">$0</div>
+                </div>
+                <div class="shared-budget-box" onclick="scrollToSharedExpenseForm()" style="cursor:pointer;">
+                    <div class="label">快捷操作</div>
+                    <div class="value" style="font-size:0.95rem;">＋ 新增共同花費</div>
+                </div>
+            </div>
+            <div class="shared-chip-row">
+                <span class="shared-chip" id="shared-page-partner-chip">對方：另一半</span>
+                <span class="shared-chip" id="shared-page-split-chip">分攤：五五分</span>
+                <span class="shared-chip" id="shared-page-settlement-chip">小工具：目前誰都沒有多墊</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">本期共同分類消耗</div>
+            <div id="shared-category-bars"></div>
+        </div>
+
+
+        <div class="card" id="shared-deposit-card">
+            <div class="card-title">本期共同入金</div>
+            <div class="soft-note" id="shared-deposit-summary-text">先把各自要投入共同生活的錢放進來，之後再從共同帳戶支出，心情會輕鬆很多。</div>
+            <div class="shared-budget-grid">
+                <div class="shared-budget-box">
+                    <div class="label">共同帳戶餘額</div>
+                    <div class="value" id="shared-page-account-balance">$0</div>
+                </div>
+                <div class="shared-budget-box">
+                    <div class="label">本期總入金</div>
+                    <div class="value" id="shared-page-total-deposit">$0</div>
+                </div>
+                <div class="shared-budget-box">
+                    <div class="label">我轉入了</div>
+                    <div class="value" id="shared-page-my-deposit">$0</div>
+                </div>
+                <div class="shared-budget-box">
+                    <div class="label">對方轉入了</div>
+                    <div class="value" id="shared-page-partner-deposit">$0</div>
+                </div>
+            </div>
+            <div class="form-group"><label>入金日期</label></div>
+            <div class="form-group">
+                <label>由誰轉入</label>
+                <select id="shared-deposit-from">
+                    <option value="me">我轉入</option>
+                    <option value="partner">對方轉入</option>
+                </select>
+            </div>
+            <div class="form-group"><label>入金金額</label></div>
+            <div class="form-group"><label>備註 (選填)</label></div>
+            <button class="btn" onclick="saveSharedDeposit()"><i class="fas fa-piggy-bank"></i> 記一筆共同入金</button>
+            <div class="soft-note" style="margin-top:12px;">誰先付、誰該補多少的功能會先保留在上面當作小工具；共同帳戶的核心，改成先入金、再花費。</div>
+            <div id="shared-deposit-list" style="margin-top:14px;"></div>
+        </div>
+
+        <div class="card" id="shared-settings-card">
+            <div class="card-title">共同帳戶設定</div>
+            <div class="form-group"><label>對方名稱</label></div>
+            <div class="form-group"><label>每月共同總預算</label></div>
+            <div class="form-group">
+                <label>分攤方式</label>
+                <select id="shared-page-split-mode" onchange="toggleSharedRatioGroup()">
+                    <option value="half">五五分</option>
+                    <option value="ratio">按比例分攤</option>
+                </select>
+            </div>
+            <div class="form-group hidden" id="shared-page-ratio-group"><label>我的分攤比例 (%)</label></div>
+            <div class="soft-note" style="margin-bottom:12px;">共同帳戶也可以有自己的分類。先從 3～5 類開始就很好用。</div>
+            <div id="shared-category-settings-list"></div>
+            <button class="btn btn-outline" style="margin-top:8px;" onclick="addSharedCategorySettingRow()"><i class="fas fa-plus"></i> 新增共同分類</button>
+            <button class="btn" onclick="saveSharedAccountSettings()"><i class="fas fa-heart"></i> 存下共同帳戶設定</button>
+        </div>
+
+        <div class="card" id="shared-expense-entry-card">
+            <div class="card-title">新增一筆共同花費</div>
+            <div class="soft-note" style="margin-bottom:14px;">放在這裡的花費，就視為從共同帳戶支出。若之後要從共同帳戶拿回個人墊付，也可以先寫在備註裡。</div>
+            <div class="form-group"><label>日期</label><input type="date" id="shared-entry-date"></div>
+            <div class="form-group"><label>共同分類</label><select id="shared-entry-category"></select></div>
+            <div class="form-group"><label>金額</label><input type="number" step="any" id="shared-entry-amount" placeholder="0" inputmode="decimal"></div>
+            <div class="form-group"><label>備註 (選填)</label><input type="text" id="shared-entry-note" placeholder="例如：我先墊，之後從共同帳戶拿回 / 全聯採買 / 晚餐"></div>
+            <button class="btn" onclick="saveSharedTransaction()"><i class="fas fa-receipt"></i> 記進共同帳戶</button>
+        </div>
+
+        <div class="card">
+            <div class="card-title">本期共同花費明細</div>
+            <div id="shared-page-tx-list"></div>
+        </div>
+    </div>
+
     <div id="page-settings" class="page">
         <div class="page-intro">
             <div class="section-kicker"><i class="fas fa-feather-pointed"></i> 系統語氣設定</div>
@@ -667,27 +756,9 @@
         </div>
 
         <div class="card">
-            <div class="card-title">夫妻 / 情侶共同預算</div>
-            <div class="soft-note" style="margin-bottom:14px;">不是把所有錢混在一起，而是把「哪些一起扛、怎麼分」說清楚。這張卡只會追蹤妳勾選為共同預算的支出。</div>
-            <div class="form-group">
-                <label style="display:flex; align-items:center; gap:8px; margin-bottom:0;">
-                    <input type="checkbox" id="shared-budget-enabled" style="width:auto; transform:translateY(1px);">
-                    開啟共同預算模式
-                </label>
-            </div>
-            <div id="shared-budget-settings-panel" class="hidden">
-                <div class="form-group"><label>對方名稱</label><input type="text" id="shared-partner-name" placeholder="例如：阿謙 / 老公 / 男友"></div>
-                <div class="form-group"><label>每月共同預算</label><input type="number" step="any" id="shared-monthly-budget" placeholder="例如：20000" inputmode="decimal"></div>
-                <div class="form-group"><label>分攤方式</label>
-                    <select id="shared-split-mode">
-                        <option value="half">五五分</option>
-                        <option value="ratio">按比例分攤</option>
-                    </select>
-                </div>
-                <div class="form-group hidden" id="shared-ratio-group"><label>我的分攤比例 (%)</label><input type="number" step="any" id="shared-my-ratio" min="0" max="100" placeholder="例如：60" inputmode="decimal"></div>
-                <button class="btn btn-outline" style="margin-top:4px;" onclick="saveSharedBudgetSettings()"><i class="fas fa-heart"></i> 存下共同預算設定</button>
-                <div class="shared-mini-note">範例：共同月支出 20,000，若五五分，我應負擔 10,000；若我設定 60%，系統會用 60 / 40 估算誰先墊太多。</div>
-            </div>
+            <div class="card-title">夫妻 / 情侶共同帳戶</div>
+            <div class="soft-note" style="margin-bottom:14px;">共同花費更適合獨立成一個小帳戶。它有自己的預算、分類和明細，不會和妳的個人預算混在一起。</div>
+            <button class="btn btn-outline" style="margin-top:0;" onclick="switchPage('shared')"><i class="fas fa-heart-circle-plus"></i> 前往共同帳戶</button>
         </div>
         <div class="card">
             <div class="card-title">把底氣留一份備份</div>
@@ -845,11 +916,11 @@
         </div>
     </div>
 
-    <div class="bottom-nav">
-        <div class="nav-item active" onclick="switchPage('dash')" id="nav-dash">
-            <i class="fas fa-chart-pie"></i>
-            <div class="nav-label">儀表板</div>
-            <div class="nav-sub">佔位</div>
+    <div class="bottom-nav default-bottom-nav">
+        <div class="nav-item active" onclick="openAccountHome()" id="nav-account">
+            <i class="fas fa-wallet"></i>
+            <div class="nav-label">帳戶</div>
+            <div class="nav-sub" id="nav-account-sub">我的</div>
         </div>
         <div class="nav-item" onclick="switchPage('networth')" id="nav-networth">
             <i class="fas fa-coins"></i>
@@ -865,6 +936,29 @@
             <i class="fas fa-list-ul"></i>
             <div class="nav-label">設定</div>
             <div class="nav-sub">整理</div>
+        </div>
+    </div>
+
+    <div class="bottom-nav shared-bottom-nav">
+        <div class="nav-item active" onclick="setAccountMode('shared'); window.scrollTo({top:0, behavior:'smooth'});" id="shared-nav-home">
+            <i class="fas fa-heart-circle-plus"></i>
+            <div class="nav-label">共同首頁</div>
+            <div class="nav-sub">總覽</div>
+        </div>
+        <div class="nav-item" onclick="scrollToSharedDepositForm()" id="shared-nav-deposit">
+            <i class="fas fa-piggy-bank"></i>
+            <div class="nav-label">入金</div>
+            <div class="nav-sub">放錢</div>
+        </div>
+        <div class="nav-item" onclick="scrollToSharedExpenseForm()" id="shared-nav-expense">
+            <i class="fas fa-receipt"></i>
+            <div class="nav-label">花費</div>
+            <div class="nav-sub">支出</div>
+        </div>
+        <div class="nav-item" onclick="scrollToSharedSettingsForm()" id="shared-nav-settings">
+            <i class="fas fa-sliders"></i>
+            <div class="nav-label">共同設定</div>
+            <div class="nav-sub">分類</div>
         </div>
     </div>
 
@@ -900,7 +994,8 @@
         let sysSettings = JSON.parse(localStorage.getItem('bear_sys_settings')) || { cycleStart: 1 };
         let userDebts = JSON.parse(localStorage.getItem('bear_debts_tracker')) || [];
         let backupMeta = JSON.parse(localStorage.getItem('bear_backup_meta')) || { lastAutoSave: '', lastManualBackup: '', remindAfter: '' };
-        let sharedBudgetSettings = JSON.parse(localStorage.getItem('bear_shared_budget_settings')) || { enabled: false, partnerName: '另一半', monthlyBudget: 0, splitMode: 'half', myRatio: 50 };
+        let sharedBudgetSettings = JSON.parse(localStorage.getItem('bear_shared_budget_settings')) || { enabled: false, partnerName: '另一半', monthlyBudget: 0, splitMode: 'half', myRatio: 50, categories: [{name:'共同餐飲', budget:0},{name:'家用採買', budget:0},{name:'約會娛樂', budget:0},{name:'旅行交通', budget:0}] };
+        let sharedDeposits = JSON.parse(localStorage.getItem('bear_shared_deposits')) || [];
 
         let userEnvelopes = JSON.parse(localStorage.getItem('bear_custom_envelopes'));
         if (!userEnvelopes || !userEnvelopes['固定支出']) {
@@ -911,6 +1006,7 @@
         let myChart = null; let nwChart = null; let reviewBarChart = null; let reviewPieChart = null; 
         let editingId = null; let dashboardViewDate = new Date(); let currentChartFilter = null; let editingDebtId = null;
         let currentChartMode = localStorage.getItem('bear_chart_mode') || 'main';
+        let currentAccountMode = localStorage.getItem('bear_account_mode') || 'mine';
         let isCustomCatMode = false; 
 
         let guideStep = 0;
@@ -982,6 +1078,56 @@
 
         function getTotalEnvelopesCount() { let count = 0; for (let cat in userEnvelopes) { count += userEnvelopes[cat].length; } return count; }
 
+        function syncBodyAccountMode() {
+            document.body.classList.toggle('shared-mode', currentAccountMode === 'shared');
+        }
+
+        function clearSharedNavActive() {
+            ['shared-nav-home','shared-nav-deposit','shared-nav-expense','shared-nav-settings'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.remove('active');
+            });
+        }
+
+        function scrollToSharedDepositForm() {
+            if (currentAccountMode !== 'shared') setAccountMode('shared');
+            clearSharedNavActive();
+            document.getElementById('shared-nav-deposit')?.classList.add('active');
+            const el = document.getElementById('shared-deposit-card');
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function scrollToSharedSettingsForm() {
+            if (currentAccountMode !== 'shared') setAccountMode('shared');
+            clearSharedNavActive();
+            document.getElementById('shared-nav-settings')?.classList.add('active');
+            const el = document.getElementById('shared-settings-card');
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function syncAccountModeSwitch() {
+            const mineBtn = document.getElementById('account-mode-mine-btn');
+            const sharedBtn = document.getElementById('account-mode-shared-btn');
+            const accountSub = document.getElementById('nav-account-sub');
+            if (mineBtn) mineBtn.classList.toggle('active', currentAccountMode === 'mine');
+            if (sharedBtn) sharedBtn.classList.toggle('active', currentAccountMode === 'shared');
+            if (accountSub) accountSub.innerText = currentAccountMode === 'shared' ? '共同' : '我的';
+            syncBodyAccountMode();
+        }
+
+        function setAccountMode(mode) {
+            currentAccountMode = mode === 'shared' ? 'shared' : 'mine';
+            localStorage.setItem('bear_account_mode', currentAccountMode);
+            syncAccountModeSwitch();
+            switchPage(currentAccountMode === 'shared' ? 'shared' : 'dash');
+        }
+
+        function openAccountHome() {
+            syncAccountModeSwitch();
+            switchPage(currentAccountMode === 'shared' ? 'shared' : 'dash');
+        }
+
+
         function toggleCustomCatMode(forceMode = null) {
             const selectEl = document.getElementById('input-sub-category'); const inputEl = document.getElementById('input-custom-category'); const btnEl = document.getElementById('cat-switch-btn');
             if (forceMode !== null) { isCustomCatMode = forceMode; } else { isCustomCatMode = !isCustomCatMode; }
@@ -1022,22 +1168,40 @@
         function switchPage(pageId) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.getElementById('page-' + pageId).classList.add('active');
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            if (pageId === 'dash' || pageId === 'shop' || pageId === 'review') document.getElementById('nav-dash').classList.add('active');
-            else if (pageId === 'add') document.getElementById('nav-add').classList.add('active');
-            else if (pageId === 'networth') document.getElementById('nav-networth').classList.add('active');
-            else document.getElementById('nav-settings').classList.add('active');
+
+            if (pageId === 'dash') {
+                document.getElementById('nav-account').classList.add('active');
+            } else if (pageId === 'shared') {
+                document.getElementById('shared-nav-home').classList.add('active');
+            } else if (pageId === 'shop' || pageId === 'review') {
+                if (currentAccountMode === 'shared') document.getElementById('shared-nav-home').classList.add('active');
+                else document.getElementById('nav-account').classList.add('active');
+            } else if (pageId === 'add') {
+                document.getElementById('nav-add').classList.add('active');
+            } else if (pageId === 'networth') {
+                document.getElementById('nav-networth').classList.add('active');
+            } else {
+                document.getElementById('nav-settings').classList.add('active');
+            }
+
+            if (pageId === 'dash') currentAccountMode = 'mine';
+            if (pageId === 'shared') currentAccountMode = 'shared';
+            localStorage.setItem('bear_account_mode', currentAccountMode);
+            syncAccountModeSwitch();
+
             window.scrollTo(0, 0);
             if(pageId === 'dash') { dashboardViewDate = new Date(); currentChartFilter = null; renderDashboard(); }
             if(pageId === 'settings') { renderList(); renderBudgetSettings(); renderBackupStatus(); initSharedBudgetForm(); } 
             if(pageId === 'add') { initBatchEntry(false); bindBatchButtons(); }
             if(pageId === 'shop') { resetShop(); renderShoppingList(); }
             if(pageId === 'networth') { loadNetWorthDataForMonth(document.getElementById('nw-input-month').value); renderNetWorthPage(); renderDebtTracker(); } 
+            if(pageId === 'shared') { initSharedAccountPage(); renderSharedAccountPage(); }
             if(pageId === 'review') renderReviewPage(); 
             if(pageId === 'milestones') renderMilestonesPage(); 
         }
 
         function openAddPage() { resetForm(); switchPage('add'); switchEntryMode('single'); }
-        function resetForm() { editingId = null; document.getElementById('add-page-title').innerText = '先幫這筆錢留位置'; document.getElementById('save-btn').innerHTML = '先幫這筆錢留位置 <i class="fas fa-check"></i>'; document.getElementById('add-page-helper').innerText = '不用一次記很多。先從你最確定的一筆開始，空白晚點補也沒關係。'; document.getElementById('cancel-edit-btn').classList.add('hidden'); document.getElementById('input-date').valueAsDate = new Date(); document.getElementById('input-main-category').value = '支出-變動'; updateSubCategories(); document.getElementById('input-amount').value = ''; document.getElementById('input-note').value = ''; document.getElementById('input-method').value = 'cash'; document.getElementById('input-shared-enabled').checked = false; document.getElementById('input-shared-payer').value = 'me'; document.getElementById('input-shared-label').value = ''; switchEntryMode('single'); document.getElementById('multi-entry-wrap').classList.remove('hidden'); initExtraEntryArea(); updateSharedExpenseVisibility(); }
+        function resetForm() { editingId = null; document.getElementById('add-page-title').innerText = '先幫這筆錢留位置'; document.getElementById('save-btn').innerHTML = '先幫這筆錢留位置 <i class="fas fa-check"></i>'; document.getElementById('add-page-helper').innerText = '不用一次記很多。先從你最確定的一筆開始，空白晚點補也沒關係。'; document.getElementById('cancel-edit-btn').classList.add('hidden'); document.getElementById('input-date').valueAsDate = new Date(); document.getElementById('input-main-category').value = '支出-變動'; updateSubCategories(); document.getElementById('input-amount').value = ''; document.getElementById('input-note').value = ''; document.getElementById('input-method').value = 'cash'; switchEntryMode('single'); document.getElementById('multi-entry-wrap').classList.remove('hidden'); initExtraEntryArea(); updateSharedExpenseVisibility(); }
         function sortTransactions() { transactions.sort((a, b) => { const dateDiff = new Date(b.date) - new Date(a.date); if (dateDiff !== 0) return dateDiff; return b.id - a.id; }); }
 
 
@@ -1260,12 +1424,11 @@
                 <div class="form-group"><label>備註 (選填)</label><input type="text" id="extra-note-${id}" value="${defaults.note || ''}" placeholder="例如：午餐、全聯..."></div>
                 <div class="shared-inline-box ${sharedBudgetSettings.enabled ? '' : 'hidden'}">
                     <label style="margin-bottom:8px; display:flex; align-items:center; gap:8px;">
-                        <input type="checkbox" id="extra-shared-enabled-${id}" style="width:auto; transform:translateY(1px);" ${defaults.sharedMeta && defaults.sharedMeta.enabled ? 'checked' : ''}>
-                        這筆列入共同預算
+                        
                     </label>
                     <div class="shared-inline-row ${defaults.sharedMeta && defaults.sharedMeta.enabled ? '' : 'hidden'}" id="extra-shared-row-${id}">
                         <div><label>誰先付</label><select id="extra-shared-payer-${id}"><option value="me" ${(defaults.sharedMeta?.payer || 'me') === 'me' ? 'selected' : ''}>我先付</option><option value="partner" ${(defaults.sharedMeta?.payer || '') === 'partner' ? 'selected' : ''}>對方先付</option></select></div>
-                        <div><label>共同標籤</label><input type="text" id="extra-shared-label-${id}" value="${defaults.sharedMeta?.label || ''}" placeholder="例如：旅行 / 採買"></div>
+                        <div><label>共同標籤</label></div>
                     </div>
                 </div>
             `;
@@ -1303,75 +1466,325 @@
             }
         }
 
-        function initSharedBudgetForm() {
-            const enabled = !!sharedBudgetSettings.enabled;
-            const enabledEl = document.getElementById('shared-budget-enabled');
-            const partnerEl = document.getElementById('shared-partner-name');
-            const monthlyEl = document.getElementById('shared-monthly-budget');
-            const splitEl = document.getElementById('shared-split-mode');
-            const ratioEl = document.getElementById('shared-my-ratio');
-            if (enabledEl) enabledEl.checked = enabled;
-            if (partnerEl) partnerEl.value = sharedBudgetSettings.partnerName || '另一半';
-            if (monthlyEl) monthlyEl.value = sharedBudgetSettings.monthlyBudget || '';
-            if (splitEl) splitEl.value = sharedBudgetSettings.splitMode || 'half';
-            if (ratioEl) ratioEl.value = sharedBudgetSettings.myRatio ?? 50;
-            updateSharedBudgetFormVisibility();
-            updateSharedExpenseVisibility();
-        }
+        function initSharedBudgetForm() { normalizeSharedBudgetSettings(); updateSharedExpenseVisibility(); }
 
-        function updateSharedBudgetFormVisibility() {
-            const enabled = document.getElementById('shared-budget-enabled')?.checked;
-            const panel = document.getElementById('shared-budget-settings-panel');
-            const ratioGroup = document.getElementById('shared-ratio-group');
-            const splitMode = document.getElementById('shared-split-mode')?.value || 'half';
-            if (panel) panel.classList.toggle('hidden', !enabled);
-            if (ratioGroup) ratioGroup.classList.toggle('hidden', splitMode !== 'ratio');
-            updateSharedExpenseVisibility();
-        }
+        function updateSharedBudgetFormVisibility() { updateSharedExpenseVisibility(); }
 
-        function saveSharedBudgetSettings() {
-            const enabled = !!document.getElementById('shared-budget-enabled')?.checked;
-            const partnerName = document.getElementById('shared-partner-name')?.value?.trim() || '另一半';
-            const monthlyBudget = parseFloat(document.getElementById('shared-monthly-budget')?.value) || 0;
-            const splitMode = document.getElementById('shared-split-mode')?.value || 'half';
-            let myRatio = parseFloat(document.getElementById('shared-my-ratio')?.value);
-            if (splitMode === 'half' || isNaN(myRatio)) myRatio = 50;
-            if (myRatio < 0) myRatio = 0;
-            if (myRatio > 100) myRatio = 100;
-
-            sharedBudgetSettings = { enabled, partnerName, monthlyBudget, splitMode, myRatio };
-            localStorage.setItem('bear_shared_budget_settings', JSON.stringify(sharedBudgetSettings));
-            writeAutoBackup('shared-settings');
-            updateSharedBudgetFormVisibility();
-            renderDashboard();
-            alert('共同預算設定已更新 🤝');
-        }
+        function saveSharedBudgetSettings() { saveSharedAccountSettings(); }
 
         function updateSharedExpenseVisibility() {
             const box = document.getElementById('shared-expense-box');
-            const row = document.getElementById('shared-expense-detail-row');
             const mainCat = document.getElementById('input-main-category')?.value || '';
             const isExpense = mainCat.startsWith('支出-') && mainCat !== '支出-預存';
-            const enabled = !!sharedBudgetSettings.enabled;
-            if (box) box.classList.toggle('hidden', !(enabled && isExpense));
-            const checked = !!document.getElementById('input-shared-enabled')?.checked;
-            if (row) row.classList.toggle('hidden', !(enabled && isExpense && checked));
+            if (box) box.classList.toggle('hidden', !isExpense);
         }
 
         function getSharedMetaFromMainForm() {
-            const isEnabled = !!document.getElementById('input-shared-enabled')?.checked;
-            if (!sharedBudgetSettings.enabled || !isEnabled) return null;
-            return {
-                enabled: true,
-                payer: document.getElementById('input-shared-payer')?.value || 'me',
-                label: (document.getElementById('input-shared-label')?.value || '').trim(),
-                partnerName: sharedBudgetSettings.partnerName || '另一半',
-                splitMode: sharedBudgetSettings.splitMode || 'half',
-                myRatio: sharedBudgetSettings.splitMode === 'ratio' ? (parseFloat(sharedBudgetSettings.myRatio) || 50) : 50
-            };
+            return null;
         }
 
-        function getSharedBudgetSummary(cycleTx) {
+        
+        function normalizeSharedBudgetSettings() {
+            if (!sharedBudgetSettings || typeof sharedBudgetSettings !== 'object') sharedBudgetSettings = {};
+            sharedBudgetSettings.enabled = !!sharedBudgetSettings.enabled;
+            sharedBudgetSettings.partnerName = sharedBudgetSettings.partnerName || '另一半';
+            sharedBudgetSettings.monthlyBudget = parseFloat(sharedBudgetSettings.monthlyBudget) || 0;
+            sharedBudgetSettings.splitMode = sharedBudgetSettings.splitMode || 'half';
+            sharedBudgetSettings.myRatio = sharedBudgetSettings.myRatio ?? 50;
+            if (!Array.isArray(sharedBudgetSettings.categories) || sharedBudgetSettings.categories.length === 0) {
+                sharedBudgetSettings.categories = [
+                    { name: '共同餐飲', budget: 0 },
+                    { name: '家用採買', budget: 0 },
+                    { name: '約會娛樂', budget: 0 },
+                    { name: '旅行交通', budget: 0 }
+                ];
+            }
+        }
+
+        function toggleSharedRatioGroup() {
+            const group = document.getElementById('shared-page-ratio-group');
+            const splitMode = document.getElementById('shared-page-split-mode')?.value || 'half';
+            if (group) group.classList.toggle('hidden', splitMode !== 'ratio');
+        }
+
+        function renderSharedCategorySettingRows() {
+            const list = document.getElementById('shared-category-settings-list');
+            if (!list) return;
+            normalizeSharedBudgetSettings();
+            list.innerHTML = '';
+            sharedBudgetSettings.categories.forEach((item, index) => {
+                list.innerHTML += `
+                    <div class="nw-detail-row">
+                        <input type="text" class="nw-detail-name" value="${item.name || ''}" placeholder="分類名稱" onchange="updateSharedCategorySetting(${index}, 'name', this.value)">
+                        <input type="number" step="any" class="nw-detail-val" value="${item.budget || ''}" placeholder="預算" onchange="updateSharedCategorySetting(${index}, 'budget', this.value)">
+                        <i class="fas fa-trash" style="color:var(--danger); cursor:pointer; padding:5px;" onclick="removeSharedCategorySetting(${index})"></i>
+                    </div>`;
+            });
+        }
+
+        function updateSharedCategorySetting(index, key, value) {
+            normalizeSharedBudgetSettings();
+            if (!sharedBudgetSettings.categories[index]) return;
+            sharedBudgetSettings.categories[index][key] = key === 'budget' ? (parseFloat(value) || 0) : value.trim();
+        }
+
+        function addSharedCategorySettingRow() {
+            normalizeSharedBudgetSettings();
+            sharedBudgetSettings.categories.push({ name: '', budget: 0 });
+            renderSharedCategorySettingRows();
+        }
+
+        function removeSharedCategorySetting(index) {
+            normalizeSharedBudgetSettings();
+            if (sharedBudgetSettings.categories.length <= 1) {
+                alert('至少保留一個共同分類比較好喔。');
+                return;
+            }
+            sharedBudgetSettings.categories.splice(index, 1);
+            renderSharedCategorySettingRows();
+        }
+
+        function initSharedAccountPage() {
+            normalizeSharedBudgetSettings();
+            const today = new Date().toISOString().slice(0, 10);
+            const dateEl = document.getElementById('shared-entry-date');
+            if (dateEl) dateEl.value = today;
+            const depositDateEl = document.getElementById('shared-deposit-date');
+            if (depositDateEl) depositDateEl.value = today;
+            const partnerEl = document.getElementById('shared-page-partner-name');
+            const budgetEl = document.getElementById('shared-page-monthly-budget');
+            const splitEl = document.getElementById('shared-page-split-mode');
+            const ratioEl = document.getElementById('shared-page-my-ratio');
+            if (partnerEl) partnerEl.value = sharedBudgetSettings.partnerName || '另一半';
+            if (budgetEl) budgetEl.value = sharedBudgetSettings.monthlyBudget || '';
+            if (splitEl) splitEl.value = sharedBudgetSettings.splitMode || 'half';
+            if (ratioEl) ratioEl.value = sharedBudgetSettings.myRatio ?? 50;
+            toggleSharedRatioGroup();
+            renderSharedCategorySettingRows();
+            renderSharedCategoryOptions();
+        }
+
+        function renderSharedCategoryOptions() {
+            const select = document.getElementById('shared-entry-category');
+            if (!select) return;
+            normalizeSharedBudgetSettings();
+            select.innerHTML = '';
+            sharedBudgetSettings.categories.forEach(item => {
+                if ((item.name || '').trim()) select.innerHTML += `<option value="${item.name.trim()}">${item.name.trim()}</option>`;
+            });
+            if (!select.innerHTML) select.innerHTML = `<option value="共同支出">共同支出</option>`;
+        }
+
+        function saveSharedAccountSettings() {
+            normalizeSharedBudgetSettings();
+            sharedBudgetSettings.enabled = true;
+            sharedBudgetSettings.partnerName = document.getElementById('shared-page-partner-name')?.value?.trim() || '另一半';
+            sharedBudgetSettings.monthlyBudget = parseFloat(document.getElementById('shared-page-monthly-budget')?.value) || 0;
+            sharedBudgetSettings.splitMode = document.getElementById('shared-page-split-mode')?.value || 'half';
+            let ratio = parseFloat(document.getElementById('shared-page-my-ratio')?.value);
+            if (sharedBudgetSettings.splitMode === 'half' || isNaN(ratio)) ratio = 50;
+            if (ratio < 0) ratio = 0;
+            if (ratio > 100) ratio = 100;
+            sharedBudgetSettings.myRatio = ratio;
+            sharedBudgetSettings.categories = (sharedBudgetSettings.categories || []).map(item => ({
+                name: (item.name || '').trim(),
+                budget: parseFloat(item.budget) || 0
+            })).filter(item => item.name);
+            if (sharedBudgetSettings.categories.length === 0) {
+                sharedBudgetSettings.categories = [{ name: '共同支出', budget: 0 }];
+            }
+            localStorage.setItem('bear_shared_budget_settings', JSON.stringify(sharedBudgetSettings));
+            writeAutoBackup('shared-account-settings');
+            renderSharedCategoryOptions();
+            renderDashboard();
+            renderSharedAccountPage();
+            alert('共同帳戶設定已更新 🤝');
+        }
+
+        
+        function getSharedDepositSummary(currentCycle) {
+            const depositsInCycle = sharedDeposits.filter(d => {
+                const dt = new Date(d.date);
+                dt.setHours(0,0,0,0);
+                return dt >= currentCycle.start && dt <= currentCycle.end;
+            });
+            const total = depositsInCycle.reduce((sum, d) => sum + (parseFloat(d.amount) || 0), 0);
+            const myDeposit = depositsInCycle.filter(d => (d.from || 'me') === 'me').reduce((sum, d) => sum + (parseFloat(d.amount) || 0), 0);
+            const partnerDeposit = depositsInCycle.filter(d => (d.from || 'me') === 'partner').reduce((sum, d) => sum + (parseFloat(d.amount) || 0), 0);
+            return { depositsInCycle, total, myDeposit, partnerDeposit };
+        }
+
+        function saveSharedDeposit() {
+            const date = document.getElementById('shared-deposit-date')?.value;
+            const amount = parseFloat(document.getElementById('shared-deposit-amount')?.value);
+            const note = (document.getElementById('shared-deposit-note')?.value || '').trim();
+
+            if (!date || isNaN(amount) || amount <= 0) {
+                alert('請輸入正確的日期與金額');
+                return;
+            }
+
+            sharedDeposits.push({
+                id: Date.now(),
+                date,
+                amount,
+                note,
+                from: 'me'
+            });
+
+            localStorage.setItem('bear_shared_deposits', JSON.stringify(sharedDeposits));
+
+            document.getElementById('shared-deposit-amount').value = '';
+            document.getElementById('shared-deposit-note').value = '';
+
+            renderSharedAccountPage();
+            alert('已入金 🤍');
+        }
+
+        function scrollToSharedExpenseForm() {
+            if (currentAccountMode !== 'shared') setAccountMode('shared');
+            clearSharedNavActive();
+            document.getElementById('shared-nav-expense')?.classList.add('active');
+            const el = document.getElementById('shared-expense-entry-card');
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function renderSharedDepositList(currentCycle) {
+            const listEl = document.getElementById('shared-deposit-list');
+            if (!listEl) return;
+            const summary = getSharedDepositSummary(currentCycle);
+            if (summary.depositsInCycle.length === 0) {
+                listEl.innerHTML = '<div style="text-align:center; padding:14px 10px; color:#999; font-size:0.82rem;">本期還沒有共同入金紀錄。</div>';
+                return;
+            }
+            let html = '<ul class="tx-list">';
+            summary.depositsInCycle.forEach(item => {
+                const who = (item.from || 'me') === 'me' ? '我轉入' : `${sharedBudgetSettings.partnerName || '對方'}轉入`;
+                html += `<li class="tx-item"><div class="tx-info"><span class="tx-cat">🫙 共同入金</span><span class="tx-date">${item.date} ・ ${who}${item.note ? ` ・ ${item.note}` : ''}</span></div><div class="tx-amount amount-inc">+$${formatMoney(item.amount)}</div></li>`;
+            });
+            html += '</ul>';
+            listEl.innerHTML = html;
+        }
+
+function saveSharedTransaction() {
+            normalizeSharedBudgetSettings();
+            const date = document.getElementById('shared-entry-date')?.value;
+            const label = document.getElementById('shared-entry-category')?.value || '共同支出';
+            const amount = parseFloat(document.getElementById('shared-entry-amount')?.value);
+            const note = (document.getElementById('shared-entry-note')?.value || '').trim();
+            if (!date || isNaN(amount) || amount <= 0) {
+                alert('請輸入正確的日期與金額。');
+                return;
+            }
+            transactions.push({
+                id: Date.now(),
+                date,
+                type: 'expense',
+                category: '共同帳戶',
+                mainCategory: '變動支出',
+                amount,
+                note,
+                method: 'other',
+                sharedMeta: {
+                    enabled: true,
+                    payer: 'account',
+                    label,
+                    partnerName: sharedBudgetSettings.partnerName || '另一半',
+                    splitMode: sharedBudgetSettings.splitMode || 'half',
+                    myRatio: sharedBudgetSettings.splitMode === 'ratio' ? (parseFloat(sharedBudgetSettings.myRatio) || 50) : 50
+                }
+            });
+            sortTransactions();
+            localStorage.setItem('bear_transactions', JSON.stringify(transactions));
+            writeAutoBackup('shared-transaction');
+            document.getElementById('shared-entry-amount').value = '';
+            document.getElementById('shared-entry-note').value = '';
+            renderDashboard();
+            renderSharedAccountPage();
+            alert('已記進共同帳戶 🤍');
+        }
+
+        function renderSharedCategoryBars(summary) {
+            const container = document.getElementById('shared-category-bars');
+            if (!container) return;
+            normalizeSharedBudgetSettings();
+            const spendMap = {};
+            summary.sharedTx.forEach(t => {
+                const label = t.sharedMeta?.label || '共同支出';
+                spendMap[label] = (spendMap[label] || 0) + (parseFloat(t.amount) || 0);
+            });
+            let html = '';
+            sharedBudgetSettings.categories.forEach(item => {
+                const budget = parseFloat(item.budget) || 0;
+                const spent = spendMap[item.name] || 0;
+                if (budget <= 0 && spent <= 0) return;
+                let percent = budget > 0 ? (spent / budget) * 100 : 100;
+                let colorVar = '--success';
+                if (percent > 100) colorVar = '--danger';
+                else if (percent > 80) colorVar = '--warning';
+                html += `<div class="budget-item"><div class="budget-header"><span>${item.name}</span><span>$${formatMoney(spent)} / $${formatMoney(budget)}</span></div><div class="budget-bar-bg"><div class="budget-bar-fill" style="width:${Math.min(percent,100)}%; background:var(${colorVar});"></div></div><div class="budget-remain">剩餘: <span style="color:var(${budget-spent < 0 ? '--danger' : '--text-primary'})">$${formatMoney(budget - spent)}</span></div></div>`;
+            });
+            if (!html) html = '<div style="text-align:center; padding:18px 10px; color:#999; font-size:0.85rem;">先在上方設定共同分類預算，之後花費就會在這裡跑動。</div>';
+            container.innerHTML = html;
+        }
+
+        function renderSharedAccountPage() {
+            normalizeSharedBudgetSettings();
+            const currentCycle = getCycleBoundary(dashboardViewDate, sysSettings.cycleStart);
+            const cycleTx = transactions.filter(t => { const d = new Date(t.date); d.setHours(0,0,0,0); return d >= currentCycle.start && d <= currentCycle.end; });
+            const summary = getSharedBudgetSummary(cycleTx);
+            const depositSummary = getSharedDepositSummary(currentCycle);
+            const accountBalance = depositSummary.total - summary.total;
+
+            document.getElementById('shared-page-total-spent').innerText = `$${formatMoney(summary.total)}`;
+            const balanceEl = document.getElementById('shared-page-account-balance');
+            balanceEl.innerText = `$${formatMoney(accountBalance)}`;
+            balanceEl.style.color = accountBalance < 0 ? 'var(--danger)' : 'var(--text-primary)';
+            document.getElementById('shared-page-total-deposit').innerText = `$${formatMoney(depositSummary.total)}`;
+
+            document.getElementById('shared-page-partner-chip').innerText = `對方：${sharedBudgetSettings.partnerName || '另一半'}`;
+            document.getElementById('shared-page-split-chip').innerText = sharedBudgetSettings.splitMode === 'ratio'
+                ? `分攤：我 ${sharedBudgetSettings.myRatio || 50}% / 對方 ${100 - (sharedBudgetSettings.myRatio || 50)}%`
+                : '分攤：五五分';
+
+            const settleEl = document.getElementById('shared-page-settlement-chip');
+            if (summary.balance > 0) {
+                settleEl.innerText = `小工具：若有個人先墊，這期大約是妳多墊了 $${formatMoney(Math.abs(summary.balance))}`;
+            } else if (summary.balance < 0) {
+                settleEl.innerText = `小工具：若有個人先墊，這期大約是${sharedBudgetSettings.partnerName || '對方'}多墊了 $${formatMoney(Math.abs(summary.balance))}`;
+            } else {
+                settleEl.innerText = '小工具：目前誰都沒有多墊';
+            }
+
+            document.getElementById('shared-page-summary-text').innerText = summary.sharedTx.length > 0 || depositSummary.total > 0
+                ? `這個帳期共同入金 $${formatMoney(depositSummary.total)}、共同花費 $${formatMoney(summary.total)}，目前共同帳戶總餘額 $${formatMoney(accountBalance)}。`
+                : '這個帳期還沒有共同入金或共同花費。可以先記一筆入金，再開始從共同帳戶花。';
+
+            const depositSummaryText = document.getElementById('shared-deposit-summary-text');
+            if (depositSummaryText) {
+                depositSummaryText.innerText = depositSummary.total > 0
+                    ? `這期我轉入 $${formatMoney(depositSummary.myDeposit)}，${sharedBudgetSettings.partnerName || '對方'}轉入 $${formatMoney(depositSummary.partnerDeposit)}。`
+                    : '先把各自要投入共同生活的錢放進來，之後再從共同帳戶支出。';
+            }
+
+            renderSharedCategoryBars(summary);
+            renderSharedDepositList(currentCycle);
+
+            const listEl = document.getElementById('shared-page-tx-list');
+            if (summary.sharedTx.length === 0) {
+                listEl.innerHTML = '<div style="text-align:center; padding:18px 10px; color:#999; font-size:0.85rem;">本期還沒有共同帳戶紀錄。</div>';
+            } else {
+                let html = '<ul class="tx-list">';
+                summary.sharedTx.sort((a,b)=> new Date(b.date)-new Date(a.date) || b.id-a.id).forEach(t => {
+                    const labelText = t.sharedMeta?.label || '共同支出';
+                    html += `<li class="tx-item"><div class="tx-info"><span class="tx-cat">🤝 ${labelText}</span><span class="tx-date">${t.date}${t.note ? ` ・ ${t.note}` : ''}</span></div><div class="tx-amount amount-exp">-$${formatMoney(t.amount)}</div></li>`;
+                });
+                html += '</ul>';
+                listEl.innerHTML = html;
+            }
+        }
+
+function getSharedBudgetSummary(cycleTx) {
             const sharedTx = cycleTx.filter(t => t.type === 'expense' && t.sharedMeta && t.sharedMeta.enabled);
             const total = sharedTx.reduce((sum, t) => sum + (parseFloat(t.amount) || 0), 0);
             const myRatio = (sharedBudgetSettings.splitMode === 'ratio' ? (parseFloat(sharedBudgetSettings.myRatio) || 50) : 50) / 100;
@@ -1384,42 +1797,11 @@
         }
 
         function renderSharedBudgetCard(cycleTx) {
-            const card = document.getElementById('shared-budget-card');
-            if (!card) return;
-            if (!sharedBudgetSettings.enabled) {
-                card.classList.add('hidden');
-                return;
-            }
-            const summary = getSharedBudgetSummary(cycleTx);
-            document.getElementById('shared-total-spent').innerText = `$${formatMoney(summary.total)}`;
-            const remainingEl = document.getElementById('shared-budget-remaining');
-            remainingEl.innerText = `$${formatMoney(summary.remaining)}`;
-            remainingEl.style.color = summary.remaining < 0 ? 'var(--danger)' : 'var(--text-primary)';
-            document.getElementById('shared-my-paid').innerText = `$${formatMoney(summary.myPaid)}`;
-            const settleEl = document.getElementById('shared-settlement');
-            let settleText = `$${formatMoney(Math.abs(summary.balance))}`;
-            if (summary.balance > 0) {
-                settleEl.innerText = `應收回 ${settleText}`;
-                settleEl.style.color = 'var(--success)';
-            } else if (summary.balance < 0) {
-                settleEl.innerText = `我還要補 ${settleText}`;
-                settleEl.style.color = 'var(--danger)';
-            } else {
-                settleEl.innerText = '剛剛好';
-                settleEl.style.color = 'var(--text-primary)';
-            }
-            document.getElementById('shared-partner-chip').innerText = `對方：${sharedBudgetSettings.partnerName || '另一半'}`;
-            document.getElementById('shared-split-chip').innerText = sharedBudgetSettings.splitMode === 'ratio' ? `分攤：我 ${sharedBudgetSettings.myRatio || 50}% / 對方 ${100 - (sharedBudgetSettings.myRatio || 50)}%` : '分攤：五五分';
-            document.getElementById('shared-budget-summary-text').innerText = summary.sharedTx.length > 0
-                ? `這個帳期共同花了 $${formatMoney(summary.total)}。我理論上應負擔 $${formatMoney(summary.myExpected)}，目前我先付了 $${formatMoney(summary.myPaid)}。`
-                : '這個帳期還沒有共同花費紀錄。之後在記帳頁勾選「列入共同預算」就會出現在這裡。';
-            card.classList.remove('hidden');
+            return;
         }
 
         function openSharedBudgetModal() {
-            if (!sharedBudgetSettings.enabled) return;
-            renderSharedBudgetModal();
-            document.getElementById('shared-budget-modal').classList.add('show');
+            setAccountMode('shared');
         }
 
         function closeSharedBudgetModal() {
@@ -1436,7 +1818,6 @@
             const settleText = summary.balance > 0 ? `這期 ${sharedBudgetSettings.partnerName || '對方'}應補妳 $${formatMoney(Math.abs(summary.balance))}` : summary.balance < 0 ? `這期妳還要補 $${formatMoney(Math.abs(summary.balance))}` : '這期剛剛好，誰都不用補誰。';
             summaryEl.innerHTML = `共同花費 $${formatMoney(summary.total)} ／ 月預算 $${formatMoney(sharedBudgetSettings.monthlyBudget || 0)}<br>妳應負擔 $${formatMoney(summary.myExpected)}，妳實際先付 $${formatMoney(summary.myPaid)}。${settleText}`;
             if (summary.sharedTx.length === 0) {
-                listEl.innerHTML = '<div style="text-align:center; padding:18px 10px; color:#999; font-size:0.86rem;">本期還沒有共同預算紀錄。<br><span style="font-size:0.78rem;">到「記帳」頁勾選「這筆列入共同預算」就會出現在這裡。</span></div>';
                 return;
             }
             let html = '<ul class="tx-list">';
@@ -1879,6 +2260,7 @@ function renderDashboard() {
             cycleTx.forEach(t => {
                 if (t.type === 'income') { totalInc += t.amount; } 
                 else if (t.type === 'expense') {
+                    if (t.sharedMeta && t.sharedMeta.enabled) return;
                     if (t.mainCategory !== '預存支出') {
                         totalExp += t.amount; if(mainExp[t.mainCategory] !== undefined) mainExp[t.mainCategory] += t.amount; masterSpent[t.mainCategory] += t.amount;
                         let subCatDisplay = t.category; if (!envExp[subCatDisplay]) envExp[subCatDisplay] = { spent: 0, mainGroup: t.mainCategory }; envExp[subCatDisplay].spent += t.amount;
@@ -1927,7 +2309,7 @@ function renderDashboard() {
                 trueBalanceEl.style.color = 'var(--text-primary)';
             }
 
-            renderBudgetBars(envExp, masterSpent); renderSinkingFundsTracker(); renderSharedBudgetCard(cycleTx); renderChart(mainExp, envExp); renderDashList(cycleTx, currentChartFilter); if (document.getElementById('income-detail-modal') && document.getElementById('income-detail-modal').classList.contains('show')) renderIncomeDetailList(); 
+            renderBudgetBars(envExp, masterSpent); renderSinkingFundsTracker(); renderChart(mainExp, envExp); renderDashList(cycleTx, currentChartFilter); if (document.getElementById('income-detail-modal') && document.getElementById('income-detail-modal').classList.contains('show')) renderIncomeDetailList(); 
         }
 
 
@@ -2180,7 +2562,7 @@ function renderBudgetBars(envExp, masterSpent) {
 
         function getMethodIcon(method) { if (method === 'card') return '💳'; if (method === 'other') return '🏦'; return '💵'; }
         function renderDashList(cycleTx, filterCategory) {
-            const list = document.getElementById('recent-tx-list'); list.innerHTML = ''; let dataToShow = cycleTx;
+            const list = document.getElementById('recent-tx-list'); list.innerHTML = ''; let dataToShow = cycleTx.filter(t => !(t.sharedMeta && t.sharedMeta.enabled));
             if (filterCategory) { 
                 dataToShow = cycleTx.filter(t => { 
                     if (t.type !== 'expense' || t.mainCategory === '預存支出') return false;
@@ -2196,7 +2578,7 @@ function renderBudgetBars(envExp, masterSpent) {
                 let catDisplay = catPrefix + displayCat + sharedBadge + ' ' + displayNote;
                 list.innerHTML += `<li class="tx-item"><div class="tx-info"><span class="tx-cat">${catDisplay}</span><span class="tx-date">${t.date} <span style="font-size:0.8rem; margin-left:5px;">${methodIcon}</span></span></div><div class="action-btns"><span class="tx-amount ${color}">${sign}$${formatMoney(t.amount)}</span><i class="fas fa-edit edit-btn" onclick="editTx(${t.id})"></i><i class="fas fa-trash delete-btn" onclick="deleteTx(${t.id})"></i></div></li>`;
             });
-            if(!filterCategory && cycleTx.length > 10) { list.innerHTML += `<div style="text-align:center; padding:10px; color:var(--accent); font-size:0.8rem; cursor:pointer;" onclick="switchPage('settings')">查看更多歷史明細 <i class="fas fa-arrow-right"></i></div>`; }
+            if(!filterCategory && dataToShow.length > 10) { list.innerHTML += `<div style="text-align:center; padding:10px; color:var(--accent); font-size:0.8rem; cursor:pointer;" onclick="switchPage('settings')">查看更多歷史明細 <i class="fas fa-arrow-right"></i></div>`; }
         }
 
         function renderList() {
@@ -2219,7 +2601,7 @@ function renderBudgetBars(envExp, masterSpent) {
             ['固定支出', '變動支出'].forEach(mainCat => { if(userEnvelopes[mainCat].length === 0) { mainBudgets[mainCat] = masterBudgets[mainCat] || 0; } else { userEnvelopes[mainCat].forEach(env => { mainBudgets[mainCat] += (budgets[env] || 0); }); } });
             const cycleTx = transactions.filter(t => { const tDate = new Date(t.date); tDate.setHours(0,0,0,0); return tDate >= currentCycle.start && tDate <= currentCycle.end; });
             let mainActuals = { '固定支出': 0, '變動支出': 0 }; let totalIncome = 0; let totalExp = 0;
-            cycleTx.forEach(t => { if (t.type === 'income') { totalIncome += t.amount; } else if (t.type === 'expense' && t.mainCategory !== '預存支出') { totalExp += t.amount; mainActuals[t.mainCategory] += t.amount; } });
+            cycleTx.forEach(t => { if (t.type === 'income') { totalIncome += t.amount; } else if (t.type === 'expense' && t.mainCategory !== '預存支出' && !(t.sharedMeta && t.sharedMeta.enabled)) { totalExp += t.amount; mainActuals[t.mainCategory] += t.amount; } });
 
             const ctxBar = document.getElementById('reviewBarChart').getContext('2d'); if (reviewBarChart) reviewBarChart.destroy();
             reviewBarChart = new Chart(ctxBar, { type: 'bar', data: { labels: ['固定支出', '變動支出'], datasets: [ { label: '預算規劃', data: [mainBudgets['固定支出'], mainBudgets['變動支出']], backgroundColor: '#e0e0e0', borderRadius: 5 }, { label: '實際花費', data: [mainActuals['固定支出']||0, mainActuals['變動支出']||0], backgroundColor: ['#5a4d41', '#b08d85'], borderRadius: 5 } ] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } }, scales: { y: { beginAtZero: true, grid: { color: '#f0f0f0' } }, x: { grid: { display: false } } } } });
@@ -3008,7 +3390,8 @@ function exportToExcel() {
                 initSaved = data.initSaved || {};
                 masterBudgets = data.masterBudgets || { '固定支出': 0, '變動支出': 0, '預存支出': 0 };
                 monthlySavedPlans = data.monthlySavedPlans || {};
-                sharedBudgetSettings = data.sharedBudgetSettings || { enabled: false, partnerName: '另一半', monthlyBudget: 0, splitMode: 'half', myRatio: 50 };
+                sharedBudgetSettings = data.sharedBudgetSettings || { enabled: false, partnerName: '另一半', monthlyBudget: 0, splitMode: 'half', myRatio: 50, categories: [{name:'共同餐飲', budget:0},{name:'家用採買', budget:0},{name:'約會娛樂', budget:0},{name:'旅行交通', budget:0}] };
+                        sharedDeposits = data.sharedDeposits || [];
 
                 localStorage.setItem('bear_transactions', JSON.stringify(transactions));
                 localStorage.setItem('bear_budgets', JSON.stringify(budgets));
@@ -3039,7 +3422,7 @@ function exportToExcel() {
 
         // JSON 備份功能
         function exportData(showSuccessToast = false) { 
-            const data = { tx: transactions, budget: budgets, shop: shoppingList, networth: netWorthData, settings: sysSettings, envelopes: userEnvelopes, debts: userDebts, yearlyGoals: yearlyGoals, initSaved: initSaved, masterBudgets: masterBudgets, monthlySavedPlans: monthlySavedPlans, sharedBudgetSettings: sharedBudgetSettings }; 
+            const data = { tx: transactions, budget: budgets, shop: shoppingList, networth: netWorthData, settings: sysSettings, envelopes: userEnvelopes, debts: userDebts, yearlyGoals: yearlyGoals, initSaved: initSaved, masterBudgets: masterBudgets, monthlySavedPlans: monthlySavedPlans, sharedBudgetSettings: sharedBudgetSettings, sharedDeposits: sharedDeposits }; 
             const blob = new Blob([JSON.stringify(data)], {type: "text/json"}); 
             const link = document.createElement("a"); 
             link.href = URL.createObjectURL(blob); 
@@ -3083,6 +3466,8 @@ function exportToExcel() {
                     localStorage.setItem('bear_init_saved', JSON.stringify(initSaved)); 
                     localStorage.setItem('bear_master_budgets', JSON.stringify(masterBudgets)); 
                     localStorage.setItem('bear_monthly_saved_plans', JSON.stringify(monthlySavedPlans)); 
+                    localStorage.setItem('bear_shared_budget_settings', JSON.stringify(sharedBudgetSettings)); 
+                    localStorage.setItem('bear_shared_deposits', JSON.stringify(sharedDeposits)); 
                     writeAutoBackup('import');
                     renderBackupStatus();
                     alert('匯入成功！'); 
