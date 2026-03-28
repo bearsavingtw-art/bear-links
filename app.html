@@ -646,35 +646,9 @@
 
         <div class="card" id="shared-deposit-card">
             <div class="card-title">本期共同入金</div>
-            <div class="soft-note" id="shared-deposit-summary-text">先把各自要投入共同生活的錢放進來，之後再從共同帳戶支出，心情會輕鬆很多。</div>
-            <div class="shared-budget-grid">
-                <div class="shared-budget-box">
-                    <div class="label">共同帳戶餘額</div>
-                    <div class="value" id="shared-page-account-balance">$0</div>
-                </div>
-                <div class="shared-budget-box">
-                    <div class="label">本期總入金</div>
-                    <div class="value" id="shared-page-total-deposit">$0</div>
-                </div>
-                <div class="shared-budget-box">
-                    <div class="label">我轉入了</div>
-                    <div class="value" id="shared-page-my-deposit">$0</div>
-                </div>
-                <div class="shared-budget-box">
-                    <div class="label">對方轉入了</div>
-                    <div class="value" id="shared-page-partner-deposit">$0</div>
-                </div>
-            </div>
-            <div class="form-group"><label>入金日期</label></div>
-            <div class="form-group">
-                <label>由誰轉入</label>
-                <select id="shared-deposit-from">
-                    <option value="me">我轉入</option>
-                    <option value="partner">對方轉入</option>
-                </select>
-            </div>
-            <div class="form-group"><label>入金金額</label></div>
-            <div class="form-group"><label>備註 (選填)</label></div>
+            <div class="form-group"><label>日期</label><input type="date" id="shared-deposit-date"></div>
+            <div class="form-group"><label>金額</label><input type="number" step="any" id="shared-deposit-amount" placeholder="0" inputmode="decimal"></div>
+            <div class="form-group"><label>備註 (選填)</label><input type="text" id="shared-deposit-note" placeholder="例如：補進共同帳戶 / 這月生活費"></div>
             <button class="btn" onclick="saveSharedDeposit()"><i class="fas fa-piggy-bank"></i> 記一筆共同入金</button>
             <div class="soft-note" style="margin-top:12px;">誰先付、誰該補多少的功能會先保留在上面當作小工具；共同帳戶的核心，改成先入金、再花費。</div>
             <div id="shared-deposit-list" style="margin-top:14px;"></div>
@@ -1615,30 +1589,35 @@
         }
 
         function saveSharedDeposit() {
+            normalizeSharedBudgetSettings();
+            sharedBudgetSettings.enabled = true;
             const date = document.getElementById('shared-deposit-date')?.value;
             const amount = parseFloat(document.getElementById('shared-deposit-amount')?.value);
             const note = (document.getElementById('shared-deposit-note')?.value || '').trim();
 
             if (!date || isNaN(amount) || amount <= 0) {
-                alert('請輸入正確的日期與金額');
+                alert('請輸入正確的入金日期與金額。');
                 return;
             }
 
             sharedDeposits.push({
                 id: Date.now(),
                 date,
+                from: 'me',
                 amount,
-                note,
-                from: 'me'
+                note
             });
 
+            sharedDeposits.sort((a, b) => new Date(b.date) - new Date(a.date) || b.id - a.id);
             localStorage.setItem('bear_shared_deposits', JSON.stringify(sharedDeposits));
+            localStorage.setItem('bear_shared_budget_settings', JSON.stringify(sharedBudgetSettings));
+            writeAutoBackup('shared-deposit');
 
             document.getElementById('shared-deposit-amount').value = '';
             document.getElementById('shared-deposit-note').value = '';
 
             renderSharedAccountPage();
-            alert('已入金 🤍');
+            alert('已記一筆共同入金 🤍');
         }
 
         function scrollToSharedExpenseForm() {
