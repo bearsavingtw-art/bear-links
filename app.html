@@ -1041,8 +1041,20 @@
 
         const logicQuestions = [ { id: 'need', icon: '⚖️', title: '需求閘', desc: '是全新的需求？還是家裡有替代品？', yes: '新需求 (+20)', no: '有替代品 (-50)', val: (y)=>y?20:-50 }, { id: 'cash', icon: '💰', title: '財力閘', desc: '手邊有足夠現金全額支付嗎？', yes: '有錢 (+20)', no: '要分期 (-100)', val: (y)=>y?20:-100 }, { id: 'value', icon: '⏳', title: '價值閘', desc: '看上方工時，值得用生命去換嗎？', yes: '值得 (+10)', no: '不值 (-30)', data: true, val: (y)=>y?10:-30 }, { id: 'cool', icon: '🔥', title: '冷靜閘', desc: '如果沒打折或不能馬上拿到，還買嗎？', yes: '照買 (+30)', no: '那算了 (-30)', val: (y)=>y?30:-30 } ];
 
+        function getTodayLocalDateString() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function getNowLocalTimestamp() {
+            return Date.now();
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('input-date').valueAsDate = new Date();
+            document.getElementById('input-date').value = getTodayLocalDateString();
             const today = new Date(); document.getElementById('nw-input-month').value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
             document.getElementById('setting-cycle-start').value = sysSettings.cycleStart;
             document.getElementById('nw-input-month').addEventListener('change', function() { loadNetWorthDataForMonth(this.value); });
@@ -1175,7 +1187,7 @@
         }
 
         function openAddPage() { resetForm(); switchPage('add'); switchEntryMode('single'); }
-        function resetForm() { editingId = null; document.getElementById('add-page-title').innerText = '先幫這筆錢留位置'; document.getElementById('save-btn').innerHTML = '先幫這筆錢留位置 <i class="fas fa-check"></i>'; document.getElementById('add-page-helper').innerText = '不用一次記很多。先從你最確定的一筆開始，空白晚點補也沒關係。'; document.getElementById('cancel-edit-btn').classList.add('hidden'); document.getElementById('input-date').valueAsDate = new Date(); document.getElementById('input-main-category').value = '支出-變動'; updateSubCategories(); document.getElementById('input-amount').value = ''; document.getElementById('input-note').value = ''; document.getElementById('input-method').value = 'cash'; switchEntryMode('single'); document.getElementById('multi-entry-wrap').classList.remove('hidden'); initExtraEntryArea(); updateSharedExpenseVisibility(); }
+        function resetForm() { editingId = null; document.getElementById('add-page-title').innerText = '先幫這筆錢留位置'; document.getElementById('save-btn').innerHTML = '先幫這筆錢留位置 <i class="fas fa-check"></i>'; document.getElementById('add-page-helper').innerText = '不用一次記很多。先從你最確定的一筆開始，空白晚點補也沒關係。'; document.getElementById('cancel-edit-btn').classList.add('hidden'); document.getElementById('input-date').value = getTodayLocalDateString(); document.getElementById('input-main-category').value = '支出-變動'; updateSubCategories(); document.getElementById('input-amount').value = ''; document.getElementById('input-note').value = ''; document.getElementById('input-method').value = 'cash'; switchEntryMode('single'); document.getElementById('multi-entry-wrap').classList.remove('hidden'); initExtraEntryArea(); updateSharedExpenseVisibility(); }
         function sortTransactions() { transactions.sort((a, b) => { const dateDiff = new Date(b.date) - new Date(a.date); if (dateDiff !== 0) return dateDiff; return b.id - a.id; }); }
 
 
@@ -1261,7 +1273,7 @@
             if (!tbody) return;
             batchRowCounter += 1;
             const rowId = batchRowCounter;
-            const today = new Date().toISOString().slice(0, 10);
+            const today = getTodayLocalDateString();
             const mainCat = defaults.mainCat || '支出-變動';
             const tr = document.createElement('tr');
             tr.setAttribute('data-row-id', rowId);
@@ -1311,7 +1323,7 @@
         }
 
         function fillBatchToday() {
-            const today = new Date().toISOString().slice(0, 10);
+            const today = getTodayLocalDateString();
             document.querySelectorAll('[id^="batch-date-"]').forEach(el => {
                 if (!el.value) el.value = today;
             });
@@ -1360,7 +1372,7 @@
             if (!container) return;
             extraEntryCounter += 1;
             const id = extraEntryCounter;
-            const today = new Date().toISOString().slice(0, 10);
+            const today = getTodayLocalDateString();
             const mainCat = defaults.mainCat || '支出-變動';
 
             const card = document.createElement('div');
@@ -1520,7 +1532,7 @@
 
         function initSharedAccountPage() {
             normalizeSharedBudgetSettings();
-            const today = new Date().toISOString().slice(0, 10);
+            const today = getTodayLocalDateString();
             const dateEl = document.getElementById('shared-entry-date');
             if (dateEl) dateEl.value = today;
             const depositDateEl = document.getElementById('shared-deposit-date');
@@ -2732,7 +2744,8 @@ function renderBudgetBars(envExp, masterSpent) {
             const debt = userDebts[index];
             if (!debt) return;
 
-            const currentMonthStr = `${new Date().getFullYear()}-${new Date().getMonth() + 1}`;
+            const now = new Date();
+            const currentMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
             if (debt.lastPaidMonth === currentMonthStr) {
                 alert('這個月已經打卡還過款囉！慢慢熊感謝妳的努力！🐻‍❄️');
                 return;
@@ -2786,7 +2799,7 @@ function renderBudgetBars(envExp, masterSpent) {
 
             transactions.push({
                 id: txId,
-                date: new Date().toISOString().slice(0,10),
+                date: getTodayLocalDateString(),
                 type: 'expense',
                 category: `還債｜${debt.name}`,
                 mainCategory: '固定支出',
@@ -2855,7 +2868,8 @@ function renderDebtTracker() {
                 </div>
             `;
 
-            const currentMonthStr = `${new Date().getFullYear()}-${new Date().getMonth() + 1}`;
+            const now = new Date();
+            const currentMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
             userDebts.forEach((debt, index) => {
                 let progress = ((debt.initial - debt.current) / debt.initial) * 100;
@@ -2968,7 +2982,8 @@ function renderDebtTracker() {
                             if (i <= paidTerms) {
                                 rowsHtml += `<div class="term-row"><span class="term-status done">第 ${i} 期</span><span style="color:var(--success); font-weight:600;"><i class="fas fa-check-circle"></i> 已結清</span></div>`;
                             } else if (i === paidTerms + 1) {
-                                const currentMonthStr = `${new Date().getFullYear()}-${new Date().getMonth() + 1}`;
+                                const now = new Date();
+            const currentMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
                                 if (debt.lastPaidMonth === currentMonthStr) {
                                     rowsHtml += `<div class="term-row" style="background:#f4fbf5;"><span style="font-weight:600; color:var(--text-primary);">第 ${i} 期 (本期)</span><div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:flex-end;"><span style="color:var(--success); font-size:0.8rem; font-weight:600;"><i class="fas fa-check-circle"></i> 本月已打卡${debt.lastPaidAmount ? ` $${formatMoney(debt.lastPaidAmount)}` : ''}</span><button class="term-status active-btn" style="background:#fff; color:var(--danger); border:1px solid rgba(217,122,114,0.35); box-shadow:none;" onclick="undoDebtPaid(${index})">取消打卡</button></div></div>`;
                                 } else {
@@ -3204,7 +3219,7 @@ function exportToExcel() {
                     html += `<tr><td colspan="6" style="text-align:center; color:#999;">目前無負債紀錄</td></tr>`;
                 } else {
                     userDebts.forEach(d => {
-                        const status = d.current <= 0 ? '已結清' : (d.lastPaidMonth === `${new Date().getFullYear()}-${new Date().getMonth() + 1}` ? '本月已打卡' : '進行中');
+                        const status = d.current <= 0 ? '已結清' : (d.lastPaidMonth === `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}` ? '本月已打卡' : '進行中');
                         const rateType = `${d.calcType || 'fixed'}${d.rate ? ' / ' + d.rate + '%' : ''}`;
                         html += `<tr><td>${d.name}</td><td class="num">$${Number(d.initial||0).toLocaleString()}</td><td class="num">$${Number(d.current||0).toLocaleString()}</td><td class="num">$${Number(d.monthly||0).toLocaleString()}</td><td>${rateType}</td><td>${status}</td></tr>`;
                     });
