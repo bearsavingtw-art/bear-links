@@ -2779,17 +2779,70 @@ function renderBudgetBars(envExp, masterSpent) {
 
             debt.lastPaidMonth = currentMonthStr;
             debt.lastPaidAmount = actualPayment;
+            debt.lastPaidPrincipal = principalToDeduct;
 
+            const txId = `debt_${index}_${currentMonthStr}`;
+            debt.lastPaidTxId = txId;
+
+            transactions.push({
+                id: txId,
+                date: new Date().toISOString().slice(0,10),
+                type: 'expense',
+                category: `還債｜${debt.name}`,
+                mainCategory: '固定支出',
+                amount: actualPayment,
+                note: '雪球打卡自動記帳',
+                method: 'other'
+            });
+            sortTransactions();
+
+            localStorage.setItem('bear_transactions', JSON.stringify(transactions));
             localStorage.setItem('bear_debts_tracker', JSON.stringify(userDebts));
             writeAutoBackup('debt-paid');
 
+            renderDashboard();
+            renderList();
             renderDebtTracker();
             if(document.getElementById('checklist-modal').classList.contains('show')){
                 renderChecklist();
             }
         }
 
-        function renderDebtTracker() {
+        
+        function undoDebtPaid(index) {
+            const debt = userDebts[index];
+            if (!debt || !debt.lastPaidMonth) return;
+
+            if (!confirm('確定要取消本月打卡嗎？\n會一起還原本金與自動新增的記帳明細。')) return;
+
+            debt.current += parseFloat(debt.lastPaidPrincipal) || parseFloat(debt.lastPaidAmount) || 0;
+
+            if (debt.lastPaidTxId) {
+                transactions = transactions.filter(tx => tx.id !== debt.lastPaidTxId);
+            } else {
+                transactions = transactions.filter(tx => !(tx.note === '雪球打卡自動記帳' && tx.category === `還債｜${debt.name}`));
+            }
+
+            debt.lastPaidMonth = '';
+            debt.lastPaidAmount = null;
+            debt.lastPaidPrincipal = null;
+            debt.lastPaidTxId = null;
+
+            localStorage.setItem('bear_transactions', JSON.stringify(transactions));
+            localStorage.setItem('bear_debts_tracker', JSON.stringify(userDebts));
+            writeAutoBackup('debt-undo');
+
+            renderDashboard();
+            renderList();
+            renderDebtTracker();
+            if(document.getElementById('checklist-modal').classList.contains('show')){
+                renderChecklist();
+            }
+
+            alert('已取消本月打卡，並還原明細。');
+        }
+
+function renderDebtTracker() {
             const container = document.getElementById('debt-tracker-container'); container.innerHTML = '';
             if(userDebts.length === 0) { container.innerHTML = '<div style="text-align:center; padding:15px; color:#999; font-size:0.85rem; border:1px dashed #eee; border-radius:10px; margin-bottom:15px;">尚未新增負債目標。<br>勇敢面對是解脫的第一步！</div>'; return; }
             
@@ -2849,7 +2902,11 @@ function renderBudgetBars(envExp, masterSpent) {
                 let repayBtnHtml = '';
                 if (!isDone && remainingTerms !== -1 && remainingTerms !== -2) {
                     if (debt.lastPaidMonth === currentMonthStr) {
-                        repayBtnHtml = `<span style="color:var(--success); font-weight:bold; font-size:0.85rem;"><i class="fas fa-check-circle"></i> 本月已打卡${debt.calcType === 'flexible' && debt.lastPaidAmount ? ` $${formatMoney(debt.lastPaidAmount)}` : ''}</span>`;
+                        repayBtnHtml = `
+                            <div style="display:flex; flex-direction:column; gap:8px; align-items:flex-start;">
+                                <span style="color:var(--success); font-weight:bold; font-size:0.85rem;"><i class="fas fa-check-circle"></i> 本月已打卡${debt.lastPaidAmount ? ` $${formatMoney(debt.lastPaidAmount)}` : ''}</span>
+                                <button class="btn-repay" style="background:#fff; color:var(--danger); border:1px solid rgba(217,122,114,0.35); box-shadow:none; margin-top:0;" onclick="undoDebtPaid(${index})"><i class="fas fa-rotate-left"></i> 取消打卡</button>
+                            </div>`;
                     } else {
                         repayBtnHtml = debt.calcType === 'flexible'
                             ? `<button class="btn-repay" onclick="markDebtPaid(${index})"><i class="fas fa-pen"></i> 輸入本月還款</button>`
@@ -2913,7 +2970,7 @@ function renderBudgetBars(envExp, masterSpent) {
                             } else if (i === paidTerms + 1) {
                                 const currentMonthStr = `${new Date().getFullYear()}-${new Date().getMonth() + 1}`;
                                 if (debt.lastPaidMonth === currentMonthStr) {
-                                    rowsHtml += `<div class="term-row" style="background:#f4fbf5;"><span style="font-weight:600; color:var(--text-primary);">第 ${i} 期 (本期)</span><span style="color:var(--success); font-size:0.8rem; font-weight:600;"><i class="fas fa-check-circle"></i> 本月已打卡${debt.calcType === 'flexible' && debt.lastPaidAmount ? ` $${formatMoney(debt.lastPaidAmount)}` : ''}</span></div>`;
+                                    rowsHtml += `<div class="term-row" style="background:#f4fbf5;"><span style="font-weight:600; color:var(--text-primary);">第 ${i} 期 (本期)</span><div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:flex-end;"><span style="color:var(--success); font-size:0.8rem; font-weight:600;"><i class="fas fa-check-circle"></i> 本月已打卡${debt.lastPaidAmount ? ` $${formatMoney(debt.lastPaidAmount)}` : ''}</span><button class="term-status active-btn" style="background:#fff; color:var(--danger); border:1px solid rgba(217,122,114,0.35); box-shadow:none;" onclick="undoDebtPaid(${index})">取消打卡</button></div></div>`;
                                 } else {
                                     rowsHtml += debt.calcType === 'flexible'
                                         ? `<div class="term-row" style="background:#fffaf0; border-color:var(--warning);"><span style="font-weight:600; color:var(--text-primary);">第 ${i} 期 (本期應繳)</span><button class="term-status active-btn" onclick="markDebtPaid(${index})">輸入還款</button></div>`
@@ -3011,10 +3068,12 @@ function renderBudgetBars(envExp, masterSpent) {
                 userDebts[editingDebtId] = { 
                     name, initial, current, monthly, rate, totalTerms, payDate, calcType,
                     lastPaidMonth: oldDebt.lastPaidMonth || '',
-                    lastPaidAmount: oldDebt.lastPaidAmount || null
+                    lastPaidAmount: oldDebt.lastPaidAmount || null,
+                    lastPaidPrincipal: oldDebt.lastPaidPrincipal || null,
+                    lastPaidTxId: oldDebt.lastPaidTxId || null
                 }; 
             } else { 
-                userDebts.push({ name, initial, current, monthly, rate, totalTerms, payDate, calcType, lastPaidMonth: '', lastPaidAmount: null }); 
+                userDebts.push({ name, initial, current, monthly, rate, totalTerms, payDate, calcType, lastPaidMonth: '', lastPaidAmount: null, lastPaidPrincipal: null, lastPaidTxId: null }); 
             } 
 
             localStorage.setItem('bear_debts_tracker', JSON.stringify(userDebts)); 
