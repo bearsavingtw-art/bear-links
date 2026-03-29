@@ -44,6 +44,15 @@
         .soft-note { background: rgba(184,135,107,0.08); border: 1px dashed rgba(184,135,107,0.28); border-radius: 16px; padding: 12px 14px; font-size: 0.8rem; color: var(--text-primary); line-height: 1.6; }
         .section-kicker { display: inline-flex; align-items: center; gap: 6px; font-size: 0.72rem; color: var(--accent-deep); background: rgba(184,135,107,0.12); border-radius: 999px; padding: 5px 10px; margin-bottom: 10px; font-weight: 700; letter-spacing: 0.02em; }
         .gentle-chip { display:inline-flex; align-items:center; gap:6px; font-size:0.72rem; padding:5px 10px; border-radius:999px; background:#fff; color:var(--accent-deep); border:1px solid var(--line-soft); font-weight:700; }
+        .recent-combo-section { margin: 0 0 14px; }
+        .recent-combo-head { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:8px; flex-wrap:wrap; }
+        .recent-combo-title { font-size:0.82rem; font-weight:700; color:var(--text-primary); }
+        .recent-combo-desc { font-size:0.74rem; color:var(--text-secondary); }
+        .recent-combo-list { display:flex; flex-wrap:wrap; gap:8px; }
+        .recent-combo-chip { border:none; background:linear-gradient(180deg,#fffdf9 0%, #f7efe5 100%); color:var(--text-primary); border:1px solid rgba(184,135,107,0.22); border-radius:16px; padding:10px 12px; text-align:left; cursor:pointer; box-shadow:0 4px 12px rgba(92,75,66,0.05); min-width:0; }
+        .recent-combo-chip:active { transform:scale(0.98); }
+        .recent-combo-main { font-size:0.78rem; font-weight:700; line-height:1.35; }
+        .recent-combo-sub { font-size:0.68rem; color:var(--text-secondary); margin-top:3px; line-height:1.35; }
 
         .budget-group-title { font-size:0.85rem; font-weight:bold; margin: 15px 0 8px; color:var(--text-primary); border-bottom: 1px solid #eee; padding-bottom:4px; display: flex; align-items: center; gap: 5px; }
         .budget-item { margin-bottom: 12px; }
@@ -123,7 +132,35 @@
         .tx-info { display: flex; flex-direction: column; }
         .tx-cat { font-weight: 600; font-size: 0.95rem; }
         .tx-amount { font-weight: 600; font-family: 'Montserrat', sans-serif; display: flex; flex-direction: column; align-items: flex-end; }
-        .tx-method { font-size: 0.75rem; color: #999; margin-top: 2px; } 
+        .tx-method { font-size: 0.75rem; color: #999; margin-top: 2px; }
+        .pay-helper { font-size:0.74rem; color:var(--text-secondary); margin-top:6px; line-height:1.5; }
+        .pay-inline-actions { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:8px; flex-wrap:wrap; }
+        .mini-link-btn { border:none; background:rgba(184,135,107,0.1); color:var(--accent-deep); border-radius:999px; padding:8px 12px; font-size:0.78rem; font-weight:700; cursor:pointer; }
+        .payment-detail-chip { display:inline-flex; align-items:center; gap:6px; font-size:0.72rem; color:var(--accent-deep); background:rgba(184,135,107,0.08); border:1px solid rgba(184,135,107,0.18); padding:4px 8px; border-radius:999px; margin-top:4px; }
+        .smart-alert { border-radius:16px; padding:12px 14px; margin-bottom:10px; border:1px solid rgba(217,122,114,0.22); background:rgba(217,122,114,0.08); color:var(--text-primary); }
+        .smart-alert strong { color:var(--danger); }
+        .smart-alert-sub { font-size:0.78rem; color:var(--text-secondary); margin-top:4px; line-height:1.5; }
+        .batch-inline-tools { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:6px; }
+        .batch-inline-chip { border:none; background:rgba(184,135,107,0.10); color:var(--accent-deep); border-radius:999px; padding:6px 10px; font-size:0.72rem; font-weight:700; cursor:pointer; }
+        .batch-inline-chip:active { transform:scale(0.98); }
+        .analysis-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px; }
+        .analysis-box { background:#faf5ef; border:1px solid rgba(184,135,107,0.12); border-radius:18px; padding:14px 12px; }
+        .analysis-box .stat-label { margin-bottom:6px; }
+        .analysis-empty { text-align:center; padding:16px 10px; color:#aaa; font-size:0.82rem; }
+        .analysis-list { display:flex; flex-direction:column; gap:10px; }
+        .analysis-item { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; padding:12px 0; border-bottom:1px dashed #eee; }
+        .analysis-item:last-child { border-bottom:none; }
+        .analysis-item-title { font-weight:700; color:var(--text-primary); }
+        .analysis-item-sub { font-size:0.76rem; color:var(--text-secondary); margin-top:3px; }
+        .analysis-item-amount { font-weight:700; color:var(--accent-deep); white-space:nowrap; }
+        .analysis-box.clickable { cursor:pointer; transition:0.2s ease; }
+        .analysis-box.clickable:active { transform:scale(0.98); }
+        .analysis-box.active { border-color: rgba(184,135,107,0.5); box-shadow: 0 8px 20px rgba(184,135,107,0.12); background: linear-gradient(180deg, #fffdf9 0%, #f7efe6 100%); }
+        .analysis-empty { font-size:0.84rem; color:var(--text-secondary); padding:8px 0; }
+        .analysis-detail-toolbar { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:10px; flex-wrap:wrap; }
+        .analysis-detail-chip { display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px; background:rgba(184,135,107,0.12); color:var(--accent-deep); font-size:0.76rem; font-weight:700; }
+
+
         .amount-inc { color: var(--success); }
         .amount-exp { color: var(--accent); }
         .amount-save { color: var(--gold); } 
@@ -431,6 +468,15 @@
             <div class="soft-note" style="margin-top:12px;">幫這個月的每一筆錢找位置。</div>
 
             <div id="single-entry-area">
+            <div class="recent-combo-section hidden" id="recent-combo-section">
+                <div class="recent-combo-head">
+                    <div>
+                        <div class="recent-combo-title">最近用過</div>
+                        <div class="recent-combo-desc">點一下就能帶入分類＋付款方式組合。</div>
+                    </div>
+                </div>
+                <div class="recent-combo-list" id="recent-combo-list"></div>
+            </div>
             <div class="form-group"><label>日期</label><input type="date" id="input-date"></div>
             
             <div class="form-group">
@@ -455,11 +501,29 @@
 
             <div class="form-group">
                 <label>支付方式</label>
-                <select id="input-method">
-                    <option value="cash">💵 現金 (Cash)</option>
-                    <option value="card">💳 信用卡/行動支付 (Card)</option>
-                    <option value="other">🏦 轉帳/其他 (Other)</option>
+                <select id="input-method" onchange="handleMainPaymentMethodChange()">
+                    <option value="cash">💵 現金</option>
+                    <option value="card">💳 信用卡</option>
+                    <option value="transfer">🏦 轉帳</option>
+                    <option value="wallet">📱 電子支付</option>
                 </select>
+                <div class="pay-inline-actions">
+                    <div class="pay-helper">可先在設定頁指定預設付款方式，記帳時會自動帶入。</div>
+                    <button type="button" class="mini-link-btn" onclick="openPaymentSettingsFromAdd()"><i class="fas fa-credit-card"></i> 付款工具設定</button>
+                </div>
+            </div>
+            <div class="form-group hidden" id="input-card-group">
+                <label>這筆刷哪張卡</label>
+                <select id="input-card-id"></select>
+            </div>
+            <div class="form-group hidden" id="input-transfer-group">
+                <label>轉帳工具 / 帳戶（選填）</label>
+                <input type="text" id="input-transfer-label" placeholder="例如：台新帳戶、玉山帳戶">
+            </div>
+            <div class="form-group hidden" id="input-wallet-group">
+                <label>電子支付</label>
+                <select id="input-wallet-id" onchange="syncWalletFundingHint()"></select>
+                <div class="pay-helper" id="wallet-funding-hint">可在設定頁替電子支付綁定信用卡，這裡會一起記住來源。</div>
             </div>
             <div class="shared-inline-box" id="shared-expense-box">
                 <div style="font-weight:700; color:var(--text-primary); margin-bottom:6px;">這筆是一起花的嗎？</div>
@@ -501,7 +565,7 @@
                                 <th style="width:120px;">日期</th>
                                 <th style="width:140px;">資金流向</th>
                                 <th style="width:160px;">詳細分類</th>
-                                <th style="width:130px;">支付方式</th>
+                                <th style="width:260px;">支付方式 / 卡片</th>
                                 <th style="width:110px;">金額</th>
                                 <th>備註</th>
                                 <th style="width:70px;">操作</th>
@@ -708,7 +772,45 @@
         </div>
     </div>
 
-    <div id="page-settings" class="page">
+        <div id="page-analysis" class="page">
+        <div class="page-intro">
+            <div class="section-kicker"><i class="fas fa-chart-pie"></i> 現金 / 信用卡分析</div>
+            <div class="page-intro-title">把付款工具拆開看，才知道錢是怎麼流走的。</div>
+            <div class="page-intro-desc">這裡會整理本期現金、信用卡、轉帳、電子支付的使用狀況，也會統計哪張卡刷最多、哪個電子支付最常用。</div>
+        </div>
+        <div class="card">
+            <div class="card-title">本期付款方式總覽</div>
+            <div class="analysis-grid" id="payment-method-summary"></div>
+        </div>
+        <div class="card">
+            <div class="card-title">付款方式明細</div>
+            <div class="analysis-detail-toolbar">
+                <div id="payment-method-detail-chip" class="analysis-detail-chip"><i class="fas fa-hand-pointer"></i> 點上方付款方式看本期明細</div>
+                <button type="button" class="btn-outline hidden" id="payment-method-detail-clear" style="width:auto; padding:8px 14px; margin:0;" onclick="clearPaymentMethodDetailFilter()">清除篩選</button>
+            </div>
+            <div class="analysis-list" id="payment-method-detail-list"></div>
+        </div>
+        <div class="card">
+            <div class="card-title">付款工具分布甜甜圈圖</div>
+            <div class="soft-note" style="margin-bottom:12px;">把現金、轉帳，加上每張信用卡與每個電子支付放在同一張圖裡，會更容易看出妳真正最常用的付款工具。</div>
+            <div class="chart-wrapper" style="height:260px;"><canvas id="paymentMixChart"></canvas></div>
+        </div>
+        <div class="card">
+            <div class="card-title">哪張卡已刷多少</div>
+            <div id="credit-card-alert-list" style="margin-bottom:12px;"></div>
+            <div class="analysis-list" id="credit-card-analysis-list"></div>
+        </div>
+        <div class="card">
+            <div class="card-title">電子支付刷了多少</div>
+            <div class="analysis-list" id="wallet-analysis-list"></div>
+        </div>
+        <div class="card">
+            <div class="card-title">電子支付綁哪張卡</div>
+            <div class="analysis-list" id="wallet-funding-analysis-list"></div>
+        </div>
+    </div>
+
+<div id="page-settings" class="page">
         <div class="page-intro">
             <div class="section-kicker"><i class="fas fa-feather-pointed"></i> 系統語氣設定</div>
             <div class="page-intro-title">不把功能堆滿，而是讓你每次回來都知道怎麼開始。</div>
@@ -731,6 +833,35 @@
                     <span style="font-weight:600; color:var(--text-primary);">號</span>
                 </div>
             </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">付款工具設定</div>
+            <div class="soft-note" style="margin-bottom:14px;">可以先決定記帳時預設要帶出現金、信用卡、轉帳或電子支付；若妳常刷固定幾張卡，也可以在這裡建清單，之後分析才看得出哪張卡刷最多。</div>
+            <div class="form-group">
+                <label>預設付款方式</label>
+                <select id="setting-default-method"></select>
+            </div>
+            <div class="form-group">
+                <label>預設信用卡</label>
+                <select id="setting-default-card"></select>
+            </div>
+            <div class="form-group">
+                <label>預設電子支付</label>
+                <select id="setting-default-wallet"></select>
+            </div>
+            <div class="pay-inline-actions" style="margin-top:0; margin-bottom:10px;">
+                <div class="gentle-chip"><i class="fas fa-credit-card"></i> 信用卡設定</div>
+                <button type="button" class="mini-link-btn" onclick="openAddPage()">回到記帳區</button>
+            </div>
+            <div id="credit-card-settings-list"></div>
+            <button class="btn btn-outline" type="button" onclick="addCreditCardSetting()"><i class="fas fa-plus"></i> 新增信用卡</button>
+            <div class="pay-inline-actions" style="margin-top:18px; margin-bottom:10px;">
+                <div class="gentle-chip"><i class="fas fa-mobile-screen-button"></i> 電子支付設定</div>
+            </div>
+            <div id="wallet-settings-list"></div>
+            <button class="btn btn-outline" type="button" onclick="addWalletSetting()"><i class="fas fa-plus"></i> 新增電子支付</button>
+            <button class="btn" type="button" onclick="savePaymentSettings()"><i class="fas fa-save"></i> 儲存付款工具設定</button>
         </div>
 
         <div class="card">
@@ -926,6 +1057,11 @@
             <div class="nav-label">記帳</div>
             <div class="nav-sub">留位置</div>
         </div>
+        <div class="nav-item" onclick="switchPage('analysis')" id="nav-analysis">
+            <i class="fas fa-chart-pie"></i>
+            <div class="nav-label">分析</div>
+            <div class="nav-sub">付款</div>
+        </div>
         <div class="nav-item" onclick="switchPage('settings')" id="nav-settings">
             <i class="fas fa-list-ul"></i>
             <div class="nav-label">設定</div>
@@ -986,6 +1122,7 @@
         let shoppingList = JSON.parse(localStorage.getItem('bear_shopping_list')) || [];
         let netWorthData = JSON.parse(localStorage.getItem('bear_networth')) || [];
         let sysSettings = JSON.parse(localStorage.getItem('bear_sys_settings')) || { cycleStart: 1 };
+        let paymentSettings = JSON.parse(localStorage.getItem('bear_payment_settings')) || { defaultMethod: 'cash', defaultCardId: '', defaultWalletId: '', cards: [], wallets: [] };
         let userDebts = JSON.parse(localStorage.getItem('bear_debts_tracker')) || [];
         let backupMeta = JSON.parse(localStorage.getItem('bear_backup_meta')) || { lastAutoSave: '', lastManualBackup: '', remindAfter: '' };
         let sharedBudgetSettings = JSON.parse(localStorage.getItem('bear_shared_budget_settings')) || { enabled: false, partnerName: '另一半', monthlyBudget: 0, splitMode: 'half', myRatio: 50, categories: [{name:'共同餐飲', budget:0},{name:'家用採買', budget:0},{name:'約會娛樂', budget:0},{name:'旅行交通', budget:0}] };
@@ -997,8 +1134,8 @@
             localStorage.setItem('bear_custom_envelopes', JSON.stringify(userEnvelopes));
         }
 
-        let myChart = null; let nwChart = null; let reviewBarChart = null; let reviewPieChart = null; 
-        let editingId = null; let dashboardViewDate = new Date(); let currentChartFilter = null; let editingDebtId = null; let inlineEditingTxId = null; let sharedInlineEditingTxId = null;
+        let myChart = null; let nwChart = null; let reviewBarChart = null; let reviewPieChart = null; let paymentMixChart = null; 
+        let editingId = null; let dashboardViewDate = new Date(); let currentChartFilter = null; let paymentMethodDetailFilter = null; let editingDebtId = null; let inlineEditingTxId = null; let sharedInlineEditingTxId = null;
         let currentChartMode = localStorage.getItem('bear_chart_mode') || 'main';
         let editingSharedTxId = null;
         let dashListExpanded = false;
@@ -1007,6 +1144,7 @@
         let isCustomCatMode = false; 
         let entryMode = 'single';
         let batchRowCounter = 0;
+        let recentEntryCombos = [];
 
         let guideStep = 0;
         const guideSteps = [
@@ -1083,7 +1221,8 @@
             const today = new Date(); document.getElementById('nw-input-month').value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
             document.getElementById('setting-cycle-start').value = sysSettings.cycleStart;
             document.getElementById('nw-input-month').addEventListener('change', function() { loadNetWorthDataForMonth(this.value); });
-            updateSubCategories(); initSharedBudgetForm(); bindSharedExpenseInputs(); renderDashboard(); initExtraEntryArea(); setInterval(updateCountdowns, 1000);
+            normalizePaymentSettings();
+            updateSubCategories(); initSharedBudgetForm(); bindSharedExpenseInputs(); renderPaymentSettings(); hydrateTransactionPaymentMetadata(); applyMainPaymentDefaults(); renderDashboard(); initExtraEntryArea(); setInterval(updateCountdowns, 1000);
             const urlParams = new URLSearchParams(window.location.search); if (urlParams.get('tab') === 'networth') switchPage('networth');
 });
 
@@ -1191,6 +1330,8 @@
                 document.getElementById('nav-add').classList.add('active');
             } else if (pageId === 'networth') {
                 document.getElementById('nav-networth').classList.add('active');
+            } else if (pageId === 'analysis') {
+                document.getElementById('nav-analysis').classList.add('active');
             } else {
                 document.getElementById('nav-settings').classList.add('active');
             }
@@ -1202,8 +1343,9 @@
 
             window.scrollTo(0, 0);
             if(pageId === 'dash') { dashboardViewDate = new Date(); currentChartFilter = null; renderDashboard(); }
-            if(pageId === 'settings') { renderList(); renderBudgetSettings(); renderBackupStatus(); initSharedBudgetForm(); } 
-            if(pageId === 'add') { initBatchEntry(false); bindBatchButtons(); }
+            if(pageId === 'settings') { renderList(); renderBudgetSettings(); renderBackupStatus(); initSharedBudgetForm(); renderPaymentSettings(); } 
+            if(pageId === 'analysis') { renderPaymentAnalysisPage(); } 
+            if(pageId === 'add') { initBatchEntry(false); bindBatchButtons(); renderRecentCombos(); }
             if(pageId === 'shop') { resetShop(); renderShoppingList(); }
             if(pageId === 'networth') { loadNetWorthDataForMonth(document.getElementById('nw-input-month').value); renderNetWorthPage(); renderDebtTracker(); } 
             if(pageId === 'shared') { initSharedAccountPage(); renderSharedAccountPage(); }
@@ -1211,8 +1353,8 @@
             if(pageId === 'milestones') renderMilestonesPage(); 
         }
 
-        function openAddPage() { resetForm(); switchPage('add'); switchEntryMode('single'); }
-        function resetForm() { editingId = null; document.getElementById('add-page-title').innerText = '先幫這筆錢留位置'; document.getElementById('save-btn').innerHTML = '先幫這筆錢留位置 <i class="fas fa-check"></i>'; document.getElementById('add-page-helper').innerText = '不用一次記很多。先從你最確定的一筆開始，空白晚點補也沒關係。'; document.getElementById('cancel-edit-btn').classList.add('hidden'); document.getElementById('input-date').value = getTodayLocalDateString(); document.getElementById('input-main-category').value = '支出-變動'; updateSubCategories(); document.getElementById('input-amount').value = ''; document.getElementById('input-note').value = ''; document.getElementById('input-method').value = 'cash'; switchEntryMode('single'); document.getElementById('multi-entry-wrap').classList.remove('hidden'); initExtraEntryArea(); updateSharedExpenseVisibility(); }
+        function openAddPage() { resetForm(); switchPage('add'); switchEntryMode('single'); applyMainPaymentDefaults(); renderRecentCombos(); }
+        function resetForm() { editingId = null; document.getElementById('add-page-title').innerText = '先幫這筆錢留位置'; document.getElementById('save-btn').innerHTML = '先幫這筆錢留位置 <i class="fas fa-check"></i>'; document.getElementById('add-page-helper').innerText = '不用一次記很多。先從你最確定的一筆開始，空白晚點補也沒關係。'; document.getElementById('cancel-edit-btn').classList.add('hidden'); document.getElementById('input-date').value = getTodayLocalDateString(); document.getElementById('input-main-category').value = '支出-變動'; updateSubCategories(); document.getElementById('input-amount').value = ''; document.getElementById('input-note').value = ''; document.getElementById('input-transfer-label').value = ''; switchEntryMode('single'); document.getElementById('multi-entry-wrap').classList.remove('hidden'); initExtraEntryArea(); applyMainPaymentDefaults(); updateSharedExpenseVisibility(); renderRecentCombos(); }
         function sortTransactions() { transactions.sort((a, b) => { const dateDiff = new Date(b.date) - new Date(a.date); if (dateDiff !== 0) return dateDiff; return b.id - a.id; }); }
 
 
@@ -1307,17 +1449,136 @@
             return `<select id="batch-sub-${rowId}">` + options.map(opt => `<option value="${opt.value}" ${opt.value === selected ? 'selected' : ''}>${opt.label}</option>`).join('') + `</select>`;
         }
 
+        function buildBatchQuickApplyHtml(rowId) {
+            if (!recentEntryCombos || !recentEntryCombos.length) return '';
+            const topCombos = recentEntryCombos.slice(0, 3);
+            return `
+                <div class="batch-inline-tools">
+                    ${topCombos.map((combo, idx) => `<button type="button" class="batch-inline-chip" onclick="applyRecentComboToBatchRow(${rowId}, ${idx})">${combo.subCat || '未分類'}｜${getMethodText(combo.method)}</button>`).join('')}
+                </div>
+            `;
+        }
+
+        function applyRecentComboToBatchRow(rowId, index) {
+            const combo = recentEntryCombos[index];
+            if (!combo) return;
+            const mainEl = document.getElementById(`batch-main-${rowId}`);
+            if (mainEl) mainEl.value = combo.mainCatRaw || '支出-變動';
+            updateBatchSubcategory(rowId);
+            const subEl = document.getElementById(`batch-sub-${rowId}`);
+            if (subEl) {
+                const hasOption = Array.from(subEl.options).some(opt => opt.value === combo.subCat);
+                if (hasOption) subEl.value = combo.subCat || '未分類';
+            }
+            const meta = {
+                method: combo.method || paymentSettings.defaultMethod || 'cash',
+                paymentToolId: combo.paymentToolId || '',
+                fundingCardId: combo.fundingCardId || '',
+                transferLabel: combo.transferLabel || ''
+            };
+            const wrap = document.getElementById(`batch-payment-wrap-${rowId}`);
+            if (wrap) wrap.innerHTML = buildBatchPaymentDetailHtml(rowId, meta);
+            handleBatchPaymentMethodChange(rowId);
+            document.getElementById(`batch-amount-${rowId}`)?.focus();
+        }
+
+        function buildBatchPaymentDetailHtml(rowId, defaults = {}) {
+            const method = defaults.method || 'cash';
+            const cards = getEnabledCards();
+            const wallets = getEnabledWallets();
+            const defaultCardId = defaults.paymentToolId || defaults.cardId || paymentSettings.defaultCardId || (cards[0]?.id || '');
+            const defaultWalletId = defaults.paymentToolId || defaults.walletId || paymentSettings.defaultWalletId || (wallets[0]?.id || '');
+            const defaultTransferLabel = defaults.transferLabel || '';
+            const cardOptions = (cards.length ? cards : [{ id:'', name:'尚未設定信用卡' }]).map(card => `<option value="${card.id || ''}" ${String(defaultCardId) === String(card.id || '') ? 'selected' : ''}>${card.name || '尚未設定信用卡'}</option>`).join('');
+            const walletOptions = (wallets.length ? wallets : [{ id:'', name:'尚未設定電子支付' }]).map(wallet => `<option value="${wallet.id || ''}" ${String(defaultWalletId) === String(wallet.id || '') ? 'selected' : ''}>${wallet.name || '尚未設定電子支付'}</option>`).join('');
+            const selectedWallet = wallets.find(wallet => String(wallet.id) === String(defaultWalletId));
+            const fundingName = selectedWallet?.linkedCardId ? getCardNameById(selectedWallet.linkedCardId) : '';
+            const walletHint = fundingName ? `目前綁定：${fundingName}` : '可到設定頁替電子支付綁定信用卡';
+            return `
+                <div style="display:flex; flex-direction:column; gap:6px; min-width:220px;">
+                    <select id="batch-method-${rowId}" onchange="handleBatchPaymentMethodChange(${rowId})">
+                        ${buildPaymentMethodOptions(method)}
+                    </select>
+                    <div id="batch-card-wrap-${rowId}" class="${method === 'card' ? '' : 'hidden'}">
+                        <select id="batch-card-id-${rowId}">${cardOptions}</select>
+                    </div>
+                    <div id="batch-wallet-wrap-${rowId}" class="${method === 'wallet' ? '' : 'hidden'}" style="display:flex; flex-direction:column; gap:6px;">
+                        <select id="batch-wallet-id-${rowId}" onchange="syncBatchWalletFundingHint(${rowId})">${walletOptions}</select>
+                        <div id="batch-wallet-hint-${rowId}" style="font-size:0.72rem; color:var(--text-secondary); line-height:1.45;">${walletHint}</div>
+                    </div>
+                    <div id="batch-transfer-wrap-${rowId}" class="${method === 'transfer' ? '' : 'hidden'}">
+                        <input type="text" id="batch-transfer-label-${rowId}" value="${defaultTransferLabel}" placeholder="例如：台新帳戶 / ATM 轉帳">
+                    </div>
+                </div>
+            `;
+        }
+
+        function handleBatchPaymentMethodChange(rowId) {
+            const method = document.getElementById(`batch-method-${rowId}`)?.value || 'cash';
+            document.getElementById(`batch-card-wrap-${rowId}`)?.classList.toggle('hidden', method !== 'card');
+            document.getElementById(`batch-wallet-wrap-${rowId}`)?.classList.toggle('hidden', method !== 'wallet');
+            document.getElementById(`batch-transfer-wrap-${rowId}`)?.classList.toggle('hidden', method !== 'transfer');
+            if (method === 'wallet') syncBatchWalletFundingHint(rowId);
+        }
+
+        function syncBatchWalletFundingHint(rowId) {
+            const walletId = document.getElementById(`batch-wallet-id-${rowId}`)?.value || '';
+            const wallet = getEnabledWallets().find(item => String(item.id) === String(walletId));
+            const hint = document.getElementById(`batch-wallet-hint-${rowId}`);
+            if (!hint) return;
+            const fundingName = wallet?.linkedCardId ? getCardNameById(wallet.linkedCardId) : '';
+            hint.innerText = fundingName ? `目前綁定：${fundingName}` : '可到設定頁替電子支付綁定信用卡';
+        }
+
+        function readBatchPaymentMeta(rowId) {
+            const method = document.getElementById(`batch-method-${rowId}`)?.value || 'cash';
+            const cardId = document.getElementById(`batch-card-id-${rowId}`)?.value || '';
+            const walletId = document.getElementById(`batch-wallet-id-${rowId}`)?.value || '';
+            const transferLabel = (document.getElementById(`batch-transfer-label-${rowId}`)?.value || '').trim();
+            let paymentToolId = null;
+            let fundingCardId = null;
+            if (method === 'card') paymentToolId = cardId || null;
+            if (method === 'wallet') {
+                paymentToolId = walletId || null;
+                const wallet = getEnabledWallets().find(item => String(item.id) === String(walletId));
+                fundingCardId = wallet?.linkedCardId || null;
+            }
+            if (method === 'transfer') paymentToolId = transferLabel || null;
+            return { method, paymentToolId, fundingCardId, transferLabel };
+        }
+
+
+        function getBatchDefaultPaymentMeta() {
+            normalizePaymentSettings();
+            const method = paymentSettings.defaultMethod || 'cash';
+            const cards = getEnabledCards();
+            const wallets = getEnabledWallets();
+            const walletId = paymentSettings.defaultWalletId || (wallets[0]?.id || '');
+            const wallet = wallets.find(item => String(item.id) === String(walletId));
+            return {
+                method,
+                paymentToolId: method === 'card'
+                    ? (paymentSettings.defaultCardId || (cards[0]?.id || ''))
+                    : method === 'wallet'
+                        ? walletId
+                        : null,
+                fundingCardId: method === 'wallet' ? (wallet?.linkedCardId || null) : null,
+                transferLabel: ''
+            };
+        }
+
         function addBatchRow(defaults = {}) {
             const tbody = document.getElementById('batch-tbody');
             if (!tbody) return;
+            const mergedDefaults = { ...getBatchDefaultPaymentMeta(), ...defaults };
             batchRowCounter += 1;
             const rowId = batchRowCounter;
             const today = getTodayLocalDateString();
-            const mainCat = defaults.mainCat || '支出-變動';
+            const mainCat = mergedDefaults.mainCat || '支出-變動';
             const tr = document.createElement('tr');
             tr.setAttribute('data-row-id', rowId);
             tr.innerHTML = `
-                <td><input type="date" id="batch-date-${rowId}" value="${defaults.date || today}"></td>
+                <td><input type="date" id="batch-date-${rowId}" value="${mergedDefaults.date || today}"></td>
                 <td>
                     <select id="batch-main-${rowId}" onchange="updateBatchSubcategory(${rowId})">
                         <option value="支出-變動" ${mainCat === '支出-變動' ? 'selected' : ''}>💸 支出(變動)</option>
@@ -1327,16 +1588,10 @@
                         <option value="收入" ${mainCat === '收入' ? 'selected' : ''}>💰 收入</option>
                     </select>
                 </td>
-                <td id="batch-sub-wrap-${rowId}">${buildBatchSubcategorySelect(rowId, mainCat, defaults.subCat || '')}</td>
-                <td>
-                    <select id="batch-method-${rowId}">
-                        <option value="cash" ${(defaults.method || 'cash') === 'cash' ? 'selected' : ''}>💵 現金</option>
-                        <option value="card" ${(defaults.method || '') === 'card' ? 'selected' : ''}>💳 卡/行支</option>
-                        <option value="other" ${(defaults.method || '') === 'other' ? 'selected' : ''}>🏦 轉帳/其他</option>
-                    </select>
-                </td>
-                <td><input type="number" step="any" inputmode="decimal" id="batch-amount-${rowId}" value="${defaults.amount || ''}" placeholder="0"></td>
-                <td><input type="text" id="batch-note-${rowId}" value="${defaults.note || ''}" placeholder="例如：午餐、全聯"></td>
+                <td id="batch-sub-wrap-${rowId}">${buildBatchSubcategorySelect(rowId, mainCat, mergedDefaults.subCat || '')}</td>
+                <td>${buildBatchQuickApplyHtml(rowId)}<div id="batch-payment-wrap-${rowId}">${buildBatchPaymentDetailHtml(rowId, mergedDefaults)}</div></td>
+                <td><input type="number" step="any" inputmode="decimal" id="batch-amount-${rowId}" value="${mergedDefaults.amount || ''}" placeholder="0"></td>
+                <td><input type="text" id="batch-note-${rowId}" value="${mergedDefaults.note || ''}" placeholder="例如：午餐、全聯"></td>
                 <td><button type="button" class="batch-mini-btn danger" onclick="removeBatchRow(${rowId})">刪除</button></td>
             `;
             tbody.appendChild(tr);
@@ -1354,7 +1609,7 @@
                     if (nextRow) {
                         nextRow.querySelector('input, select')?.focus();
                     } else {
-                        const nextRowId = addBatchRow({ date: document.getElementById(`batch-date-${rowId}`)?.value || today, mainCat: document.getElementById(`batch-main-${rowId}`)?.value || '支出-變動', subCat: document.getElementById(`batch-sub-${rowId}`)?.value || '', method: document.getElementById(`batch-method-${rowId}`)?.value || 'cash' });
+                        const nextRowId = addBatchRow({ date: document.getElementById(`batch-date-${rowId}`)?.value || today, mainCat: document.getElementById(`batch-main-${rowId}`)?.value || '支出-變動', subCat: document.getElementById(`batch-sub-${rowId}`)?.value || '', ...readBatchPaymentMeta(rowId) });
                         document.getElementById(`batch-amount-${nextRowId}`)?.focus();
                     }
                 });
@@ -1418,7 +1673,7 @@
                 const date = document.getElementById(`batch-date-${rowId}`)?.value || '';
                 const mainCatRaw = document.getElementById(`batch-main-${rowId}`)?.value || '支出-變動';
                 const subCat = document.getElementById(`batch-sub-${rowId}`)?.value || '未分類';
-                const method = document.getElementById(`batch-method-${rowId}`)?.value || 'cash';
+                const paymentMeta = readBatchPaymentMeta(rowId);
                 const amountRaw = document.getElementById(`batch-amount-${rowId}`)?.value || '';
                 const amount = parseFloat(amountRaw);
                 const note = (document.getElementById(`batch-note-${rowId}`)?.value || '').trim();
@@ -1433,7 +1688,7 @@
 
                 entries.push({
                     id: Date.now() + idx + 1,
-                    ...collectEntryPayload(date, mainCatRaw, subCat, method, amount, note, null)
+                    ...collectEntryPayload(date, mainCatRaw, subCat, paymentMeta, amount, note, null)
                 });
             });
 
@@ -1485,6 +1740,136 @@
             return options.map(opt => `<option value="${opt.value}" ${opt.value === selected ? 'selected' : ''}>${opt.label}</option>`).join('');
         }
 
+        function getMainCatRawFromTx(tx) {
+            if (!tx) return '支出-變動';
+            if (tx.type === 'income') return '收入';
+            if (tx.type === 'save') return '存入預備金';
+            if ((tx.mainCategory || '').includes('固定')) return '支出-固定';
+            if ((tx.mainCategory || '').includes('預存')) return '支出-預存';
+            return '支出-變動';
+        }
+
+        function getMethodText(method = 'cash') {
+            if (method === 'card') return '信用卡';
+            if (method === 'wallet') return '電子支付';
+            if (method === 'transfer') return '轉帳';
+            return '現金';
+        }
+
+        function getRecentComboPaymentLabel(combo) {
+            const methodLabel = getMethodText(combo.method);
+            if (combo.method === 'card') {
+                const cardName = getCardNameById(combo.paymentToolId);
+                return cardName ? `${methodLabel}・${cardName}` : methodLabel;
+            }
+            if (combo.method === 'wallet') {
+                const walletName = getWalletNameById(combo.paymentToolId);
+                const fundingName = combo.fundingCardId ? getCardNameById(combo.fundingCardId) : '';
+                if (walletName && fundingName) return `${walletName}・${fundingName}`;
+                return walletName ? `${methodLabel}・${walletName}` : methodLabel;
+            }
+            if (combo.method === 'transfer') {
+                return combo.transferLabel ? `${methodLabel}・${combo.transferLabel}` : methodLabel;
+            }
+            return methodLabel;
+        }
+
+        function getRecentEntryCombos(limit = 5) {
+            const comboMap = new Map();
+            const sortedTx = [...transactions].sort((a, b) => {
+                const dateDiff = new Date(b.date) - new Date(a.date);
+                if (dateDiff !== 0) return dateDiff;
+                return (Number(b.id) || 0) - (Number(a.id) || 0);
+            });
+            sortedTx.forEach(tx => {
+                if (tx.sharedMeta && tx.sharedMeta.enabled) return;
+                const combo = {
+                    mainCatRaw: getMainCatRawFromTx(tx),
+                    subCat: tx.category || '未分類',
+                    method: tx.method === 'other' ? 'transfer' : (tx.method || 'cash'),
+                    paymentToolId: tx.paymentToolId || '',
+                    fundingCardId: tx.fundingCardId || '',
+                    transferLabel: tx.transferLabel || '',
+                    mainCategory: tx.mainCategory || '',
+                    type: tx.type || 'expense',
+                    lastUsed: tx.date || '',
+                    count: 0
+                };
+                const key = [combo.mainCatRaw, combo.subCat, combo.method, combo.paymentToolId, combo.transferLabel].join('||');
+                if (!comboMap.has(key)) comboMap.set(key, combo);
+                const existing = comboMap.get(key);
+                existing.count += 1;
+                const existingTime = new Date(existing.lastUsed || '2000-01-01').getTime();
+                const currentTime = new Date(tx.date || '2000-01-01').getTime();
+                if (currentTime >= existingTime) {
+                    existing.lastUsed = tx.date || existing.lastUsed;
+                    existing.fundingCardId = tx.fundingCardId || existing.fundingCardId || '';
+                }
+            });
+            return Array.from(comboMap.values())
+                .sort((a, b) => (b.count - a.count) || (new Date(b.lastUsed) - new Date(a.lastUsed)))
+                .slice(0, limit);
+        }
+
+        function renderRecentCombos() {
+            const section = document.getElementById('recent-combo-section');
+            const list = document.getElementById('recent-combo-list');
+            if (!section || !list) return;
+            recentEntryCombos = getRecentEntryCombos(5);
+            if (!recentEntryCombos.length || editingId) {
+                section.classList.add('hidden');
+                list.innerHTML = '';
+                return;
+            }
+            section.classList.remove('hidden');
+            list.innerHTML = recentEntryCombos.map((combo, idx) => `
+                <button type="button" class="recent-combo-chip" onclick="applyRecentCombo(${idx})">
+                    <div class="recent-combo-main">${combo.subCat || '未分類'}</div>
+                    <div class="recent-combo-sub">${combo.mainCatRaw.replace('支出-','')} ・ ${getRecentComboPaymentLabel(combo)} ・ 常用 ${combo.count || 1} 次</div>
+                </button>
+            `).join('');
+        }
+
+        function applyRecentCombo(index) {
+            const combo = recentEntryCombos[index];
+            if (!combo) return;
+            const mainEl = document.getElementById('input-main-category');
+            const subEl = document.getElementById('input-sub-category');
+            const customEl = document.getElementById('input-custom-category');
+            if (mainEl) mainEl.value = combo.mainCatRaw || '支出-變動';
+            updateSubCategories();
+            if (subEl) {
+                const hasOption = Array.from(subEl.options).some(opt => opt.value === combo.subCat);
+                if (hasOption) {
+                    toggleCustomCatMode(false);
+                    subEl.value = combo.subCat;
+                } else {
+                    toggleCustomCatMode(true);
+                    if (customEl) customEl.value = combo.subCat || '';
+                }
+            }
+            const method = combo.method || paymentSettings.defaultMethod || 'cash';
+            const methodEl = document.getElementById('input-method');
+            if (methodEl) methodEl.value = method;
+            renderPaymentMethodSelects();
+            if (methodEl) methodEl.value = method;
+            if (method === 'card' && document.getElementById('input-card-id')) {
+                const fallback = paymentSettings.defaultCardId || (getEnabledCards()[0]?.id || '');
+                document.getElementById('input-card-id').value = combo.paymentToolId || fallback;
+            }
+            if (method === 'wallet' && document.getElementById('input-wallet-id')) {
+                const fallback = paymentSettings.defaultWalletId || (getEnabledWallets()[0]?.id || '');
+                document.getElementById('input-wallet-id').value = combo.paymentToolId || fallback;
+            }
+            if (method === 'transfer' && document.getElementById('input-transfer-label')) {
+                document.getElementById('input-transfer-label').value = combo.transferLabel || '';
+            } else if (document.getElementById('input-transfer-label')) {
+                document.getElementById('input-transfer-label').value = '';
+            }
+            handleMainPaymentMethodChange();
+            document.getElementById('input-amount')?.focus();
+        }
+
         function initExtraEntryArea() {
             const container = document.getElementById('extra-entry-container');
             if (container) container.innerHTML = '';
@@ -1507,7 +1892,7 @@
                     <div class="extra-entry-title">追加記帳 ${id}</div>
                     <button type="button" class="extra-entry-del" onclick="removeExtraEntryCard(${id})">刪除</button>
                 </div>
-                <div class="form-group"><label>日期</label><input type="date" id="extra-date-${id}" value="${defaults.date || today}"></div>
+                <div class="form-group"><label>日期</label><input type="date" id="extra-date-${id}" value="${mergedDefaults.date || today}"></div>
                 <div class="form-group">
                     <label>資金流向</label>
                     <select id="extra-main-${id}" onchange="updateExtraSubCategories(${id})">
@@ -1520,7 +1905,7 @@
                 </div>
                 <div class="form-group">
                     <label>詳細分類</label>
-                    <select id="extra-sub-${id}">${getSubcategoryOptionsHtml(mainCat, defaults.subCat || '')}</select>
+                    <select id="extra-sub-${id}">${getSubcategoryOptionsHtml(mainCat, mergedDefaults.subCat || '')}</select>
                 </div>
                 <div class="form-group">
                     <label>支付方式</label>
@@ -1530,8 +1915,8 @@
                         <option value="other" ${(defaults.method || '') === 'other' ? 'selected' : ''}>🏦 轉帳/其他 (Other)</option>
                     </select>
                 </div>
-                <div class="form-group"><label>金額</label><input type="number" step="any" id="extra-amount-${id}" value="${defaults.amount || ''}" placeholder="0" inputmode="decimal"></div>
-                <div class="form-group"><label>備註 (選填)</label><input type="text" id="extra-note-${id}" value="${defaults.note || ''}" placeholder="例如：午餐、全聯..."></div>
+                <div class="form-group"><label>金額</label><input type="number" step="any" id="extra-amount-${id}" value="${mergedDefaults.amount || ''}" placeholder="0" inputmode="decimal"></div>
+                <div class="form-group"><label>備註 (選填)</label><input type="text" id="extra-note-${id}" value="${mergedDefaults.note || ''}" placeholder="例如：午餐、全聯..."></div>
                 <div class="shared-inline-box ${sharedBudgetSettings.enabled ? '' : 'hidden'}">
                     <label style="margin-bottom:8px; display:flex; align-items:center; gap:8px;">
                         
@@ -2106,7 +2491,494 @@ function getSharedBudgetSummary(cycleTx) {
             listEl.innerHTML = html;
         }
 
-        function collectEntryPayload(date, mainCatRaw, subCat, method, amount, note, sharedMeta = null) {
+        function normalizePaymentSettings() {
+            if (!paymentSettings || typeof paymentSettings !== 'object') paymentSettings = {};
+            if (!Array.isArray(paymentSettings.cards)) paymentSettings.cards = [];
+            if (!Array.isArray(paymentSettings.wallets)) paymentSettings.wallets = [];
+            paymentSettings.defaultMethod = ['cash','card','transfer','wallet'].includes(paymentSettings.defaultMethod) ? paymentSettings.defaultMethod : 'cash';
+            paymentSettings.defaultCardId = paymentSettings.defaultCardId || '';
+            paymentSettings.defaultWalletId = paymentSettings.defaultWalletId || '';
+            paymentSettings.cards = paymentSettings.cards.map(card => ({ ...card, limit: card?.limit || '' }));
+            if (paymentSettings.cards.length === 0) {
+                paymentSettings.cards.push({ id: 'card_' + Date.now(), name: '我的信用卡', bank: '', dueDay: '', limit: '', enabled: true });
+            }
+        }
+
+        function getEnabledCards() {
+            normalizePaymentSettings();
+            return paymentSettings.cards.filter(card => card && card.enabled !== false && (card.name || '').trim());
+        }
+
+        function getEnabledWallets() {
+            normalizePaymentSettings();
+            return paymentSettings.wallets.filter(wallet => wallet && wallet.enabled !== false && (wallet.name || '').trim());
+        }
+
+        function getCardNameById(cardId) {
+            const card = getEnabledCards().find(item => String(item.id) === String(cardId));
+            return card ? card.name : '';
+        }
+
+        function getWalletNameById(walletId) {
+            const wallet = getEnabledWallets().find(item => String(item.id) === String(walletId));
+            return wallet ? wallet.name : '';
+        }
+
+        function buildPaymentMethodOptions(selected = 'cash') {
+            const methods = [
+                { value:'cash', label:'💵 現金' },
+                { value:'card', label:'💳 信用卡' },
+                { value:'transfer', label:'🏦 轉帳' },
+                { value:'wallet', label:'📱 電子支付' }
+            ];
+            return methods.map(item => `<option value="${item.value}" ${selected === item.value ? 'selected' : ''}>${item.label}</option>`).join('');
+        }
+
+        function renderPaymentMethodSelects() {
+            const cardOptions = getEnabledCards();
+            const walletOptions = getEnabledWallets();
+            const mainMethod = document.getElementById('input-method');
+            const mainCard = document.getElementById('input-card-id');
+            const mainWallet = document.getElementById('input-wallet-id');
+            const defaultMethodEl = document.getElementById('setting-default-method');
+            const defaultCardEl = document.getElementById('setting-default-card');
+            const defaultWalletEl = document.getElementById('setting-default-wallet');
+            if (mainMethod) mainMethod.innerHTML = buildPaymentMethodOptions(mainMethod.value || paymentSettings.defaultMethod || 'cash');
+            if (mainCard) mainCard.innerHTML = (cardOptions.length ? cardOptions : [{id:'', name:'尚未設定信用卡'}]).map(card => `<option value="${card.id || ''}">${card.name || '尚未設定信用卡'}</option>`).join('');
+            if (mainWallet) mainWallet.innerHTML = (walletOptions.length ? walletOptions : [{id:'', name:'尚未設定電子支付'}]).map(wallet => `<option value="${wallet.id || ''}">${wallet.name || '尚未設定電子支付'}</option>`).join('');
+            if (defaultMethodEl) defaultMethodEl.innerHTML = buildPaymentMethodOptions(paymentSettings.defaultMethod || 'cash');
+            if (defaultCardEl) defaultCardEl.innerHTML = '<option value="">未指定</option>' + cardOptions.map(card => `<option value="${card.id}">${card.name}</option>`).join('');
+            if (defaultWalletEl) defaultWalletEl.innerHTML = '<option value="">未指定</option>' + walletOptions.map(wallet => `<option value="${wallet.id}">${wallet.name}</option>`).join('');
+            if (defaultMethodEl) defaultMethodEl.value = paymentSettings.defaultMethod || 'cash';
+            if (defaultCardEl) defaultCardEl.value = paymentSettings.defaultCardId || '';
+            if (defaultWalletEl) defaultWalletEl.value = paymentSettings.defaultWalletId || '';
+        }
+
+        function handleMainPaymentMethodChange() {
+            const method = document.getElementById('input-method')?.value || 'cash';
+            document.getElementById('input-card-group')?.classList.toggle('hidden', method !== 'card');
+            document.getElementById('input-transfer-group')?.classList.toggle('hidden', method !== 'transfer');
+            document.getElementById('input-wallet-group')?.classList.toggle('hidden', method !== 'wallet');
+            syncWalletFundingHint();
+        }
+
+        function syncWalletFundingHint() {
+            const walletId = document.getElementById('input-wallet-id')?.value || '';
+            const wallet = getEnabledWallets().find(item => String(item.id) === String(walletId));
+            const hint = document.getElementById('wallet-funding-hint');
+            if (!hint) return;
+            if (wallet && wallet.linkedCardId && getCardNameById(wallet.linkedCardId)) {
+                hint.innerText = `此電子支付目前綁定：${getCardNameById(wallet.linkedCardId)}`;
+            } else {
+                hint.innerText = '可在設定頁替電子支付綁定信用卡，這裡會一起記住來源。';
+            }
+        }
+
+        function applyMainPaymentDefaults() {
+            renderPaymentMethodSelects();
+            const method = paymentSettings.defaultMethod || 'cash';
+            if (document.getElementById('input-method')) document.getElementById('input-method').value = method;
+            if (document.getElementById('input-card-id')) document.getElementById('input-card-id').value = paymentSettings.defaultCardId || (getEnabledCards()[0]?.id || '');
+            if (document.getElementById('input-wallet-id')) document.getElementById('input-wallet-id').value = paymentSettings.defaultWalletId || (getEnabledWallets()[0]?.id || '');
+            handleMainPaymentMethodChange();
+        }
+
+        function readMainPaymentMeta() {
+            const method = document.getElementById('input-method')?.value || 'cash';
+            const cardId = document.getElementById('input-card-id')?.value || '';
+            const walletId = document.getElementById('input-wallet-id')?.value || '';
+            const transferLabel = (document.getElementById('input-transfer-label')?.value || '').trim();
+            let paymentToolId = null;
+            let fundingCardId = null;
+            if (method === 'card') paymentToolId = cardId || null;
+            if (method === 'wallet') {
+                paymentToolId = walletId || null;
+                const wallet = getEnabledWallets().find(item => String(item.id) === String(walletId));
+                fundingCardId = wallet?.linkedCardId || null;
+            }
+            if (method === 'transfer') paymentToolId = transferLabel || null;
+            return { method, paymentToolId, fundingCardId, transferLabel };
+        }
+
+        function getPaymentDisplayParts(tx) {
+            const method = tx.method || 'cash';
+            let methodLabel = '現金';
+            let detail = '';
+            if (method === 'card') {
+                methodLabel = '信用卡';
+                detail = getCardNameById(tx.paymentToolId) || tx.transferLabel || '';
+            } else if (method === 'wallet') {
+                methodLabel = '電子支付';
+                const walletName = getWalletNameById(tx.paymentToolId) || '';
+                const fundingName = getCardNameById(tx.fundingCardId) || '';
+                detail = walletName ? (fundingName ? `${walletName}｜綁 ${fundingName}` : walletName) : '';
+            } else if (method === 'transfer' || method === 'other') {
+                methodLabel = '轉帳';
+                detail = tx.paymentToolId || tx.transferLabel || '';
+            }
+            return { methodLabel, detail, icon: getMethodIcon(method) };
+        }
+
+        function getPaymentDisplayHtml(tx) {
+            const payment = getPaymentDisplayParts(tx);
+            if (!payment.detail) return `<span style="font-size:0.8rem; margin-left:5px;">${payment.icon}</span>`;
+            return `<span style="font-size:0.8rem; margin-left:5px;">${payment.icon}</span><span class="payment-detail-chip">${payment.detail}</span>`;
+        }
+
+        function hydrateTransactionPaymentMetadata() {
+            let changed = false;
+            transactions.forEach(tx => {
+                if (!tx || tx.sharedMeta?.enabled) return;
+                if (!tx.method) {
+                    tx.method = 'cash';
+                    changed = true;
+                }
+                if (tx.method === 'other') {
+                    tx.method = 'transfer';
+                    changed = true;
+                }
+                if (tx.method === 'card' && tx.paymentToolId === undefined) tx.paymentToolId = null;
+                if (tx.method === 'wallet' && tx.paymentToolId === undefined) tx.paymentToolId = null;
+                if (tx.fundingCardId === undefined) tx.fundingCardId = null;
+                if (tx.transferLabel === undefined) tx.transferLabel = '';
+            });
+            if (changed) localStorage.setItem('bear_transactions', JSON.stringify(transactions));
+        }
+
+        function openPaymentSettingsFromAdd() {
+            switchPage('settings');
+            setTimeout(() => {
+                document.getElementById('setting-default-method')?.scrollIntoView({ behavior:'smooth', block:'center' });
+            }, 60);
+        }
+
+        function addCreditCardSetting() {
+            normalizePaymentSettings();
+            paymentSettings.cards.push({ id: 'card_' + Date.now() + '_' + Math.floor(Math.random()*1000), name: '', bank: '', dueDay: '', limit: '', enabled: true });
+            renderPaymentSettings();
+        }
+
+        function removeCreditCardSetting(id) {
+            paymentSettings.cards = paymentSettings.cards.filter(card => String(card.id) !== String(id));
+            if (paymentSettings.defaultCardId === id) paymentSettings.defaultCardId = '';
+            paymentSettings.wallets = paymentSettings.wallets.map(wallet => ({ ...wallet, linkedCardId: String(wallet.linkedCardId) === String(id) ? '' : wallet.linkedCardId }));
+            if (paymentSettings.cards.length === 0) addCreditCardSetting(); else renderPaymentSettings();
+        }
+
+        function addWalletSetting() {
+            normalizePaymentSettings();
+            paymentSettings.wallets.push({ id: 'wallet_' + Date.now() + '_' + Math.floor(Math.random()*1000), name: '', linkedCardId: '', enabled: true });
+            renderPaymentSettings();
+        }
+
+        function removeWalletSetting(id) {
+            paymentSettings.wallets = paymentSettings.wallets.filter(wallet => String(wallet.id) !== String(id));
+            if (paymentSettings.defaultWalletId === id) paymentSettings.defaultWalletId = '';
+            renderPaymentSettings();
+        }
+
+        function renderPaymentSettings() {
+            normalizePaymentSettings();
+            const cardList = document.getElementById('credit-card-settings-list');
+            const walletList = document.getElementById('wallet-settings-list');
+            renderPaymentMethodSelects();
+            if (cardList) {
+                cardList.innerHTML = paymentSettings.cards.map((card, idx) => `
+                    <div class="card" style="padding:14px; border-radius:18px; margin-bottom:12px; box-shadow:none;">
+                        <div class="card-title" style="margin-bottom:10px; font-size:0.92rem;">信用卡 ${idx + 1}<i class="fas fa-trash delete-btn" onclick="removeCreditCardSetting('${card.id}')"></i></div>
+                        <div class="form-group"><label>卡片名稱</label><input type="text" data-card-field="name" data-card-id="${card.id}" value="${card.name || ''}" placeholder="例如：富邦 J 卡"></div>
+                        <div class="form-group"><label>發卡銀行（選填）</label><input type="text" data-card-field="bank" data-card-id="${card.id}" value="${card.bank || ''}" placeholder="例如：富邦"></div>
+                        <div class="form-group"><label>本期額度提醒線（選填）</label><input type="number" step="any" inputmode="decimal" data-card-field="limit" data-card-id="${card.id}" value="${card.limit || ''}" placeholder="例如：30000"></div>
+                        <div class="form-group"><label>繳款日 / 註記（選填）</label><input type="text" data-card-field="dueDay" data-card-id="${card.id}" value="${card.dueDay || ''}" placeholder="例如：每月 12 號"></div>
+                    </div>
+                `).join('');
+            }
+            if (walletList) {
+                const cardOptions = '<option value="">未綁信用卡</option>' + getEnabledCards().map(card => `<option value="${card.id}">${card.name}</option>`).join('');
+                walletList.innerHTML = paymentSettings.wallets.map((wallet, idx) => `
+                    <div class="card" style="padding:14px; border-radius:18px; margin-bottom:12px; box-shadow:none;">
+                        <div class="card-title" style="margin-bottom:10px; font-size:0.92rem;">電子支付 ${idx + 1}<i class="fas fa-trash delete-btn" onclick="removeWalletSetting('${wallet.id}')"></i></div>
+                        <div class="form-group"><label>名稱</label><input type="text" data-wallet-field="name" data-wallet-id="${wallet.id}" value="${wallet.name || ''}" placeholder="例如：LINE Pay"></div>
+                        <div class="form-group"><label>綁定信用卡</label><select data-wallet-field="linkedCardId" data-wallet-id="${wallet.id}" data-current="${wallet.linkedCardId || ''}">${cardOptions}</select></div>
+                    </div>
+                `).join('');
+                walletList.querySelectorAll('select[data-wallet-field="linkedCardId"]').forEach(el => { el.value = el.getAttribute('data-current') || paymentSettings.wallets.find(w => String(w.id) === String(el.dataset.walletId))?.linkedCardId || ''; });
+            }
+            document.getElementById('setting-default-method') && (document.getElementById('setting-default-method').value = paymentSettings.defaultMethod || 'cash');
+            document.getElementById('setting-default-card') && (document.getElementById('setting-default-card').value = paymentSettings.defaultCardId || '');
+            document.getElementById('setting-default-wallet') && (document.getElementById('setting-default-wallet').value = paymentSettings.defaultWalletId || '');
+            if (walletList) {
+                walletList.querySelectorAll('select[data-wallet-field="linkedCardId"]').forEach(el => {
+                    const wallet = paymentSettings.wallets.find(item => String(item.id) === String(el.dataset.walletId));
+                    if (wallet) el.value = wallet.linkedCardId || '';
+                });
+            }
+            handleMainPaymentMethodChange();
+        }
+
+        function savePaymentSettings() {
+            normalizePaymentSettings();
+            paymentSettings.cards = Array.from(document.querySelectorAll('[data-card-id]')).reduce((acc, el) => {
+                const id = el.dataset.cardId;
+                let item = acc.find(card => String(card.id) === String(id));
+                if (!item) {
+                    item = { id, name: '', bank: '', dueDay: '', limit: '', enabled: true };
+                    acc.push(item);
+                }
+                item[el.dataset.cardField] = (el.value || '').trim();
+                return acc;
+            }, []).filter(card => card.name);
+            paymentSettings.wallets = Array.from(document.querySelectorAll('[data-wallet-id]')).reduce((acc, el) => {
+                const id = el.dataset.walletId;
+                let item = acc.find(wallet => String(wallet.id) === String(id));
+                if (!item) {
+                    item = { id, name: '', linkedCardId: '', enabled: true };
+                    acc.push(item);
+                }
+                item[el.dataset.walletField] = (el.value || '').trim();
+                return acc;
+            }, []).filter(wallet => wallet.name);
+            paymentSettings.defaultMethod = document.getElementById('setting-default-method')?.value || 'cash';
+            paymentSettings.defaultCardId = document.getElementById('setting-default-card')?.value || '';
+            paymentSettings.defaultWalletId = document.getElementById('setting-default-wallet')?.value || '';
+            normalizePaymentSettings();
+            localStorage.setItem('bear_payment_settings', JSON.stringify(paymentSettings));
+            renderPaymentSettings();
+            applyMainPaymentDefaults();
+            renderDashboard();
+            renderList();
+            renderPaymentAnalysisPage();
+            alert('付款工具設定已更新！');
+        }
+
+        function renderAnalysisList(containerId, items, emptyText, formatter = null) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            if (!items || items.length === 0) {
+                container.innerHTML = `<div class="analysis-empty">${emptyText}</div>`;
+                return;
+            }
+            container.innerHTML = items.map(item => {
+                const sub = formatter ? formatter(item) : (item.sub || '');
+                return `<div class="analysis-item"><div><div class="analysis-item-title">${item.label}</div>${sub ? `<div class="analysis-item-sub">${sub}</div>` : ''}</div><div class="analysis-item-amount">$${formatMoney(item.amount || 0)}</div></div>`;
+            }).join('');
+        }
+
+
+        function getPaymentAnalysisCycleTransactions() {
+            const currentCycle = getCycleBoundary(dashboardViewDate || new Date(), sysSettings.cycleStart);
+            return transactions.filter(t => {
+                const d = new Date(t.date); d.setHours(0,0,0,0);
+                return d >= currentCycle.start && d <= currentCycle.end && t.type === 'expense' && !(t.sharedMeta && t.sharedMeta.enabled);
+            });
+        }
+
+        function getPaymentMethodLabel(method) {
+            const map = { cash:'現金', card:'信用卡', transfer:'轉帳', wallet:'電子支付' };
+            return map[method] || '現金';
+        }
+
+        function setPaymentMethodDetailFilter(method) {
+            paymentMethodDetailFilter = paymentMethodDetailFilter === method ? null : method;
+            renderPaymentAnalysisPage();
+        }
+
+        function clearPaymentMethodDetailFilter() {
+            paymentMethodDetailFilter = null;
+            renderPaymentAnalysisPage();
+        }
+
+        function renderPaymentMethodDetailList(cycleTx) {
+            const listEl = document.getElementById('payment-method-detail-list');
+            const chipEl = document.getElementById('payment-method-detail-chip');
+            const clearBtn = document.getElementById('payment-method-detail-clear');
+            if (!listEl || !chipEl || !clearBtn) return;
+
+            if (!paymentMethodDetailFilter) {
+                chipEl.innerHTML = '<i class="fas fa-hand-pointer"></i> 點上方付款方式看本期明細';
+                clearBtn.classList.add('hidden');
+                listEl.innerHTML = '<div class="analysis-empty">還沒選付款方式。點一下上方的現金、信用卡、轉帳或電子支付，就會展開本期明細。</div>';
+                return;
+            }
+
+            const detailTx = cycleTx
+                .filter(tx => (tx.method === 'other' ? 'transfer' : (tx.method || 'cash')) === paymentMethodDetailFilter)
+                .sort((a,b) => new Date(b.date) - new Date(a.date) || (b.id || 0) - (a.id || 0));
+
+            chipEl.innerHTML = `<i class="fas fa-filter"></i> 目前查看：${getPaymentMethodLabel(paymentMethodDetailFilter)}`;
+            clearBtn.classList.remove('hidden');
+
+            if (detailTx.length === 0) {
+                listEl.innerHTML = `<div class="analysis-empty">本期還沒有 ${getPaymentMethodLabel(paymentMethodDetailFilter)} 的消費明細。</div>`;
+                return;
+            }
+
+            listEl.innerHTML = detailTx.map(tx => {
+                const payment = getPaymentDisplayParts(tx);
+                const note = tx.note ? `<div class="analysis-item-sub">${tx.note}</div>` : '';
+                const sub = `<div class="analysis-item-sub">${tx.date}｜${tx.mainCategory}｜${tx.category}${payment.detail ? `｜${payment.detail}` : ''}</div>`;
+                return `<div class="analysis-item"><div><div class="analysis-item-title">${payment.icon} ${tx.category}</div>${sub}${note}</div><div class="analysis-item-amount">$${formatMoney(tx.amount || 0)}</div></div>`;
+            }).join('');
+        }
+
+        function renderPaymentMixChart(mixItems) {
+            const canvas = document.getElementById('paymentMixChart');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            if (paymentMixChart) paymentMixChart.destroy();
+            if (!mixItems.length) {
+                paymentMixChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: { labels: ['尚無資料'], datasets: [{ data: [1], backgroundColor: ['#eee'], borderColor:'#fff', borderWidth:1 }] },
+                    options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom' } } }
+                });
+                return;
+            }
+            const palette = getChartPalette(mixItems.length);
+            paymentMixChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: mixItems.map(item => item.label),
+                    datasets: [{
+                        data: mixItems.map(item => item.amount),
+                        backgroundColor: palette,
+                        borderColor: '#fff',
+                        borderWidth: 2,
+                        hoverOffset: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '58%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { boxWidth: 12, padding: 14, font:{ size: 11 } }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.raw || 0;
+                                    return `${context.label}：$${formatMoney(value)}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderPaymentAnalysisPage() {
+            const summaryWrap = document.getElementById('payment-method-summary');
+            if (!summaryWrap) return;
+            const cycleTx = getPaymentAnalysisCycleTransactions();
+            const methodTotals = { cash:0, card:0, transfer:0, wallet:0 };
+            const cardTotals = {};
+            const cardDirectTotals = {};
+            const cardWalletTotals = {};
+            const walletTotals = {};
+            const walletFundingTotals = {};
+            cycleTx.forEach(tx => {
+                const method = tx.method === 'other' ? 'transfer' : (tx.method || 'cash');
+                const amount = Number(tx.amount) || 0;
+                if (methodTotals[method] === undefined) methodTotals[method] = 0;
+                methodTotals[method] += amount;
+                if (method === 'card') {
+                    const key = getCardNameById(tx.paymentToolId) || '未指定信用卡';
+                    cardTotals[key] = (cardTotals[key] || 0) + amount;
+                    cardDirectTotals[key] = (cardDirectTotals[key] || 0) + amount;
+                }
+                if (method === 'wallet') {
+                    const walletName = getWalletNameById(tx.paymentToolId) || '未指定電子支付';
+                    walletTotals[walletName] = (walletTotals[walletName] || 0) + amount;
+                    const fundingName = getCardNameById(tx.fundingCardId) || '未綁卡';
+                    const pair = `${walletName}｜${fundingName}`;
+                    walletFundingTotals[pair] = (walletFundingTotals[pair] || 0) + amount;
+                    if (tx.fundingCardId) {
+                        cardTotals[fundingName] = (cardTotals[fundingName] || 0) + amount;
+                        cardWalletTotals[fundingName] = (cardWalletTotals[fundingName] || 0) + amount;
+                    }
+                }
+            });
+            const methodCards = [
+                { key:'cash', label:'現金', icon:'💵' },
+                { key:'card', label:'信用卡', icon:'💳' },
+                { key:'transfer', label:'轉帳', icon:'🏦' },
+                { key:'wallet', label:'電子支付', icon:'📱' }
+            ];
+            summaryWrap.innerHTML = methodCards.map(item => {
+                const active = paymentMethodDetailFilter === item.key ? 'active' : '';
+                return `<div class="analysis-box clickable ${active}" onclick="setPaymentMethodDetailFilter('${item.key}')"><div class="stat-label">${item.icon} ${item.label}</div><div class="stat-value">$${formatMoney(methodTotals[item.key] || 0)}</div></div>`;
+            }).join('');
+
+            renderPaymentMethodDetailList(cycleTx);
+
+            const toItems = obj => Object.entries(obj).sort((a,b) => b[1]-a[1]).map(([label, amount]) => ({ label, amount }));
+            const mixItems = [
+                ...(methodTotals.cash > 0 ? [{ label:'現金', amount: methodTotals.cash }] : []),
+                ...(methodTotals.transfer > 0 ? [{ label:'轉帳', amount: methodTotals.transfer }] : []),
+                ...toItems(cardTotals),
+                ...toItems(walletTotals)
+            ];
+            renderPaymentMixChart(mixItems);
+
+            const cardMetaByName = {};
+            getEnabledCards().forEach(card => {
+                cardMetaByName[card.name] = {
+                    limit: Number(card.limit) || 0,
+                    dueDay: card.dueDay || '',
+                    bank: card.bank || ''
+                };
+            });
+
+            const cardAlerts = Object.entries(cardTotals).map(([label, amount]) => {
+                const meta = cardMetaByName[label] || { limit: 0, dueDay: '', bank: '' };
+                const limit = Number(meta.limit) || 0;
+                if (!limit) return null;
+                const ratio = amount / limit;
+                let level = '';
+                if (ratio >= 1) level = 'full';
+                else if (ratio >= 0.9) level = 'danger';
+                else if (ratio >= 0.75) level = 'warning';
+                if (!level) return null;
+                const percent = Math.round(ratio * 100);
+                const remain = limit - amount;
+                const walletPart = Number(cardWalletTotals[label] || 0);
+                let title = `${label} 已刷 ${percent}%`;
+                if (level === 'full') title = `${label} 已超過提醒線`;
+                return {
+                    title,
+                    sub: level === 'full'
+                        ? `本期已刷 $${formatMoney(amount)}，比提醒線多 $${formatMoney(Math.abs(remain))}。${walletPart ? `（含電子支付綁卡 $${formatMoney(walletPart)}）` : ''}${meta.dueDay ? ` ${meta.dueDay}` : ''}`
+                        : `本期已刷 $${formatMoney(amount)} / $${formatMoney(limit)}，還差 $${formatMoney(Math.max(remain, 0))} 就到提醒線。${walletPart ? `（含電子支付綁卡 $${formatMoney(walletPart)}）` : ''}${meta.dueDay ? ` ${meta.dueDay}` : ''}`
+                };
+            }).filter(Boolean);
+
+            const alertWrap = document.getElementById('credit-card-alert-list');
+            if (alertWrap) {
+                alertWrap.innerHTML = cardAlerts.length
+                    ? cardAlerts.map(item => `<div class="smart-alert"><strong>⚠️ ${item.title}</strong><div class="smart-alert-sub">${item.sub}</div></div>`).join('')
+                    : '<div class="analysis-empty">若妳在設定頁幫信用卡填上「本期額度提醒線」，這裡就會提醒哪張卡快爆了。提醒線計算已包含綁定這張卡的電子支付消費。</div>';
+            }
+
+            renderAnalysisList('credit-card-analysis-list', toItems(cardTotals), '本期還沒有信用卡消費。', item => {
+                const meta = cardMetaByName[item.label] || { limit: 0, dueDay: '', bank: '' };
+                const directPart = Number(cardDirectTotals[item.label] || 0);
+                const walletPart = Number(cardWalletTotals[item.label] || 0);
+                const baseParts = [];
+                if (directPart) baseParts.push(`直接刷卡 $${formatMoney(directPart)}`);
+                if (walletPart) baseParts.push(`電子支付綁卡 $${formatMoney(walletPart)}`);
+                if (!meta.limit) return baseParts.join('｜') || meta.dueDay || meta.bank || '已包含綁定這張卡的電子支付消費';
+                const ratio = Math.round((item.amount / meta.limit) * 100);
+                const remain = Math.max(meta.limit - item.amount, 0);
+                return `本期已刷 $${formatMoney(item.amount)} / $${formatMoney(meta.limit)}｜約 ${ratio}%${remain ? `｜剩餘提醒空間 $${formatMoney(remain)}` : ''}${baseParts.length ? `｜${baseParts.join('｜')}` : ''}${meta.dueDay ? `｜${meta.dueDay}` : ''}`;
+            });
+            renderAnalysisList('wallet-analysis-list', toItems(walletTotals), '本期還沒有電子支付消費。');
+            renderAnalysisList('wallet-funding-analysis-list', toItems(walletFundingTotals), '目前還沒有可分析的電子支付綁卡資料。');
+        }
+
+        function collectEntryPayload(date, mainCatRaw, subCat, methodOrMeta, amount, note, sharedMeta = null) {
             let type, saveMainCategory;
             if (mainCatRaw === '收入') {
                 type = 'income';
@@ -2118,7 +2990,10 @@ function getSharedBudgetSummary(cycleTx) {
                 type = 'expense';
                 saveMainCategory = mainCatRaw.replace('支出-', '') + '支出';
             }
-            return { date, type, category: subCat, mainCategory: saveMainCategory, amount, note, method, sharedMeta };
+            const paymentMeta = typeof methodOrMeta === 'object' && methodOrMeta !== null
+                ? { method: methodOrMeta.method || 'cash', paymentToolId: methodOrMeta.paymentToolId || null, fundingCardId: methodOrMeta.fundingCardId || null, transferLabel: methodOrMeta.transferLabel || '' }
+                : { method: methodOrMeta || 'cash', paymentToolId: null, fundingCardId: null, transferLabel: '' };
+            return { date, type, category: subCat, mainCategory: saveMainCategory, amount, note, method: paymentMeta.method, paymentToolId: paymentMeta.paymentToolId, fundingCardId: paymentMeta.fundingCardId, transferLabel: paymentMeta.transferLabel, sharedMeta };
         }
 
         function saveTransaction() {
@@ -2126,7 +3001,7 @@ function getSharedBudgetSummary(cycleTx) {
             const mainCatRaw = document.getElementById('input-main-category').value;
             const amount = parseFloat(document.getElementById('input-amount').value);
             const note = document.getElementById('input-note').value;
-            const method = document.getElementById('input-method').value;
+            const paymentMeta = readMainPaymentMeta();
             const subGroup = document.getElementById('sub-category-group');
             let subCat = '';
             if (subGroup.style.display !== 'none') {
@@ -2138,7 +3013,7 @@ function getSharedBudgetSummary(cycleTx) {
             if (!date || isNaN(amount) || amount <= 0) { alert('請輸入完整金額與日期！'); return; }
 
             if (editingId) {
-                const payload = collectEntryPayload(date, mainCatRaw, subCat, method, amount, note, getSharedMetaFromMainForm());
+                const payload = collectEntryPayload(date, mainCatRaw, subCat, paymentMeta, amount, note, getSharedMetaFromMainForm());
                 const index = transactions.findIndex(t => t.id === editingId);
                 if (index !== -1) {
                     transactions[index] = { id: editingId, ...payload };
@@ -2149,6 +3024,7 @@ function getSharedBudgetSummary(cycleTx) {
                 writeAutoBackup('transaction-edit');
                 editingId = null;
                 resetForm();
+                renderRecentCombos();
                 renderDashboard();
                 renderList();
                 renderSharedAccountPage();
@@ -2156,7 +3032,7 @@ function getSharedBudgetSummary(cycleTx) {
                 return;
             }
 
-            const entries = [{ id: Date.now(), ...collectEntryPayload(date, mainCatRaw, subCat, method, amount, note, getSharedMetaFromMainForm()) }];
+            const entries = [{ id: Date.now(), ...collectEntryPayload(date, mainCatRaw, subCat, paymentMeta, amount, note, getSharedMetaFromMainForm()) }];
             const extraCards = Array.from(document.querySelectorAll('#extra-entry-container .extra-entry-card'));
             const errors = [];
 
@@ -2200,6 +3076,7 @@ function getSharedBudgetSummary(cycleTx) {
             writeAutoBackup('transaction-multi');
             alert(`成功儲存 ${entries.length} 筆紀錄！`);
             resetForm();
+            renderRecentCombos();
             renderDashboard();
             renderList();
             renderSharedAccountPage();
@@ -2218,8 +3095,13 @@ function getSharedBudgetSummary(cycleTx) {
                 else { toggleCustomCatMode(false); subSelect.value = tx.category; document.getElementById('input-note').value = tx.note; }
             } else { document.getElementById('input-note').value = tx.note; }
 
-            document.getElementById('input-amount').value = tx.amount; document.getElementById('input-method').value = tx.method || 'cash';
-            document.getElementById('add-page-title').innerText = '調整這筆位置'; document.getElementById('save-btn').innerHTML = '存下這次調整 <i class="fas fa-save"></i>'; document.getElementById('add-page-helper').innerText = '把這筆錢放回更適合的位置。'; document.getElementById('cancel-edit-btn').classList.remove('hidden'); switchPage('add'); document.getElementById('multi-entry-wrap').classList.add('hidden'); switchEntryMode('single');
+            document.getElementById('input-amount').value = tx.amount; document.getElementById('input-method').value = (tx.method === 'other' ? 'transfer' : (tx.method || 'cash'));
+            renderPaymentMethodSelects();
+            document.getElementById('input-card-id').value = tx.paymentToolId || paymentSettings.defaultCardId || (getEnabledCards()[0]?.id || '');
+            document.getElementById('input-wallet-id').value = tx.paymentToolId || paymentSettings.defaultWalletId || (getEnabledWallets()[0]?.id || '');
+            document.getElementById('input-transfer-label').value = tx.transferLabel || (typeof tx.paymentToolId === 'string' ? tx.paymentToolId : '');
+            handleMainPaymentMethodChange();
+            document.getElementById('add-page-title').innerText = '調整這筆位置'; document.getElementById('save-btn').innerHTML = '存下這次調整 <i class="fas fa-save"></i>'; document.getElementById('add-page-helper').innerText = '把這筆錢放回更適合的位置。'; document.getElementById('cancel-edit-btn').classList.remove('hidden'); switchPage('add'); renderRecentCombos(); document.getElementById('multi-entry-wrap').classList.add('hidden'); switchEntryMode('single');
         }
 
         function deleteTx(id) { 
@@ -2228,6 +3110,7 @@ function getSharedBudgetSummary(cycleTx) {
                 transactions = transactions.filter(t => t.id !== id); 
                 localStorage.setItem('bear_transactions', JSON.stringify(transactions)); 
                 writeAutoBackup('delete-transaction');
+                renderRecentCombos();
                 renderDashboard(); 
                 renderList(); 
                 if (document.getElementById('income-detail-modal') && document.getElementById('income-detail-modal').classList.contains('show')) renderIncomeDetailList();
@@ -2632,7 +3515,7 @@ function getSharedBudgetSummary(cycleTx) {
                 html += `<li class="tx-item">
                     <div class="tx-info">
                         <span class="tx-cat">${source} ${noteHtml}</span>
-                        <span class="tx-date">${t.date} <span style="font-size:0.8rem; margin-left:5px;">${methodIcon}</span></span>
+                        <span class="tx-date">${t.date} ${getPaymentDisplayHtml(t)}</span>
                     </div>
                     <div class="action-btns">
                         <span class="tx-amount amount-inc">+$${formatMoney(t.amount)}</span>
@@ -2743,7 +3626,7 @@ function renderDashboard() {
                 trueBalanceEl.style.color = 'var(--text-primary)';
             }
 
-            renderBudgetBars(envExp, masterSpent); renderSinkingFundsTracker(); renderChart(mainExp, envExp); renderDashList(cycleTx, currentChartFilter); if (document.getElementById('income-detail-modal') && document.getElementById('income-detail-modal').classList.contains('show')) renderIncomeDetailList(); 
+            renderBudgetBars(envExp, masterSpent); renderSinkingFundsTracker(); renderChart(mainExp, envExp); renderDashList(cycleTx, currentChartFilter); renderPaymentAnalysisPage(); if (document.getElementById('income-detail-modal') && document.getElementById('income-detail-modal').classList.contains('show')) renderIncomeDetailList(); 
         }
 
 
@@ -2999,7 +3882,7 @@ function renderBudgetBars(envExp, masterSpent) {
             renderDashboard();
         }
 
-        function getMethodIcon(method) { if (method === 'card') return '💳'; if (method === 'other') return '🏦'; return '💵'; }
+        function getMethodIcon(method) { if (method === 'card') return '💳'; if (method === 'transfer' || method === 'other') return '🏦'; if (method === 'wallet') return '📱'; return '💵'; }
         function renderDashList(cycleTx, filterCategory) {
             const list = document.getElementById('recent-tx-list');
             list.innerHTML = '';
@@ -3041,7 +3924,7 @@ function renderBudgetBars(envExp, masterSpent) {
                 let displayNote = t.category === '未分類' ? '' : (t.note ? `<small style="color:#888;">${t.note}</small>` : '');
                 let catDisplay = catPrefix + displayCat + sharedBadge + ' ' + displayNote;
 
-                list.innerHTML += `<li class="tx-item"><div class="tx-info"><span class="tx-cat">${catDisplay}</span><span class="tx-date">${t.date} <span style="font-size:0.8rem; margin-left:5px;">${methodIcon}</span></span></div><div class="action-btns">${getInlineAmountActionHtml(t, color, sign)}</div></li>`;
+                list.innerHTML += `<li class="tx-item"><div class="tx-info"><span class="tx-cat">${catDisplay}</span><span class="tx-date">${t.date} ${getPaymentDisplayHtml(t)}</span></div><div class="action-btns">${getInlineAmountActionHtml(t, color, sign)}</div></li>`;
             });
 
             if (!filterCategory && dataToShow.length > defaultVisibleCount) {
@@ -3181,7 +4064,7 @@ function renderBudgetBars(envExp, masterSpent) {
                     let sharedBadge = (t.sharedMeta && t.sharedMeta.enabled) ? `<span class="shared-badge">🤝 共同</span>` : ''; 
                     let displayNote = t.category === '未分類' ? '' : (t.note ? `<small style="color:#888;">${t.note}</small>` : '');
                     let catDisplay = catPrefix + displayCat + sharedBadge + ' ' + displayNote;
-                    html += `<li class="tx-item"><div class="tx-info"><span class="tx-cat">${catDisplay}</span><span class="tx-date">${t.date} <span style="font-size:0.8rem; margin-left:5px;">${methodIcon}</span></span></div><div class="action-btns">${getInlineAmountActionHtml(t, color, sign)}</div></li>`;
+                    html += `<li class="tx-item"><div class="tx-info"><span class="tx-cat">${catDisplay}</span><span class="tx-date">${t.date} ${getPaymentDisplayHtml(t)}</span></div><div class="action-btns">${getInlineAmountActionHtml(t, color, sign)}</div></li>`;
                 });
 
                 if (txs.length > 5) {
@@ -3800,7 +4683,7 @@ function exportToExcel() {
                 monthTx.forEach(t => {
                     const typeLabel = t.type === 'income' ? '收入' : (t.type === 'save' ? '存入預備金' : '支出');
                     const colorStyle = t.type === 'income' ? '#2e7d32' : (t.type === 'save' ? '#d4a373' : '#d32f2f');
-                    const noteMethod = `${t.note ? t.note : '無備註'} (${t.method === 'cash' ? '現金' : (t.method === 'card' ? '刷卡' : '轉帳')})`;
+                    const noteMethod = `${t.note ? t.note : '無備註'} (${getPaymentDisplayParts(t).methodLabel}${getPaymentDisplayParts(t).detail ? '｜' + getPaymentDisplayParts(t).detail : ''})`;
                     html += `<tr><td>${t.date}</td><td style="color:${colorStyle}; font-weight:bold; text-align:center;">${typeLabel}</td><td>${t.mainCategory}</td><td>${t.category}</td><td class="num" style="color:${colorStyle}; font-weight:bold;">$${Number(t.amount).toLocaleString()}</td><td>${noteMethod}</td></tr>`;
                 });
 
@@ -3866,7 +4749,7 @@ function exportToExcel() {
                     t.category || '',
                     t.amount || 0,
                     t.note || '',
-                    t.method === 'cash' ? '現金' : (t.method === 'card' ? '刷卡' : '轉帳'),
+                    `${getPaymentDisplayParts(t).methodLabel}${getPaymentDisplayParts(t).detail ? '｜' + getPaymentDisplayParts(t).detail : ''}`,
                     ''
                 ].map(safe).join(","));
             });
