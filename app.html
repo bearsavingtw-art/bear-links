@@ -535,11 +535,7 @@
             <button class="btn" id="save-btn" onclick="saveTransaction()">先幫這筆錢留位置 <i class="fas fa-check"></i></button>
             <button class="btn btn-cancel hidden" id="cancel-edit-btn" onclick="resetForm()">取消修改</button>
 
-            <div class="multi-entry-wrap" id="multi-entry-wrap">
-                <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
-                    <div style="font-size:0.8rem; color:var(--text-secondary);">如果妳現在要連續記兩筆以上，可以直接在下面再加下一筆。</div>
-                    <button type="button" class="batch-mini-btn" id="add-more-entry-btn" onclick="addExtraEntryCard()">＋ 再加一筆</button>
-                </div>
+            <div class="multi-entry-wrap hidden" id="multi-entry-wrap">
                 <div id="extra-entry-container"></div>
             </div>
             </div>
@@ -3377,13 +3373,32 @@ function getSharedBudgetSummary(cycleTx) {
         function saveMasterBudget(mainCat) { const val = parseFloat(document.getElementById(`master-budget-${mainCat}`).value) || 0; masterBudgets[mainCat] = val; localStorage.setItem('bear_master_budgets', JSON.stringify(masterBudgets)); }
 
         function addNewEnvelope(mainCat) {
-            if (getTotalEnvelopesCount() >= 15) return alert('已達 15 袋上限！');
-            const newName = prompt(`請輸入新的「${mainCat}」分類名稱：`);
-            if (newName && newName.trim()) {
-                const name = newName.trim(); let isDup = false; for (let cat in userEnvelopes) { if (userEnvelopes[cat].includes(name)) isDup = true; }
-                if (isDup) return alert('這個分類名稱已經存在囉！請換一個名字。');
-                userEnvelopes[mainCat].push(name); localStorage.setItem('bear_custom_envelopes', JSON.stringify(userEnvelopes)); writeAutoBackup('new-envelope'); writeAutoBackup('delete-envelope'); renderBudgetSettings(); updateSubCategories(); 
+            const totalCount = getTotalEnvelopesCount();
+            if (totalCount >= 15) {
+                alert('已達 15 袋上限！請先刪除其他袋子再新增。');
+                return;
             }
+            const remaining = 15 - totalCount;
+            const newName = prompt(`請輸入新的「${mainCat}」分類名稱：
+（目前還可再新增 ${remaining} 袋）`);
+            if (newName && newName.trim()) {
+                const name = newName.trim();
+                let isDup = false;
+                for (let cat in userEnvelopes) {
+                    if (userEnvelopes[cat].includes(name)) isDup = true;
+                }
+                if (isDup) return alert('這個分類名稱已經存在囉！請換一個名字。');
+                userEnvelopes[mainCat].push(name);
+                localStorage.setItem('bear_custom_envelopes', JSON.stringify(userEnvelopes));
+                writeAutoBackup('new-envelope');
+                renderBudgetSettings();
+                updateSubCategories();
+                renderDashboard();
+            }
+        }
+
+        function addEnvelope(mainCat) {
+            addNewEnvelope(mainCat);
         }
 
         function deleteEnvelope(mainCat, index) {
