@@ -2648,26 +2648,72 @@ function getSharedBudgetSummary(cycleTx) {
             }, 60);
         }
 
+        function syncPaymentSettingsDraftFromForm() {
+            const cardInputs = Array.from(document.querySelectorAll('#credit-card-settings-list [data-card-id]'));
+            if (cardInputs.length) {
+                paymentSettings.cards = cardInputs.reduce((acc, el) => {
+                    const id = el.dataset.cardId;
+                    let item = acc.find(card => String(card.id) === String(id));
+                    if (!item) {
+                        item = { id, name: '', bank: '', dueDay: '', limit: '', enabled: true };
+                        acc.push(item);
+                    }
+                    item[el.dataset.cardField] = (el.value || '').trim();
+                    return acc;
+                }, []).filter(card => card.name || card.bank || card.dueDay || card.limit);
+            }
+
+            const walletInputs = Array.from(document.querySelectorAll('#wallet-settings-list [data-wallet-id]'));
+            if (walletInputs.length) {
+                paymentSettings.wallets = walletInputs.reduce((acc, el) => {
+                    const id = el.dataset.walletId;
+                    let item = acc.find(wallet => String(wallet.id) === String(id));
+                    if (!item) {
+                        item = { id, name: '', linkedCardId: '', enabled: true };
+                        acc.push(item);
+                    }
+                    item[el.dataset.walletField] = (el.value || '').trim();
+                    return acc;
+                }, []).filter(wallet => wallet.name || wallet.linkedCardId);
+            }
+
+            const defaultMethodEl = document.getElementById('setting-default-method');
+            const defaultCardEl = document.getElementById('setting-default-card');
+            const defaultWalletEl = document.getElementById('setting-default-wallet');
+            if (defaultMethodEl) paymentSettings.defaultMethod = defaultMethodEl.value || 'cash';
+            if (defaultCardEl) paymentSettings.defaultCardId = defaultCardEl.value || '';
+            if (defaultWalletEl) paymentSettings.defaultWalletId = defaultWalletEl.value || '';
+        }
+
         function addCreditCardSetting() {
             normalizePaymentSettings();
-            paymentSettings.cards.push({ id: 'card_' + Date.now() + '_' + Math.floor(Math.random()*1000), name: '', bank: '', dueDay: '', limit: '', enabled: true });
+            syncPaymentSettingsDraftFromForm();
+            paymentSettings.cards.push({ id: 'card_' + Date.now() + '_' + Math.floor(Math.random()*1000000), name: '', bank: '', dueDay: '', limit: '', enabled: true });
             renderPaymentSettings();
         }
 
         function removeCreditCardSetting(id) {
+            normalizePaymentSettings();
+            syncPaymentSettingsDraftFromForm();
             paymentSettings.cards = paymentSettings.cards.filter(card => String(card.id) !== String(id));
             if (paymentSettings.defaultCardId === id) paymentSettings.defaultCardId = '';
             paymentSettings.wallets = paymentSettings.wallets.map(wallet => ({ ...wallet, linkedCardId: String(wallet.linkedCardId) === String(id) ? '' : wallet.linkedCardId }));
-            if (paymentSettings.cards.length === 0) addCreditCardSetting(); else renderPaymentSettings();
+            if (paymentSettings.cards.length === 0) {
+                paymentSettings.cards.push({ id: 'card_' + Date.now() + '_' + Math.floor(Math.random()*1000000), name: '', bank: '', dueDay: '', limit: '', enabled: true });
+            }
+            renderPaymentSettings();
         }
 
         function addWalletSetting() {
             normalizePaymentSettings();
-            paymentSettings.wallets.push({ id: 'wallet_' + Date.now() + '_' + Math.floor(Math.random()*1000), name: '', linkedCardId: '', enabled: true });
+            syncPaymentSettingsDraftFromForm();
+            paymentSettings.wallets.push({ id: 'wallet_' + Date.now() + '_' + Math.floor(Math.random()*1000000), name: '', linkedCardId: '', enabled: true });
             renderPaymentSettings();
         }
 
         function removeWalletSetting(id) {
+            normalizePaymentSettings();
+            syncPaymentSettingsDraftFromForm();
             paymentSettings.wallets = paymentSettings.wallets.filter(wallet => String(wallet.id) !== String(id));
             if (paymentSettings.defaultWalletId === id) paymentSettings.defaultWalletId = '';
             renderPaymentSettings();
