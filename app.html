@@ -1933,12 +1933,18 @@
                 alert('請先輸入 Email 與密碼');
                 return;
             }
-            const { error } = await supabaseClient.auth.signUp({ email, password });
+            const { error } = await supabaseClient.auth.signUp({
+                email,
+                password,
+                options: {
+                    emailRedirectTo: 'https://bearsavingtw-art.github.io/bear-links/app.html'
+                }
+            });
             if (error) {
                 alert('註冊失敗：' + error.message);
                 return;
             }
-            alert('註冊成功，接著直接登入即可。');
+            alert('註冊成功，請到信箱點擊驗證連結。驗證完成後會回到 Bear 財務駕駛艙。');
             await refreshCloudAuthStatus();
         }
 
@@ -1961,7 +1967,7 @@
             if (loadResult === 'conflict') {
                 updateCloudAuthStatus({ type: 'warn', badge: '登入成功', desc: '已登入，但本機和雲端不是同一份資料，請先選擇要保留哪一份。' });
             } else {
-                showAppToast('登入成功，已開始自動同步最新版本。', 'ok');
+                showAppToast('登入成功，資料已同步', 'ok');
             }
         }
 
