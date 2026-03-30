@@ -757,6 +757,7 @@
             <div class="soft-note" style="margin-bottom:14px;">放在這裡的花費，就視為從共同帳戶支出。若之後要從共同帳戶拿回個人墊付，也可以先寫在備註裡。</div>
             <div class="form-group"><label>日期</label><input type="date" id="shared-entry-date"></div>
             <div class="form-group"><label>共同分類</label><select id="shared-entry-category"></select></div>
+            <div class="form-group"><label>支付方式</label><select id="shared-entry-method"><option value="cash">💵 現金</option><option value="card">💳 刷卡</option><option value="wallet">📱 電子支付</option><option value="other">🏦 轉帳 / 其他</option></select></div>
             <div class="form-group"><label>金額</label><input type="number" step="any" id="shared-entry-amount" placeholder="0" inputmode="decimal"></div>
             <div class="form-group"><label>備註 (選填)</label><input type="text" id="shared-entry-note" placeholder="例如：我先墊，之後從共同帳戶拿回 / 全聯採買 / 晚餐"></div>
             <button class="btn" onclick="saveSharedTransaction()"><i class="fas fa-receipt"></i> 記進共同帳戶</button>
@@ -2176,6 +2177,7 @@
 
             const dateInput = document.getElementById('shared-entry-date');
             const categorySelect = document.getElementById('shared-entry-category');
+            const methodSelect = document.getElementById('shared-entry-method');
             const amountInput = document.getElementById('shared-entry-amount');
             const noteInput = document.getElementById('shared-entry-note');
             const label = tx.sharedMeta?.label || '共同支出';
@@ -2191,6 +2193,7 @@
                 }
                 categorySelect.value = label;
             }
+            if (methodSelect) methodSelect.value = ['cash', 'card', 'wallet', 'other'].includes(tx.method) ? tx.method : 'other';
             if (amountInput) amountInput.value = tx.amount || '';
             if (noteInput) noteInput.value = tx.note || '';
 
@@ -2204,6 +2207,7 @@
             editingSharedTxId = null;
             if (document.getElementById('shared-entry-date')) document.getElementById('shared-entry-date').value = getTodayLocalDateString();
             renderSharedCategoryOptions();
+            if (document.getElementById('shared-entry-method')) document.getElementById('shared-entry-method').value = 'cash';
             if (document.getElementById('shared-entry-amount')) document.getElementById('shared-entry-amount').value = '';
             if (document.getElementById('shared-entry-note')) document.getElementById('shared-entry-note').value = '';
             const btn = document.querySelector('#shared-expense-entry-card .btn');
@@ -2226,6 +2230,7 @@ function saveSharedTransaction() {
             normalizeSharedBudgetSettings();
             const date = document.getElementById('shared-entry-date')?.value;
             const label = document.getElementById('shared-entry-category')?.value || '共同支出';
+            const method = document.getElementById('shared-entry-method')?.value || 'cash';
             const amount = parseFloat(document.getElementById('shared-entry-amount')?.value);
             const note = (document.getElementById('shared-entry-note')?.value || '').trim();
             if (!date || isNaN(amount) || amount <= 0) {
@@ -2245,7 +2250,7 @@ function saveSharedTransaction() {
                 tx.note = note;
                 tx.category = '共同帳戶';
                 tx.mainCategory = '變動支出';
-                tx.method = 'other';
+                tx.method = method;
                 if (!tx.sharedMeta) tx.sharedMeta = {};
                 tx.sharedMeta.enabled = true;
                 tx.sharedMeta.payer = 'account';
@@ -2262,7 +2267,7 @@ function saveSharedTransaction() {
                     mainCategory: '變動支出',
                     amount,
                     note,
-                    method: 'other',
+                    method,
                     sharedMeta: {
                         enabled: true,
                         payer: 'account',
@@ -2354,11 +2359,7 @@ function saveSharedTransaction() {
         }
 
         function getSharedInlineAmountActionHtml(t) {
-            const isInlineEditing = sharedInlineEditingTxId === t.id;
-            if (isInlineEditing) {
-                return `<div class="inline-edit-wrap"><span style="font-weight:700; color:var(--accent);">-$</span><input id="shared-inline-amount-${t.id}" class="inline-amount-input" type="number" inputmode="decimal" step="any" value="${t.amount}" onkeydown="handleSharedInlineAmountKeydown(event, ${t.id}, this)"><button class="inline-save-btn" onclick="saveSharedInlineAmountEdit(${t.id}, this)">儲存</button><i class="fas fa-times delete-btn" onclick="cancelSharedInlineAmountEdit()"></i></div>`;
-            }
-            return `<span class="tx-amount amount-exp">-$${formatMoney(t.amount)}</span><i class="fas fa-edit edit-btn" onclick="startSharedInlineAmountEdit(${t.id})"></i><i class="fas fa-trash delete-btn" onclick="deleteSharedTransaction(${t.id})"></i>`;
+            return `<span class="tx-amount amount-exp">-$${formatMoney(t.amount)}</span><i class="fas fa-edit edit-btn" onclick="sharedInlineEditingTxId='${t.id}'; inlineEditingTxId=null; renderSharedAccountPage();"></i><i class="fas fa-trash delete-btn" onclick="deleteSharedTransaction('${t.id}')"></i>`;
         }
 
         function renderSharedCategoryBars(summary) {
@@ -2434,7 +2435,11 @@ function saveSharedTransaction() {
                 let html = '<ul class="tx-list">';
                 summary.sharedTx.sort((a,b)=> new Date(b.date)-new Date(a.date) || b.id-a.id).forEach(t => {
                     const labelText = t.sharedMeta?.label || '共同支出';
-                    html += `<li class="tx-item"><div class="tx-info"><span class="tx-cat">🤝 ${labelText}</span><span class="tx-date">${t.date}${t.note ? ` ・ ${t.note}` : ''}</span></div><div class="action-btns">${getSharedInlineAmountActionHtml(t)}</div></li>`;
+                    if (String(sharedInlineEditingTxId) === String(t.id)) {
+                        html += buildInlineSharedEditHtml(t);
+                    } else {
+                        html += `<li class="tx-item"><div class="tx-info"><span class="tx-cat">🤝 ${labelText}</span><span class="tx-date">${t.date} ${getPaymentDisplayHtml(t)}${t.note ? ` ・ ${t.note}` : ''}</span></div><div class="action-btns">${getSharedInlineAmountActionHtml(t)}</div></li>`;
+                    }
                 });
                 html += '</ul>';
                 listEl.innerHTML = html;
@@ -2648,72 +2653,26 @@ function getSharedBudgetSummary(cycleTx) {
             }, 60);
         }
 
-        function syncPaymentSettingsDraftFromForm() {
-            const cardInputs = Array.from(document.querySelectorAll('#credit-card-settings-list [data-card-id]'));
-            if (cardInputs.length) {
-                paymentSettings.cards = cardInputs.reduce((acc, el) => {
-                    const id = el.dataset.cardId;
-                    let item = acc.find(card => String(card.id) === String(id));
-                    if (!item) {
-                        item = { id, name: '', bank: '', dueDay: '', limit: '', enabled: true };
-                        acc.push(item);
-                    }
-                    item[el.dataset.cardField] = (el.value || '').trim();
-                    return acc;
-                }, []).filter(card => card.name || card.bank || card.dueDay || card.limit);
-            }
-
-            const walletInputs = Array.from(document.querySelectorAll('#wallet-settings-list [data-wallet-id]'));
-            if (walletInputs.length) {
-                paymentSettings.wallets = walletInputs.reduce((acc, el) => {
-                    const id = el.dataset.walletId;
-                    let item = acc.find(wallet => String(wallet.id) === String(id));
-                    if (!item) {
-                        item = { id, name: '', linkedCardId: '', enabled: true };
-                        acc.push(item);
-                    }
-                    item[el.dataset.walletField] = (el.value || '').trim();
-                    return acc;
-                }, []).filter(wallet => wallet.name || wallet.linkedCardId);
-            }
-
-            const defaultMethodEl = document.getElementById('setting-default-method');
-            const defaultCardEl = document.getElementById('setting-default-card');
-            const defaultWalletEl = document.getElementById('setting-default-wallet');
-            if (defaultMethodEl) paymentSettings.defaultMethod = defaultMethodEl.value || 'cash';
-            if (defaultCardEl) paymentSettings.defaultCardId = defaultCardEl.value || '';
-            if (defaultWalletEl) paymentSettings.defaultWalletId = defaultWalletEl.value || '';
-        }
-
         function addCreditCardSetting() {
             normalizePaymentSettings();
-            syncPaymentSettingsDraftFromForm();
-            paymentSettings.cards.push({ id: 'card_' + Date.now() + '_' + Math.floor(Math.random()*1000000), name: '', bank: '', dueDay: '', limit: '', enabled: true });
+            paymentSettings.cards.push({ id: 'card_' + Date.now() + '_' + Math.floor(Math.random()*1000), name: '', bank: '', dueDay: '', limit: '', enabled: true });
             renderPaymentSettings();
         }
 
         function removeCreditCardSetting(id) {
-            normalizePaymentSettings();
-            syncPaymentSettingsDraftFromForm();
             paymentSettings.cards = paymentSettings.cards.filter(card => String(card.id) !== String(id));
             if (paymentSettings.defaultCardId === id) paymentSettings.defaultCardId = '';
             paymentSettings.wallets = paymentSettings.wallets.map(wallet => ({ ...wallet, linkedCardId: String(wallet.linkedCardId) === String(id) ? '' : wallet.linkedCardId }));
-            if (paymentSettings.cards.length === 0) {
-                paymentSettings.cards.push({ id: 'card_' + Date.now() + '_' + Math.floor(Math.random()*1000000), name: '', bank: '', dueDay: '', limit: '', enabled: true });
-            }
-            renderPaymentSettings();
+            if (paymentSettings.cards.length === 0) addCreditCardSetting(); else renderPaymentSettings();
         }
 
         function addWalletSetting() {
             normalizePaymentSettings();
-            syncPaymentSettingsDraftFromForm();
-            paymentSettings.wallets.push({ id: 'wallet_' + Date.now() + '_' + Math.floor(Math.random()*1000000), name: '', linkedCardId: '', enabled: true });
+            paymentSettings.wallets.push({ id: 'wallet_' + Date.now() + '_' + Math.floor(Math.random()*1000), name: '', linkedCardId: '', enabled: true });
             renderPaymentSettings();
         }
 
         function removeWalletSetting(id) {
-            normalizePaymentSettings();
-            syncPaymentSettingsDraftFromForm();
             paymentSettings.wallets = paymentSettings.wallets.filter(wallet => String(wallet.id) !== String(id));
             if (paymentSettings.defaultWalletId === id) paymentSettings.defaultWalletId = '';
             renderPaymentSettings();
@@ -3148,8 +3107,8 @@ function getSharedBudgetSummary(cycleTx) {
 
         function deleteTx(id) { 
             if(confirm('確定刪除這筆紀錄？')) { 
-                if (inlineEditingTxId === id) inlineEditingTxId = null;
-                transactions = transactions.filter(t => t.id !== id); 
+                if (String(inlineEditingTxId) === String(id)) inlineEditingTxId = null;
+                transactions = transactions.filter(t => String(t.id) !== String(id)); 
                 localStorage.setItem('bear_transactions', JSON.stringify(transactions)); 
                 writeAutoBackup('delete-transaction');
                 renderRecentCombos();
@@ -3985,7 +3944,11 @@ function renderBudgetBars(envExp, masterSpent) {
                 let displayNote = t.category === '未分類' ? '' : (t.note ? `<small style="color:#888;">${t.note}</small>` : '');
                 let catDisplay = catPrefix + displayCat + sharedBadge + ' ' + displayNote;
 
-                list.innerHTML += `<li class="tx-item"><div class="tx-info"><span class="tx-cat">${catDisplay}</span><span class="tx-date">${t.date} ${getPaymentDisplayHtml(t)}</span></div><div class="action-btns">${getInlineAmountActionHtml(t, color, sign)}</div></li>`;
+                if (String(inlineEditingTxId) === String(t.id) && !(t.sharedMeta && t.sharedMeta.enabled)) {
+                    list.innerHTML += buildInlinePersonalEditHtml(t);
+                } else {
+                    list.innerHTML += `<li class="tx-item"><div class="tx-info"><span class="tx-cat">${catDisplay}</span><span class="tx-date">${t.date} ${getPaymentDisplayHtml(t)}</span></div><div class="action-btns">${getInlineAmountActionHtml(t, color, sign)}</div></li>`;
+                }
             });
 
             if (!filterCategory && dataToShow.length > defaultVisibleCount) {
@@ -3995,7 +3958,230 @@ function renderBudgetBars(envExp, masterSpent) {
         }
 
 
+        function buildInlinePaymentFields(prefix, tx) {
+            const method = (tx.method === 'other' ? 'transfer' : (tx.method || 'cash'));
+            const cardOptions = (getEnabledCards().length ? getEnabledCards() : [{id:'', name:'尚未設定信用卡'}])
+                .map(card => `<option value="${card.id || ''}" ${String(tx.paymentToolId || '') === String(card.id || '') ? 'selected' : ''}>${card.name || '尚未設定信用卡'}</option>`).join('');
+            const walletOptions = (getEnabledWallets().length ? getEnabledWallets() : [{id:'', name:'尚未設定電子支付'}])
+                .map(wallet => `<option value="${wallet.id || ''}" ${String(tx.paymentToolId || '') === String(wallet.id || '') ? 'selected' : ''}>${wallet.name || '尚未設定電子支付'}</option>`).join('');
+            const transferValue = tx.transferLabel || (typeof tx.paymentToolId === 'string' ? tx.paymentToolId : '');
+            return `
+                <div class="form-group" style="margin-bottom:10px;"><label>付款方式</label><select id="${prefix}-method-${tx.id}" onchange="handleInlineEditMethodChange('${prefix}', '${tx.id}', this)">${buildPaymentMethodOptions(method)}</select></div>
+                <div class="form-group ${method === 'card' ? '' : 'hidden'}" id="${prefix}-card-group-${tx.id}" style="margin-bottom:10px;"><label>信用卡</label><select id="${prefix}-card-id-${tx.id}">${cardOptions}</select></div>
+                <div class="form-group ${method === 'wallet' ? '' : 'hidden'}" id="${prefix}-wallet-group-${tx.id}" style="margin-bottom:10px;"><label>電子支付</label><select id="${prefix}-wallet-id-${tx.id}">${walletOptions}</select></div>
+                <div class="form-group ${method === 'transfer' ? '' : 'hidden'}" id="${prefix}-transfer-group-${tx.id}" style="margin-bottom:10px;"><label>轉帳 / 備註名稱</label><input type="text" id="${prefix}-transfer-label-${tx.id}" value="${transferValue}"></div>
+            `;
+        }
+
+        function buildInlinePersonalEditHtml(tx) {
+            const mainToSet = tx.type === 'income' ? '收入' : tx.type === 'save' ? '存入預備金' : ((tx.mainCategory || '').includes('固定') ? '支出-固定' : (tx.mainCategory || '').includes('預存') ? '支出-預存' : '支出-變動');
+            const subOptions = getSubcategoryOptionsHtml(mainToSet, tx.category || '未分類');
+            return `
+                <div class="card" style="margin:8px 0 12px; padding:16px; border-radius:18px;">
+                    <div class="card-title" style="margin-bottom:12px;">原地修改這筆記帳</div>
+                    <div class="form-group" style="margin-bottom:10px;"><label>日期</label><input type="date" id="inline-date-${tx.id}" value="${tx.date || ''}"></div>
+                    <div class="form-group" style="margin-bottom:10px;"><label>資金流向</label><select id="inline-main-${tx.id}" onchange="updateInlineSubcategory('${tx.id}', this)">
+                        <option value="支出-變動" ${mainToSet === '支出-變動' ? 'selected' : ''}>💸 支出 (變動)</option>
+                        <option value="支出-固定" ${mainToSet === '支出-固定' ? 'selected' : ''}>🏠 支出 (固定)</option>
+                        <option value="支出-預存" ${mainToSet === '支出-預存' ? 'selected' : ''}>🎯 支出 (花掉預存金)</option>
+                        <option value="存入預備金" ${mainToSet === '存入預備金' ? 'selected' : ''}>🐖 存入預備金</option>
+                        <option value="收入" ${mainToSet === '收入' ? 'selected' : ''}>💰 收入</option>
+                    </select></div>
+                    <div class="form-group" style="margin-bottom:10px;" id="inline-sub-wrap-${tx.id}"><label>詳細分類</label><select id="inline-sub-${tx.id}">${subOptions}</select></div>
+                    ${buildInlinePaymentFields('inline', tx)}
+                    <div class="form-group" style="margin-bottom:10px;"><label>金額</label><input type="number" step="any" inputmode="decimal" id="inline-amount-${tx.id}" value="${tx.amount || ''}"></div>
+                    <div class="form-group" style="margin-bottom:10px;"><label>備註</label><input type="text" id="inline-note-${tx.id}" value="${(tx.note || '').replace(/"/g,'&quot;')}"></div>
+                    <div style="display:flex; gap:10px;"><button type="button" class="btn" style="margin-top:0;" onclick="saveInlineTransactionEdit('${tx.id}', this)">存下修改</button><button type="button" class="btn btn-outline" style="margin-top:0;" onclick="cancelInlineTransactionEdit()">取消</button></div>
+                </div>
+            `;
+        }
+
+        function buildInlineSharedEditHtml(tx) {
+            normalizeSharedBudgetSettings();
+            const categoryOptions = (sharedBudgetSettings.categories || []).filter(item => (item.name || '').trim()).map(item => `<option value="${item.name.trim()}" ${(tx.sharedMeta?.label || '共同支出') === item.name.trim() ? 'selected' : ''}>${item.name.trim()}</option>`).join('') || `<option value="共同支出">共同支出</option>`;
+            return `
+                <div class="card" style="margin:8px 0 12px; padding:16px; border-radius:18px;">
+                    <div class="card-title" style="margin-bottom:12px;">原地修改這筆共同花費</div>
+                    <div class="form-group" style="margin-bottom:10px;"><label>日期</label><input type="date" id="shared-inline-date-${tx.id}" value="${tx.date || ''}"></div>
+                    <div class="form-group" style="margin-bottom:10px;"><label>共同分類</label><select id="shared-inline-category-${tx.id}">${categoryOptions}</select></div>
+                    ${buildInlinePaymentFields('shared-inline', tx)}
+                    <div class="form-group" style="margin-bottom:10px;"><label>金額</label><input type="number" step="any" inputmode="decimal" id="shared-inline-amount-${tx.id}" value="${tx.amount || ''}"></div>
+                    <div class="form-group" style="margin-bottom:10px;"><label>備註</label><input type="text" id="shared-inline-note-${tx.id}" value="${(tx.note || '').replace(/"/g,'&quot;')}"></div>
+                    <div style="display:flex; gap:10px;"><button type="button" class="btn" style="margin-top:0;" onclick="saveSharedInlineTransactionEdit('${tx.id}', this)">存下修改</button><button type="button" class="btn btn-outline" style="margin-top:0;" onclick="cancelSharedInlineTransactionEdit()">取消</button></div>
+                </div>
+            `;
+        }
+
+        function setInlineGroupVisibility(el, shouldShow) {
+            if (!el) return;
+            el.classList.toggle('hidden', !shouldShow);
+            el.style.display = shouldShow ? '' : 'none';
+        }
+
+        function preserveViewportPosition(callback) {
+            const currentY = window.scrollY || window.pageYOffset || 0;
+            callback();
+            requestAnimationFrame(() => {
+                window.scrollTo({ top: currentY, behavior: 'auto' });
+            });
+        }
+
+        function getInlineEditScope(prefix, id, sourceEl = null) {
+            const directScope = sourceEl?.closest?.('.card');
+            if (directScope) return directScope;
+            const activeScope = document.activeElement?.closest?.('.card');
+            if (activeScope && activeScope.querySelector(`#${prefix}-method-${id}`)) return activeScope;
+            return document.getElementById(`${prefix}-method-${id}`)?.closest('.card') || null;
+        }
+
+        function getScopedInlineField(scope, id) {
+            if (!scope) return document.getElementById(id);
+            return scope.querySelector(`#${id}`) || document.getElementById(id);
+        }
+
+        function handleInlineEditMethodChange(prefix, id, sourceEl = null) {
+            const scope = getInlineEditScope(prefix, id, sourceEl);
+            const method = getScopedInlineField(scope, `${prefix}-method-${id}`)?.value || 'cash';
+            const cardGroup = getScopedInlineField(scope, `${prefix}-card-group-${id}`);
+            const walletGroup = getScopedInlineField(scope, `${prefix}-wallet-group-${id}`);
+            const transferGroup = getScopedInlineField(scope, `${prefix}-transfer-group-${id}`);
+            const cardEl = getScopedInlineField(scope, `${prefix}-card-id-${id}`);
+            const walletEl = getScopedInlineField(scope, `${prefix}-wallet-id-${id}`);
+            const transferEl = getScopedInlineField(scope, `${prefix}-transfer-label-${id}`);
+
+            setInlineGroupVisibility(cardGroup, method === 'card');
+            setInlineGroupVisibility(walletGroup, method === 'wallet');
+            setInlineGroupVisibility(transferGroup, method === 'transfer');
+
+            if (method === 'card' && cardEl && !cardEl.value) {
+                cardEl.value = paymentSettings.defaultCardId || (getEnabledCards()[0]?.id || '');
+            }
+            if (method === 'wallet' && walletEl && !walletEl.value) {
+                walletEl.value = paymentSettings.defaultWalletId || (getEnabledWallets()[0]?.id || '');
+            }
+
+            if (method !== 'card' && cardEl) cardEl.value = '';
+            if (method !== 'wallet' && walletEl) walletEl.value = '';
+            if (method !== 'transfer' && transferEl) transferEl.value = '';
+        }
+
+        function updateInlineSubcategory(id, sourceEl = null) {
+            const tx = transactions.find(t => String(t.id) === String(id));
+            const scope = getInlineEditScope('inline', id, sourceEl);
+            const wrap = getScopedInlineField(scope, `inline-sub-wrap-${id}`);
+            const mainCat = getScopedInlineField(scope, `inline-main-${id}`)?.value || '支出-變動';
+            if (!wrap || !tx) return;
+            wrap.innerHTML = `<label>詳細分類</label><select id="inline-sub-${id}">${getSubcategoryOptionsHtml(mainCat, tx.category || '未分類')}</select>`;
+        }
+
+        function readInlinePaymentMeta(prefix, id, sourceEl = null) {
+            const scope = getInlineEditScope(prefix, id, sourceEl);
+            const method = getScopedInlineField(scope, `${prefix}-method-${id}`)?.value || 'cash';
+            const cardId = getScopedInlineField(scope, `${prefix}-card-id-${id}`)?.value || '';
+            const walletId = getScopedInlineField(scope, `${prefix}-wallet-id-${id}`)?.value || '';
+            const transferLabel = (getScopedInlineField(scope, `${prefix}-transfer-label-${id}`)?.value || '').trim();
+            let paymentToolId = null;
+            let fundingCardId = null;
+            if (method === 'card') paymentToolId = cardId || null;
+            if (method === 'wallet') {
+                paymentToolId = walletId || null;
+                const wallet = getEnabledWallets().find(item => String(item.id) === String(walletId));
+                fundingCardId = wallet?.linkedCardId || null;
+            }
+            if (method === 'transfer') paymentToolId = transferLabel || null;
+            return { method, paymentToolId, fundingCardId, transferLabel };
+        }
+
+        function startInlineTransactionEdit(id) {
+            inlineEditingTxId = String(id);
+            sharedInlineEditingTxId = null;
+            renderDashboard();
+            renderList();
+            renderSharedAccountPage();
+        }
+
+        function cancelInlineTransactionEdit() {
+            inlineEditingTxId = null;
+            renderDashboard();
+            renderList();
+        }
+
+        function saveInlineTransactionEdit(id, sourceEl = null) {
+            const txIndex = transactions.findIndex(t => String(t.id) === String(id));
+            if (txIndex === -1) return;
+            const scope = getInlineEditScope('inline', id, sourceEl);
+            const date = getScopedInlineField(scope, `inline-date-${id}`)?.value || '';
+            const mainCatRaw = getScopedInlineField(scope, `inline-main-${id}`)?.value || '支出-變動';
+            const subCat = getScopedInlineField(scope, `inline-sub-${id}`)?.value || '未分類';
+            const amount = parseFloat(getScopedInlineField(scope, `inline-amount-${id}`)?.value);
+            const note = (getScopedInlineField(scope, `inline-note-${id}`)?.value || '').trim();
+            const paymentMeta = readInlinePaymentMeta('inline', id, sourceEl);
+            if (!date || isNaN(amount) || amount <= 0) {
+                alert('請輸入正確的日期與金額。');
+                return;
+            }
+            const existing = transactions[txIndex];
+            const payload = collectEntryPayload(date, mainCatRaw, subCat, paymentMeta, amount, note, existing.sharedMeta || null);
+            transactions[txIndex] = { id: existing.id, ...payload };
+            sortTransactions();
+            localStorage.setItem('bear_transactions', JSON.stringify(transactions));
+            writeAutoBackup('inline-edit-full-transaction');
+            inlineEditingTxId = null;
+            preserveViewportPosition(() => {
+                renderDashboard();
+                renderList();
+                renderSharedAccountPage();
+                if (document.getElementById('income-detail-modal') && document.getElementById('income-detail-modal').classList.contains('show')) renderIncomeDetailList();
+            });
+        }
+
+        function cancelSharedInlineTransactionEdit() {
+            sharedInlineEditingTxId = null;
+            renderSharedAccountPage();
+        }
+
+        function saveSharedInlineTransactionEdit(id, sourceEl = null) {
+            const tx = transactions.find(t => String(t.id) === String(id) && t.sharedMeta && t.sharedMeta.enabled);
+            if (!tx) return;
+            const scope = getInlineEditScope('shared-inline', id, sourceEl);
+            const date = getScopedInlineField(scope, `shared-inline-date-${id}`)?.value || '';
+            const label = getScopedInlineField(scope, `shared-inline-category-${id}`)?.value || '共同支出';
+            const amount = parseFloat(getScopedInlineField(scope, `shared-inline-amount-${id}`)?.value);
+            const note = (getScopedInlineField(scope, `shared-inline-note-${id}`)?.value || '').trim();
+            const paymentMeta = readInlinePaymentMeta('shared-inline', id, sourceEl);
+            if (!date || isNaN(amount) || amount <= 0) {
+                alert('請輸入正確的日期與金額。');
+                return;
+            }
+            tx.date = date;
+            tx.amount = amount;
+            tx.note = note;
+            tx.method = paymentMeta.method;
+            tx.paymentToolId = paymentMeta.paymentToolId;
+            tx.fundingCardId = paymentMeta.fundingCardId;
+            tx.transferLabel = paymentMeta.transferLabel;
+            tx.category = '共同帳戶';
+            tx.mainCategory = '變動支出';
+            tx.sharedMeta = tx.sharedMeta || {};
+            tx.sharedMeta.enabled = true;
+            tx.sharedMeta.payer = 'account';
+            tx.sharedMeta.label = label;
+            tx.sharedMeta.partnerName = sharedBudgetSettings.partnerName || '另一半';
+            tx.sharedMeta.splitMode = sharedBudgetSettings.splitMode || 'half';
+            tx.sharedMeta.myRatio = sharedBudgetSettings.splitMode === 'ratio' ? (parseFloat(sharedBudgetSettings.myRatio) || 50) : 50;
+            sortTransactions();
+            localStorage.setItem('bear_transactions', JSON.stringify(transactions));
+            writeAutoBackup('inline-edit-full-shared-transaction');
+            sharedInlineEditingTxId = null;
+            preserveViewportPosition(() => {
+                renderDashboard();
+                renderList();
+                renderSharedAccountPage();
+            });
+        }
+
         function startInlineAmountEdit(id) {
+
             const tx = transactions.find(t => t.id === id);
             if (!tx) return;
             if (tx.type !== 'expense' || (tx.sharedMeta && tx.sharedMeta.enabled)) {
@@ -4064,20 +4250,15 @@ function renderBudgetBars(envExp, masterSpent) {
             localStorage.setItem('bear_transactions', JSON.stringify(transactions));
             writeAutoBackup('inline-edit-transaction-amount');
             inlineEditingTxId = null;
-            renderDashboard();
-            renderList();
-            if (document.getElementById('income-detail-modal') && document.getElementById('income-detail-modal').classList.contains('show')) renderIncomeDetailList();
+            preserveViewportPosition(() => {
+                renderDashboard();
+                renderList();
+                if (document.getElementById('income-detail-modal') && document.getElementById('income-detail-modal').classList.contains('show')) renderIncomeDetailList();
+            });
         }
 
         function getInlineAmountActionHtml(t, color, sign) {
-            const isInlineEditing = inlineEditingTxId === t.id;
-            const canInlineEdit = t.type === 'expense' && !(t.sharedMeta && t.sharedMeta.enabled);
-
-            if (isInlineEditing && canInlineEdit) {
-                return `<div class="inline-edit-wrap"><span style="font-weight:700; color:var(--accent);">${sign}$</span><input id="inline-amount-${t.id}" class="inline-amount-input" type="number" inputmode="decimal" step="any" value="${t.amount}" onkeydown="handleInlineAmountKeydown(event, ${t.id}, this)"><button class="inline-save-btn" onclick="saveInlineAmountEdit(${t.id}, this)">儲存</button><i class="fas fa-times delete-btn" onclick="cancelInlineAmountEdit()"></i></div>`;
-            }
-
-            return `<span class="tx-amount ${color}">${sign}$${formatMoney(t.amount)}</span><i class="fas fa-edit edit-btn" onclick="${canInlineEdit ? `startInlineAmountEdit(${t.id})` : `editTx(${t.id})`}"></i><i class="fas fa-trash delete-btn" onclick="deleteTx(${t.id})"></i>`;
+            return `<span class="tx-amount ${color}">${sign}$${formatMoney(t.amount)}</span><i class="fas fa-edit edit-btn" onclick="startInlineTransactionEdit('${t.id}')"></i><i class="fas fa-trash delete-btn" onclick="deleteTx('${t.id}')"></i>`;
         }
 
         function renderList() {
@@ -4125,7 +4306,11 @@ function renderBudgetBars(envExp, masterSpent) {
                     let sharedBadge = (t.sharedMeta && t.sharedMeta.enabled) ? `<span class="shared-badge">🤝 共同</span>` : ''; 
                     let displayNote = t.category === '未分類' ? '' : (t.note ? `<small style="color:#888;">${t.note}</small>` : '');
                     let catDisplay = catPrefix + displayCat + sharedBadge + ' ' + displayNote;
-                    html += `<li class="tx-item"><div class="tx-info"><span class="tx-cat">${catDisplay}</span><span class="tx-date">${t.date} ${getPaymentDisplayHtml(t)}</span></div><div class="action-btns">${getInlineAmountActionHtml(t, color, sign)}</div></li>`;
+                    if (String(inlineEditingTxId) === String(t.id) && !(t.sharedMeta && t.sharedMeta.enabled)) {
+                        html += buildInlinePersonalEditHtml(t);
+                    } else {
+                        html += `<li class="tx-item"><div class="tx-info"><span class="tx-cat">${catDisplay}</span><span class="tx-date">${t.date} ${getPaymentDisplayHtml(t)}</span></div><div class="action-btns">${getInlineAmountActionHtml(t, color, sign)}</div></li>`;
+                    }
                 });
 
                 if (txs.length > 5) {
