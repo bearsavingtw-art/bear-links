@@ -955,7 +955,13 @@
                 <input type="password" id="cloudPassword" placeholder="請輸入密碼（至少 6 碼）">
             </div>
             <div style="display:flex; flex-direction:column; gap:10px;">
-                <button class="btn" type="button" onclick="handleCloudSignUp()"><i class="fas fa-user-plus"></i> 註冊雲端帳號</button>
+                <button id="cloudSignUpBtn" class="btn" type="button" onclick="handleCloudSignUp()"><i class="fas fa-user-plus"></i> 註冊雲端帳號</button>
+                <div id="resendVerifyWrap" class="hidden" style="margin-top:2px;">
+                    <button id="resendVerifyBtn" type="button" class="btn btn-outline" style="margin-top:0;">
+                        重新寄送驗證信
+                    </button>
+                    <p id="resendVerifyMsg" style="margin:8px 2px 0; font-size:0.8rem; color:var(--text-secondary); line-height:1.6;"></p>
+                </div>
                 <button class="btn btn-outline" type="button" onclick="handleCloudSignIn()"><i class="fas fa-right-to-bracket"></i> 登入並載入雲端資料</button>
                 <button class="btn btn-outline" type="button" onclick="handleCloudSaveNow()"><i class="fas fa-cloud-arrow-up"></i> 把目前資料同步到雲端</button>
                 <button class="btn btn-outline" type="button" onclick="handleCloudLoadNow()"><i class="fas fa-cloud-arrow-down"></i> 從雲端載回資料</button>
@@ -1926,13 +1932,248 @@
             updateCloudAuthStatus({ type: 'neutral', badge: '已登入', desc: `已登入 ${user.email}，按下儲存後會自動上傳，其他裝置也會自動更新到最新版本。` });
         }
 
+
+        let resendVerifyTimer = null;
+        let signupCooldownTimer = null;
+        window.lastSignupEmail = window.lastSignupEmail || '';
+
+        function getResendCooldownKey(email = '') {
+            return `bear_resend_verify_at_${String(email).trim().toLowerCase()}`;
+        }
+
+        function getSignupCooldownKey(email = '') {
+            return `bear_signup_cooldown_${String(email).trim().toLowerCase()}`;
+        }
+
+        function getResendVerifyElements() {
+            return {
+                wrap: document.getElementById('resendVerifyWrap'),
+                btn: document.getElementById('resendVerifyBtn'),
+                msg: document.getElementById('resendVerifyMsg')
+            };
+        }
+        function getCloudSignupBtn() {
+            return document.getElementById('cloudSignUpBtn');
+        }
+
+        function clearSignupCooldownTimer() {
+            if (signupCooldownTimer) {
+                clearInterval(signupCooldownTimer);
+                signupCooldownTimer = null;
+            }
+        }
+
+        function setCloudSignupBtnState({ disabled = false, seconds = 0 } = {}) {
+            const btn = getCloudSignupBtn();
+            if (!btn) return;
+
+            btn.disabled = !!disabled;
+            btn.innerHTML = disabled && seconds > 0
+                ? `<i class="fas fa-user-plus"></i> 註冊雲端帳號（${seconds}s）`
+                : '<i class="fas fa-user-plus"></i> 註冊雲端帳號';
+        }
+
+        function startSignupCooldown(seconds = 60, email = '') {
+            const targetEmail = String(email || window.lastSignupEmail || '').trim().toLowerCase();
+            if (targetEmail) {
+                localStorage.setItem(getSignupCooldownKey(targetEmail), String(Date.now()));
+            }
+
+            clearSignupCooldownTimer();
+
+            let remaining = Math.max(0, Number(seconds) || 0);
+            if (remaining <= 0) {
+                setCloudSignupBtnState({ disabled: false });
+                return;
+            }
+
+            setCloudSignupBtnState({ disabled: true, seconds: remaining });
+
+            signupCooldownTimer = setInterval(() => {
+                remaining -= 1;
+
+                if (remaining <= 0) {
+                    clearSignupCooldownTimer();
+                    setCloudSignupBtnState({ disabled: false });
+                    return;
+                }
+
+                setCloudSignupBtnState({ disabled: true, seconds: remaining });
+            }, 1000);
+        }
+
+        function restoreSignupCooldown(email = '') {
+            const targetEmail = String(email || window.lastSignupEmail || '').trim().toLowerCase();
+            if (!targetEmail) {
+                clearSignupCooldownTimer();
+                setCloudSignupBtnState({ disabled: false });
+                return 0;
+            }
+
+            const lastSignupAt = Number(localStorage.getItem(getSignupCooldownKey(targetEmail)) || 0);
+            if (!lastSignupAt) {
+                clearSignupCooldownTimer();
+                setCloudSignupBtnState({ disabled: false });
+                return 0;
+            }
+
+            const secondsPassed = Math.floor((Date.now() - lastSignupAt) / 1000);
+            const secondsLeft = 60 - secondsPassed;
+
+            if (secondsLeft > 0) {
+                startSignupCooldown(secondsLeft, targetEmail);
+                return secondsLeft;
+            }
+
+            clearSignupCooldownTimer();
+            setCloudSignupBtnState({ disabled: false });
+            return 0;
+        }
+
+        function clearResendVerifyTimer() {
+            if (resendVerifyTimer) {
+                clearInterval(resendVerifyTimer);
+                resendVerifyTimer = null;
+            }
+        }
+
+        function showResendVerifySection(email = '') {
+            const { wrap } = getResendVerifyElements();
+            if (wrap) wrap.classList.remove('hidden');
+            if (email) window.lastSignupEmail = String(email).trim().toLowerCase();
+            restoreResendCooldown(email || window.lastSignupEmail || '');
+        }
+
+        function startResendCooldown(seconds = 60, email = '') {
+            const { btn } = getResendVerifyElements();
+            if (!btn) return;
+
+            const targetEmail = String(email || window.lastSignupEmail || '').trim().toLowerCase();
+            if (targetEmail) {
+                localStorage.setItem(getResendCooldownKey(targetEmail), String(Date.now()));
+            }
+
+            clearResendVerifyTimer();
+
+            let remaining = Math.max(0, Number(seconds) || 0);
+            if (remaining <= 0) {
+                btn.disabled = false;
+                btn.textContent = '重新寄送驗證信';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = `重新寄送（${remaining}s）`;
+
+            resendVerifyTimer = setInterval(() => {
+                remaining -= 1;
+
+                if (remaining <= 0) {
+                    clearResendVerifyTimer();
+                    btn.disabled = false;
+                    btn.textContent = '重新寄送驗證信';
+                    return;
+                }
+
+                btn.textContent = `重新寄送（${remaining}s）`;
+            }, 1000);
+        }
+
+        function restoreResendCooldown(email = '') {
+            const { btn } = getResendVerifyElements();
+            if (!btn) return;
+
+            const targetEmail = String(email || window.lastSignupEmail || '').trim().toLowerCase();
+            if (!targetEmail) {
+                clearResendVerifyTimer();
+                btn.disabled = false;
+                btn.textContent = '重新寄送驗證信';
+                return;
+            }
+
+            const lastSentAt = Number(localStorage.getItem(getResendCooldownKey(targetEmail)) || 0);
+            if (!lastSentAt) {
+                clearResendVerifyTimer();
+                btn.disabled = false;
+                btn.textContent = '重新寄送驗證信';
+                return;
+            }
+
+            const secondsPassed = Math.floor((Date.now() - lastSentAt) / 1000);
+            const secondsLeft = 60 - secondsPassed;
+
+            if (secondsLeft > 0) {
+                startResendCooldown(secondsLeft, targetEmail);
+            } else {
+                clearResendVerifyTimer();
+                btn.disabled = false;
+                btn.textContent = '重新寄送驗證信';
+            }
+        }
+
+        async function handleResendVerifyEmail() {
+            const { btn, msg, wrap } = getResendVerifyElements();
+            const emailInput = document.getElementById('cloudEmail');
+            const email = String(window.lastSignupEmail || emailInput?.value || '').trim().toLowerCase();
+
+            if (!email) {
+                if (wrap) wrap.classList.remove('hidden');
+                if (msg) msg.textContent = '請先輸入剛剛註冊的 Email。';
+                return;
+            }
+
+            window.lastSignupEmail = email;
+
+            if (wrap) wrap.classList.remove('hidden');
+            if (btn) btn.disabled = true;
+            if (msg) msg.textContent = '正在重新寄送驗證信...';
+
+            const { error } = await supabaseClient.auth.resend({
+                type: 'signup',
+                email,
+                options: {
+                    emailRedirectTo: 'https://bearsavingtw-art.github.io/bear-links/app.html'
+                }
+            });
+
+            if (error) {
+                if (msg) msg.textContent = '重新寄送失敗：' + error.message;
+                if (btn) {
+                    btn.disabled = false;
+                    btn.textContent = '重新寄送驗證信';
+                }
+                return;
+            }
+
+            if (msg) {
+                msg.textContent = '驗證信已重新寄出，可能需要 30～60 秒，請先檢查收件匣與垃圾郵件。';
+            }
+
+            startResendCooldown(60, email);
+        }
+
         async function handleCloudSignUp() {
-            const email = document.getElementById('cloudEmail').value.trim();
+            const email = document.getElementById('cloudEmail').value.trim().toLowerCase();
             const password = document.getElementById('cloudPassword').value;
+            const { wrap, msg } = getResendVerifyElements();
+
             if (!email || !password) {
                 alert('請先輸入 Email 與密碼');
                 return;
             }
+
+            const secondsLeft = restoreSignupCooldown(email);
+            if (secondsLeft > 0) {
+                if (wrap) wrap.classList.remove('hidden');
+                if (msg) {
+                    msg.textContent = `驗證信剛寄出，請先稍等 ${secondsLeft} 秒，再決定是否重寄。`;
+                }
+                alert(`驗證信剛寄出，請 ${secondsLeft} 秒後再試`);
+                return;
+            }
+
+            setCloudSignupBtnState({ disabled: true, seconds: 60 });
+
             const { error } = await supabaseClient.auth.signUp({
                 email,
                 password,
@@ -1940,10 +2181,22 @@
                     emailRedirectTo: 'https://bearsavingtw-art.github.io/bear-links/app.html'
                 }
             });
+
             if (error) {
+                setCloudSignupBtnState({ disabled: false });
                 alert('註冊失敗：' + error.message);
                 return;
             }
+
+            window.lastSignupEmail = email;
+
+            if (wrap) wrap.classList.remove('hidden');
+            if (msg) {
+                msg.textContent = '驗證信已寄出，可能需要 30～60 秒，請先檢查收件匣與垃圾郵件。';
+            }
+
+            startSignupCooldown(60, email);
+            startResendCooldown(60, email);
             alert('註冊成功，請到信箱點擊驗證連結。驗證完成後會回到 Bear 財務駕駛艙。');
             await refreshCloudAuthStatus();
         }
@@ -2011,13 +2264,36 @@
             const syncKeepLocalBtn = document.getElementById('sync-keep-local-btn');
             const syncKeepCloudBtn = document.getElementById('sync-keep-cloud-btn');
             const syncModal = document.getElementById('sync-conflict-modal');
+            const resendVerifyBtn = document.getElementById('resendVerifyBtn');
+            const emailInput = document.getElementById('cloudEmail');
             if (syncCancelBtn) syncCancelBtn.addEventListener('click', () => resolveSyncConflict('cancel'));
             if (syncKeepLocalBtn) syncKeepLocalBtn.addEventListener('click', () => resolveSyncConflict('keep-local'));
             if (syncKeepCloudBtn) syncKeepCloudBtn.addEventListener('click', () => resolveSyncConflict('keep-cloud'));
             if (syncModal) syncModal.addEventListener('click', (e) => { if (e.target === syncModal) closeSyncConflictModal(); });
+            if (resendVerifyBtn) resendVerifyBtn.addEventListener('click', handleResendVerifyEmail);
+            if (emailInput) {
+                emailInput.addEventListener('input', () => {
+                    const email = emailInput.value.trim().toLowerCase();
+                    if (!email) {
+                        window.lastSignupEmail = '';
+                        restoreSignupCooldown('');
+                        return;
+                    }
+                    window.lastSignupEmail = email;
+                    showResendVerifySection(email);
+                    restoreSignupCooldown(email);
+                });
+            }
             if (hasAnyUserData() && !getLocalUpdatedAt()) setLocalUpdatedAt('init-existing-local-data');
             await refreshCloudAuthStatus();
             renderSyncHints();
+            if (emailInput && emailInput.value.trim()) {
+                window.lastSignupEmail = emailInput.value.trim().toLowerCase();
+                showResendVerifySection(window.lastSignupEmail);
+                restoreSignupCooldown(window.lastSignupEmail);
+            } else {
+                restoreSignupCooldown('');
+            }
             const { data } = await supabaseClient.auth.getSession();
             if (data && data.session) {
                 try {
