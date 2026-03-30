@@ -18,6 +18,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Noto+Serif+TC:wght@400;600&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
         :root {
@@ -53,6 +54,25 @@
         .recent-combo-chip:active { transform:scale(0.98); }
         .recent-combo-main { font-size:0.78rem; font-weight:700; line-height:1.35; }
         .recent-combo-sub { font-size:0.68rem; color:var(--text-secondary); margin-top:3px; line-height:1.35; }
+
+
+        .status-panel { background: linear-gradient(180deg, #fffdf9 0%, #f7efe5 100%); border: 1px solid rgba(184,135,107,0.2); border-radius: 18px; padding: 14px; margin-bottom: 14px; }
+        .status-panel.warn { border-color: rgba(217,122,114,0.28); background: rgba(217,122,114,0.07); }
+        .status-panel.ok { border-color: rgba(126,184,137,0.28); background: rgba(126,184,137,0.08); }
+        .status-panel.neutral { border-color: rgba(184,135,107,0.2); background: rgba(184,135,107,0.08); }
+        .status-panel-head { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:8px; flex-wrap:wrap; }
+        .status-panel-title { font-size:0.92rem; font-weight:700; color:var(--text-primary); }
+        .status-badge { display:inline-flex; align-items:center; gap:6px; padding:5px 10px; border-radius:999px; font-size:0.72rem; font-weight:700; }
+        .status-badge.local { background: rgba(184,135,107,0.12); color: var(--accent-deep); }
+        .status-badge.cloud { background: rgba(125,168,199,0.12); color: var(--info); }
+        .status-badge.warn { background: rgba(217,122,114,0.12); color: var(--danger); }
+        .status-panel-desc { font-size:0.8rem; color:var(--text-secondary); line-height:1.6; }
+        .status-meta-list { display:grid; grid-template-columns:1fr; gap:8px; margin-top:10px; }
+        .status-meta-item { background: rgba(255,255,255,0.72); border:1px solid rgba(184,135,107,0.14); border-radius:14px; padding:10px 12px; }
+        .status-meta-label { font-size:0.72rem; color:var(--text-secondary); margin-bottom:2px; }
+        .status-meta-value { font-size:0.82rem; color:var(--text-primary); font-weight:700; word-break:break-word; }
+        .sync-inline-note { margin: 12px 0 14px; font-size: 0.78rem; color: var(--text-secondary); line-height: 1.6; }
+        .sync-inline-note strong { color: var(--text-primary); }
 
         .budget-group-title { font-size:0.85rem; font-weight:bold; margin: 15px 0 8px; color:var(--text-primary); border-bottom: 1px solid #eee; padding-bottom:4px; display: flex; align-items: center; gap: 5px; }
         .budget-item { margin-bottom: 12px; }
@@ -207,6 +227,23 @@
         .chart-wrapper { position: relative; height: 220px; width: 100%; display: flex; justify-content: center; margin-bottom: 15px;}
         .hidden { display: none !important; }
 
+        .sync-conflict-card { background: linear-gradient(180deg, #fffdf9 0%, #f8f1e8 100%); border: 1px solid rgba(184,135,107,0.18); border-radius: 22px; padding: 18px 16px; margin-top: 14px; }
+        .sync-conflict-title { display:flex; align-items:center; gap:10px; font-weight:700; color:var(--text-primary); margin-bottom:10px; }
+        .sync-conflict-icon { width:38px; height:38px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; background:rgba(217,122,114,0.12); color:var(--danger); font-size:1rem; }
+        .sync-conflict-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:12px; }
+        .sync-conflict-box { background:#fff; border:1px solid rgba(184,135,107,0.16); border-radius:16px; padding:12px; }
+        .sync-conflict-kicker { font-size:0.72rem; color:var(--text-secondary); margin-bottom:6px; }
+        .sync-conflict-time { font-size:0.84rem; font-weight:700; color:var(--text-primary); line-height:1.45; }
+        .sync-conflict-sub { font-size:0.74rem; color:var(--text-secondary); margin-top:5px; line-height:1.55; }
+        .sync-modal-actions { display:flex; flex-direction:column; gap:10px; margin-top:16px; }
+        .sync-modal-actions .btn { margin-top:0; }
+        .sync-modal-note { font-size:0.75rem; color:var(--text-secondary); line-height:1.6; margin-top:10px; }
+        .sync-mini-status { margin-top:8px; font-size:0.76rem; color:var(--accent-deep); }
+        .app-toast { position: fixed; left: 50%; bottom: 112px; transform: translateX(-50%) translateY(16px); min-width: min(92vw, 360px); max-width: min(92vw, 360px); background: rgba(60,49,42,0.96); color: #fff; padding: 14px 16px; border-radius: 18px; box-shadow: 0 16px 30px rgba(0,0,0,0.18); z-index: 2600; opacity: 0; pointer-events: none; transition: 0.28s ease; font-size: 0.86rem; line-height: 1.6; }
+        .app-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .app-toast.ok { background: rgba(58,83,64,0.96); }
+        .app-toast.warn { background: rgba(138,96,53,0.96); }
+        .app-toast.error { background: rgba(121,68,63,0.96); }
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(3px); display: flex; justify-content: center; align-items: center; z-index: 2000; opacity: 0; pointer-events: none; transition: 0.3s; }
         .modal-overlay.show { opacity: 1; pointer-events: auto; }
         .modal-content { background: #fff; padding: 25px; border-radius: 20px; width: 90%; max-width: 400px; max-height: 85vh; overflow-y: auto; box-shadow: 0 15px 30px rgba(0,0,0,0.2); transform: translateY(20px); transition: 0.3s; text-align: left; }
@@ -459,13 +496,19 @@
     <div id="page-add" class="page">
         <div class="card">
             <div class="card-title" id="add-page-title">先幫這筆錢留位置</div>
-            <div class="soft-note" id="add-page-helper" style="margin-bottom:15px;">不用一次記很多。先從你最確定的一筆開始，空白晚點補也沒關係。</div>
+            <div class="sync-inline-note" id="add-page-helper">記一筆就好，其他空白可以晚點補。</div>
             <div class="entry-mode-switch">
                 <button class="entry-mode-btn active" id="single-entry-btn" onclick="switchEntryMode('single')">單筆輸入</button>
                 <button class="entry-mode-btn" id="batch-entry-btn" onclick="switchEntryMode('batch')">月底補登模式</button>
             </div>
-            <div class="batch-helper" id="entry-mode-helper">平常記一筆、存一筆。若妳先寫在紙本上，也可以切到「月底補登模式」一次補進系統。</div>
-            <div class="soft-note" style="margin-top:12px;">幫這個月的每一筆錢找位置。</div>
+            <div class="batch-helper" id="entry-mode-helper">單筆就現在記；月底再補登也可以。</div>
+            <div id="add-sync-status" class="status-panel neutral" style="margin-top:12px;">
+                <div class="status-panel-head">
+                    <div class="status-panel-title">資料同步提醒</div>
+                    <div class="status-badge local" id="add-sync-badge">本機中</div>
+                </div>
+                <div class="status-panel-desc" id="add-sync-desc">這頁先專心記帳，系統會自動保留這台裝置的最新變更。</div>
+            </div>
 
             <div id="single-entry-area">
             <div class="recent-combo-section hidden" id="recent-combo-section">
@@ -882,6 +925,44 @@
             <div class="soft-note" style="margin-bottom:14px;">共同花費更適合獨立成一個小帳戶。它有自己的預算、分類和明細，不會和妳的個人預算混在一起。</div>
             <button class="btn btn-outline" style="margin-top:0;" onclick="switchPage('shared')"><i class="fas fa-heart-circle-plus"></i> 前往共同帳戶</button>
         </div>
+
+        <div class="card">
+            <div class="card-title">Email 雲端同步</div>
+            <div class="soft-note" style="margin-bottom:14px;">把資料綁定 Email 後，換手機或換瀏覽器也能把這份底氣帶回來。建議先用同一台裝置登入，再按一次同步到雲端。</div>
+            <div id="cloud-auth-status" class="status-panel neutral" style="margin-bottom:14px;">
+                <div class="status-panel-head">
+                    <div class="status-panel-title">同步狀態</div>
+                    <div class="status-badge local" id="cloud-status-badge">尚未登入</div>
+                </div>
+                <div class="status-panel-desc" id="cloud-status-desc">目前尚未登入，資料先留在這台裝置。</div>
+                <div class="status-meta-list">
+                    <div class="status-meta-item">
+                        <div class="status-meta-label">本機最後更新</div>
+                        <div class="status-meta-value" id="cloud-local-meta">尚未建立</div>
+                    </div>
+                    <div class="status-meta-item">
+                        <div class="status-meta-label">雲端最後狀態</div>
+                        <div class="status-meta-value" id="cloud-remote-meta">尚未登入</div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="cloudEmail" placeholder="請輸入 Email">
+            </div>
+            <div class="form-group">
+                <label>密碼</label>
+                <input type="password" id="cloudPassword" placeholder="請輸入密碼（至少 6 碼）">
+            </div>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+                <button class="btn" type="button" onclick="handleCloudSignUp()"><i class="fas fa-user-plus"></i> 註冊雲端帳號</button>
+                <button class="btn btn-outline" type="button" onclick="handleCloudSignIn()"><i class="fas fa-right-to-bracket"></i> 登入並載入雲端資料</button>
+                <button class="btn btn-outline" type="button" onclick="handleCloudSaveNow()"><i class="fas fa-cloud-arrow-up"></i> 把目前資料同步到雲端</button>
+                <button class="btn btn-outline" type="button" onclick="handleCloudLoadNow()"><i class="fas fa-cloud-arrow-down"></i> 從雲端載回資料</button>
+                <button class="btn btn-cancel" type="button" onclick="signOutCloud()"><i class="fas fa-right-from-bracket"></i> 登出</button>
+            </div>
+        </div>
+
         <div class="card">
             <div class="card-title">把底氣留一份備份</div>
             <div style="background: rgba(176,141,133,0.06); border:1px dashed rgba(176,141,133,0.35); border-radius:12px; padding:14px; margin-bottom:15px;">
@@ -930,6 +1011,26 @@
         <div class="card"><div class="card-title">紀律與習慣</div><div class="milestone-grid" id="ms-grid-habit"></div></div>
         <div class="card"><div class="card-title">資產與底氣</div><div class="milestone-grid" id="ms-grid-asset"></div></div>
         <button class="btn-outline" onclick="switchPage('settings')"><i class="fas fa-arrow-left"></i> 返回設定</button>
+    </div>
+
+    
+    <div id="sync-conflict-modal" class="modal-overlay">
+        <div class="modal-content" style="text-align:left; max-width:460px;">
+            <div class="sync-conflict-title">
+                <div class="sync-conflict-icon"><i class="fas fa-code-compare"></i></div>
+                <div>
+                    <div style="font-size:1rem; font-weight:700;">同步前先確認要保留哪一份</div>
+                    <div style="font-size:0.78rem; color:var(--text-secondary); margin-top:2px;">偵測到本機和雲端不是同一版資料</div>
+                </div>
+            </div>
+            <div id="sync-conflict-body" class="sync-conflict-card"></div>
+            <div class="sync-modal-actions">
+                <button id="sync-keep-local-btn" type="button" class="btn"><i class="fas fa-cloud-arrow-up"></i> 保留本機，覆蓋雲端</button>
+                <button id="sync-keep-cloud-btn" type="button" class="btn btn-outline"><i class="fas fa-cloud-arrow-down"></i> 保留雲端，載回這台裝置</button>
+                <button id="sync-cancel-btn" type="button" class="btn btn-cancel">先不要，晚點再決定</button>
+            </div>
+            <div class="sync-modal-note">時間皆以台灣時間顯示。為了避免直接蓋掉上一版，系統會先停在這裡，等妳選擇。</div>
+        </div>
     </div>
 
     <div id="debt-form-modal" class="modal-overlay">
@@ -1088,6 +1189,8 @@
             <div class="nav-sub">分類</div>
         </div>
     </div>
+
+    <div id="app-toast" class="app-toast"></div>
 
     <script>
         function formatMoney(amount) {
@@ -1310,6 +1413,649 @@
         function getSmartDate(year, month, targetDay) { const lastDayOfMonth = new Date(year, month + 1, 0).getDate(); const actualDay = Math.min(targetDay, lastDayOfMonth); return new Date(year, month, actualDay); }
         function getCycleBoundary(dateObj, startDay) { let year = dateObj.getFullYear(); let month = dateObj.getMonth(); let cycleStartDate, cycleEndDate, labelStr; if (startDay === 1) { cycleStartDate = new Date(year, month, 1); cycleEndDate = new Date(year, month + 1, 0); labelStr = `${year}年 ${month + 1}月`; } else { const thisMonthStart = getSmartDate(year, month, startDay); const lastMonthStart = getSmartDate(year, month - 1, startDay); if (dateObj >= thisMonthStart) { cycleStartDate = thisMonthStart; cycleEndDate = new Date(getSmartDate(year, month + 1, startDay).getTime() - 86400000); labelStr = `${month + 1}月帳期`; } else { cycleStartDate = lastMonthStart; cycleEndDate = new Date(thisMonthStart.getTime() - 86400000); let labelMonth = month === 0 ? 12 : month; labelStr = `${labelMonth}月帳期`; } } return { start: cycleStartDate, end: cycleEndDate, label: labelStr, isDefault: (startDay === 1) }; }
         function changeDashboardMonth(offset) { dashboardViewDate.setMonth(dashboardViewDate.getMonth() + offset); renderDashboard(); }
+
+        // ===== Supabase 雲端同步 =====
+        const SUPABASE_URL = 'https://hpgzgbxvszcoftfwrccw.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_u4tYPXHYZmcmHmG51iIJUA__WZW5sky';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        let cloudSaveTimer = null;
+        let suppressCloudAutoSave = false;
+        let lastCloudSnapshotMeta = null;
+        let syncConflictState = null;
+        let cloudRealtimeChannel = null;
+        let cloudRefreshInterval = null;
+        let cloudSessionSubscription = null;
+        let lastAppliedCloudFingerprint = '';
+        let lastAppliedCloudUpdatedAt = '';
+
+        function getLocalUpdatedAt() {
+            return localStorage.getItem('bear_local_updated_at') || '';
+        }
+
+        function setLocalUpdatedAt(reason = 'local-change') {
+            const iso = new Date().toISOString();
+            localStorage.setItem('bear_local_updated_at', iso);
+            localStorage.setItem('bear_local_change_reason', reason);
+            renderSyncHints();
+            return iso;
+        }
+
+        function formatDateTimeDisplay(isoString) {
+            if (!isoString) return '尚未建立';
+            const d = new Date(isoString);
+            if (isNaN(d.getTime())) return '尚未建立';
+            return new Intl.DateTimeFormat('zh-TW', {
+                timeZone: 'Asia/Taipei',
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            }).format(d).replace(/\//g, '/');
+        }
+
+        let toastTimer = null;
+
+        function showAppToast(message, type = 'ok', duration = 2200) {
+            const toast = document.getElementById('app-toast');
+            if (!toast) return;
+            clearTimeout(toastTimer);
+            toast.textContent = message;
+            toast.className = `app-toast ${type}`;
+            requestAnimationFrame(() => toast.classList.add('show'));
+            toastTimer = setTimeout(() => {
+                toast.classList.remove('show');
+            }, duration);
+        }
+
+        function stableStringify(value) {
+            if (value === null || typeof value !== 'object') return JSON.stringify(value);
+            if (Array.isArray(value)) return '[' + value.map(stableStringify).join(',') + ']';
+            const keys = Object.keys(value).filter(key => key !== '_syncMeta').sort();
+            return '{' + keys.map(key => JSON.stringify(key) + ':' + stableStringify(value[key])).join(',') + '}';
+        }
+
+        function buildStateFingerprint(payload) {
+            const raw = stableStringify(payload || {});
+            let hash = 0;
+            for (let i = 0; i < raw.length; i++) {
+                hash = ((hash << 5) - hash) + raw.charCodeAt(i);
+                hash |= 0;
+            }
+            return `fp_${raw.length}_${Math.abs(hash)}`;
+        }
+
+        function getLocalStateFingerprint() {
+            return buildStateFingerprint(collectAppState());
+        }
+
+        function renderSyncHints() {
+            const localMetaEl = document.getElementById('cloud-local-meta');
+            const remoteMetaEl = document.getElementById('cloud-remote-meta');
+            const addBadge = document.getElementById('add-sync-badge');
+            const addDesc = document.getElementById('add-sync-desc');
+            const localUpdatedAt = getLocalUpdatedAt();
+            if (localMetaEl) localMetaEl.textContent = formatDateTimeDisplay(localUpdatedAt);
+            if (remoteMetaEl) {
+                if (lastCloudSnapshotMeta && lastCloudSnapshotMeta.updatedAt) {
+                    remoteMetaEl.textContent = `${formatDateTimeDisplay(lastCloudSnapshotMeta.updatedAt)}${lastCloudSnapshotMeta.email ? ' ・ ' + lastCloudSnapshotMeta.email : ''}`;
+                } else {
+                    remoteMetaEl.textContent = '尚未登入';
+                }
+            }
+            if (addBadge && addDesc) {
+                if (lastCloudSnapshotMeta && lastCloudSnapshotMeta.hasConflict) {
+                    addBadge.textContent = '注意差異';
+                    addBadge.className = 'status-badge warn';
+                    addDesc.innerHTML = '這台裝置和雲端看起來不是同一份資料。<strong>先確認要保留哪一份，再按載入或同步。</strong>';
+                } else if (lastCloudSnapshotMeta && lastCloudSnapshotMeta.isLoggedIn) {
+                    addBadge.textContent = '雲端已連線';
+                    addBadge.className = 'status-badge cloud';
+                    addDesc.textContent = '按下儲存後，這筆記帳會直接上傳到雲端，其他裝置也會自動更新到最新版本。';
+                } else {
+                    addBadge.textContent = '本機中';
+                    addBadge.className = 'status-badge local';
+                    addDesc.textContent = '這頁先專心記帳，系統會自動保留這台裝置的最新變更。';
+                }
+            }
+        }
+
+        function compareLocalAndCloud(cloudRow) {
+            const payload = cloudRow?.data_json || {};
+            const cloudMeta = payload._syncMeta || {};
+            const localUpdatedAt = getLocalUpdatedAt();
+            const cloudUpdatedAt = cloudMeta.localUpdatedAt || cloudRow?.updated_at || '';
+            const localFingerprint = getLocalStateFingerprint();
+            const cloudFingerprint = cloudMeta.fingerprint || buildStateFingerprint(payload);
+            const hasLocalData = hasAnyUserData();
+            const hasCloudData = !!cloudRow?.data_json;
+            const localTs = localUpdatedAt ? new Date(localUpdatedAt).getTime() : 0;
+            const cloudTs = cloudUpdatedAt ? new Date(cloudUpdatedAt).getTime() : 0;
+            const different = !!(hasLocalData && hasCloudData && localFingerprint !== cloudFingerprint);
+            const hasConflict = different;
+            let newerSide = '';
+            if (localTs && cloudTs) newerSide = localTs >= cloudTs ? 'local' : 'cloud';
+            else if (localTs) newerSide = 'local';
+            else if (cloudTs) newerSide = 'cloud';
+            return { hasConflict, localUpdatedAt, cloudUpdatedAt, localFingerprint, cloudFingerprint, hasLocalData, hasCloudData, cloudMeta, localTs, cloudTs, newerSide };
+        }
+
+        function closeSyncConflictModal() {
+            const modal = document.getElementById('sync-conflict-modal');
+            if (modal) modal.classList.remove('show');
+        }
+
+        function buildConflictSummary(compare, mode = 'load') {
+            const newerText = compare.newerSide === 'local'
+                ? '目前看起來本機較新。'
+                : compare.newerSide === 'cloud'
+                    ? '目前看起來雲端較新。'
+                    : '目前無法判斷哪一份較新。';
+            return `
+                <div style="font-size:0.9rem; color:var(--text-primary); line-height:1.7;">
+                    偵測到 <strong>${mode === 'save' ? '準備同步到雲端前' : '載入雲端前'}</strong>，本機和雲端不是同一份資料。<br>${newerText}
+                </div>
+                <div class="sync-conflict-grid">
+                    <div class="sync-conflict-box">
+                        <div class="sync-conflict-kicker">本機上一版時間</div>
+                        <div class="sync-conflict-time">${formatDateTimeDisplay(compare.localUpdatedAt)}</div>
+                        <div class="sync-conflict-sub">這台裝置目前保留的版本</div>
+                    </div>
+                    <div class="sync-conflict-box">
+                        <div class="sync-conflict-kicker">雲端上一版時間</div>
+                        <div class="sync-conflict-time">${formatDateTimeDisplay(compare.cloudUpdatedAt)}</div>
+                        <div class="sync-conflict-sub">帳號裡已存在的版本</div>
+                    </div>
+                </div>
+                <div class="sync-mini-status">為了避免直接蓋掉上一版，系統已先暫停自動覆蓋。</div>
+            `;
+        }
+
+        function openSyncConflictModal(compare, mode = 'load') {
+            syncConflictState = { compare, mode };
+            const modal = document.getElementById('sync-conflict-modal');
+            const body = document.getElementById('sync-conflict-body');
+            const localBtn = document.getElementById('sync-keep-local-btn');
+            const cloudBtn = document.getElementById('sync-keep-cloud-btn');
+            if (!modal || !body || !localBtn || !cloudBtn) return;
+            body.innerHTML = buildConflictSummary(compare, mode);
+            localBtn.innerHTML = `<i class="fas fa-cloud-arrow-up"></i> ${mode === 'save' ? '仍要保留本機，覆蓋雲端' : '改用本機版本，覆蓋雲端'}`;
+            cloudBtn.innerHTML = `<i class="fas fa-cloud-arrow-down"></i> ${mode === 'save' ? '改保留雲端，載回這台裝置' : '保留雲端，載回這台裝置'}`;
+            modal.classList.add('show');
+        }
+
+        async function resolveSyncConflict(action) {
+            const state = syncConflictState;
+            closeSyncConflictModal();
+            if (!state) return false;
+            syncConflictState = null;
+            if (action === 'keep-local') {
+                const ok = await saveToCloud('resolve-conflict-keep-local', { force: true });
+                if (ok) updateCloudAuthStatus({ type: 'ok', badge: '已保留本機', desc: '已用這台裝置的版本覆蓋雲端。' });
+                return ok;
+            }
+            if (action === 'keep-cloud') {
+                const ok = await loadFromCloud({ force: true });
+                if (ok === true) updateCloudAuthStatus({ type: 'ok', badge: '已保留雲端', desc: '已把雲端版本載回這台裝置。' });
+                return ok;
+            }
+            updateCloudAuthStatus({ type: 'warn', badge: '待妳決定', desc: '本機和雲端不是同一份資料，系統先暫停自動覆蓋。' });
+            return false;
+        }
+
+        function collectAppState() {
+            const payload = {
+                tx: transactions || [],
+                budget: budgets || {},
+                shop: shoppingList || [],
+                networth: netWorthData || [],
+                settings: sysSettings || { cycleStart: 1 },
+                envelopes: userEnvelopes || JSON.parse(JSON.stringify(defaultSuggestions)),
+                debts: userDebts || [],
+                yearlyGoals: yearlyGoals || {},
+                initSaved: initSaved || {},
+                masterBudgets: masterBudgets || { '固定支出': 0, '變動支出': 0, '預存支出': 0 },
+                monthlySavedPlans: monthlySavedPlans || {},
+                sharedBudgetSettings: sharedBudgetSettings || { enabled: false, partnerName: '另一半', monthlyBudget: 0, splitMode: 'half', myRatio: 50, categories: [{name:'共同餐飲', budget:0},{name:'家用採買', budget:0},{name:'約會娛樂', budget:0},{name:'旅行交通', budget:0}] },
+                sharedDeposits: sharedDeposits || []
+            };
+            payload._syncMeta = {
+                localUpdatedAt: getLocalUpdatedAt() || new Date().toISOString(),
+                fingerprint: buildStateFingerprint(payload)
+            };
+            return payload;
+        }
+
+        function saveToLocalStorageFromState() {
+            suppressCloudAutoSave = true;
+            try {
+                localStorage.setItem('bear_transactions', JSON.stringify(transactions));
+                localStorage.setItem('bear_budgets', JSON.stringify(budgets));
+                localStorage.setItem('bear_shopping_list', JSON.stringify(shoppingList));
+                localStorage.setItem('bear_networth', JSON.stringify(netWorthData));
+                localStorage.setItem('bear_sys_settings', JSON.stringify(sysSettings));
+                localStorage.setItem('bear_custom_envelopes', JSON.stringify(userEnvelopes));
+                localStorage.setItem('bear_debts_tracker', JSON.stringify(userDebts));
+                localStorage.setItem('bear_yearly_goals', JSON.stringify(yearlyGoals));
+                localStorage.setItem('bear_init_saved', JSON.stringify(initSaved));
+                localStorage.setItem('bear_master_budgets', JSON.stringify(masterBudgets));
+                localStorage.setItem('bear_monthly_saved_plans', JSON.stringify(monthlySavedPlans));
+                localStorage.setItem('bear_shared_budget_settings', JSON.stringify(sharedBudgetSettings));
+                localStorage.setItem('bear_shared_deposits', JSON.stringify(sharedDeposits));
+            } finally {
+                suppressCloudAutoSave = false;
+            }
+        }
+
+        function applyAppState(data) {
+            transactions = data.tx || [];
+            budgets = data.budget || {};
+            shoppingList = data.shop || [];
+            netWorthData = data.networth || [];
+            sysSettings = data.settings || { cycleStart: 1 };
+            userEnvelopes = data.envelopes || JSON.parse(JSON.stringify(defaultSuggestions));
+            userDebts = data.debts || [];
+            yearlyGoals = data.yearlyGoals || {};
+            initSaved = data.initSaved || {};
+            masterBudgets = data.masterBudgets || { '固定支出': 0, '變動支出': 0, '預存支出': 0 };
+            monthlySavedPlans = data.monthlySavedPlans || {};
+            sharedBudgetSettings = data.sharedBudgetSettings || { enabled: false, partnerName: '另一半', monthlyBudget: 0, splitMode: 'half', myRatio: 50, categories: [{name:'共同餐飲', budget:0},{name:'家用採買', budget:0},{name:'約會娛樂', budget:0},{name:'旅行交通', budget:0}] };
+            sharedDeposits = data.sharedDeposits || [];
+            saveToLocalStorageFromState();
+            writeAutoBackup('cloud-load');
+            renderSyncHints();
+        }
+
+        function renderAllAfterCloudLoad() {
+            try { if (typeof initSharedBudgetForm === 'function') initSharedBudgetForm(); } catch(e) {}
+            try { if (typeof renderDashboard === 'function') renderDashboard(); } catch(e) {}
+            try { if (typeof renderList === 'function') renderList(); } catch(e) {}
+            try { if (typeof renderBudgetSettings === 'function') renderBudgetSettings(); } catch(e) {}
+            try { if (typeof renderNetWorthPage === 'function') renderNetWorthPage(); } catch(e) {}
+            try { if (typeof renderDebtTracker === 'function') renderDebtTracker(); } catch(e) {}
+            try { if (typeof renderBackupStatus === 'function') renderBackupStatus(); } catch(e) {}
+            try { if (typeof renderSharedDashboard === 'function') renderSharedDashboard(); } catch(e) {}
+            try { if (typeof renderSharedTxList === 'function') renderSharedTxList(); } catch(e) {}
+            try { if (typeof updateSubCategories === 'function') updateSubCategories(); } catch(e) {}
+            try { if (typeof updateMethodSelectOptions === 'function') updateMethodSelectOptions(); } catch(e) {}
+            try { if (typeof updatePaymentDetailSelect === 'function') updatePaymentDetailSelect(); } catch(e) {}
+        }
+
+        async function getCurrentUser() {
+            const { data, error } = await supabaseClient.auth.getUser();
+            if (error) return null;
+            return data.user || null;
+        }
+
+        async function ensureProfile() {
+            const user = await getCurrentUser();
+            if (!user) return null;
+            const { error } = await supabaseClient
+                .from('profiles')
+                .upsert({
+                    id: user.id,
+                    email: user.email,
+                    updated_at: new Date().toISOString()
+                });
+            if (error) {
+                console.error('ensureProfile error:', error);
+                throw error;
+            }
+            return user;
+        }
+
+        function stopCloudRealtimeSync() {
+            if (cloudRefreshInterval) {
+                clearInterval(cloudRefreshInterval);
+                cloudRefreshInterval = null;
+            }
+            if (cloudRealtimeChannel) {
+                try { supabaseClient.removeChannel(cloudRealtimeChannel); } catch (err) { console.error('remove realtime channel error:', err); }
+                cloudRealtimeChannel = null;
+            }
+        }
+
+        async function applyIncomingCloudSnapshot(row, source = 'remote') {
+            const payload = row?.data_json;
+            if (!payload) return false;
+            const cloudMeta = payload._syncMeta || {};
+            const cloudUpdatedAt = cloudMeta.localUpdatedAt || row.updated_at || '';
+            const incomingFingerprint = cloudMeta.fingerprint || buildStateFingerprint(payload);
+            const localFingerprint = getLocalStateFingerprint();
+            const localUpdatedAt = getLocalUpdatedAt();
+            const localTs = localUpdatedAt ? new Date(localUpdatedAt).getTime() : 0;
+            const cloudTs = cloudUpdatedAt ? new Date(cloudUpdatedAt).getTime() : 0;
+            const sameAsLocal = incomingFingerprint === localFingerprint;
+            const alreadyApplied = !!(incomingFingerprint && incomingFingerprint === lastAppliedCloudFingerprint && cloudUpdatedAt && cloudUpdatedAt === lastAppliedCloudUpdatedAt);
+
+            lastCloudSnapshotMeta = {
+                updatedAt: cloudUpdatedAt || row.updated_at || '',
+                email: (lastCloudSnapshotMeta && lastCloudSnapshotMeta.email) ? lastCloudSnapshotMeta.email : '',
+                isLoggedIn: true,
+                hasConflict: false
+            };
+            renderSyncHints();
+
+            if (sameAsLocal || alreadyApplied) return false;
+            if (localTs && cloudTs && cloudTs < localTs) return false;
+
+            applyAppState(payload);
+            if (cloudUpdatedAt) localStorage.setItem('bear_local_updated_at', cloudUpdatedAt);
+            renderAllAfterCloudLoad();
+            lastAppliedCloudFingerprint = incomingFingerprint;
+            lastAppliedCloudUpdatedAt = cloudUpdatedAt || row.updated_at || '';
+            if (source !== 'init') {
+                updateCloudAuthStatus({ type: 'ok', badge: '已更新', desc: `偵測到其他裝置的新版本，已自動同步到這台裝置。上一版時間：${formatDateTimeDisplay(lastAppliedCloudUpdatedAt)}。` });
+                showAppToast('已自動同步其他裝置的最新版本', 'ok');
+            }
+            return true;
+        }
+
+        async function refreshCloudSnapshotInBackground(source = 'background') {
+            const user = await getCurrentUser();
+            if (!user) return false;
+            const { data, error } = await supabaseClient
+                .from('user_snapshots')
+                .select('*')
+                .eq('user_id', user.id)
+                .maybeSingle();
+            if (error) {
+                console.error('refreshCloudSnapshotInBackground error:', error);
+                return false;
+            }
+            if (!data || !data.data_json) return false;
+            lastCloudSnapshotMeta = { updatedAt: data.updated_at || '', email: user.email, isLoggedIn: true, hasConflict: false };
+            renderSyncHints();
+            return await applyIncomingCloudSnapshot(data, source);
+        }
+
+        async function startCloudRealtimeSync(user) {
+            if (!user) return;
+            stopCloudRealtimeSync();
+            lastCloudSnapshotMeta = { ...(lastCloudSnapshotMeta || {}), email: user.email, isLoggedIn: true, hasConflict: false };
+            const channelName = `bear-sync-${user.id}`;
+            cloudRealtimeChannel = supabaseClient
+                .channel(channelName)
+                .on('postgres_changes', {
+                    event: '*',
+                    schema: 'public',
+                    table: 'user_snapshots',
+                    filter: `user_id=eq.${user.id}`
+                }, async (payload) => {
+                    const row = payload?.new;
+                    if (!row || !row.data_json) return;
+                    lastCloudSnapshotMeta = { updatedAt: row.updated_at || '', email: user.email, isLoggedIn: true, hasConflict: false };
+                    renderSyncHints();
+                    await applyIncomingCloudSnapshot(row, 'realtime');
+                });
+            try {
+                await cloudRealtimeChannel.subscribe();
+            } catch (err) {
+                console.error('realtime subscribe error:', err);
+            }
+            cloudRefreshInterval = setInterval(() => {
+                refreshCloudSnapshotInBackground('poll').catch(err => console.error('cloud poll error:', err));
+            }, 15000);
+        }
+
+        async function saveToCloud(reason = 'manual', options = {}) {
+            const user = await getCurrentUser();
+            if (!user) return false;
+            const { force = false, silent = false, skipConflictCheck = true } = options;
+            const { data: remoteRow, error: readError } = await supabaseClient
+                .from('user_snapshots')
+                .select('*')
+                .eq('user_id', user.id)
+                .maybeSingle();
+            if (readError) {
+                console.error('saveToCloud precheck error:', readError);
+                updateCloudAuthStatus({ type: 'error', badge: '同步失敗', desc: `同步前檢查失敗：${readError.message}` });
+                return false;
+            }
+            if (remoteRow?.data_json) {
+                const compare = compareLocalAndCloud(remoteRow);
+                lastCloudSnapshotMeta = { updatedAt: compare.cloudUpdatedAt || remoteRow.updated_at || '', email: user.email, isLoggedIn: true, hasConflict: false };
+                renderSyncHints();
+            }
+            const payload = collectAppState();
+            const nowIso = new Date().toISOString();
+            payload._syncMeta = {
+                ...(payload._syncMeta || {}),
+                localUpdatedAt: getLocalUpdatedAt() || nowIso,
+                fingerprint: buildStateFingerprint(payload),
+                reason
+            };
+            lastAppliedCloudFingerprint = payload._syncMeta.fingerprint || '';
+            lastAppliedCloudUpdatedAt = nowIso;
+            const { error } = await supabaseClient
+                .from('user_snapshots')
+                .upsert({
+                    user_id: user.id,
+                    data_json: payload,
+                    updated_at: nowIso,
+                    device_info: navigator.userAgent
+                }, { onConflict: 'user_id' });
+            if (error) {
+                console.error('saveToCloud error:', error);
+                updateCloudAuthStatus({ type: 'error', badge: '同步失敗', desc: `雲端同步失敗：${error.message}` });
+                return false;
+            }
+            lastCloudSnapshotMeta = { updatedAt: nowIso, email: user.email, isLoggedIn: true, hasConflict: false };
+            updateCloudAuthStatus({ type: 'ok', badge: '已同步', desc: `已登入 ${user.email}，目前最新版本已同步到雲端。` });
+            renderSyncHints();
+            return true;
+        }
+
+        async function loadFromCloud(options = {}) {
+            const user = await getCurrentUser();
+            if (!user) return false;
+            const { force = false, silent = false, skipConflictCheck = true } = options;
+            const { data, error } = await supabaseClient
+                .from('user_snapshots')
+                .select('*')
+                .eq('user_id', user.id)
+                .maybeSingle();
+            if (error) {
+                console.error('loadFromCloud error:', error);
+                updateCloudAuthStatus({ type: 'error', badge: '讀取失敗', desc: `讀取雲端資料失敗：${error.message}` });
+                return false;
+            }
+            if (!data || !data.data_json) {
+                lastCloudSnapshotMeta = { updatedAt: '', email: user.email, isLoggedIn: true, hasConflict: false };
+                updateCloudAuthStatus({ type: 'neutral', badge: '雲端空白', desc: `已登入 ${user.email}，雲端目前還沒有資料。` });
+                renderSyncHints();
+                return true;
+            }
+            const compare = compareLocalAndCloud(data);
+            lastCloudSnapshotMeta = {
+                updatedAt: compare.cloudUpdatedAt || data.updated_at || '',
+                email: user.email,
+                isLoggedIn: true,
+                hasConflict: compare.hasConflict
+            };
+            if (compare.hasConflict && !force) {
+                updateCloudAuthStatus({
+                    type: 'warn',
+                    badge: '發現差異',
+                    desc: `這台裝置是 ${formatDateTimeDisplay(compare.localUpdatedAt)}，雲端是 ${formatDateTimeDisplay(compare.cloudUpdatedAt)}。先確認要保留哪一份，再決定是否載入雲端。`
+                });
+                renderSyncHints();
+                if (!silent) openSyncConflictModal(compare, 'load');
+                return 'conflict';
+            }
+            applyAppState(data.data_json);
+            if (compare.cloudUpdatedAt) localStorage.setItem('bear_local_updated_at', compare.cloudUpdatedAt);
+            renderAllAfterCloudLoad();
+            lastAppliedCloudFingerprint = compare.cloudFingerprint || buildStateFingerprint(data.data_json || {});
+            lastAppliedCloudUpdatedAt = compare.cloudUpdatedAt || data.updated_at || '';
+            lastCloudSnapshotMeta = { updatedAt: compare.cloudUpdatedAt || data.updated_at || '', email: user.email, isLoggedIn: true, hasConflict: false };
+            updateCloudAuthStatus({ type: 'ok', badge: '已載入', desc: `已登入 ${user.email}，雲端資料已載入到這台裝置。` });
+            renderSyncHints();
+            return true;
+        }
+
+        function scheduleCloudSave(reason = 'autosave') {
+            if (suppressCloudAutoSave) return;
+            clearTimeout(cloudSaveTimer);
+            cloudSaveTimer = setTimeout(() => {
+                saveToCloud(reason).catch(err => console.error('scheduleCloudSave error:', err));
+            }, 900);
+        }
+
+        function updateCloudAuthStatus({ type = 'neutral', badge = '尚未登入', desc = '目前尚未登入，資料先留在這台裝置。' } = {}) {
+            const panel = document.getElementById('cloud-auth-status');
+            const badgeEl = document.getElementById('cloud-status-badge');
+            const descEl = document.getElementById('cloud-status-desc');
+            if (!panel || !badgeEl || !descEl) return;
+            panel.className = `status-panel ${type}`;
+            badgeEl.className = `status-badge ${type === 'warn' ? 'warn' : type === 'ok' ? 'cloud' : 'local'}`;
+            badgeEl.textContent = badge;
+            descEl.textContent = desc;
+            renderSyncHints();
+        }
+
+        async function refreshCloudAuthStatus() {
+            const user = await getCurrentUser();
+            if (!user) {
+                lastCloudSnapshotMeta = { updatedAt: '', email: '', isLoggedIn: false, hasConflict: false };
+                updateCloudAuthStatus({ type: 'neutral', badge: '尚未登入', desc: '目前尚未登入，資料先留在這台裝置。' });
+                return;
+            }
+            lastCloudSnapshotMeta = { ...(lastCloudSnapshotMeta || {}), email: user.email, isLoggedIn: true };
+            updateCloudAuthStatus({ type: 'neutral', badge: '已登入', desc: `已登入 ${user.email}，按下儲存後會自動上傳，其他裝置也會自動更新到最新版本。` });
+        }
+
+        async function handleCloudSignUp() {
+            const email = document.getElementById('cloudEmail').value.trim();
+            const password = document.getElementById('cloudPassword').value;
+            if (!email || !password) {
+                alert('請先輸入 Email 與密碼');
+                return;
+            }
+            const { error } = await supabaseClient.auth.signUp({ email, password });
+            if (error) {
+                alert('註冊失敗：' + error.message);
+                return;
+            }
+            alert('註冊成功，接著直接登入即可。');
+            await refreshCloudAuthStatus();
+        }
+
+        async function handleCloudSignIn() {
+            const email = document.getElementById('cloudEmail').value.trim();
+            const password = document.getElementById('cloudPassword').value;
+            if (!email || !password) {
+                alert('請先輸入 Email 與密碼');
+                return;
+            }
+            const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+            if (error) {
+                alert('登入失敗：' + error.message);
+                return;
+            }
+            const user = await ensureProfile();
+            const loadResult = await loadFromCloud({ silent: true });
+            await startCloudRealtimeSync(user);
+            await refreshCloudAuthStatus();
+            if (loadResult === 'conflict') {
+                updateCloudAuthStatus({ type: 'warn', badge: '登入成功', desc: '已登入，但本機和雲端不是同一份資料，請先選擇要保留哪一份。' });
+            } else {
+                showAppToast('登入成功，已開始自動同步最新版本。', 'ok');
+            }
+        }
+
+        async function handleCloudSaveNow() {
+            const user = await getCurrentUser();
+            if (!user) {
+                alert('請先登入 Email 帳號');
+                return;
+            }
+            const ok = await saveToCloud('manual-button');
+            if (ok === true) showAppToast('已把目前資料同步到雲端。', 'ok');
+        }
+
+        async function handleCloudLoadNow() {
+            const user = await getCurrentUser();
+            if (!user) {
+                alert('請先登入 Email 帳號');
+                return;
+            }
+            const firstTry = await loadFromCloud();
+            if (firstTry === 'conflict') return;
+            if (firstTry) alert('已從雲端載回資料。');
+        }
+
+        async function signOutCloud() {
+            const { error } = await supabaseClient.auth.signOut();
+            if (error) {
+                alert('登出失敗：' + error.message);
+                return;
+            }
+            stopCloudRealtimeSync();
+            lastAppliedCloudFingerprint = '';
+            lastAppliedCloudUpdatedAt = '';
+            lastCloudSnapshotMeta = { updatedAt: '', email: '', isLoggedIn: false, hasConflict: false };
+            updateCloudAuthStatus({ type: 'neutral', badge: '已登出', desc: '已登出，目前資料只留在這台裝置。' });
+            alert('已登出。');
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const syncCancelBtn = document.getElementById('sync-cancel-btn');
+            const syncKeepLocalBtn = document.getElementById('sync-keep-local-btn');
+            const syncKeepCloudBtn = document.getElementById('sync-keep-cloud-btn');
+            const syncModal = document.getElementById('sync-conflict-modal');
+            if (syncCancelBtn) syncCancelBtn.addEventListener('click', () => resolveSyncConflict('cancel'));
+            if (syncKeepLocalBtn) syncKeepLocalBtn.addEventListener('click', () => resolveSyncConflict('keep-local'));
+            if (syncKeepCloudBtn) syncKeepCloudBtn.addEventListener('click', () => resolveSyncConflict('keep-cloud'));
+            if (syncModal) syncModal.addEventListener('click', (e) => { if (e.target === syncModal) closeSyncConflictModal(); });
+            if (hasAnyUserData() && !getLocalUpdatedAt()) setLocalUpdatedAt('init-existing-local-data');
+            await refreshCloudAuthStatus();
+            renderSyncHints();
+            const { data } = await supabaseClient.auth.getSession();
+            if (data && data.session) {
+                try {
+                    const user = await ensureProfile();
+                    await loadFromCloud({ silent: true });
+                    await startCloudRealtimeSync(user);
+                    await refreshCloudSnapshotInBackground('init');
+                } catch (err) {
+                    console.error('auto cloud init error:', err);
+                }
+                await refreshCloudAuthStatus();
+                renderSyncHints();
+            }
+            if (!cloudSessionSubscription) {
+                const { data: authListener } = supabaseClient.auth.onAuthStateChange(async (event, session) => {
+                    if (session && session.user) {
+                        try {
+                            await ensureProfile();
+                            await startCloudRealtimeSync(session.user);
+                            await refreshCloudSnapshotInBackground('auth');
+                        } catch (err) {
+                            console.error('auth sync start error:', err);
+                        }
+                        await refreshCloudAuthStatus();
+                    } else {
+                        stopCloudRealtimeSync();
+                        lastAppliedCloudFingerprint = '';
+                        lastAppliedCloudUpdatedAt = '';
+                        lastCloudSnapshotMeta = { updatedAt: '', email: '', isLoggedIn: false, hasConflict: false };
+                        updateCloudAuthStatus({ type: 'neutral', badge: '尚未登入', desc: '目前尚未登入，資料先留在這台裝置。' });
+                    }
+                    renderSyncHints();
+                });
+                cloudSessionSubscription = authListener?.subscription || null;
+            }
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden) refreshCloudSnapshotInBackground('visible').catch(err => console.error('visibility sync error:', err));
+            });
+            window.addEventListener('focus', () => {
+                refreshCloudSnapshotInBackground('focus').catch(err => console.error('focus sync error:', err));
+            });
+        });
+
+
         function saveSysSettings() { let startDay = parseInt(document.getElementById('setting-cycle-start').value) || 1; if (startDay < 1) startDay = 1; if (startDay > 31) startDay = 31; document.getElementById('setting-cycle-start').value = startDay; sysSettings.cycleStart = startDay; localStorage.setItem('bear_sys_settings', JSON.stringify(sysSettings)); writeAutoBackup('settings'); alert('帳單週期設定已更新！'); dashboardViewDate = new Date(); renderDashboard(); renderList(); }
         
         function switchPage(pageId) {
@@ -1351,7 +2097,7 @@
         }
 
         function openAddPage() { resetForm(); switchPage('add'); switchEntryMode('single'); applyMainPaymentDefaults(); renderRecentCombos(); }
-        function resetForm() { editingId = null; document.getElementById('add-page-title').innerText = '先幫這筆錢留位置'; document.getElementById('save-btn').innerHTML = '先幫這筆錢留位置 <i class="fas fa-check"></i>'; document.getElementById('add-page-helper').innerText = '不用一次記很多。先從你最確定的一筆開始，空白晚點補也沒關係。'; document.getElementById('cancel-edit-btn').classList.add('hidden'); document.getElementById('input-date').value = getTodayLocalDateString(); document.getElementById('input-main-category').value = '支出-變動'; updateSubCategories(); document.getElementById('input-amount').value = ''; document.getElementById('input-note').value = ''; document.getElementById('input-transfer-label').value = ''; switchEntryMode('single'); document.getElementById('multi-entry-wrap').classList.remove('hidden'); initExtraEntryArea(); applyMainPaymentDefaults(); updateSharedExpenseVisibility(); renderRecentCombos(); }
+        function resetForm() { editingId = null; document.getElementById('add-page-title').innerText = '先幫這筆錢留位置'; document.getElementById('save-btn').innerHTML = '先幫這筆錢留位置 <i class="fas fa-check"></i>'; document.getElementById('add-page-helper').innerText = '記一筆就好，其他空白可以晚點補。'; document.getElementById('cancel-edit-btn').classList.add('hidden'); document.getElementById('input-date').value = getTodayLocalDateString(); document.getElementById('input-main-category').value = '支出-變動'; updateSubCategories(); document.getElementById('input-amount').value = ''; document.getElementById('input-note').value = ''; document.getElementById('input-transfer-label').value = ''; switchEntryMode('single'); document.getElementById('multi-entry-wrap').classList.remove('hidden'); initExtraEntryArea(); applyMainPaymentDefaults(); updateSharedExpenseVisibility(); renderRecentCombos(); }
         function sortTransactions() { transactions.sort((a, b) => { const dateDiff = new Date(b.date) - new Date(a.date); if (dateDiff !== 0) return dateDiff; return b.id - a.id; }); }
 
 
@@ -1370,8 +2116,8 @@
             singleArea.classList.toggle('hidden', !isSingle);
             batchArea.classList.toggle('hidden', isSingle);
             helper.innerText = isSingle
-                ? '平常記一筆、存一筆。若妳先寫在紙本上，也可以切到「月底補登模式」一次補進系統。'
-                : '適合把紙本記錄一次補登進網站，再去看分析和匯出報表。';
+                ? '單筆就現在記；月底再補登也可以。'
+                : '適合把紙本資料一次補進系統。';
 
             if (!isSingle) {
                 initBatchEntry(false);
@@ -2997,7 +3743,7 @@ function getSharedBudgetSummary(cycleTx) {
             return { date, type, category: subCat, mainCategory: saveMainCategory, amount, note, method: paymentMeta.method, paymentToolId: paymentMeta.paymentToolId, fundingCardId: paymentMeta.fundingCardId, transferLabel: paymentMeta.transferLabel, sharedMeta };
         }
 
-        function saveTransaction() {
+        async function saveTransaction() {
             const date = document.getElementById('input-date').value;
             const mainCatRaw = document.getElementById('input-main-category').value;
             const amount = parseFloat(document.getElementById('input-amount').value);
@@ -3023,6 +3769,11 @@ function getSharedBudgetSummary(cycleTx) {
                 sortTransactions();
                 localStorage.setItem('bear_transactions', JSON.stringify(transactions));
                 writeAutoBackup('transaction-edit');
+                let cloudSaved = false;
+                if (await getCurrentUser()) {
+                    const syncOk = await saveToCloud('transaction-edit', { silent: true, skipConflictCheck: true });
+                    cloudSaved = syncOk === true;
+                }
                 editingId = null;
                 resetForm();
                 renderRecentCombos();
@@ -3030,6 +3781,7 @@ function getSharedBudgetSummary(cycleTx) {
                 renderList();
                 renderSharedAccountPage();
                 switchPage('add');
+                showAppToast(cloudSaved ? '已把這筆記帳上傳到雲端' : '修改成功！', 'ok');
                 return;
             }
 
@@ -3075,13 +3827,19 @@ function getSharedBudgetSummary(cycleTx) {
             localStorage.setItem('bear_transactions', JSON.stringify(transactions));
             localStorage.setItem('bear_custom_envelopes', JSON.stringify(userEnvelopes));
             writeAutoBackup('transaction-multi');
-            alert(`成功儲存 ${entries.length} 筆紀錄！`);
+            let cloudSaved = false;
+            if (await getCurrentUser()) {
+                const syncOk = await saveToCloud('transaction-multi', { silent: true, skipConflictCheck: true });
+                cloudSaved = syncOk === true;
+            }
             resetForm();
             renderRecentCombos();
             renderDashboard();
             renderList();
             renderSharedAccountPage();
             switchPage('add');
+            if (cloudSaved) showAppToast(entries.length === 1 ? '已把這筆記帳上傳到雲端' : '已把這次記帳上傳到雲端', 'ok');
+            else showAppToast(`成功儲存 ${entries.length} 筆紀錄！`, 'ok');
         }
 
         function editTx(id) {
@@ -3102,7 +3860,7 @@ function getSharedBudgetSummary(cycleTx) {
             document.getElementById('input-wallet-id').value = tx.paymentToolId || paymentSettings.defaultWalletId || (getEnabledWallets()[0]?.id || '');
             document.getElementById('input-transfer-label').value = tx.transferLabel || (typeof tx.paymentToolId === 'string' ? tx.paymentToolId : '');
             handleMainPaymentMethodChange();
-            document.getElementById('add-page-title').innerText = '調整這筆位置'; document.getElementById('save-btn').innerHTML = '存下這次調整 <i class="fas fa-save"></i>'; document.getElementById('add-page-helper').innerText = '把這筆錢放回更適合的位置。'; document.getElementById('cancel-edit-btn').classList.remove('hidden'); switchPage('add'); renderRecentCombos(); document.getElementById('multi-entry-wrap').classList.add('hidden'); switchEntryMode('single');
+            document.getElementById('add-page-title').innerText = '調整這筆位置'; document.getElementById('save-btn').innerHTML = '存下這次調整 <i class="fas fa-save"></i>'; document.getElementById('add-page-helper').innerText = '把這筆調整回對的位置。'; document.getElementById('cancel-edit-btn').classList.remove('hidden'); switchPage('add'); renderRecentCombos(); document.getElementById('multi-entry-wrap').classList.add('hidden'); switchEntryMode('single');
         }
 
         function deleteTx(id) { 
@@ -3375,7 +4133,7 @@ function getSharedBudgetSummary(cycleTx) {
             }
         }
 
-        function saveMasterBudget(mainCat) { const val = parseFloat(document.getElementById(`master-budget-${mainCat}`).value) || 0; masterBudgets[mainCat] = val; localStorage.setItem('bear_master_budgets', JSON.stringify(masterBudgets)); }
+        function saveMasterBudget(mainCat) { const val = parseFloat(document.getElementById(`master-budget-${mainCat}`).value) || 0; masterBudgets[mainCat] = val; localStorage.setItem('bear_master_budgets', JSON.stringify(masterBudgets)); writeAutoBackup('save-master-budget'); renderDashboard(); }
 
         function addNewEnvelope(mainCat) {
             const totalCount = getTotalEnvelopesCount();
@@ -5074,6 +5832,7 @@ function exportToExcel() {
                 masterBudgets: masterBudgets,
                 monthlySavedPlans: monthlySavedPlans,
                 sharedBudgetSettings: sharedBudgetSettings,
+                sharedDeposits: sharedDeposits,
                 exported_at: new Date().toISOString()
             };
         }
@@ -5083,11 +5842,13 @@ function exportToExcel() {
         }
 
         function writeAutoBackup(reason = 'autosave') {
+            setLocalUpdatedAt(reason);
             const payload = getBackupPayload();
             localStorage.setItem('bear_auto_backup', JSON.stringify(payload));
             backupMeta.lastAutoSave = new Date().toISOString();
             saveBackupMeta();
             renderBackupStatus();
+            scheduleCloudSave(reason);
         }
 
         function formatRelativeTime(isoString) {
@@ -5194,7 +5955,9 @@ function exportToExcel() {
                 localStorage.setItem('bear_master_budgets', JSON.stringify(masterBudgets));
                 localStorage.setItem('bear_monthly_saved_plans', JSON.stringify(monthlySavedPlans));
                 localStorage.setItem('bear_shared_budget_settings', JSON.stringify(sharedBudgetSettings));
+                localStorage.setItem('bear_shared_deposits', JSON.stringify(sharedDeposits));
                 initSharedBudgetForm();
+                writeAutoBackup('restore-auto-backup');
 
                 alert('已從最近一次自動快照還原！');
                 renderDashboard();
@@ -5243,6 +6006,7 @@ function exportToExcel() {
                         masterBudgets = data.masterBudgets || { '固定支出': 0, '變動支出': 0, '預存支出': 0 }; 
                         monthlySavedPlans = data.monthlySavedPlans || {}; 
                         sharedBudgetSettings = data.sharedBudgetSettings || { enabled: false, partnerName: '另一半', monthlyBudget: 0, splitMode: 'half', myRatio: 50 };
+                        sharedDeposits = data.sharedDeposits || [];
                     } 
                     localStorage.setItem('bear_transactions', JSON.stringify(transactions)); 
                     localStorage.setItem('bear_budgets', JSON.stringify(budgets)); 
