@@ -1062,7 +1062,8 @@
                 <div class="form-group"><label>目前剩餘 ($)</label><input type="number" step="any" id="debt-current" placeholder="現欠款" inputmode="decimal"></div>
                 <div class="form-group"><label>每月還款 ($)</label><input type="number" step="any" id="debt-monthly" placeholder="每月預定" inputmode="decimal"></div>
                 <div class="form-group" id="group-debt-rate"><label id="label-debt-rate">年利率 (%)</label><input type="number" step="any" id="debt-rate" placeholder="例: 2.5" inputmode="decimal"></div>
-                <div class="form-group"><label>總期數 (期)</label><input type="number" id="debt-total-terms" placeholder="選填, 自動精算" inputmode="numeric"></div>
+                <div class="form-group" id="group-debt-total-terms"><label id="label-debt-total-terms">總期數 (期)</label><input type="number" id="debt-total-terms" placeholder="選填, 自動精算" inputmode="numeric"></div>
+                <div id="debt-total-terms-note" style="display:none; grid-column:1 / -1; margin-top:-4px; margin-bottom:2px; font-size:0.76rem; color:var(--danger); background:rgba(217,122,114,0.08); border:1px solid rgba(217,122,114,0.18); border-radius:12px; padding:10px 12px; line-height:1.6;">固定分期通常有明確期數，請填入總期數</div>
                 <div class="form-group"><label>每月扣款日</label><input type="number" id="debt-pay-date" min="1" max="31" placeholder="例: 5" inputmode="numeric"></div>
             </div>
 
@@ -4167,10 +4168,10 @@ function getSharedBudgetSummary(cycleTx) {
             renderDashboard();
         }
 
-        function calculateSinkingCurrentBalance(env) {
-            const yearlyGoal = yearlyGoals[env] || 0;
-            const initialVal = initSaved[env] || 0;
-            const currentMonth = new Date().getMonth();
+        function getSinkingEffectiveSaved(env, options = {}) {
+            const includeCurrentMonth = options.includeCurrentMonth !== false;
+            const todayMonthIndex = new Date().getMonth();
+            const lastIncludedMonth = includeCurrentMonth ? todayMonthIndex : todayMonthIndex - 1;
 
             let manualSavesByMonth = Array(12).fill(0);
             transactions.forEach(t => {
@@ -4187,9 +4188,18 @@ function getSharedBudgetSummary(cycleTx) {
                     planned = parseFloat(monthlySavedPlans[env][m]) || 0;
                 }
                 let manual = manualSavesByMonth[m] || 0;
-                if (m < currentMonth) effectiveSaved += Math.max(planned, manual);
+
+                if (m <= lastIncludedMonth) effectiveSaved += Math.max(planned, manual);
                 else effectiveSaved += manual;
             }
+
+            return effectiveSaved;
+        }
+
+        function calculateSinkingCurrentBalance(env) {
+            const yearlyGoal = yearlyGoals[env] || 0;
+            const initialVal = initSaved[env] || 0;
+            let effectiveSaved = getSinkingEffectiveSaved(env, { includeCurrentMonth: true });
 
             let totalSaved = initialVal + effectiveSaved;
             let totalSpent = 0;
@@ -4379,6 +4389,7 @@ function getSharedBudgetSummary(cycleTx) {
                                 <div class="labeled-input"><label>已存金額</label><input type="number" step="any" value="${initVal}" onchange="saveInitSaved('${env}', this.value)"></div>
                             </div>
                             <div style="font-size:0.78rem; color:var(--gold); font-weight:700; text-align:right; margin-top:8px;">目前水位會自動計算：$${formatMoney(currentBalance)}</div>
+                            <div style="font-size:0.72rem; color:var(--text-secondary); line-height:1.6; margin-top:6px; text-align:right;">小說明：未來月份先填也可以，但不會先算入總存入水位，會等該月份到了才納入。</div>
                             ${monthMatrixHtml}
                         </div>`;
                 });
@@ -4725,7 +4736,6 @@ function renderBudgetBars(envExp, masterSpent) {
             const bagCount = sinkingCats ? sinkingCats.length : 0;
             let hasData = false;
 
-            const currentMonth = new Date().getMonth() + 1; 
 
             if (bagCount === 0) {
                 const yearlyGoal = masterBudgets['預存支出'] || 0;
@@ -4745,29 +4755,7 @@ function renderBudgetBars(envExp, masterSpent) {
                     const yearlyGoal = yearlyGoals[env] || 0;
                     const initialVal = initSaved[env] || 0;
                     
-                    let manualSavesByMonth = Array(12).fill(0);
-                    transactions.forEach(t => {
-                        if(t.type === 'save' && t.category === env) {
-                            let mIndex = new Date(t.date).getMonth(); 
-                            manualSavesByMonth[mIndex] += t.amount;
-                        }
-                    });
-
-                    let effectiveSaved = 0;
-                    for(let m=0; m<12; m++) {
-                        let planned = 0;
-                        if(monthlySavedPlans[env] && monthlySavedPlans[env][m]) {
-                            planned = parseFloat(monthlySavedPlans[env][m]) || 0;
-                        }
-                        let manual = manualSavesByMonth[m];
-                        
-                        if (m < currentMonth) {
-                            effectiveSaved += Math.max(planned, manual);
-                        } else {
-                            effectiveSaved += manual;
-                        }
-                    }
-                    
+                    let effectiveSaved = getSinkingEffectiveSaved(env, { includeCurrentMonth: true });
                     let totalSaved = initialVal + effectiveSaved;
                     let totalSpent = 0; transactions.forEach(t => { if(t.type === 'expense' && t.mainCategory === '預存支出' && t.category === env) totalSpent += t.amount; });
                     let currentBalance = totalSaved - totalSpent; 
@@ -5456,6 +5444,9 @@ function renderBudgetBars(envExp, masterSpent) {
             const rateGroup = document.getElementById('group-debt-rate');
             const rateLabel = document.getElementById('label-debt-rate');
             const hintBox = document.getElementById('debt-type-hint');
+            const totalTermsInput = document.getElementById('debt-total-terms');
+            const totalTermsLabel = document.getElementById('label-debt-total-terms');
+            const totalTermsNote = document.getElementById('debt-total-terms-note');
 
             if (type === 'fixed') {
                 rateGroup.style.display = 'block';
@@ -5463,26 +5454,61 @@ function renderBudgetBars(envExp, masterSpent) {
                 hintBox.style.display = 'block';
                 hintBox.innerHTML = '💡 <b>本息合一</b>：銀行已將利息算入每月固定還款。系統會依照<b>剩餘本金＋年利率＋月付金</b>推估剩餘期數，<b>不會重複扣除利息</b>。';
                 hintBox.style.borderLeftColor = '#968c83';
+
+                totalTermsInput.required = true;
+                totalTermsInput.placeholder = '固定分期請填總期數';
+                totalTermsLabel.innerText = '總期數 (期) *';
+                totalTermsNote.style.display = 'block';
             } else if (type === 'compound') {
                 rateGroup.style.display = 'block';
                 rateLabel.innerText = '年利率 (%)';
                 hintBox.style.display = 'block';
                 hintBox.innerHTML = '💡 <b>循環計息</b>：適用於房貸或信用卡循。系統會在妳每次打卡時，<b>自動以複利計算並扣除當月利息</b>，精準推估剩餘期數。';
                 hintBox.style.borderLeftColor = 'var(--danger)';
+
+                totalTermsInput.required = false;
+                totalTermsInput.placeholder = '選填, 自動精算';
+                totalTermsLabel.innerText = '總期數 (期)';
+                totalTermsNote.style.display = 'none';
             } else if (type === 'flexible') {
                 rateGroup.style.display = 'none';
                 hintBox.style.display = 'block';
                 hintBox.innerHTML = '💡 <b>彈性還款</b>：適合家人借款、朋友借款或妳想有餘力時多還一點的情況。打卡時可以自己輸入本月實際還款金額，系統會依照妳設定的每月預設金額估算剩餘期數。';
                 hintBox.style.borderLeftColor = 'var(--info)';
+
+                totalTermsInput.required = false;
+                totalTermsInput.placeholder = '選填, 自動精算';
+                totalTermsLabel.innerText = '總期數 (期)';
+                totalTermsNote.style.display = 'none';
             } else {
                 rateGroup.style.display = 'none';
                 hintBox.style.display = 'block';
                 hintBox.innerHTML = '💡 <b>零利率</b>：適用於親友借款或無息分期。打卡還款金額將100%用於扣抵本金。';
                 hintBox.style.borderLeftColor = 'var(--success)';
+
+                totalTermsInput.required = false;
+                totalTermsInput.placeholder = '選填, 自動精算';
+                totalTermsLabel.innerText = '總期數 (期)';
+                totalTermsNote.style.display = 'none';
             }
         }
 
-        function calculateRemainingTerms(currentDebt, monthlyPayment, annualRate, type = 'fixed') {
+        
+        function getDebtDisplayRemainingTerms(debt) {
+            const rawTerms = calculateRemainingTerms(debt.current, debt.monthly, debt.rate, debt.calcType);
+            if (rawTerms < 0) return rawTerms;
+            if (debt && debt.calcType === 'fixed' && debt.totalTerms > 0) {
+                return Math.min(rawTerms, debt.totalTerms);
+            }
+            return rawTerms;
+        }
+
+        function getDebtDisplayTotalTerms(debt) {
+            if (debt && debt.totalTerms > 0) return debt.totalTerms;
+            return calculateRemainingTerms(debt.initial, debt.monthly, debt.rate, debt.calcType);
+        }
+
+function calculateRemainingTerms(currentDebt, monthlyPayment, annualRate, type = 'fixed') {
             if (currentDebt <= 0) return 0;
             if (monthlyPayment <= 0) return -1;
 
@@ -5652,7 +5678,7 @@ function renderDebtTracker() {
                 if(progress < 0) progress = 0; if(progress > 100) progress = 100;
                 let isDone = progress === 100; 
                 
-                let remainingTerms = calculateRemainingTerms(debt.current, debt.monthly, debt.rate, debt.calcType);
+                let remainingTerms = getDebtDisplayRemainingTerms(debt);
                 let timeLeftStr = '';
                 
                 if (isDone) { 
@@ -5686,7 +5712,9 @@ function renderDebtTracker() {
                     rateBadgeText = `<span style="background:rgba(125,168,199,0.12); color:var(--info); padding:2px 8px; border-radius:10px; font-size:0.75rem; margin-left:8px;">彈性還款</span>`;
                 }
 
-                let termsDisplay = debt.totalTerms ? `<div style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:5px;">剩餘期數：<b style="color:var(--text-primary);">${remainingTerms > 0 ? remainingTerms : '-'}</b> 期 / 總期數：${debt.totalTerms} 期${debt.calcType === 'flexible' ? ' <span style="font-size:0.72rem; color:var(--info);">(依預設月付估算)</span>' : ''}</div>` : '';
+                let fixedClampNote = debt.calcType === 'fixed' && debt.totalTerms > 0 && calculateRemainingTerms(debt.current, debt.monthly, debt.rate, debt.calcType) > debt.totalTerms
+                    ? ' <span style="font-size:0.72rem; color:var(--warning);">(已依妳設定的總期數顯示)</span>' : '';
+                let termsDisplay = debt.totalTerms ? `<div style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:5px;">剩餘期數：<b style="color:var(--text-primary);">${remainingTerms > 0 ? remainingTerms : '-'}</b> 期 / 總期數：${debt.totalTerms} 期${debt.calcType === 'flexible' ? ' <span style="font-size:0.72rem; color:var(--info);">(依預設月付估算)</span>' : ''}${fixedClampNote}</div>` : '';
                 let textClass = progress > 15 ? 'snowball-text' : 'snowball-text snowball-text-dark';
 
                 let repayBtnHtml = '';
@@ -5743,13 +5771,13 @@ function renderDebtTracker() {
                 if (debt.current > 0 && debt.monthly > 0) {
                     hasActiveDebt = true;
                     
-                    let remainingTerms = calculateRemainingTerms(debt.current, debt.monthly, debt.rate, debt.calcType);
+                    let remainingTerms = getDebtDisplayRemainingTerms(debt);
                     let rowsHtml = '';
                     
                     if (remainingTerms === -1 || remainingTerms === -2) {
                         rowsHtml = `<div style="padding:20px; text-align:center; color:var(--danger); font-size:0.85rem;">⚠️ 每月還款金額設定異常（低於利息或為0），無法產生攤還表。請至設定修改。</div>`;
                     } else {
-                        let totalTermsBase = debt.totalTerms > 0 ? debt.totalTerms : calculateRemainingTerms(debt.initial, debt.monthly, debt.rate, debt.calcType);
+                        let totalTermsBase = getDebtDisplayTotalTerms(debt);
                         if (totalTermsBase < remainingTerms) totalTermsBase = remainingTerms;
                         
                         let paidTerms = Math.max(0, totalTermsBase - remainingTerms);
@@ -5841,18 +5869,38 @@ function renderDebtTracker() {
         function closeDebtForm() { document.getElementById('debt-form-modal').classList.remove('show'); }
         
         function saveDebt() { 
-            const name = document.getElementById('debt-name').value; 
+            const name = document.getElementById('debt-name').value.trim(); 
             const calcType = document.getElementById('debt-calc-type').value;
             const initial = parseFloat(document.getElementById('debt-initial').value) || 0; 
             const current = parseFloat(document.getElementById('debt-current').value) || 0; 
             const monthly = parseFloat(document.getElementById('debt-monthly').value) || 0; 
             const rate = parseFloat(document.getElementById('debt-rate').value) || 0; 
-            const totalTerms = parseInt(document.getElementById('debt-total-terms').value) || 0; 
+            const totalTermsRaw = document.getElementById('debt-total-terms').value.trim();
+            const totalTerms = parseInt(totalTermsRaw, 10) || 0; 
             const payDate = parseInt(document.getElementById('debt-pay-date').value) || ''; 
 
             if(!name || initial <= 0 || monthly <= 0) { 
-                alert('請輸入完整資訊（含初始總額與每月還款）！'); return; 
-            } 
+                showAppToast('請輸入完整資訊（含初始總額與每月還款）', 'warn'); 
+                return; 
+            }
+
+            if (calcType === 'fixed' && (!totalTermsRaw || totalTerms <= 0)) {
+                showAppToast('固定分期通常有明確期數，請填入總期數', 'warn', 2800);
+                document.getElementById('debt-total-terms').focus();
+                return;
+            }
+
+            if (current <= 0) {
+                showAppToast('請填寫目前剩餘本金', 'warn');
+                document.getElementById('debt-current').focus();
+                return;
+            }
+
+            if (current > initial) {
+                showAppToast('目前剩餘不能大於初始總額', 'warn');
+                document.getElementById('debt-current').focus();
+                return;
+            }
 
             if (editingDebtId !== null) { 
                 const oldDebt = userDebts[editingDebtId];
@@ -5871,9 +5919,13 @@ function renderDebtTracker() {
             writeAutoBackup('save-debt');
             closeDebtForm(); 
             renderDebtTracker(); 
+            if(document.getElementById('checklist-modal')?.classList.contains('show')){
+                renderChecklist();
+            }
+            showAppToast('已存好這個還款目標', 'ok');
         }
-        
-        function deleteDebt() { if(editingDebtId !== null && confirm('確定要刪除這筆負債目標嗎？')) { userDebts.splice(editingDebtId, 1); localStorage.setItem('bear_debts_tracker', JSON.stringify(userDebts)); writeAutoBackup('delete-debt'); closeDebtForm(); renderDebtTracker(); } }
+
+function deleteDebt() { if(editingDebtId !== null && confirm('確定要刪除這筆負債目標嗎？')) { userDebts.splice(editingDebtId, 1); localStorage.setItem('bear_debts_tracker', JSON.stringify(userDebts)); writeAutoBackup('delete-debt'); closeDebtForm(); renderDebtTracker(); } }
 
         function startLogic() { const name = document.getElementById('shop-name').value; const price = parseFloat(document.getElementById('shop-price').value); const salary = parseFloat(document.getElementById('shop-salary').value); if(!name || !price || !salary) { alert('請輸入完整資訊！'); return; } shopItem = { name, price, wage: Math.round(salary/160), costHour: (price/(salary/160)).toFixed(1) }; shopStep = 0; shopScore = 0; document.getElementById('shop-step-1').classList.add('hidden'); document.getElementById('shop-step-2').classList.remove('hidden'); document.getElementById('shop-history-container').classList.add('hidden'); showQuestion(); }
         function showQuestion() { const q = logicQuestions[shopStep]; document.getElementById('q-icon').innerText = q.icon; document.getElementById('q-title').innerText = q.title; document.getElementById('q-desc').innerText = q.desc; document.getElementById('btn-yes').innerText = q.yes; document.getElementById('btn-no').innerText = q.no; if(q.data) document.getElementById('q-data').innerText = `需花費工時：${shopItem.costHour} 小時`; else document.getElementById('q-data').innerText = ''; }
