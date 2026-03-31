@@ -1438,6 +1438,10 @@
         let lastQueuedCloudFingerprint = '';
         let lastAppliedCloudFingerprint = '';
         let lastAppliedCloudUpdatedAt = '';
+        let lastCloudWriteAt = 0;
+        let lastCloudReadAt = 0;
+        const CLOUD_SKIP_REFRESH_AFTER_WRITE_MS = 8000;
+        const CLOUD_REFRESH_MIN_INTERVAL_MS = 12000;
 
         function getLocalUpdatedAt() {
             return localStorage.getItem('bear_local_updated_at') || '';
@@ -1659,7 +1663,16 @@
             }
         }
 
-        function applyAppState(data) {
+        function writeLocalBackupOnly(reason = 'autosave') {
+            setLocalUpdatedAt(reason);
+            const payload = getBackupPayload();
+            localStorage.setItem('bear_auto_backup', JSON.stringify(payload));
+            backupMeta.lastAutoSave = new Date().toISOString();
+            saveBackupMeta();
+            renderBackupStatus();
+        }
+
+        function applyAppState(data, options = {}) {
             transactions = data.tx || [];
             budgets = data.budget || {};
             shoppingList = data.shop || [];
@@ -1699,6 +1712,19 @@
             if (error) return null;
             cachedAuthUser = data?.session?.user || null;
             return cachedAuthUser;
+        }
+
+        function canRefreshCloudSnapshot(source = 'background', options = {}) {
+            const { force = false } = options;
+            if (force) return true;
+            const now = Date.now();
+            if (lastCloudWriteAt && (now - lastCloudWriteAt) < CLOUD_SKIP_REFRESH_AFTER_WRITE_MS) {
+                return false;
+            }
+            if ((source === 'visible' || source === 'focus' || source === 'background') && lastCloudReadAt && (now - lastCloudReadAt) < CLOUD_REFRESH_MIN_INTERVAL_MS) {
+                return false;
+            }
+            return true;
         }
 
         async function ensureProfile() {
@@ -1753,8 +1779,8 @@
             if (sameAsLocal || alreadyApplied) return false;
             if (localTs && cloudTs && cloudTs < localTs) return false;
 
-            applyAppState(payload);
             if (cloudUpdatedAt) localStorage.setItem('bear_local_updated_at', cloudUpdatedAt);
+            applyAppState(payload, { fromCloud: true });
             renderAllAfterCloudLoad();
             lastQueuedCloudFingerprint = incomingFingerprint;
             lastAppliedCloudFingerprint = incomingFingerprint;
@@ -1766,7 +1792,8 @@
             return true;
         }
 
-        async function refreshCloudSnapshotInBackground(source = 'background') {
+        async function refreshCloudSnapshotInBackground(source = 'background', options = {}) {
+            if (!canRefreshCloudSnapshot(source, options)) return false;
             const user = await getCurrentUser();
             if (!user) return false;
             const { data, error } = await supabaseClient
@@ -1779,6 +1806,7 @@
                 return false;
             }
             if (!data || !data.data_json) return false;
+            lastCloudReadAt = Date.now();
             lastCloudSnapshotMeta = { updatedAt: data.updated_at || '', email: user.email, isLoggedIn: true, hasConflict: false };
             renderSyncHints();
             return await applyIncomingCloudSnapshot(data, source);
@@ -1814,6 +1842,7 @@
         }
 
         async function saveToCloud(reason = 'manual', options = {}) {
+            clearTimeout(cloudSaveTimer);
             const user = await getCurrentUser();
             if (!user) return false;
             const { force = false, skipConflictCheck = true } = options;
@@ -1872,6 +1901,8 @@
                 updateCloudAuthStatus({ type: 'error', badge: '同步失敗', desc: `雲端同步失敗：${error.message}` });
                 return false;
             }
+            lastCloudWriteAt = Date.now();
+            lastCloudReadAt = Date.now();
             lastAppliedCloudFingerprint = fingerprint || '';
             lastQueuedCloudFingerprint = fingerprint || '';
             lastAppliedCloudUpdatedAt = nowIso;
@@ -1918,8 +1949,8 @@
                 if (!silent) openSyncConflictModal(compare, 'load');
                 return 'conflict';
             }
-            applyAppState(data.data_json);
             if (compare.cloudUpdatedAt) localStorage.setItem('bear_local_updated_at', compare.cloudUpdatedAt);
+            applyAppState(data.data_json, { fromCloud: true });
             renderAllAfterCloudLoad();
             lastQueuedCloudFingerprint = compare.cloudFingerprint || buildStateFingerprint(data.data_json || {});
             lastAppliedCloudFingerprint = lastQueuedCloudFingerprint;
@@ -2334,7 +2365,7 @@
                     const user = await ensureProfile();
                     await loadFromCloud({ silent: true });
                     await startCloudRealtimeSync(user);
-                    await refreshCloudSnapshotInBackground('init');
+                    await refreshCloudSnapshotInBackground('init', { force: true });
                 } catch (err) {
                     console.error('auto cloud init error:', err);
                 }
@@ -2348,7 +2379,7 @@
                         try {
                             await ensureProfile();
                             await startCloudRealtimeSync(session.user);
-                            await refreshCloudSnapshotInBackground('auth');
+                            await refreshCloudSnapshotInBackground('auth', { force: true });
                         } catch (err) {
                             console.error('auth sync start error:', err);
                         }
@@ -6211,12 +6242,7 @@ function exportToExcel() {
         }
 
         function writeAutoBackup(reason = 'autosave') {
-            setLocalUpdatedAt(reason);
-            const payload = getBackupPayload();
-            localStorage.setItem('bear_auto_backup', JSON.stringify(payload));
-            backupMeta.lastAutoSave = new Date().toISOString();
-            saveBackupMeta();
-            renderBackupStatus();
+            writeLocalBackupOnly(reason);
             scheduleCloudSave(reason);
         }
 
