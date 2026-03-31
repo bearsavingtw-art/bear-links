@@ -1632,7 +1632,6 @@
                 initSaved: initSaved || {},
                 masterBudgets: masterBudgets || { '固定支出': 0, '變動支出': 0, '預存支出': 0 },
                 monthlySavedPlans: monthlySavedPlans || {},
-                paymentSettings: paymentSettings || { defaultMethod: 'cash', defaultCardId: '', defaultWalletId: '', cards: [], wallets: [] },
                 sharedBudgetSettings: sharedBudgetSettings || { enabled: false, partnerName: '另一半', monthlyBudget: 0, splitMode: 'half', myRatio: 50, categories: [{name:'共同餐飲', budget:0},{name:'家用採買', budget:0},{name:'約會娛樂', budget:0},{name:'旅行交通', budget:0}] },
                 sharedDeposits: sharedDeposits || []
             };
@@ -1657,7 +1656,6 @@
                 localStorage.setItem('bear_init_saved', JSON.stringify(initSaved));
                 localStorage.setItem('bear_master_budgets', JSON.stringify(masterBudgets));
                 localStorage.setItem('bear_monthly_saved_plans', JSON.stringify(monthlySavedPlans));
-                localStorage.setItem('bear_payment_settings', JSON.stringify(paymentSettings));
                 localStorage.setItem('bear_shared_budget_settings', JSON.stringify(sharedBudgetSettings));
                 localStorage.setItem('bear_shared_deposits', JSON.stringify(sharedDeposits));
             } finally {
@@ -1686,8 +1684,6 @@
             initSaved = data.initSaved || {};
             masterBudgets = data.masterBudgets || { '固定支出': 0, '變動支出': 0, '預存支出': 0 };
             monthlySavedPlans = data.monthlySavedPlans || {};
-            paymentSettings = data.paymentSettings || { defaultMethod: 'cash', defaultCardId: '', defaultWalletId: '', cards: [], wallets: [] };
-            normalizePaymentSettings();
             sharedBudgetSettings = data.sharedBudgetSettings || { enabled: false, partnerName: '另一半', monthlyBudget: 0, splitMode: 'half', myRatio: 50, categories: [{name:'共同餐飲', budget:0},{name:'家用採買', budget:0},{name:'約會娛樂', budget:0},{name:'旅行交通', budget:0}] };
             sharedDeposits = data.sharedDeposits || [];
             saveToLocalStorageFromState();
@@ -1705,9 +1701,6 @@
             try { if (typeof renderBackupStatus === 'function') renderBackupStatus(); } catch(e) {}
             try { if (typeof renderSharedDashboard === 'function') renderSharedDashboard(); } catch(e) {}
             try { if (typeof renderSharedTxList === 'function') renderSharedTxList(); } catch(e) {}
-            try { if (typeof renderPaymentSettings === 'function') renderPaymentSettings(); } catch(e) {}
-            try { if (typeof applyMainPaymentDefaults === 'function') applyMainPaymentDefaults(); } catch(e) {}
-            try { if (typeof renderPaymentAnalysisPage === 'function') renderPaymentAnalysisPage(); } catch(e) {}
             try { if (typeof updateSubCategories === 'function') updateSubCategories(); } catch(e) {}
             try { if (typeof updateMethodSelectOptions === 'function') updateMethodSelectOptions(); } catch(e) {}
             try { if (typeof updatePaymentDetailSelect === 'function') updatePaymentDetailSelect(); } catch(e) {}
@@ -2007,12 +2000,48 @@
         let signupCooldownTimer = null;
         window.lastSignupEmail = window.lastSignupEmail || '';
 
+        function normalizeCloudEmail(email = '') {
+            return String(email || '').trim().toLowerCase();
+        }
+
         function getResendCooldownKey(email = '') {
-            return `bear_resend_verify_at_${String(email).trim().toLowerCase()}`;
+            return `bear_resend_verify_at_${normalizeCloudEmail(email)}`;
         }
 
         function getSignupCooldownKey(email = '') {
-            return `bear_signup_cooldown_${String(email).trim().toLowerCase()}`;
+            return `bear_signup_cooldown_${normalizeCloudEmail(email)}`;
+        }
+
+        function getKnownCloudSignupKey(email = '') {
+            return `bear_known_cloud_signup_${normalizeCloudEmail(email)}`;
+        }
+
+        function markKnownCloudSignup(email = '', status = 'known') {
+            const normalized = normalizeCloudEmail(email);
+            if (!normalized) return;
+            localStorage.setItem(getKnownCloudSignupKey(normalized), JSON.stringify({
+                status,
+                updatedAt: new Date().toISOString()
+            }));
+        }
+
+        function hasKnownCloudSignup(email = '') {
+            const normalized = normalizeCloudEmail(email);
+            if (!normalized) return false;
+            return !!localStorage.getItem(getKnownCloudSignupKey(normalized));
+        }
+
+        function showKnownCloudSignupHint(email = '') {
+            const normalized = normalizeCloudEmail(email);
+            const { wrap, msg } = getResendVerifyElements();
+            if (wrap) wrap.classList.remove('hidden');
+            if (msg) {
+                msg.textContent = `${normalized} 之前已經註冊過雲端帳號了，不需要再按註冊。若還沒完成驗證，請直接用下方重新寄送驗證信；若已經註冊完成，請直接登入。`;
+            }
+            if (normalized) {
+                window.lastSignupEmail = normalized;
+                showResendVerifySection(normalized);
+            }
         }
 
         function getResendVerifyElements() {
@@ -2223,12 +2252,26 @@
         }
 
         async function handleCloudSignUp() {
-            const email = document.getElementById('cloudEmail').value.trim().toLowerCase();
+            const email = normalizeCloudEmail(document.getElementById('cloudEmail').value);
             const password = document.getElementById('cloudPassword').value;
             const { wrap, msg } = getResendVerifyElements();
+            const currentUser = await getCurrentUser();
 
             if (!email || !password) {
                 alert('請先輸入 Email 與密碼');
+                return;
+            }
+
+            if (currentUser && normalizeCloudEmail(currentUser.email) === email) {
+                markKnownCloudSignup(email, 'signed-in');
+                showKnownCloudSignupHint(email);
+                alert('這個 Email 已經登入過雲端帳號了，不需要再註冊一次。');
+                return;
+            }
+
+            if (hasKnownCloudSignup(email)) {
+                showKnownCloudSignupHint(email);
+                alert('這個 Email 之前已經註冊過雲端帳號了，請不要重複註冊。若還沒完成驗證，直接按「重新寄送驗證信」就好。');
                 return;
             }
 
@@ -2259,10 +2302,11 @@
             }
 
             window.lastSignupEmail = email;
+            markKnownCloudSignup(email, 'signup-sent');
 
             if (wrap) wrap.classList.remove('hidden');
             if (msg) {
-                msg.textContent = '驗證信已寄出，可能需要 30～60 秒，請先檢查收件匣與垃圾郵件。';
+                msg.textContent = '驗證信已寄出，可能需要 30～60 秒，請先檢查收件匣與垃圾郵件。這個 Email 之後若再輸入，系統會直接引導妳重寄或登入，不再重複註冊。';
             }
 
             startSignupCooldown(60, email);
@@ -2272,7 +2316,7 @@
         }
 
         async function handleCloudSignIn() {
-            const email = document.getElementById('cloudEmail').value.trim();
+            const email = normalizeCloudEmail(document.getElementById('cloudEmail').value);
             const password = document.getElementById('cloudPassword').value;
             if (!email || !password) {
                 alert('請先輸入 Email 與密碼');
@@ -2383,6 +2427,7 @@
                 const { data: authListener } = supabaseClient.auth.onAuthStateChange(async (event, session) => {
                     cachedAuthUser = session?.user || null;
                     if (session && session.user) {
+                        markKnownCloudSignup(session.user.email || '', 'signed-in');
                         try {
                             await ensureProfile();
                             await startCloudRealtimeSync(session.user);
@@ -3851,8 +3896,7 @@ function getSharedBudgetSummary(cycleTx) {
             renderDashboard();
             renderList();
             renderPaymentAnalysisPage();
-            writeAutoBackup('payment-settings-updated');
-            showAppToast('付款工具設定已更新，會一起同步到雲端', 'ok');
+            alert('付款工具設定已更新！');
         }
 
         function renderAnalysisList(containerId, items, emptyText, formatter = null) {
