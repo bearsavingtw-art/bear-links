@@ -1597,8 +1597,8 @@
             const cloudBtn = document.getElementById('sync-keep-cloud-btn');
             if (!modal || !body || !localBtn || !cloudBtn) return;
             body.innerHTML = buildConflictSummary(compare, mode);
-            localBtn.innerHTML = `<i class="fas fa-cloud-arrow-up"></i> ${mode === 'save' ? '仍要保留本機，覆蓋雲端' : '改用本機版本，覆蓋雲端'}`;
-            cloudBtn.innerHTML = `<i class="fas fa-cloud-arrow-down"></i> ${mode === 'save' ? '改保留雲端，載回這台裝置' : '保留雲端，載回這台裝置'}`;
+            localBtn.innerHTML = `<i class="fas fa-cloud-arrow-up"></i> ${mode === 'save' ? '保留本機，覆蓋雲端' : '用本機覆蓋雲端'}`;
+            cloudBtn.innerHTML = `<i class="fas fa-cloud-arrow-down"></i> ${mode === 'save' ? '保留雲端，載回這台裝置' : '保留雲端，載回這台裝置'}`;
             modal.classList.add('show');
         }
 
@@ -6596,4 +6596,4 @@ function exportToExcel() {
         }
     </script>
 </body>
-</html>ㄒㄒvv
+</html>Bear love you.
