@@ -1626,6 +1626,7 @@
                 shop: shoppingList || [],
                 networth: netWorthData || [],
                 settings: sysSettings || { cycleStart: 1 },
+                paymentSettings: paymentSettings || { defaultMethod: 'cash', defaultCardId: '', defaultWalletId: '', cards: [], wallets: [] },
                 envelopes: userEnvelopes || JSON.parse(JSON.stringify(defaultSuggestions)),
                 debts: userDebts || [],
                 yearlyGoals: yearlyGoals || {},
@@ -1650,6 +1651,7 @@
                 localStorage.setItem('bear_shopping_list', JSON.stringify(shoppingList));
                 localStorage.setItem('bear_networth', JSON.stringify(netWorthData));
                 localStorage.setItem('bear_sys_settings', JSON.stringify(sysSettings));
+                localStorage.setItem('bear_payment_settings', JSON.stringify(paymentSettings));
                 localStorage.setItem('bear_custom_envelopes', JSON.stringify(userEnvelopes));
                 localStorage.setItem('bear_debts_tracker', JSON.stringify(userDebts));
                 localStorage.setItem('bear_yearly_goals', JSON.stringify(yearlyGoals));
@@ -1678,6 +1680,7 @@
             shoppingList = data.shop || [];
             netWorthData = data.networth || [];
             sysSettings = data.settings || { cycleStart: 1 };
+            paymentSettings = data.paymentSettings || { defaultMethod: 'cash', defaultCardId: '', defaultWalletId: '', cards: [], wallets: [] };
             userEnvelopes = data.envelopes || JSON.parse(JSON.stringify(defaultSuggestions));
             userDebts = data.debts || [];
             yearlyGoals = data.yearlyGoals || {};
@@ -3864,7 +3867,7 @@ function getSharedBudgetSummary(cycleTx) {
             handleMainPaymentMethodChange();
         }
 
-        function savePaymentSettings() {
+        async function savePaymentSettings() {
             normalizePaymentSettings();
             paymentSettings.cards = Array.from(document.querySelectorAll('[data-card-id]')).reduce((acc, el) => {
                 const id = el.dataset.cardId;
@@ -3891,12 +3894,27 @@ function getSharedBudgetSummary(cycleTx) {
             paymentSettings.defaultWalletId = document.getElementById('setting-default-wallet')?.value || '';
             normalizePaymentSettings();
             localStorage.setItem('bear_payment_settings', JSON.stringify(paymentSettings));
+            writeLocalBackupOnly('payment-settings');
             renderPaymentSettings();
             applyMainPaymentDefaults();
             renderDashboard();
             renderList();
             renderPaymentAnalysisPage();
-            alert('付款工具設定已更新！');
+
+            const user = await getCurrentUser();
+            if (user) {
+                const cloudSaved = await saveToCloud('payment-settings-save', { skipConflictCheck: false });
+                if (cloudSaved === true) {
+                    showAppToast('付款工具設定已更新，這版本也同步到雲端了', 'ok');
+                } else if (cloudSaved === 'conflict') {
+                    showAppToast('付款工具設定已更新，先確認要保留本機還是雲端版本', 'warn', 3200);
+                } else {
+                    showAppToast('付款工具設定已更新，但這次雲端同步沒有成功', 'warn', 3200);
+                }
+                return;
+            }
+
+            showAppToast('付款工具設定已更新！', 'ok');
         }
 
         function renderAnalysisList(containerId, items, emptyText, formatter = null) {
@@ -6277,6 +6295,7 @@ function exportToExcel() {
                 shop: shoppingList,
                 networth: netWorthData,
                 settings: sysSettings,
+                paymentSettings: paymentSettings,
                 envelopes: userEnvelopes,
                 debts: userDebts,
                 yearlyGoals: yearlyGoals,
@@ -6395,6 +6414,7 @@ function exportToExcel() {
                 localStorage.setItem('bear_shopping_list', JSON.stringify(shoppingList));
                 localStorage.setItem('bear_networth', JSON.stringify(netWorthData));
                 localStorage.setItem('bear_sys_settings', JSON.stringify(sysSettings));
+                localStorage.setItem('bear_payment_settings', JSON.stringify(paymentSettings));
                 localStorage.setItem('bear_custom_envelopes', JSON.stringify(userEnvelopes));
                 localStorage.setItem('bear_debts_tracker', JSON.stringify(userDebts));
                 localStorage.setItem('bear_yearly_goals', JSON.stringify(yearlyGoals));
