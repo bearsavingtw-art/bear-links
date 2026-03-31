@@ -1425,6 +1425,8 @@
         const SUPABASE_URL = 'https://hpgzgbxvszcoftfwrccw.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_u4tYPXHYZmcmHmG51iIJUA__WZW5sky';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const CLOUD_SAVE_DEBOUNCE_MS = 4000;
+        const CLOUD_BACKGROUND_POLL_MS = 180000;
         let cloudSaveTimer = null;
         let suppressCloudAutoSave = false;
         let lastCloudSnapshotMeta = null;
@@ -1432,6 +1434,8 @@
         let cloudRealtimeChannel = null;
         let cloudRefreshInterval = null;
         let cloudSessionSubscription = null;
+        let cachedAuthUser = null;
+        let lastQueuedCloudFingerprint = '';
         let lastAppliedCloudFingerprint = '';
         let lastAppliedCloudUpdatedAt = '';
 
@@ -1689,10 +1693,12 @@
             try { if (typeof updatePaymentDetailSelect === 'function') updatePaymentDetailSelect(); } catch(e) {}
         }
 
-        async function getCurrentUser() {
-            const { data, error } = await supabaseClient.auth.getUser();
+        async function getCurrentUser(forceRefresh = false) {
+            if (!forceRefresh && cachedAuthUser) return cachedAuthUser;
+            const { data, error } = await supabaseClient.auth.getSession();
             if (error) return null;
-            return data.user || null;
+            cachedAuthUser = data?.session?.user || null;
+            return cachedAuthUser;
         }
 
         async function ensureProfile() {
@@ -1750,6 +1756,7 @@
             applyAppState(payload);
             if (cloudUpdatedAt) localStorage.setItem('bear_local_updated_at', cloudUpdatedAt);
             renderAllAfterCloudLoad();
+            lastQueuedCloudFingerprint = incomingFingerprint;
             lastAppliedCloudFingerprint = incomingFingerprint;
             lastAppliedCloudUpdatedAt = cloudUpdatedAt || row.updated_at || '';
             if (source !== 'init') {
@@ -1764,7 +1771,7 @@
             if (!user) return false;
             const { data, error } = await supabaseClient
                 .from('user_snapshots')
-                .select('*')
+                .select('user_id, updated_at, data_json')
                 .eq('user_id', user.id)
                 .maybeSingle();
             if (error) {
@@ -1803,38 +1810,55 @@
             }
             cloudRefreshInterval = setInterval(() => {
                 refreshCloudSnapshotInBackground('poll').catch(err => console.error('cloud poll error:', err));
-            }, 15000);
+            }, CLOUD_BACKGROUND_POLL_MS);
         }
 
         async function saveToCloud(reason = 'manual', options = {}) {
             const user = await getCurrentUser();
             if (!user) return false;
-            const { force = false, silent = false, skipConflictCheck = true } = options;
-            const { data: remoteRow, error: readError } = await supabaseClient
-                .from('user_snapshots')
-                .select('*')
-                .eq('user_id', user.id)
-                .maybeSingle();
-            if (readError) {
-                console.error('saveToCloud precheck error:', readError);
-                updateCloudAuthStatus({ type: 'error', badge: '同步失敗', desc: `同步前檢查失敗：${readError.message}` });
-                return false;
-            }
-            if (remoteRow?.data_json) {
-                const compare = compareLocalAndCloud(remoteRow);
-                lastCloudSnapshotMeta = { updatedAt: compare.cloudUpdatedAt || remoteRow.updated_at || '', email: user.email, isLoggedIn: true, hasConflict: false };
-                renderSyncHints();
-            }
+            const { force = false, skipConflictCheck = true } = options;
             const payload = collectAppState();
+            const fingerprint = buildStateFingerprint(payload);
+
+            if (!force && fingerprint && fingerprint === lastAppliedCloudFingerprint) {
+                lastQueuedCloudFingerprint = fingerprint;
+                return true;
+            }
+
+            if (!skipConflictCheck) {
+                const { data: remoteRow, error: readError } = await supabaseClient
+                    .from('user_snapshots')
+                    .select('user_id, updated_at, data_json')
+                    .eq('user_id', user.id)
+                    .maybeSingle();
+                if (readError) {
+                    console.error('saveToCloud precheck error:', readError);
+                    updateCloudAuthStatus({ type: 'error', badge: '同步失敗', desc: `同步前檢查失敗：${readError.message}` });
+                    return false;
+                }
+                if (remoteRow?.data_json) {
+                    const compare = compareLocalAndCloud(remoteRow);
+                    lastCloudSnapshotMeta = { updatedAt: compare.cloudUpdatedAt || remoteRow.updated_at || '', email: user.email, isLoggedIn: true, hasConflict: false };
+                    renderSyncHints();
+                    if (compare.hasConflict && !force) {
+                        updateCloudAuthStatus({
+                            type: 'warn',
+                            badge: '發現差異',
+                            desc: `這台裝置是 ${formatDateTimeDisplay(compare.localUpdatedAt)}，雲端是 ${formatDateTimeDisplay(compare.cloudUpdatedAt)}。先確認要保留哪一份，再決定是否同步。`
+                        });
+                        openSyncConflictModal(compare, 'save');
+                        return 'conflict';
+                    }
+                }
+            }
+
             const nowIso = new Date().toISOString();
             payload._syncMeta = {
                 ...(payload._syncMeta || {}),
                 localUpdatedAt: getLocalUpdatedAt() || nowIso,
-                fingerprint: buildStateFingerprint(payload),
+                fingerprint,
                 reason
             };
-            lastAppliedCloudFingerprint = payload._syncMeta.fingerprint || '';
-            lastAppliedCloudUpdatedAt = nowIso;
             const { error } = await supabaseClient
                 .from('user_snapshots')
                 .upsert({
@@ -1848,6 +1872,9 @@
                 updateCloudAuthStatus({ type: 'error', badge: '同步失敗', desc: `雲端同步失敗：${error.message}` });
                 return false;
             }
+            lastAppliedCloudFingerprint = fingerprint || '';
+            lastQueuedCloudFingerprint = fingerprint || '';
+            lastAppliedCloudUpdatedAt = nowIso;
             lastCloudSnapshotMeta = { updatedAt: nowIso, email: user.email, isLoggedIn: true, hasConflict: false };
             updateCloudAuthStatus({ type: 'ok', badge: '已同步', desc: `已登入 ${user.email}，目前最新版本已同步到雲端。` });
             renderSyncHints();
@@ -1860,7 +1887,7 @@
             const { force = false, silent = false, skipConflictCheck = true } = options;
             const { data, error } = await supabaseClient
                 .from('user_snapshots')
-                .select('*')
+                .select('user_id, updated_at, data_json')
                 .eq('user_id', user.id)
                 .maybeSingle();
             if (error) {
@@ -1894,7 +1921,8 @@
             applyAppState(data.data_json);
             if (compare.cloudUpdatedAt) localStorage.setItem('bear_local_updated_at', compare.cloudUpdatedAt);
             renderAllAfterCloudLoad();
-            lastAppliedCloudFingerprint = compare.cloudFingerprint || buildStateFingerprint(data.data_json || {});
+            lastQueuedCloudFingerprint = compare.cloudFingerprint || buildStateFingerprint(data.data_json || {});
+            lastAppliedCloudFingerprint = lastQueuedCloudFingerprint;
             lastAppliedCloudUpdatedAt = compare.cloudUpdatedAt || data.updated_at || '';
             lastCloudSnapshotMeta = { updatedAt: compare.cloudUpdatedAt || data.updated_at || '', email: user.email, isLoggedIn: true, hasConflict: false };
             updateCloudAuthStatus({ type: 'ok', badge: '已載入', desc: `已登入 ${user.email}，雲端資料已載入到這台裝置。` });
@@ -1904,10 +1932,13 @@
 
         function scheduleCloudSave(reason = 'autosave') {
             if (suppressCloudAutoSave) return;
+            const nextFingerprint = getLocalStateFingerprint();
+            if (nextFingerprint && (nextFingerprint === lastQueuedCloudFingerprint || nextFingerprint === lastAppliedCloudFingerprint)) return;
+            lastQueuedCloudFingerprint = nextFingerprint;
             clearTimeout(cloudSaveTimer);
             cloudSaveTimer = setTimeout(() => {
                 saveToCloud(reason).catch(err => console.error('scheduleCloudSave error:', err));
-            }, 900);
+            }, CLOUD_SAVE_DEBOUNCE_MS);
         }
 
         function updateCloudAuthStatus({ type = 'neutral', badge = '尚未登入', desc = '目前尚未登入，資料先留在這台裝置。' } = {}) {
@@ -2253,6 +2284,7 @@
                 return;
             }
             stopCloudRealtimeSync();
+            lastQueuedCloudFingerprint = '';
             lastAppliedCloudFingerprint = '';
             lastAppliedCloudUpdatedAt = '';
             lastCloudSnapshotMeta = { updatedAt: '', email: '', isLoggedIn: false, hasConflict: false };
@@ -2296,6 +2328,7 @@
                 restoreSignupCooldown('');
             }
             const { data } = await supabaseClient.auth.getSession();
+            cachedAuthUser = data?.session?.user || null;
             if (data && data.session) {
                 try {
                     const user = await ensureProfile();
@@ -2310,6 +2343,7 @@
             }
             if (!cloudSessionSubscription) {
                 const { data: authListener } = supabaseClient.auth.onAuthStateChange(async (event, session) => {
+                    cachedAuthUser = session?.user || null;
                     if (session && session.user) {
                         try {
                             await ensureProfile();
@@ -2321,6 +2355,7 @@
                         await refreshCloudAuthStatus();
                     } else {
                         stopCloudRealtimeSync();
+                        lastQueuedCloudFingerprint = '';
                         lastAppliedCloudFingerprint = '';
                         lastAppliedCloudUpdatedAt = '';
                         lastCloudSnapshotMeta = { updatedAt: '', email: '', isLoggedIn: false, hasConflict: false };
@@ -6412,7 +6447,12 @@ function exportToExcel() {
         }, 120000);
 
         window.addEventListener('beforeunload', () => {
-            if (hasAnyUserData()) writeAutoBackup('beforeunload');
+            if (!hasAnyUserData()) return;
+            setLocalUpdatedAt('beforeunload');
+            const payload = getBackupPayload();
+            localStorage.setItem('bear_auto_backup', JSON.stringify(payload));
+            backupMeta.lastAutoSave = new Date().toISOString();
+            saveBackupMeta();
         });
 
         if ('serviceWorker' in navigator) { 
