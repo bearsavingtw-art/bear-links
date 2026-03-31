@@ -896,11 +896,13 @@
             </div>
             <div id="credit-card-settings-list"></div>
             <button class="btn btn-outline" type="button" onclick="addCreditCardSetting()"><i class="fas fa-plus"></i> 新增信用卡</button>
+            <button class="btn btn-outline" type="button" onclick="saveCreditCardSettings()"><i class="fas fa-save"></i> 儲存信用卡設定</button>
             <div class="pay-inline-actions" style="margin-top:18px; margin-bottom:10px;">
                 <div class="gentle-chip"><i class="fas fa-mobile-screen-button"></i> 電子支付設定</div>
             </div>
             <div id="wallet-settings-list"></div>
             <button class="btn btn-outline" type="button" onclick="addWalletSetting()"><i class="fas fa-plus"></i> 新增電子支付</button>
+            <button class="btn btn-outline" type="button" onclick="saveWalletSettings()"><i class="fas fa-save"></i> 儲存電子支付設定</button>
             <button class="btn" type="button" onclick="savePaymentSettings()"><i class="fas fa-save"></i> 儲存付款工具設定</button>
         </div>
 
@@ -3867,31 +3869,49 @@ function getSharedBudgetSummary(cycleTx) {
             handleMainPaymentMethodChange();
         }
 
-        async function savePaymentSettings() {
+        function collectPaymentSettingRows(containerSelector, rowSelector, fieldPrefix, factory) {
+            const container = document.querySelector(containerSelector);
+            if (!container) return [];
+            const grouped = new Map();
+            container.querySelectorAll(rowSelector).forEach(el => {
+                const id = el.dataset[`${fieldPrefix}Id`];
+                const field = el.dataset[`${fieldPrefix}Field`];
+                if (!id || !field) return;
+                if (!grouped.has(id)) grouped.set(id, factory(id));
+                grouped.get(id)[field] = (el.value || '').trim();
+            });
+            return Array.from(grouped.values());
+        }
+
+        function collectCreditCardSettingsFromForm() {
             normalizePaymentSettings();
-            paymentSettings.cards = Array.from(document.querySelectorAll('[data-card-id]')).reduce((acc, el) => {
-                const id = el.dataset.cardId;
-                let item = acc.find(card => String(card.id) === String(id));
-                if (!item) {
-                    item = { id, name: '', bank: '', dueDay: '', limit: '', enabled: true };
-                    acc.push(item);
-                }
-                item[el.dataset.cardField] = (el.value || '').trim();
-                return acc;
-            }, []).filter(card => card.name);
-            paymentSettings.wallets = Array.from(document.querySelectorAll('[data-wallet-id]')).reduce((acc, el) => {
-                const id = el.dataset.walletId;
-                let item = acc.find(wallet => String(wallet.id) === String(id));
-                if (!item) {
-                    item = { id, name: '', linkedCardId: '', enabled: true };
-                    acc.push(item);
-                }
-                item[el.dataset.walletField] = (el.value || '').trim();
-                return acc;
-            }, []).filter(wallet => wallet.name);
+            paymentSettings.cards = collectPaymentSettingRows(
+                '#credit-card-settings-list',
+                '[data-card-id]',
+                'card',
+                id => ({ id, name: '', bank: '', dueDay: '', limit: '', enabled: true })
+            ).filter(card => card.name);
+        }
+
+        function collectWalletSettingsFromForm() {
+            normalizePaymentSettings();
+            paymentSettings.wallets = collectPaymentSettingRows(
+                '#wallet-settings-list',
+                '[data-wallet-id]',
+                'wallet',
+                id => ({ id, name: '', linkedCardId: '', enabled: true })
+            ).filter(wallet => wallet.name);
+        }
+
+        function collectPaymentDefaultsFromForm() {
             paymentSettings.defaultMethod = document.getElementById('setting-default-method')?.value || 'cash';
             paymentSettings.defaultCardId = document.getElementById('setting-default-card')?.value || '';
             paymentSettings.defaultWalletId = document.getElementById('setting-default-wallet')?.value || '';
+        }
+
+        async function persistPaymentSettings(successBaseText = '付款工具設定已更新') {
+            normalizePaymentSettings();
+            collectPaymentDefaultsFromForm();
             normalizePaymentSettings();
             localStorage.setItem('bear_payment_settings', JSON.stringify(paymentSettings));
             writeLocalBackupOnly('payment-settings');
@@ -3905,16 +3925,32 @@ function getSharedBudgetSummary(cycleTx) {
             if (user) {
                 const cloudSaved = await saveToCloud('payment-settings-save', { skipConflictCheck: false });
                 if (cloudSaved === true) {
-                    showAppToast('付款工具設定已更新，這版本也同步到雲端了', 'ok');
+                    showAppToast(`${successBaseText}，這版本也同步到雲端了`, 'ok');
                 } else if (cloudSaved === 'conflict') {
-                    showAppToast('付款工具設定已更新，先確認要保留本機還是雲端版本', 'warn', 3200);
+                    showAppToast(`${successBaseText}，先確認要保留本機還是雲端版本`, 'warn', 3200);
                 } else {
-                    showAppToast('付款工具設定已更新，但這次雲端同步沒有成功', 'warn', 3200);
+                    showAppToast(`${successBaseText}，但這次雲端同步沒有成功`, 'warn', 3200);
                 }
                 return;
             }
 
-            showAppToast('付款工具設定已更新！', 'ok');
+            showAppToast(`${successBaseText}！`, 'ok');
+        }
+
+        async function saveCreditCardSettings() {
+            collectCreditCardSettingsFromForm();
+            await persistPaymentSettings('信用卡設定已更新');
+        }
+
+        async function saveWalletSettings() {
+            collectWalletSettingsFromForm();
+            await persistPaymentSettings('電子支付設定已更新');
+        }
+
+        async function savePaymentSettings() {
+            collectCreditCardSettingsFromForm();
+            collectWalletSettingsFromForm();
+            await persistPaymentSettings('付款工具設定已更新');
         }
 
         function renderAnalysisList(containerId, items, emptyText, formatter = null) {
@@ -6560,4 +6596,4 @@ function exportToExcel() {
         }
     </script>
 </body>
-</html>
+</html>ㄒㄒvv
