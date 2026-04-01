@@ -435,7 +435,7 @@
         
         <div class="stat-grid">
             <div class="stat-box" onclick="openIncomeDetailModal()" style="cursor:pointer;"><div class="stat-label">本期收入 <i class="fas fa-chevron-right" style="font-size:0.7rem;"></i></div><div class="stat-value income" id="display-income">$0</div><div style="font-size:0.72rem; color:var(--text-secondary); margin-top:4px;">點擊查看 / 編輯收入</div></div>
-            <div class="stat-box"><div class="stat-label">本期支出 (固定+變動)</div><div class="stat-value expense" id="display-expense">$0</div></div>
+            <div class="stat-box"><div class="stat-label">本期支出（含預存）</div><div class="stat-value expense" id="display-expense">$0</div></div>
         </div>
         
 
@@ -4936,7 +4936,7 @@ function renderDashboard() {
             if (currentChartFilter) { listTitle.innerHTML = `<i class="fas fa-filter"></i> ${currentChartFilter} 明細`; clearBtn.classList.remove('hidden'); } else { listTitle.innerHTML = `${prefix}紀錄明細`; clearBtn.classList.add('hidden'); }
 
             const cycleTx = transactions.filter(t => { const tDate = new Date(t.date); tDate.setHours(0,0,0,0); return tDate >= currentCycle.start && tDate <= currentCycle.end; });
-            let totalInc = 0, totalExp = 0; let mainExp = { '固定支出': 0, '變動支出': 0 }; let envExp = {}; let masterSpent = { '固定支出': 0, '變動支出': 0 };
+            let totalInc = 0, totalExp = 0; let mainExp = { '固定支出': 0, '變動支出': 0, '預存支出': 0 }; let envExp = {}; let masterSpent = { '固定支出': 0, '變動支出': 0, '預存支出': 0 };
 
             let manualSavesInCycle = {}; 
 
@@ -4944,10 +4944,10 @@ function renderDashboard() {
                 if (t.type === 'income') { totalInc += t.amount; } 
                 else if (t.type === 'expense') {
                     if (t.sharedMeta && t.sharedMeta.enabled) return;
-                    if (t.mainCategory !== '預存支出') {
-                        totalExp += t.amount; if(mainExp[t.mainCategory] !== undefined) mainExp[t.mainCategory] += t.amount; masterSpent[t.mainCategory] += t.amount;
-                        let subCatDisplay = t.category; if (!envExp[subCatDisplay]) envExp[subCatDisplay] = { spent: 0, mainGroup: t.mainCategory }; envExp[subCatDisplay].spent += t.amount;
-                    }
+                    totalExp += t.amount;
+                    if(mainExp[t.mainCategory] !== undefined) mainExp[t.mainCategory] += t.amount;
+                    if(masterSpent[t.mainCategory] !== undefined) masterSpent[t.mainCategory] += t.amount;
+                    let subCatDisplay = t.category; if (!envExp[subCatDisplay]) envExp[subCatDisplay] = { spent: 0, mainGroup: t.mainCategory }; envExp[subCatDisplay].spent += t.amount;
                 }
                 else if (t.type === 'save') { 
                     if (!manualSavesInCycle[t.category]) manualSavesInCycle[t.category] = 0;
@@ -5647,24 +5647,29 @@ function renderBudgetBars(envExp, masterSpent) {
 
         function renderReviewPage() {
             const currentCycle = getCycleBoundary(dashboardViewDate, sysSettings.cycleStart); document.getElementById('review-cycle-title').innerText = `${currentCycle.label} 診斷`;
-            let mainBudgets = { '固定支出': 0, '變動支出': 0 }; 
-            ['固定支出', '變動支出'].forEach(mainCat => { if(userEnvelopes[mainCat].length === 0) { mainBudgets[mainCat] = masterBudgets[mainCat] || 0; } else { userEnvelopes[mainCat].forEach(env => { mainBudgets[mainCat] += (budgets[env] || 0); }); } });
+            let mainBudgets = { '固定支出': 0, '變動支出': 0, '預存支出': 0 }; 
+            ['固定支出', '變動支出', '預存支出'].forEach(mainCat => { if(userEnvelopes[mainCat].length === 0) { mainBudgets[mainCat] = masterBudgets[mainCat] || 0; } else { userEnvelopes[mainCat].forEach(env => { mainBudgets[mainCat] += (budgets[env] || 0); }); } });
             const cycleTx = transactions.filter(t => { const tDate = new Date(t.date); tDate.setHours(0,0,0,0); return tDate >= currentCycle.start && tDate <= currentCycle.end; });
-            let mainActuals = { '固定支出': 0, '變動支出': 0 }; let totalIncome = 0; let totalExp = 0;
-            cycleTx.forEach(t => { if (t.type === 'income') { totalIncome += t.amount; } else if (t.type === 'expense' && t.mainCategory !== '預存支出' && !(t.sharedMeta && t.sharedMeta.enabled)) { totalExp += t.amount; mainActuals[t.mainCategory] += t.amount; } });
+            let mainActuals = { '固定支出': 0, '變動支出': 0, '預存支出': 0 }; let totalIncome = 0; let totalExp = 0;
+            cycleTx.forEach(t => { if (t.type === 'income') { totalIncome += t.amount; } else if (t.type === 'expense' && !(t.sharedMeta && t.sharedMeta.enabled)) { totalExp += t.amount; if (mainActuals[t.mainCategory] !== undefined) mainActuals[t.mainCategory] += t.amount; } });
+
+            const reviewLabels = ['固定支出', '變動支出', '預存支出'];
+            const reviewBudgetData = reviewLabels.map(label => mainBudgets[label] || 0);
+            const reviewActualData = reviewLabels.map(label => mainActuals[label] || 0);
 
             const ctxBar = document.getElementById('reviewBarChart').getContext('2d'); if (reviewBarChart) reviewBarChart.destroy();
-            reviewBarChart = new Chart(ctxBar, { type: 'bar', data: { labels: ['固定支出', '變動支出'], datasets: [ { label: '預算規劃', data: [mainBudgets['固定支出'], mainBudgets['變動支出']], backgroundColor: '#e0e0e0', borderRadius: 5 }, { label: '實際花費', data: [mainActuals['固定支出']||0, mainActuals['變動支出']||0], backgroundColor: ['#5a4d41', '#b08d85'], borderRadius: 5 } ] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } }, scales: { y: { beginAtZero: true, grid: { color: '#f0f0f0' } }, x: { grid: { display: false } } } } });
+            reviewBarChart = new Chart(ctxBar, { type: 'bar', data: { labels: reviewLabels, datasets: [ { label: '預算規劃', data: reviewBudgetData, backgroundColor: '#e0e0e0', borderRadius: 5 }, { label: '實際花費', data: reviewActualData, backgroundColor: ['#5a4d41', '#b08d85', '#d4a373'], borderRadius: 5 } ] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } }, scales: { y: { beginAtZero: true, grid: { color: '#f0f0f0' } }, x: { grid: { display: false } } } } });
             
             const ctxPie = document.getElementById('reviewPieChart').getContext('2d'); if (reviewPieChart) reviewPieChart.destroy(); const hasActualData = totalExp > 0;
-            reviewPieChart = new Chart(ctxPie, { type: 'pie', data: { labels: ['固定支出', '變動支出'], datasets: [{ data: hasActualData ? [mainActuals['固定支出']||0, mainActuals['變動支出']||0] : [1], backgroundColor: hasActualData ? ['#5a4d41', '#b08d85'] : ['#eee'], borderWidth: 1, borderColor: '#fff' }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { boxWidth: 10, font:{size: 10} } } } } });
+            reviewPieChart = new Chart(ctxPie, { type: 'pie', data: { labels: reviewLabels, datasets: [{ data: hasActualData ? reviewActualData : [1], backgroundColor: hasActualData ? ['#5a4d41', '#b08d85', '#d4a373'] : ['#eee'], borderWidth: 1, borderColor: '#fff' }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { boxWidth: 10, font:{size: 10} } } } } });
 
-            const diagContainer = document.getElementById('diagnostic-content'); let diagHtml = ''; let isFixedOver = (mainActuals['固定支出'] > mainBudgets['固定支出']) && (mainBudgets['固定支出'] > 0); let isVarOver = (mainActuals['變動支出'] > mainBudgets['變動支出']) && (mainBudgets['變動支出'] > 0);
-            if (totalExp > totalIncome && totalIncome > 0) { diagHtml = `<div class="diag-status-badge danger">🆘 底氣流失中 (日常支出 > 總收入)</div><p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.6;">這個月辛苦了，我們正在透支未來的底氣。請先深呼吸，下個月試著把「變動支出」的預算往下調降 10%，我們一步一步把掌控權拿回來。</p>`; } 
+            const diagContainer = document.getElementById('diagnostic-content'); let diagHtml = ''; let isFixedOver = (mainActuals['固定支出'] > mainBudgets['固定支出']) && (mainBudgets['固定支出'] > 0); let isVarOver = (mainActuals['變動支出'] > mainBudgets['變動支出']) && (mainBudgets['變動支出'] > 0); let isSinkingOver = (mainActuals['預存支出'] > mainBudgets['預存支出']) && (mainBudgets['預存支出'] > 0);
+            if (totalExp > totalIncome && totalIncome > 0) { diagHtml = `<div class="diag-status-badge danger">🆘 底氣流失中 (總支出 > 總收入)</div><p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.6;">這個月辛苦了，我們正在透支未來的底氣。請先深呼吸，先確認是不是有一筆較大的預存支出集中在本月，再決定下個月要優先調整哪一塊。</p>`; } 
             else if (isFixedOver) { diagHtml = `<div class="diag-status-badge danger">🔴 結構性漏水 (固定支出超標)</div><p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.6;">警報！妳的固定支出超出了預期。請立刻檢查是不是有忘記取消的訂閱，或是日常水電使用過度。固定支出是財務的根基，必須盡快止血。</p>`; } 
             else if (isVarOver) { diagHtml = `<div class="diag-status-badge warning">🟡 慾望小暴走 (變動支出超標)</div><p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.6;">變動支出不小心超標了！下個月請試著在每次消費前，啟動「購物冷靜閘」。別自責，知道哪裡漏水，下個月補起來就好。</p>`; } 
+            else if (isSinkingOver) { diagHtml = `<div class="diag-status-badge warning">🟠 預存支出集中發生</div><p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.6;">這個月的預存支出比原本規劃高一些，可能是保費、醫療或年度大筆支出集中在這期發生。這不一定代表失控，但建議回頭檢查預存袋安排是否需要調整。</p>`; } 
             else if (totalExp === 0 && totalIncome === 0) { diagHtml = `<div class="diag-status-badge" style="background:#f0f4f8; color:#546e7a;">⏳ 尚無資料</div><p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.6; text-align:center;">這個帳期還沒有任何收支紀錄喔！快去記下妳的第一筆帳吧。</p>`; } 
-            else { diagHtml = `<div class="diag-status-badge success">🟢 游刃有餘 (日常預算控管完美)</div><p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.6;">太棒了！這個月妳完美守住了防線。多出來的結餘，請撥 20% 買個小禮物犒賞自己，剩下的記得在記帳時「存入預備金」，讓未來的底氣更厚實。</p>`; }
+            else { diagHtml = `<div class="diag-status-badge success">🟢 游刃有餘 (本期支出控管穩定)</div><p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.6;">太棒了！這個月妳把固定、變動和預存支出都顧得不錯。多出來的結餘，請撥 20% 買個小禮物犒賞自己，剩下的記得留給未來的自己。</p>`; }
             diagContainer.innerHTML = diagHtml;
         }
 
