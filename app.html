@@ -2337,12 +2337,76 @@
 
         let cloudPasswordRecoveryMode = false;
         let cloudPasswordPanelManuallyOpened = false;
+        let cloudPasswordUpdateInFlight = false;
+        let cloudRecoverySessionReady = false;
 
         function clearCloudPasswordInputs() {
             const newPwd = document.getElementById('cloudNewPassword');
             const confirmPwd = document.getElementById('cloudConfirmPassword');
             if (newPwd) newPwd.value = '';
             if (confirmPwd) confirmPwd.value = '';
+        }
+
+        function getCloudRecoveryHashParams() {
+            const rawHash = location.hash && location.hash.startsWith('#') ? location.hash.slice(1) : (location.hash || '');
+            return new URLSearchParams(rawHash);
+        }
+
+        async function prepareCloudRecoverySession() {
+            try {
+                const url = new URL(window.location.href);
+                const search = url.searchParams;
+                const hashParams = getCloudRecoveryHashParams();
+                const code = search.get('code');
+
+                if (code) {
+                    const { error } = await supabaseClient.auth.exchangeCodeForSession(code);
+                    if (error) throw error;
+                    cloudPasswordRecoveryMode = true;
+                    cloudRecoverySessionReady = true;
+                    return true;
+                }
+
+                const accessToken = hashParams.get('access_token');
+                const refreshToken = hashParams.get('refresh_token');
+                const hashType = hashParams.get('type');
+                const searchType = search.get('type');
+
+                if ((hashType === 'recovery' || searchType === 'recovery') && accessToken && refreshToken) {
+                    const { error } = await supabaseClient.auth.setSession({
+                        access_token: accessToken,
+                        refresh_token: refreshToken
+                    });
+                    if (error) throw error;
+                    cloudPasswordRecoveryMode = true;
+                    cloudRecoverySessionReady = true;
+                    return true;
+                }
+
+                const { data, error } = await supabaseClient.auth.getSession();
+                if (error) throw error;
+                if (data?.session?.user) {
+                    cloudRecoverySessionReady = true;
+                    return true;
+                }
+                cloudRecoverySessionReady = false;
+                return false;
+            } catch (err) {
+                console.error('prepareCloudRecoverySession failed:', err);
+                cloudRecoverySessionReady = false;
+                return false;
+            }
+        }
+
+        function cleanupRecoveryUrlParams() {
+            try {
+                const url = new URL(window.location.href);
+                ['code', 'type'].forEach(key => url.searchParams.delete(key));
+                url.hash = '';
+                history.replaceState(null, '', url.pathname + (url.search ? url.search : ''));
+            } catch (err) {
+                console.error('cleanupRecoveryUrlParams failed:', err);
+            }
         }
 
         function syncCloudPasswordPanelState({ loggedIn = false } = {}) {
@@ -2422,6 +2486,8 @@
         }
 
         async function handleCloudPasswordUpdate() {
+            if (cloudPasswordUpdateInFlight) return;
+
             const newPassword = document.getElementById('cloudNewPassword')?.value || '';
             const confirmPassword = document.getElementById('cloudConfirmPassword')?.value || '';
             if (!newPassword || !confirmPassword) {
@@ -2438,37 +2504,54 @@
             }
 
             const btn = document.getElementById('cloudUpdatePasswordBtn');
+            const cancelBtn = document.getElementById('cloudCancelPasswordBtn');
             const original = btn ? btn.innerHTML : '';
-            if (btn) {
-                btn.disabled = true;
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 更新中...';
-            }
-            const { data, error } = await supabaseClient.auth.updateUser({ password: newPassword });
-            if (btn) {
-                btn.disabled = false;
-                btn.innerHTML = original;
-            }
-            if (error) {
-                alert('更新密碼失敗：' + error.message);
-                return;
-            }
-            cachedAuthUser = data?.user || cachedAuthUser;
-            clearCloudPasswordInputs();
-            if (cloudPasswordRecoveryMode) {
-                cloudPasswordRecoveryMode = false;
-                cloudPasswordPanelManuallyOpened = false;
-                if (location.hash && /type=recovery/i.test(location.hash)) {
-                    history.replaceState(null, '', location.pathname + location.search);
+
+            try {
+                cloudPasswordUpdateInFlight = true;
+                if (btn) {
+                    btn.disabled = true;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 更新中...';
                 }
-                showAppToast('新密碼已更新，現在可以用新密碼登入。', 'ok', 2800);
-                alert('新密碼已更新，現在可以用新密碼登入。');
-            } else {
-                cloudPasswordPanelManuallyOpened = false;
-                showAppToast('密碼已更新', 'ok');
-                alert('密碼已更新，下次請用新密碼登入。');
+                if (cancelBtn) cancelBtn.disabled = true;
+
+                if (cloudPasswordRecoveryMode && !cloudRecoverySessionReady) {
+                    const prepared = await prepareCloudRecoverySession();
+                    if (!prepared) {
+                        throw new Error('重設密碼連結已失效，請重新申請一次忘記密碼。');
+                    }
+                }
+
+                const { data, error } = await supabaseClient.auth.updateUser({ password: newPassword });
+                if (error) throw error;
+
+                cachedAuthUser = data?.user || cachedAuthUser;
+                clearCloudPasswordInputs();
+                if (cloudPasswordRecoveryMode) {
+                    cloudPasswordRecoveryMode = false;
+                    cloudRecoverySessionReady = false;
+                    cloudPasswordPanelManuallyOpened = false;
+                    cleanupRecoveryUrlParams();
+                    showAppToast('新密碼已更新，現在可以用新密碼登入。', 'ok', 2800);
+                    alert('新密碼已更新，現在可以用新密碼登入。');
+                } else {
+                    cloudPasswordPanelManuallyOpened = false;
+                    showAppToast('密碼已更新', 'ok');
+                    alert('密碼已更新，下次請用新密碼登入。');
+                }
+                syncCloudPasswordPanelState({ loggedIn: !!cachedAuthUser });
+                await refreshCloudAuthStatus();
+            } catch (err) {
+                console.error('handleCloudPasswordUpdate failed:', err);
+                alert('更新密碼失敗：' + (err?.message || '請重新申請重設密碼連結後再試一次'));
+            } finally {
+                cloudPasswordUpdateInFlight = false;
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = original;
+                }
+                if (cancelBtn) cancelBtn.disabled = false;
             }
-            syncCloudPasswordPanelState({ loggedIn: !!cachedAuthUser });
-            await refreshCloudAuthStatus();
         }
 
 
@@ -2863,11 +2946,14 @@
             const emailInput = document.getElementById('cloudEmail');
             const hashText = location.hash || '';
             const searchText = location.search || '';
-            if (/type=recovery/i.test(hashText) || /type=recovery/i.test(searchText)) {
+            if (/type=recovery/i.test(hashText) || /type=recovery/i.test(searchText) || /access_token=/i.test(hashText) || /refresh_token=/i.test(hashText) || /[?&]code=/i.test(searchText)) {
                 cloudPasswordRecoveryMode = true;
                 cloudPasswordPanelManuallyOpened = true;
             }
             syncCloudPasswordPanelState({ loggedIn: false });
+            if (cloudPasswordRecoveryMode) {
+                await prepareCloudRecoverySession();
+            }
             if (syncCancelBtn) syncCancelBtn.addEventListener('click', () => resolveSyncConflict('cancel'));
             if (syncKeepLocalBtn) syncKeepLocalBtn.addEventListener('click', () => resolveSyncConflict('keep-local'));
             if (syncKeepCloudBtn) syncKeepCloudBtn.addEventListener('click', () => resolveSyncConflict('keep-cloud'));
@@ -2898,6 +2984,7 @@
             }
             const { data } = await supabaseClient.auth.getSession();
             cachedAuthUser = data?.session?.user || null;
+            cloudRecoverySessionReady = !!data?.session?.user;
             if (cachedAuthUser && cloudPasswordRecoveryMode) {
                 document.getElementById('cloudEmail').value = normalizeCloudEmail(cachedAuthUser.email || '');
                 switchPage('settings');
@@ -2921,6 +3008,7 @@
                     if (event === 'PASSWORD_RECOVERY') {
                         cloudPasswordRecoveryMode = true;
                         cloudPasswordPanelManuallyOpened = true;
+                        cloudRecoverySessionReady = true;
                         switchPage('settings');
                         showAppToast('請先設定新密碼', 'warn', 2800);
                     }
@@ -2940,6 +3028,7 @@
                         lastAppliedCloudFingerprint = '';
                         lastAppliedCloudUpdatedAt = '';
                         lastCloudSnapshotMeta = { updatedAt: '', email: '', isLoggedIn: false, hasConflict: false };
+                        cloudRecoverySessionReady = false;
                         cloudPasswordPanelManuallyOpened = false;
                         if (!cloudPasswordRecoveryMode) clearCloudPasswordInputs();
                         updateCloudAuthStatus({ type: 'neutral', badge: '尚未登入', desc: '目前尚未登入，資料先留在這台裝置。' });
