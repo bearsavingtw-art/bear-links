@@ -162,6 +162,9 @@
         .shared-inline-box { margin-top: 14px; padding-top: 12px; border-top: 1px dashed rgba(184,135,107,0.2); }
         .shared-mini-note { font-size: 0.72rem; color: var(--text-secondary); line-height: 1.45; }
         .mini-link-btn { border:none; background:rgba(184,135,107,0.1); color:var(--accent-deep); border-radius:999px; padding:8px 12px; font-size:0.78rem; font-weight:700; cursor:pointer; }
+        .settings-add-row { display:flex; justify-content:flex-end; margin:6px 0 2px; }
+        .settings-add-link { border:none; background:transparent; color:var(--text-secondary); font-size:0.74rem; font-weight:700; cursor:pointer; padding:4px 2px; }
+        .settings-add-link:active { opacity:0.6; }
         .payment-detail-chip { display:inline-flex; align-items:center; gap:6px; font-size:0.72rem; color:var(--accent-deep); background:rgba(184,135,107,0.08); border:1px solid rgba(184,135,107,0.18); padding:4px 8px; border-radius:999px; margin-top:4px; }
         .smart-alert { border-radius:16px; padding:12px 14px; margin-bottom:10px; border:1px solid rgba(217,122,114,0.22); background:rgba(217,122,114,0.08); color:var(--text-primary); }
         .smart-alert strong { color:var(--danger); }
@@ -988,13 +991,13 @@
                 <button type="button" class="mini-link-btn" onclick="openAddPage()">回到記帳區</button>
             </div>
             <div id="credit-card-settings-list"></div>
-            <button class="btn btn-outline" type="button" onclick="addCreditCardSetting()"><i class="fas fa-plus"></i> 新增信用卡</button>
+            <div class="settings-add-row"><button class="settings-add-link" type="button" onclick="addCreditCardSetting()">＋ 再新增一張信用卡</button></div>
             <button class="btn btn-outline" type="button" onclick="saveCreditCardSettings()"><i class="fas fa-save"></i> 儲存信用卡設定</button>
             <div class="pay-inline-actions" style="margin-top:18px; margin-bottom:10px;">
                 <div class="gentle-chip"><i class="fas fa-mobile-screen-button"></i> 電子支付設定</div>
             </div>
             <div id="wallet-settings-list"></div>
-            <button class="btn btn-outline" type="button" onclick="addWalletSetting()"><i class="fas fa-plus"></i> 新增電子支付</button>
+            <div class="settings-add-row"><button class="settings-add-link" type="button" onclick="addWalletSetting()">＋ 再新增一個電子支付</button></div>
             <button class="btn btn-outline" type="button" onclick="saveWalletSettings()"><i class="fas fa-save"></i> 儲存電子支付設定</button>
             <button class="btn" type="button" onclick="savePaymentSettings()"><i class="fas fa-save"></i> 儲存付款工具設定</button>
             <div class="section-back-top"><button type="button" class="mini-link-btn" onclick="scrollToSettingsSection('settings-shortcuts-top')"><i class="fas fa-arrow-up"></i> 點我回到最上方</button></div>
@@ -3944,8 +3947,19 @@ function getSharedBudgetSummary(cycleTx) {
             }, 60);
         }
 
-        function addCreditCardSetting() {
+        function syncUnsavedPaymentSettingsFromForm() {
+            if (document.getElementById('credit-card-settings-list')) {
+                collectCreditCardSettingsFromForm();
+            }
+            if (document.getElementById('wallet-settings-list')) {
+                collectWalletSettingsFromForm();
+            }
+            collectPaymentDefaultsFromForm();
             normalizePaymentSettings();
+        }
+
+        function addCreditCardSetting() {
+            syncUnsavedPaymentSettingsFromForm();
             paymentSettings.cards.push({ id: 'card_' + Date.now() + '_' + Math.floor(Math.random()*1000), name: '', bank: '', dueDay: '', limit: '', enabled: true });
             renderPaymentSettings();
         }
@@ -3958,7 +3972,7 @@ function getSharedBudgetSummary(cycleTx) {
         }
 
         function addWalletSetting() {
-            normalizePaymentSettings();
+            syncUnsavedPaymentSettingsFromForm();
             paymentSettings.wallets.push({ id: 'wallet_' + Date.now() + '_' + Math.floor(Math.random()*1000), name: '', linkedCardId: '', enabled: true });
             renderPaymentSettings();
         }
