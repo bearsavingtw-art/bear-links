@@ -414,10 +414,17 @@
     </div>
 
     <div id="page-dash" class="page active">
-        <div class="page-intro">
-            <div class="section-kicker"><i class="fas fa-seedling"></i> 本期陪跑區</div>
-            <div class="page-intro-title">先把一定會花的留起來，再決定其他位置。</div>
-            <div class="page-intro-desc">這裡不用一次做很完美，而是讓妳每次打開都知道：現在站在哪、接下來先顧哪一塊。</div>
+        <div class="page-intro" id="dash-storage-guide">
+            <div class="section-kicker"><i class="fas fa-cloud-arrow-up"></i> 本機資料保存 &amp; 雲端資料使用引導</div>
+            <div class="page-intro-title" id="dash-storage-title">這台裝置會先把資料留在本機；有登入雲端時，也會一起同步上去。</div>
+            <div class="page-intro-desc" id="dash-storage-desc">如果妳是用桌面捷徑開啟，再改用網址開，可能會像換了一台新裝置。看到資料不一樣時，先看下面的保存狀態，再決定要不要載入雲端。</div>
+            <div class="soft-note" style="margin-top:12px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:8px;">
+                    <span class="status-badge local" id="dash-storage-badge">本機保存中</span>
+                    <span style="font-size:0.72rem; color:var(--text-secondary);" id="dash-storage-mode">目前開啟：瀏覽器</span>
+                </div>
+                <div id="dash-storage-note" style="font-size:0.78rem; line-height:1.6; color:var(--text-primary);">先在同一個開啟方式繼續使用最穩。若已登入雲端，記帳後系統會把這份版本一起同步，其他裝置之後也能載入同一份資料。</div>
+            </div>
         </div>
         <div class="dashboard-header">
             <button class="month-nav-btn" onclick="changeDashboardMonth(-1)"><i class="fas fa-chevron-left"></i></button>
@@ -1606,6 +1613,52 @@
             return buildStateFingerprint(collectAppState());
         }
 
+        function isStandaloneMode() {
+            try {
+                return !!(window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || !!window.navigator.standalone;
+            } catch (err) {
+                return false;
+            }
+        }
+
+        function getOpenModeLabel() {
+            return isStandaloneMode() ? '桌面捷徑 / App 模式' : '瀏覽器網址模式';
+        }
+
+        function renderDashboardStorageGuide() {
+            const badgeEl = document.getElementById('dash-storage-badge');
+            const titleEl = document.getElementById('dash-storage-title');
+            const descEl = document.getElementById('dash-storage-desc');
+            const noteEl = document.getElementById('dash-storage-note');
+            const modeEl = document.getElementById('dash-storage-mode');
+            if (modeEl) modeEl.textContent = `目前開啟：${getOpenModeLabel()}`;
+            if (!badgeEl || !titleEl || !descEl || !noteEl) return;
+
+            if (lastCloudSnapshotMeta && lastCloudSnapshotMeta.hasConflict) {
+                badgeEl.textContent = '本機 / 雲端有差異';
+                badgeEl.className = 'status-badge warn';
+                titleEl.textContent = '這台裝置和雲端目前不是同一份資料，先不要急著繼續輸入。';
+                descEl.textContent = '先到設定裡看雲端同步狀態，確認要保留本機還是雲端，再繼續使用，會比較安全。';
+                noteEl.textContent = '如果妳剛好是從桌面捷徑改用網址開，看到差異很常見，因為它們可能是不同保存環境。';
+                return;
+            }
+
+            if (lastCloudSnapshotMeta && lastCloudSnapshotMeta.isLoggedIn) {
+                badgeEl.textContent = '雲端已連線';
+                badgeEl.className = 'status-badge cloud';
+                titleEl.textContent = '這台裝置會先保留本機版本，登入雲端後也會一起同步。';
+                descEl.textContent = '同一個帳號在其他裝置開啟時，記得先等雲端資料載入完成，再開始新增或修改，會比較不容易看到空白。';
+                noteEl.textContent = `最近雲端版本：${formatDateTimeDisplay(lastCloudSnapshotMeta.updatedAt || '')}${lastCloudSnapshotMeta.email ? ' ・ ' + lastCloudSnapshotMeta.email : ''}`;
+                return;
+            }
+
+            badgeEl.textContent = '本機保存中';
+            badgeEl.className = 'status-badge local';
+            titleEl.textContent = '這台裝置目前會先把資料留在本機。';
+            descEl.textContent = '如果妳換成另一個瀏覽器、另一支手機，或改用桌面捷徑開啟，可能會看起來像資料不見；那通常是因為開到不同保存環境。';
+            noteEl.textContent = '想讓其他裝置也看到同一份資料，先登入雲端，再讓系統把這份版本同步上去。';
+        }
+
         function renderSyncHints() {
             const localMetaEl = document.getElementById('cloud-local-meta');
             const remoteMetaEl = document.getElementById('cloud-remote-meta');
@@ -1635,6 +1688,7 @@
                     addDesc.textContent = '這頁先專心記帳，系統會自動保留這台裝置的最新變更。';
                 }
             }
+            renderDashboardStorageGuide();
         }
 
         function compareLocalAndCloud(cloudRow) {
@@ -1947,9 +2001,13 @@
 
         async function saveToCloud(reason = 'manual', options = {}) {
             clearTimeout(cloudSaveTimer);
-            const user = await getCurrentUser();
-            if (!user) return false;
-            const { force = false, skipConflictCheck = true } = options;
+            const { force = false, skipConflictCheck = true, refreshSession = false } = options;
+            const user = await getCurrentUser(refreshSession || reason === 'pagehide' || reason === 'hidden' || reason === 'online');
+            if (!user) {
+                updateCloudAuthStatus({ type: 'neutral', badge: '尚未登入', desc: '這次變更已留在本機；若想同步到雲端，請先重新登入。' });
+                renderSyncHints();
+                return false;
+            }
             const payload = collectAppState();
             const fingerprint = buildStateFingerprint(payload);
 
@@ -2089,7 +2147,7 @@
         }
 
         async function refreshCloudAuthStatus() {
-            const user = await getCurrentUser();
+            const user = await getCurrentUser(true);
             if (!user) {
                 lastCloudSnapshotMeta = { updatedAt: '', email: '', isLoggedIn: false, hasConflict: false };
                 updateCloudAuthStatus({ type: 'neutral', badge: '尚未登入', desc: '目前尚未登入，資料先留在這台裝置。' });
@@ -2518,9 +2576,14 @@
             if (data && data.session) {
                 try {
                     const user = await ensureProfile();
-                    await loadFromCloud({ silent: true });
+                    const loadResult = await loadFromCloud({ silent: true });
                     await startCloudRealtimeSync(user);
                     await refreshCloudSnapshotInBackground('init', { force: true });
+                    if (hasAnyUserData() && (!lastCloudSnapshotMeta || !lastCloudSnapshotMeta.updatedAt)) {
+                        await saveToCloud('init-local-seed', { force: true, skipConflictCheck: true, refreshSession: true });
+                    } else if (loadResult === true && hasAnyUserData() && lastCloudSnapshotMeta && lastCloudSnapshotMeta.isLoggedIn && !lastCloudSnapshotMeta.hasConflict) {
+                        scheduleCloudSave('init-logged-in');
+                    }
                 } catch (err) {
                     console.error('auto cloud init error:', err);
                 }
@@ -2534,8 +2597,14 @@
                         markKnownCloudSignup(session.user.email || '', 'signed-in');
                         try {
                             await ensureProfile();
+                            const loadResult = await loadFromCloud({ silent: true });
                             await startCloudRealtimeSync(session.user);
                             await refreshCloudSnapshotInBackground('auth', { force: true });
+                            if (hasAnyUserData() && (!lastCloudSnapshotMeta || !lastCloudSnapshotMeta.updatedAt)) {
+                                await saveToCloud('auth-local-seed', { force: true, skipConflictCheck: true, refreshSession: true });
+                            } else if (loadResult === true && hasAnyUserData() && lastCloudSnapshotMeta && lastCloudSnapshotMeta.isLoggedIn && !lastCloudSnapshotMeta.hasConflict) {
+                                scheduleCloudSave('auth-logged-in');
+                            }
                         } catch (err) {
                             console.error('auth sync start error:', err);
                         }
@@ -2553,10 +2622,22 @@
                 cloudSessionSubscription = authListener?.subscription || null;
             }
             document.addEventListener('visibilitychange', () => {
-                if (!document.hidden) refreshCloudSnapshotInBackground('visible').catch(err => console.error('visibility sync error:', err));
+                if (document.hidden) {
+                    saveToCloud('hidden', { refreshSession: true }).catch(err => console.error('hidden sync error:', err));
+                } else {
+                    refreshCloudSnapshotInBackground('visible').catch(err => console.error('visibility sync error:', err));
+                }
             });
             window.addEventListener('focus', () => {
                 refreshCloudSnapshotInBackground('focus').catch(err => console.error('focus sync error:', err));
+            });
+            window.addEventListener('pagehide', () => {
+                saveToCloud('pagehide', { refreshSession: true }).catch(err => console.error('pagehide sync error:', err));
+            });
+            window.addEventListener('online', () => {
+                refreshCloudAuthStatus().catch(err => console.error('online auth refresh error:', err));
+                refreshCloudSnapshotInBackground('online', { force: true }).catch(err => console.error('online cloud refresh error:', err));
+                scheduleCloudSave('online');
             });
         });
 
