@@ -1076,6 +1076,30 @@
             <div class="form-group">
                 <label>密碼</label>
                 <input type="password" id="cloudPassword" placeholder="請輸入密碼（至少 6 碼）">
+                <div class="pay-inline-actions" style="margin-top:10px;">
+                    <button class="mini-link-btn" type="button" onclick="handleForgotPassword()"><i class="fas fa-key"></i> 忘記密碼？</button>
+                    <button class="mini-link-btn hidden" id="toggleChangePasswordBtn" type="button" onclick="toggleCloudPasswordPanel()"><i class="fas fa-pen-to-square"></i> 修改密碼</button>
+                </div>
+                <div id="cloudPasswordHelp" class="sync-inline-note">如果忘記密碼，先輸入註冊信箱，再按「忘記密碼？」系統會寄重設信到信箱。</div>
+            </div>
+            <div id="cloud-password-panel" class="status-panel neutral hidden" style="margin-bottom:12px;">
+                <div class="status-panel-head">
+                    <div class="status-panel-title" id="cloud-password-panel-title">修改密碼</div>
+                    <div class="status-badge local" id="cloud-password-panel-badge">登入後可使用</div>
+                </div>
+                <div class="status-panel-desc" id="cloud-password-panel-desc">登入後可直接改成新密碼；如果妳是從信箱點進重設連結，也會在這裡設定新密碼。</div>
+                <div class="form-group" style="margin-top:12px; margin-bottom:10px;">
+                    <label>新密碼</label>
+                    <input type="password" id="cloudNewPassword" placeholder="請輸入新密碼（至少 6 碼）">
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                    <label>再次確認新密碼</label>
+                    <input type="password" id="cloudConfirmPassword" placeholder="請再輸入一次新密碼">
+                </div>
+                <div style="display:flex; flex-direction:column; gap:10px; margin-top:12px;">
+                    <button class="btn" type="button" id="cloudUpdatePasswordBtn" onclick="handleCloudPasswordUpdate()"><i class="fas fa-lock"></i> 更新密碼</button>
+                    <button class="btn btn-outline hidden" type="button" id="cloudCancelPasswordBtn" onclick="cancelCloudPasswordPanel()"><i class="fas fa-xmark"></i> 先取消</button>
+                </div>
             </div>
             <div style="display:flex; flex-direction:column; gap:10px;">
                 <button id="cloudSignUpBtn" class="btn" type="button" onclick="handleCloudSignUp()"><i class="fas fa-user-plus"></i> 註冊雲端帳號</button>
@@ -2303,10 +2327,148 @@
             if (!user) {
                 lastCloudSnapshotMeta = { updatedAt: '', email: '', isLoggedIn: false, hasConflict: false };
                 updateCloudAuthStatus({ type: 'neutral', badge: '尚未登入', desc: '目前尚未登入，資料先留在這台裝置。' });
+                syncCloudPasswordPanelState({ loggedIn: false });
                 return;
             }
             lastCloudSnapshotMeta = { ...(lastCloudSnapshotMeta || {}), email: user.email, isLoggedIn: true };
             updateCloudAuthStatus({ type: 'neutral', badge: '已登入', desc: `已登入 ${user.email}，按下儲存後會自動上傳，其他裝置也會自動更新到最新版本。` });
+            syncCloudPasswordPanelState({ loggedIn: true });
+        }
+
+        let cloudPasswordRecoveryMode = false;
+        let cloudPasswordPanelManuallyOpened = false;
+
+        function clearCloudPasswordInputs() {
+            const newPwd = document.getElementById('cloudNewPassword');
+            const confirmPwd = document.getElementById('cloudConfirmPassword');
+            if (newPwd) newPwd.value = '';
+            if (confirmPwd) confirmPwd.value = '';
+        }
+
+        function syncCloudPasswordPanelState({ loggedIn = false } = {}) {
+            const panel = document.getElementById('cloud-password-panel');
+            const toggleBtn = document.getElementById('toggleChangePasswordBtn');
+            const cancelBtn = document.getElementById('cloudCancelPasswordBtn');
+            const badge = document.getElementById('cloud-password-panel-badge');
+            const title = document.getElementById('cloud-password-panel-title');
+            const desc = document.getElementById('cloud-password-panel-desc');
+            const help = document.getElementById('cloudPasswordHelp');
+            if (toggleBtn) toggleBtn.classList.toggle('hidden', !loggedIn);
+            if (!panel || !badge || !title || !desc) return;
+
+            if (cloudPasswordRecoveryMode) {
+                panel.classList.remove('hidden');
+                panel.className = 'status-panel warn';
+                title.textContent = '重設新密碼';
+                badge.className = 'status-badge warn';
+                badge.textContent = '重設模式';
+                desc.textContent = '妳是從信箱的重設密碼連結進來，請在這裡設定新密碼。更新完成後，就可以直接用新密碼登入。';
+                if (cancelBtn) cancelBtn.classList.remove('hidden');
+                if (help) help.textContent = '目前是重設密碼模式，設定好新密碼後就可以直接登入。';
+                return;
+            }
+
+            if (loggedIn) {
+                panel.className = 'status-panel neutral' + (cloudPasswordPanelManuallyOpened ? '' : ' hidden');
+                title.textContent = '修改密碼';
+                badge.className = 'status-badge cloud';
+                badge.textContent = cloudPasswordPanelManuallyOpened ? '可直接更新' : '登入後可使用';
+                desc.textContent = '已登入的狀態下，可以直接改成新密碼。建議改完後記得用新密碼重新登入一次確認。';
+                if (cancelBtn) cancelBtn.classList.toggle('hidden', !cloudPasswordPanelManuallyOpened);
+                if (help) help.textContent = '如果忘記密碼，先輸入註冊信箱，再按「忘記密碼？」系統會寄重設信到信箱。';
+            } else {
+                panel.className = 'status-panel neutral hidden';
+                title.textContent = '修改密碼';
+                badge.className = 'status-badge local';
+                badge.textContent = '登入後可使用';
+                desc.textContent = '登入後可直接改成新密碼；如果妳是從信箱點進重設連結，也會在這裡設定新密碼。';
+                if (cancelBtn) cancelBtn.classList.add('hidden');
+                if (help) help.textContent = '如果忘記密碼，先輸入註冊信箱，再按「忘記密碼？」系統會寄重設信到信箱。';
+                cloudPasswordPanelManuallyOpened = false;
+                clearCloudPasswordInputs();
+            }
+        }
+
+        function toggleCloudPasswordPanel(forceOpen = null) {
+            cloudPasswordPanelManuallyOpened = typeof forceOpen === 'boolean' ? forceOpen : !cloudPasswordPanelManuallyOpened;
+            syncCloudPasswordPanelState({ loggedIn: !!cachedAuthUser });
+        }
+
+        function cancelCloudPasswordPanel() {
+            if (cloudPasswordRecoveryMode) {
+                showAppToast('目前是重設密碼模式，設定完成後再離開比較不容易卡住。', 'warn', 2800);
+                return;
+            }
+            cloudPasswordPanelManuallyOpened = false;
+            clearCloudPasswordInputs();
+            syncCloudPasswordPanelState({ loggedIn: !!cachedAuthUser });
+        }
+
+        async function handleForgotPassword() {
+            const email = normalizeCloudEmail(document.getElementById('cloudEmail')?.value || '');
+            if (!email) {
+                showAppToast('請先輸入註冊時的 Email', 'warn');
+                return;
+            }
+            const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+                redirectTo: 'https://bearsavingtw-art.github.io/bear-links/app.html'
+            });
+            if (error) {
+                alert('重設密碼信寄送失敗：' + error.message);
+                return;
+            }
+            showAppToast('重設密碼信已寄出，請到信箱收信。', 'ok', 2600);
+            alert('重設密碼信已寄出，請到信箱打開連結後回到 Bear 財務駕駛艙設定新密碼。');
+        }
+
+        async function handleCloudPasswordUpdate() {
+            const newPassword = document.getElementById('cloudNewPassword')?.value || '';
+            const confirmPassword = document.getElementById('cloudConfirmPassword')?.value || '';
+            if (!newPassword || !confirmPassword) {
+                showAppToast('請先把新密碼輸入完整', 'warn');
+                return;
+            }
+            if (newPassword.length < 6) {
+                showAppToast('新密碼至少要 6 碼', 'warn');
+                return;
+            }
+            if (newPassword !== confirmPassword) {
+                showAppToast('兩次輸入的新密碼不一致', 'warn');
+                return;
+            }
+
+            const btn = document.getElementById('cloudUpdatePasswordBtn');
+            const original = btn ? btn.innerHTML : '';
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 更新中...';
+            }
+            const { data, error } = await supabaseClient.auth.updateUser({ password: newPassword });
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = original;
+            }
+            if (error) {
+                alert('更新密碼失敗：' + error.message);
+                return;
+            }
+            cachedAuthUser = data?.user || cachedAuthUser;
+            clearCloudPasswordInputs();
+            if (cloudPasswordRecoveryMode) {
+                cloudPasswordRecoveryMode = false;
+                cloudPasswordPanelManuallyOpened = false;
+                if (location.hash && /type=recovery/i.test(location.hash)) {
+                    history.replaceState(null, '', location.pathname + location.search);
+                }
+                showAppToast('新密碼已更新，現在可以用新密碼登入。', 'ok', 2800);
+                alert('新密碼已更新，現在可以用新密碼登入。');
+            } else {
+                cloudPasswordPanelManuallyOpened = false;
+                showAppToast('密碼已更新', 'ok');
+                alert('密碼已更新，下次請用新密碼登入。');
+            }
+            syncCloudPasswordPanelState({ loggedIn: !!cachedAuthUser });
+            await refreshCloudAuthStatus();
         }
 
 
@@ -2684,7 +2846,11 @@
             lastAppliedCloudFingerprint = '';
             lastAppliedCloudUpdatedAt = '';
             lastCloudSnapshotMeta = { updatedAt: '', email: '', isLoggedIn: false, hasConflict: false };
+            cloudPasswordRecoveryMode = false;
+            cloudPasswordPanelManuallyOpened = false;
+            clearCloudPasswordInputs();
             updateCloudAuthStatus({ type: 'neutral', badge: '已登出', desc: '已登出，目前資料只留在這台裝置。' });
+            syncCloudPasswordPanelState({ loggedIn: false });
             alert('已登出。');
         }
 
@@ -2695,6 +2861,13 @@
             const syncModal = document.getElementById('sync-conflict-modal');
             const resendVerifyBtn = document.getElementById('resendVerifyBtn');
             const emailInput = document.getElementById('cloudEmail');
+            const hashText = location.hash || '';
+            const searchText = location.search || '';
+            if (/type=recovery/i.test(hashText) || /type=recovery/i.test(searchText)) {
+                cloudPasswordRecoveryMode = true;
+                cloudPasswordPanelManuallyOpened = true;
+            }
+            syncCloudPasswordPanelState({ loggedIn: false });
             if (syncCancelBtn) syncCancelBtn.addEventListener('click', () => resolveSyncConflict('cancel'));
             if (syncKeepLocalBtn) syncKeepLocalBtn.addEventListener('click', () => resolveSyncConflict('keep-local'));
             if (syncKeepCloudBtn) syncKeepCloudBtn.addEventListener('click', () => resolveSyncConflict('keep-cloud'));
@@ -2725,6 +2898,11 @@
             }
             const { data } = await supabaseClient.auth.getSession();
             cachedAuthUser = data?.session?.user || null;
+            if (cachedAuthUser && cloudPasswordRecoveryMode) {
+                document.getElementById('cloudEmail').value = normalizeCloudEmail(cachedAuthUser.email || '');
+                switchPage('settings');
+                syncCloudPasswordPanelState({ loggedIn: true });
+            }
             if (data && data.session) {
                 try {
                     const user = await ensureProfile();
@@ -2740,6 +2918,12 @@
             if (!cloudSessionSubscription) {
                 const { data: authListener } = supabaseClient.auth.onAuthStateChange(async (event, session) => {
                     cachedAuthUser = session?.user || null;
+                    if (event === 'PASSWORD_RECOVERY') {
+                        cloudPasswordRecoveryMode = true;
+                        cloudPasswordPanelManuallyOpened = true;
+                        switchPage('settings');
+                        showAppToast('請先設定新密碼', 'warn', 2800);
+                    }
                     if (session && session.user) {
                         markKnownCloudSignup(session.user.email || '', 'signed-in');
                         try {
@@ -2756,7 +2940,10 @@
                         lastAppliedCloudFingerprint = '';
                         lastAppliedCloudUpdatedAt = '';
                         lastCloudSnapshotMeta = { updatedAt: '', email: '', isLoggedIn: false, hasConflict: false };
+                        cloudPasswordPanelManuallyOpened = false;
+                        if (!cloudPasswordRecoveryMode) clearCloudPasswordInputs();
                         updateCloudAuthStatus({ type: 'neutral', badge: '尚未登入', desc: '目前尚未登入，資料先留在這台裝置。' });
+                        syncCloudPasswordPanelState({ loggedIn: false });
                     }
                     renderSyncHints();
                 });
