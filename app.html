@@ -128,6 +128,15 @@
 
         .btn { width: 100%; padding: 15px 18px; border: none; border-radius: 18px; background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-deep) 100%); color: #fff; font-weight: 700; font-size: 0.98rem; cursor: pointer; transition: 0.3s; margin-top: 10px; box-shadow: 0 10px 18px rgba(92,75,66,0.16); display: block; text-align: center; text-decoration: none; }
         .btn:active { transform: scale(0.98); }
+        .btn.is-saving { opacity: 0.78; pointer-events: none; }
+        .save-feedback-inline { margin-top: 10px; font-size: 0.78rem; color: var(--text-secondary); line-height: 1.5; min-height: 1.2em; }
+        .save-feedback-inline.ok { color: var(--success); }
+        .save-feedback-inline.warn { color: var(--danger); }
+        .version-update-banner { margin-top: 12px; background: linear-gradient(135deg, #fff8f0 0%, #fffdf9 100%); border: 1px dashed rgba(184,135,107,0.35); border-radius: 16px; padding: 12px 14px; }
+        .version-update-banner.hidden { display: none !important; }
+        .version-update-title { font-size: 0.84rem; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+        .version-update-desc { font-size: 0.76rem; color: var(--text-secondary); line-height: 1.55; }
+        .version-update-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
         .btn-outline { background: transparent; border: 1px solid var(--accent); color: var(--accent-deep); margin-top: 10px; box-shadow: none; border-radius: 16px; padding: 12px 14px;}
         .btn-tool { background: #546e7a; margin-bottom: 20px; }
         .btn-cancel { background: #999; margin-top: 10px; }
@@ -613,6 +622,7 @@
                 <button type="button" class="btn btn-outline" style="margin-top:8px; padding:10px 12px; font-size:0.82rem;" onclick="switchPage('shared')"><i class="fas fa-heart-circle-plus"></i> 前往共同帳戶</button>
             </div>
             <button class="btn" id="save-btn" onclick="saveTransaction()">先幫這筆錢留位置 <i class="fas fa-check"></i></button>
+            <div class="save-feedback-inline" id="save-feedback-inline"></div>
             <button class="btn btn-cancel hidden" id="cancel-edit-btn" onclick="resetForm()">取消修改</button>
 
             <div class="multi-entry-wrap hidden" id="multi-entry-wrap">
@@ -948,6 +958,14 @@
                 </button>
             </div>
             <div class="settings-version-note" id="settings-shortcut-version">目前版本載入中</div>
+            <div class="version-update-banner hidden" id="version-update-banner">
+                <div class="version-update-title"><i class="fas fa-rotate"></i> 看起來妳現在開的是舊版本</div>
+                <div class="version-update-desc" id="version-update-desc">先重新整理一次。如果還是一樣，請關掉舊分頁後重開；若是手機主畫面捷徑，回到瀏覽器重新開一次最新版本。</div>
+                <div class="version-update-actions">
+                    <button type="button" class="btn-small btn-small-primary" onclick="handleVersionRefresh()"><i class="fas fa-arrows-rotate"></i> 重新整理這頁</button>
+                    <button type="button" class="btn-small btn-small-outline" onclick="dismissVersionUpdateBanner()">我知道了</button>
+                </div>
+            </div>
         </div>
 
         <div class="achievement-banner" onclick="switchPage('milestones')">
@@ -1351,6 +1369,36 @@
             if (headerChip) headerChip.innerHTML = `<strong>${versionText}</strong>`;
             const settingsNote = document.getElementById('settings-shortcut-version');
             if (settingsNote) settingsNote.innerHTML = `目前版本 <strong>${APP_VERSION}</strong> ・ ${getAppOpenModeLabel()}`;
+            checkVersionUpdateNotice();
+        }
+
+        function dismissVersionUpdateBanner() {
+            localStorage.setItem('bear_version_banner_dismissed_for', APP_VERSION);
+            const banner = document.getElementById('version-update-banner');
+            if (banner) banner.classList.add('hidden');
+        }
+
+        function handleVersionRefresh() {
+            localStorage.removeItem('bear_version_banner_dismissed_for');
+            window.location.reload();
+        }
+
+        function checkVersionUpdateNotice() {
+            const previousVersion = localStorage.getItem('bear_last_seen_app_version') || '';
+            const dismissedFor = localStorage.getItem('bear_version_banner_dismissed_for') || '';
+            const banner = document.getElementById('version-update-banner');
+            const desc = document.getElementById('version-update-desc');
+            if (!banner || !desc) return;
+
+            localStorage.setItem('bear_last_seen_app_version', APP_VERSION);
+
+            if (!previousVersion || previousVersion === APP_VERSION || dismissedFor === APP_VERSION) {
+                banner.classList.add('hidden');
+                return;
+            }
+
+            desc.innerHTML = `妳上一個開到的版本是 <strong>${previousVersion}</strong>，現在這份是 <strong>${APP_VERSION}</strong>。如果剛剛有看到按了沒反應、畫面像舊的，請先重新整理；若還沒更新，請關掉舊分頁再重開。手機主畫面捷徑 / App 模式可回到瀏覽器網址重開一次最新版本。`;
+            banner.classList.remove('hidden');
         }
 
         
@@ -1368,6 +1416,7 @@
         let backupMeta = JSON.parse(localStorage.getItem('bear_backup_meta')) || { lastAutoSave: '', lastManualBackup: '', remindAfter: '' };
         let sharedBudgetSettings = JSON.parse(localStorage.getItem('bear_shared_budget_settings')) || { enabled: false, partnerName: '另一半', monthlyBudget: 0, splitMode: 'half', myRatio: 50, categories: [{name:'共同餐飲', budget:0},{name:'家用採買', budget:0},{name:'約會娛樂', budget:0},{name:'旅行交通', budget:0}] };
         let sharedDeposits = JSON.parse(localStorage.getItem('bear_shared_deposits')) || [];
+        let budgetCycleConfigs = JSON.parse(localStorage.getItem('bear_budget_cycle_configs')) || {};
 
         let userEnvelopes = JSON.parse(localStorage.getItem('bear_custom_envelopes'));
         if (!userEnvelopes || !userEnvelopes['固定支出']) {
@@ -1558,6 +1607,89 @@
         function getCycleBoundary(dateObj, startDay) { let year = dateObj.getFullYear(); let month = dateObj.getMonth(); let cycleStartDate, cycleEndDate, labelStr; if (startDay === 1) { cycleStartDate = new Date(year, month, 1); cycleEndDate = new Date(year, month + 1, 0); labelStr = `${year}年 ${month + 1}月`; } else { const thisMonthStart = getSmartDate(year, month, startDay); const lastMonthStart = getSmartDate(year, month - 1, startDay); if (dateObj >= thisMonthStart) { cycleStartDate = thisMonthStart; cycleEndDate = new Date(getSmartDate(year, month + 1, startDay).getTime() - 86400000); labelStr = `${month + 1}月帳期`; } else { cycleStartDate = lastMonthStart; cycleEndDate = new Date(thisMonthStart.getTime() - 86400000); let labelMonth = month === 0 ? 12 : month; labelStr = `${labelMonth}月帳期`; } } return { start: cycleStartDate, end: cycleEndDate, label: labelStr, isDefault: (startDay === 1) }; }
         function changeDashboardMonth(offset) { dashboardViewDate.setMonth(dashboardViewDate.getMonth() + offset); renderDashboard(); }
 
+        function cloneJson(value) {
+            return JSON.parse(JSON.stringify(value));
+        }
+
+        function getCycleConfigKey(dateObj = new Date()) {
+            const cycle = getCycleBoundary(dateObj, sysSettings.cycleStart);
+            return cycle.start.toISOString().slice(0, 10);
+        }
+
+        function persistBudgetCycleConfigs() {
+            localStorage.setItem('bear_budget_cycle_configs', JSON.stringify(budgetCycleConfigs));
+        }
+
+        function buildBudgetCycleSnapshot() {
+            return {
+                envelopes: cloneJson(userEnvelopes || defaultSuggestions),
+                budgets: cloneJson(budgets || {}),
+                masterBudgets: cloneJson(masterBudgets || { '固定支出': 0, '變動支出': 0, '預存支出': 0 }),
+                yearlyGoals: cloneJson(yearlyGoals || {}),
+                initSaved: cloneJson(initSaved || {}),
+                monthlySavedPlans: cloneJson(monthlySavedPlans || {})
+            };
+        }
+
+        function saveSelectedCycleBudgetConfig(showAlert = true) {
+            const cycle = getCycleBoundary(dashboardViewDate, sysSettings.cycleStart);
+            const key = getCycleConfigKey(dashboardViewDate);
+            budgetCycleConfigs[key] = buildBudgetCycleSnapshot();
+            persistBudgetCycleConfigs();
+            writeAutoBackup('save-budget-cycle-config');
+            renderBudgetSettings();
+            renderDashboard();
+            if (showAlert) {
+                alert(`${cycle.label} 的預算設定已鎖定。之後妳再改分類名稱，也不會回頭改到這個帳期。`);
+            }
+        }
+
+        function getBudgetStateForDate(dateObj, cycleTx = []) {
+            const key = getCycleConfigKey(dateObj);
+            const saved = budgetCycleConfigs[key];
+            const state = saved ? {
+                envelopes: cloneJson(saved.envelopes || defaultSuggestions),
+                budgets: cloneJson(saved.budgets || {}),
+                masterBudgets: cloneJson(saved.masterBudgets || { '固定支出': 0, '變動支出': 0, '預存支出': 0 }),
+                yearlyGoals: cloneJson(saved.yearlyGoals || {}),
+                initSaved: cloneJson(saved.initSaved || {}),
+                monthlySavedPlans: cloneJson(saved.monthlySavedPlans || {})
+            } : {
+                envelopes: cloneJson(userEnvelopes || defaultSuggestions),
+                budgets: cloneJson(budgets || {}),
+                masterBudgets: cloneJson(masterBudgets || { '固定支出': 0, '變動支出': 0, '預存支出': 0 }),
+                yearlyGoals: cloneJson(yearlyGoals || {}),
+                initSaved: cloneJson(initSaved || {}),
+                monthlySavedPlans: cloneJson(monthlySavedPlans || {})
+            };
+
+            if (!saved && Array.isArray(cycleTx) && cycleTx.length > 0) {
+                const inferred = { '固定支出': [], '變動支出': [], '預存支出': [] };
+                cycleTx.forEach(t => {
+                    if (!t || t.type !== 'expense' || !t.mainCategory || !t.category || !inferred[t.mainCategory]) return;
+                    if (!inferred[t.mainCategory].includes(t.category)) inferred[t.mainCategory].push(t.category);
+                });
+                ['固定支出', '變動支出', '預存支出'].forEach(mainCat => {
+                    if (inferred[mainCat].length > 0) state.envelopes[mainCat] = inferred[mainCat];
+                });
+            }
+            return state;
+        }
+
+        function renameTransactionsInSelectedCycle(mainCat, oldName, newName) {
+            const cycle = getCycleBoundary(dashboardViewDate, sysSettings.cycleStart);
+            let changed = 0;
+            transactions.forEach(t => {
+                const tDate = new Date(t.date);
+                tDate.setHours(0,0,0,0);
+                if (t.type === 'expense' && t.mainCategory === mainCat && t.category === oldName && tDate >= cycle.start && tDate <= cycle.end) {
+                    t.category = newName;
+                    changed++;
+                }
+            });
+            return changed;
+        }
+
         // ===== Supabase 雲端同步 =====
         const SUPABASE_URL = 'https://hpgzgbxvszcoftfwrccw.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_u4tYPXHYZmcmHmG51iIJUA__WZW5sky';
@@ -1620,6 +1752,44 @@
             toastTimer = setTimeout(() => {
                 toast.classList.remove('show');
             }, duration);
+        }
+
+        let saveFeedbackTimer = null;
+        let saveBtnOriginalHtml = '';
+        let isSavingTransaction = false;
+
+        function setSaveButtonLoadingState(isLoading, loadingText = '儲存中...') {
+            const btn = document.getElementById('save-btn');
+            if (!btn) return;
+            if (isLoading) {
+                if (!saveBtnOriginalHtml) saveBtnOriginalHtml = btn.innerHTML;
+                btn.classList.add('is-saving');
+                btn.disabled = true;
+                btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${loadingText}`;
+                return;
+            }
+            btn.classList.remove('is-saving');
+            btn.disabled = false;
+            if (saveBtnOriginalHtml) btn.innerHTML = saveBtnOriginalHtml;
+        }
+
+        function showSaveFeedback(message = '', type = 'ok', duration = 2600) {
+            const el = document.getElementById('save-feedback-inline');
+            if (!el) return;
+            clearTimeout(saveFeedbackTimer);
+            if (!message) {
+                el.textContent = '';
+                el.className = 'save-feedback-inline';
+                return;
+            }
+            el.textContent = message;
+            el.className = `save-feedback-inline ${type}`;
+            if (duration > 0) {
+                saveFeedbackTimer = setTimeout(() => {
+                    el.textContent = '';
+                    el.className = 'save-feedback-inline';
+                }, duration);
+            }
         }
 
         function stableStringify(value) {
@@ -1771,6 +1941,7 @@
                 initSaved: initSaved || {},
                 masterBudgets: masterBudgets || { '固定支出': 0, '變動支出': 0, '預存支出': 0 },
                 monthlySavedPlans: monthlySavedPlans || {},
+                budgetCycleConfigs: budgetCycleConfigs || {},
                 sharedBudgetSettings: sharedBudgetSettings || { enabled: false, partnerName: '另一半', monthlyBudget: 0, splitMode: 'half', myRatio: 50, categories: [{name:'共同餐飲', budget:0},{name:'家用採買', budget:0},{name:'約會娛樂', budget:0},{name:'旅行交通', budget:0}] },
                 sharedDeposits: sharedDeposits || []
             };
@@ -1796,6 +1967,7 @@
                 localStorage.setItem('bear_init_saved', JSON.stringify(initSaved));
                 localStorage.setItem('bear_master_budgets', JSON.stringify(masterBudgets));
                 localStorage.setItem('bear_monthly_saved_plans', JSON.stringify(monthlySavedPlans));
+                localStorage.setItem('bear_budget_cycle_configs', JSON.stringify(budgetCycleConfigs));
                 localStorage.setItem('bear_shared_budget_settings', JSON.stringify(sharedBudgetSettings));
                 localStorage.setItem('bear_shared_deposits', JSON.stringify(sharedDeposits));
             } finally {
@@ -1825,6 +1997,7 @@
             initSaved = data.initSaved || {};
             masterBudgets = data.masterBudgets || { '固定支出': 0, '變動支出': 0, '預存支出': 0 };
             monthlySavedPlans = data.monthlySavedPlans || {};
+            budgetCycleConfigs = data.budgetCycleConfigs || {};
             sharedBudgetSettings = data.sharedBudgetSettings || { enabled: false, partnerName: '另一半', monthlyBudget: 0, splitMode: 'half', myRatio: 50, categories: [{name:'共同餐飲', budget:0},{name:'家用採買', budget:0},{name:'約會娛樂', budget:0},{name:'旅行交通', budget:0}] };
             sharedDeposits = data.sharedDeposits || [];
             saveToLocalStorageFromState();
@@ -2645,7 +2818,7 @@
         }
 
         function openAddPage() { resetForm(); switchPage('add'); switchEntryMode('single'); applyMainPaymentDefaults(); renderRecentCombos(); }
-        function resetForm() { editingId = null; document.getElementById('add-page-title').innerText = '先幫這筆錢留位置'; document.getElementById('save-btn').innerHTML = '先幫這筆錢留位置 <i class="fas fa-check"></i>'; document.getElementById('add-page-helper').innerText = '記一筆就好，其他空白可以晚點補。'; document.getElementById('cancel-edit-btn').classList.add('hidden'); document.getElementById('input-date').value = getTodayLocalDateString(); document.getElementById('input-main-category').value = '支出-變動'; updateSubCategories(); document.getElementById('input-amount').value = ''; document.getElementById('input-note').value = ''; document.getElementById('input-transfer-label').value = ''; switchEntryMode('single'); document.getElementById('multi-entry-wrap').classList.remove('hidden'); initExtraEntryArea(); applyMainPaymentDefaults(); updateSharedExpenseVisibility(); renderRecentCombos(); }
+        function resetForm() { editingId = null; document.getElementById('add-page-title').innerText = '先幫這筆錢留位置'; document.getElementById('save-btn').innerHTML = '先幫這筆錢留位置 <i class="fas fa-check"></i>'; saveBtnOriginalHtml = document.getElementById('save-btn').innerHTML; showSaveFeedback(''); document.getElementById('add-page-helper').innerText = '記一筆就好，其他空白可以晚點補。'; document.getElementById('cancel-edit-btn').classList.add('hidden'); document.getElementById('input-date').value = getTodayLocalDateString(); document.getElementById('input-main-category').value = '支出-變動'; updateSubCategories(); document.getElementById('input-amount').value = ''; document.getElementById('input-note').value = ''; document.getElementById('input-transfer-label').value = ''; switchEntryMode('single'); document.getElementById('multi-entry-wrap').classList.remove('hidden'); initExtraEntryArea(); applyMainPaymentDefaults(); updateSharedExpenseVisibility(); renderRecentCombos(); }
         function sortTransactions() { transactions.sort((a, b) => { const dateDiff = new Date(b.date) - new Date(a.date); if (dateDiff !== 0) return dateDiff; return b.id - a.id; }); }
 
 
@@ -4375,102 +4548,116 @@ function getSharedBudgetSummary(cycleTx) {
         }
 
         async function saveTransaction() {
-            const date = document.getElementById('input-date').value;
-            const mainCatRaw = document.getElementById('input-main-category').value;
-            const amount = parseFloat(document.getElementById('input-amount').value);
-            const note = document.getElementById('input-note').value;
-            const paymentMeta = readMainPaymentMeta();
-            const subGroup = document.getElementById('sub-category-group');
-            let subCat = '';
-            if (subGroup.style.display !== 'none') {
-                subCat = isCustomCatMode ? document.getElementById('input-custom-category').value.trim() : document.getElementById('input-sub-category').value;
-                if (!subCat) { alert('請選擇詳細分類！'); return; }
-            } else {
-                subCat = '未分類';
-            }
-            if (!date || isNaN(amount) || amount <= 0) { alert('請輸入完整金額與日期！'); return; }
+            if (isSavingTransaction) return;
+            isSavingTransaction = true;
+            setSaveButtonLoadingState(true, '儲存中...');
+            showSaveFeedback('正在幫這筆錢留位置...', 'ok', 0);
 
-            if (editingId) {
-                const payload = collectEntryPayload(date, mainCatRaw, subCat, paymentMeta, amount, note, getSharedMetaFromMainForm());
-                const index = transactions.findIndex(t => t.id === editingId);
-                if (index !== -1) {
-                    transactions[index] = { id: editingId, ...payload };
-                    alert('修改成功！✏️');
+            try {
+                const date = document.getElementById('input-date').value;
+                const mainCatRaw = document.getElementById('input-main-category').value;
+                const amount = parseFloat(document.getElementById('input-amount').value);
+                const note = document.getElementById('input-note').value;
+                const paymentMeta = readMainPaymentMeta();
+                const subGroup = document.getElementById('sub-category-group');
+                let subCat = '';
+                if (subGroup.style.display !== 'none') {
+                    subCat = isCustomCatMode ? document.getElementById('input-custom-category').value.trim() : document.getElementById('input-sub-category').value;
+                    if (!subCat) { showSaveFeedback('請先選擇詳細分類。', 'warn'); alert('請選擇詳細分類！'); return; }
+                } else {
+                    subCat = '未分類';
                 }
+                if (!date || isNaN(amount) || amount <= 0) { showSaveFeedback('請先填好日期和金額。', 'warn'); alert('請輸入完整金額與日期！'); return; }
+
+                if (editingId) {
+                    const payload = collectEntryPayload(date, mainCatRaw, subCat, paymentMeta, amount, note, getSharedMetaFromMainForm());
+                    const index = transactions.findIndex(t => t.id === editingId);
+                    if (index !== -1) {
+                        transactions[index] = { id: editingId, ...payload };
+                    }
+                    sortTransactions();
+                    localStorage.setItem('bear_transactions', JSON.stringify(transactions));
+                    writeAutoBackup('transaction-edit');
+                    let cloudSaved = false;
+                    if (await getCurrentUser()) {
+                        const syncOk = await saveToCloud('transaction-edit', { silent: true, skipConflictCheck: true });
+                        cloudSaved = syncOk === true;
+                    }
+                    editingId = null;
+                    resetForm();
+                    renderRecentCombos();
+                    renderDashboard();
+                    renderList();
+                    renderSharedAccountPage();
+                    switchPage('add');
+                    const successMsg = cloudSaved ? '這筆調整已儲存，並同步到雲端。' : '這筆調整已儲存。';
+                    showSaveFeedback(successMsg, 'ok');
+                    showAppToast(cloudSaved ? '已把這筆記帳上傳到雲端' : '修改成功！', 'ok');
+                    return;
+                }
+
+                const entries = [{ id: Date.now(), ...collectEntryPayload(date, mainCatRaw, subCat, paymentMeta, amount, note, getSharedMetaFromMainForm()) }];
+                const extraCards = Array.from(document.querySelectorAll('#extra-entry-container .extra-entry-card'));
+                const errors = [];
+
+                extraCards.forEach((card, idx) => {
+                    const id = card.dataset.extraId;
+                    const xDate = document.getElementById(`extra-date-${id}`)?.value || '';
+                    const xMain = document.getElementById(`extra-main-${id}`)?.value || '支出-變動';
+                    const xSub = document.getElementById(`extra-sub-${id}`)?.value || '未分類';
+                    const xMethod = document.getElementById(`extra-method-${id}`)?.value || 'cash';
+                    const xAmount = parseFloat(document.getElementById(`extra-amount-${id}`)?.value);
+                    const xNote = document.getElementById(`extra-note-${id}`)?.value || '';
+                    const xSharedEnabled = !!document.getElementById(`extra-shared-enabled-${id}`)?.checked;
+                    const xSharedMeta = xSharedEnabled && sharedBudgetSettings.enabled ? { enabled: true, payer: document.getElementById(`extra-shared-payer-${id}`)?.value || 'me', label: (document.getElementById(`extra-shared-label-${id}`)?.value || '').trim(), partnerName: sharedBudgetSettings.partnerName || '另一半', splitMode: sharedBudgetSettings.splitMode || 'half', myRatio: sharedBudgetSettings.splitMode === 'ratio' ? (parseFloat(sharedBudgetSettings.myRatio) || 50) : 50 } : null;
+
+                    const empty = !xDate && !xSub && !xMethod && !xNote && (isNaN(xAmount) || xAmount <= 0);
+                    if (empty) return;
+                    if (!xDate || isNaN(xAmount) || xAmount <= 0) {
+                        errors.push(`追加記帳 ${idx + 1} 資料不完整`);
+                        return;
+                    }
+                    entries.push({ id: Date.now() + idx + 1, ...collectEntryPayload(xDate, xMain, xSub, xMethod, xAmount, xNote, xSharedMeta) });
+                });
+
+                if (errors.length > 0) {
+                    showSaveFeedback(errors[0], 'warn');
+                    alert(errors.join('\\n'));
+                    return;
+                }
+
+                entries.forEach(entry => {
+                    if (entry.type === 'expense' && userEnvelopes[entry.mainCategory] && entry.category !== '未分類') {
+                        if (!userEnvelopes[entry.mainCategory].includes(entry.category)) {
+                            userEnvelopes[entry.mainCategory].push(entry.category);
+                        }
+                    }
+                    transactions.push(entry);
+                });
+
                 sortTransactions();
                 localStorage.setItem('bear_transactions', JSON.stringify(transactions));
-                writeAutoBackup('transaction-edit');
+                localStorage.setItem('bear_custom_envelopes', JSON.stringify(userEnvelopes));
+                writeAutoBackup('transaction-multi');
                 let cloudSaved = false;
                 if (await getCurrentUser()) {
-                    const syncOk = await saveToCloud('transaction-edit', { silent: true, skipConflictCheck: true });
+                    const syncOk = await saveToCloud('transaction-multi', { silent: true, skipConflictCheck: true });
                     cloudSaved = syncOk === true;
                 }
-                editingId = null;
                 resetForm();
                 renderRecentCombos();
                 renderDashboard();
                 renderList();
                 renderSharedAccountPage();
                 switchPage('add');
-                showAppToast(cloudSaved ? '已把這筆記帳上傳到雲端' : '修改成功！', 'ok');
-                return;
+                const successMsg = entries.length === 1 ? '這筆記帳已經存好了。' : `這次 ${entries.length} 筆記帳都存好了。`;
+                showSaveFeedback(cloudSaved ? `${successMsg} 也同步到雲端了。` : successMsg, 'ok');
+                if (cloudSaved) showAppToast(entries.length === 1 ? '已把這筆記帳上傳到雲端' : '已把這次記帳上傳到雲端', 'ok');
+                else showAppToast(entries.length === 1 ? '這筆記帳已存好' : `成功儲存 ${entries.length} 筆紀錄！`, 'ok');
+            } finally {
+                isSavingTransaction = false;
+                setSaveButtonLoadingState(false);
             }
-
-            const entries = [{ id: Date.now(), ...collectEntryPayload(date, mainCatRaw, subCat, paymentMeta, amount, note, getSharedMetaFromMainForm()) }];
-            const extraCards = Array.from(document.querySelectorAll('#extra-entry-container .extra-entry-card'));
-            const errors = [];
-
-            extraCards.forEach((card, idx) => {
-                const id = card.dataset.extraId;
-                const xDate = document.getElementById(`extra-date-${id}`)?.value || '';
-                const xMain = document.getElementById(`extra-main-${id}`)?.value || '支出-變動';
-                const xSub = document.getElementById(`extra-sub-${id}`)?.value || '未分類';
-                const xMethod = document.getElementById(`extra-method-${id}`)?.value || 'cash';
-                const xAmount = parseFloat(document.getElementById(`extra-amount-${id}`)?.value);
-                const xNote = document.getElementById(`extra-note-${id}`)?.value || '';
-                const xSharedEnabled = !!document.getElementById(`extra-shared-enabled-${id}`)?.checked;
-                const xSharedMeta = xSharedEnabled && sharedBudgetSettings.enabled ? { enabled: true, payer: document.getElementById(`extra-shared-payer-${id}`)?.value || 'me', label: (document.getElementById(`extra-shared-label-${id}`)?.value || '').trim(), partnerName: sharedBudgetSettings.partnerName || '另一半', splitMode: sharedBudgetSettings.splitMode || 'half', myRatio: sharedBudgetSettings.splitMode === 'ratio' ? (parseFloat(sharedBudgetSettings.myRatio) || 50) : 50 } : null;
-
-                const empty = !xDate && !xSub && !xMethod && !xNote && (isNaN(xAmount) || xAmount <= 0);
-                if (empty) return;
-                if (!xDate || isNaN(xAmount) || xAmount <= 0) {
-                    errors.push(`追加記帳 ${idx + 1} 資料不完整`);
-                    return;
-                }
-                entries.push({ id: Date.now() + idx + 1, ...collectEntryPayload(xDate, xMain, xSub, xMethod, xAmount, xNote, xSharedMeta) });
-            });
-
-            if (errors.length > 0) {
-                alert(errors.join('\\n'));
-                return;
-            }
-
-            entries.forEach(entry => {
-                if (entry.type === 'expense' && userEnvelopes[entry.mainCategory] && entry.category !== '未分類') {
-                    if (!userEnvelopes[entry.mainCategory].includes(entry.category)) {
-                        userEnvelopes[entry.mainCategory].push(entry.category);
-                    }
-                }
-                transactions.push(entry);
-            });
-
-            sortTransactions();
-            localStorage.setItem('bear_transactions', JSON.stringify(transactions));
-            localStorage.setItem('bear_custom_envelopes', JSON.stringify(userEnvelopes));
-            writeAutoBackup('transaction-multi');
-            let cloudSaved = false;
-            if (await getCurrentUser()) {
-                const syncOk = await saveToCloud('transaction-multi', { silent: true, skipConflictCheck: true });
-                cloudSaved = syncOk === true;
-            }
-            resetForm();
-            renderRecentCombos();
-            renderDashboard();
-            renderList();
-            renderSharedAccountPage();
-            switchPage('add');
-            if (cloudSaved) showAppToast(entries.length === 1 ? '已把這筆記帳上傳到雲端' : '已把這次記帳上傳到雲端', 'ok');
-            else showAppToast(`成功儲存 ${entries.length} 筆紀錄！`, 'ok');
         }
 
         function editTx(id) {
@@ -4491,7 +4678,7 @@ function getSharedBudgetSummary(cycleTx) {
             document.getElementById('input-wallet-id').value = tx.paymentToolId || paymentSettings.defaultWalletId || (getEnabledWallets()[0]?.id || '');
             document.getElementById('input-transfer-label').value = tx.transferLabel || (typeof tx.paymentToolId === 'string' ? tx.paymentToolId : '');
             handleMainPaymentMethodChange();
-            document.getElementById('add-page-title').innerText = '調整這筆位置'; document.getElementById('save-btn').innerHTML = '存下這次調整 <i class="fas fa-save"></i>'; document.getElementById('add-page-helper').innerText = '把這筆調整回對的位置。'; document.getElementById('cancel-edit-btn').classList.remove('hidden'); switchPage('add'); renderRecentCombos(); document.getElementById('multi-entry-wrap').classList.add('hidden'); switchEntryMode('single');
+            document.getElementById('add-page-title').innerText = '調整這筆位置'; document.getElementById('save-btn').innerHTML = '存下這次調整 <i class="fas fa-save"></i>'; saveBtnOriginalHtml = document.getElementById('save-btn').innerHTML; showSaveFeedback(''); document.getElementById('add-page-helper').innerText = '把這筆調整回對的位置。'; document.getElementById('cancel-edit-btn').classList.remove('hidden'); switchPage('add'); renderRecentCombos(); document.getElementById('multi-entry-wrap').classList.add('hidden'); switchEntryMode('single');
         }
 
         function deleteTx(id) { 
@@ -4598,28 +4785,22 @@ function getSharedBudgetSummary(cycleTx) {
 
             userEnvelopes[mainCat][index] = trimmed;
 
-            if (budgets.hasOwnProperty(oldName)) {
+            if (budgets.hasOwnProperty(oldName) && !budgets.hasOwnProperty(trimmed)) {
                 budgets[trimmed] = budgets[oldName];
-                delete budgets[oldName];
             }
-            if (yearlyGoals.hasOwnProperty(oldName)) {
+            if (yearlyGoals.hasOwnProperty(oldName) && !yearlyGoals.hasOwnProperty(trimmed)) {
                 yearlyGoals[trimmed] = yearlyGoals[oldName];
-                delete yearlyGoals[oldName];
             }
-            if (initSaved.hasOwnProperty(oldName)) {
+            if (initSaved.hasOwnProperty(oldName) && !initSaved.hasOwnProperty(trimmed)) {
                 initSaved[trimmed] = initSaved[oldName];
-                delete initSaved[oldName];
             }
-            if (monthlySavedPlans.hasOwnProperty(oldName)) {
-                monthlySavedPlans[trimmed] = monthlySavedPlans[oldName];
-                delete monthlySavedPlans[oldName];
+            if (monthlySavedPlans.hasOwnProperty(oldName) && !monthlySavedPlans.hasOwnProperty(trimmed)) {
+                monthlySavedPlans[trimmed] = cloneJson(monthlySavedPlans[oldName]);
             }
 
-            transactions.forEach(t => {
-                if (t.category === oldName) t.category = trimmed;
-            });
+            const changedCount = renameTransactionsInSelectedCycle(mainCat, oldName, trimmed);
 
-            localStorage.setItem('envelopes_v7', JSON.stringify(userEnvelopes));
+            localStorage.setItem('bear_custom_envelopes', JSON.stringify(userEnvelopes));
             localStorage.setItem('budgets_v7', JSON.stringify(budgets));
             localStorage.setItem('yearlyGoals_v1', JSON.stringify(yearlyGoals));
             localStorage.setItem('initSaved_v1', JSON.stringify(initSaved));
@@ -4630,6 +4811,9 @@ function getSharedBudgetSummary(cycleTx) {
             renderBudgetSettings();
             renderDashboard();
             renderList();
+
+            const cycle = getCycleBoundary(dashboardViewDate, sysSettings.cycleStart);
+            alert(`名稱已更新。${cycle.label} 內已同步調整 ${changedCount} 筆記帳；更早月份會保留原本名稱。`);
         }
 
         function deleteBag(mainCat, index) {
@@ -4658,6 +4842,15 @@ function getSharedBudgetSummary(cycleTx) {
         function renderBudgetSettings() {
             const container = document.getElementById('budget-settings-container'); 
             container.innerHTML = ''; 
+            const selectedCycle = getCycleBoundary(dashboardViewDate, sysSettings.cycleStart);
+            const selectedCycleKey = getCycleConfigKey(dashboardViewDate);
+            const hasSavedCycleConfig = !!budgetCycleConfigs[selectedCycleKey];
+            container.innerHTML += `
+                <div class="soft-note" style="margin-bottom:16px;">
+                    <div style="font-weight:700; margin-bottom:6px;">目前預算設定對應：${selectedCycle.label}</div>
+                    <div style="font-size:0.76rem; color:var(--text-secondary); line-height:1.55;">想把這個月份的分類名稱鎖住，可以按下面這顆按鈕。之後妳再改分類，也不會回頭影響這個帳期。</div>
+                    <button type="button" class="btn btn-outline" style="margin-top:10px;" onclick="saveSelectedCycleBudgetConfig()">${hasSavedCycleConfig ? '重新儲存這個帳期設定' : '儲存這個帳期設定'}</button>
+                </div>`;
 
             ['固定支出', '變動支出'].forEach(mainCat => {
                 let bagCount = userEnvelopes[mainCat].length;
@@ -5014,21 +5207,23 @@ function renderDashboard() {
             let currentBalance = totalInc - totalExp;
             document.getElementById('display-balance').innerText = `$${formatMoney(currentBalance)}`;
 
+            const budgetState = getBudgetStateForDate(dashboardViewDate, cycleTx);
             const cycleMonthIndex = currentCycle.start.getMonth(); 
             let totalLockedSave = 0;
 
-            if (userEnvelopes['預存支出'] && userEnvelopes['預存支出'].length > 0) {
-                userEnvelopes['預存支出'].forEach(env => {
+            if (budgetState.envelopes['預存支出'] && budgetState.envelopes['預存支出'].length > 0) {
+                budgetState.envelopes['預存支出'].forEach(env => {
+                    const statePlans = budgetState.monthlySavedPlans || {};
                     let planned = 0;
-                    if (monthlySavedPlans[env] && monthlySavedPlans[env][cycleMonthIndex]) {
-                        planned = parseFloat(monthlySavedPlans[env][cycleMonthIndex]) || 0;
+                    if (statePlans[env] && statePlans[env][cycleMonthIndex]) {
+                        planned = parseFloat(statePlans[env][cycleMonthIndex]) || 0;
                     }
                     let manual = manualSavesInCycle[env] || 0;
                     let locked = Math.max(planned, manual);
                     totalLockedSave += locked;
                 });
             } else {
-                let planned = (masterBudgets['預存支出'] || 0) / 12;
+                let planned = (budgetState.masterBudgets['預存支出'] || 0) / 12;
                 let totalManual = 0;
                 for (let cat in manualSavesInCycle) { totalManual += manualSavesInCycle[cat]; }
                 totalLockedSave = Math.max(planned, totalManual);
@@ -5045,16 +5240,20 @@ function renderDashboard() {
                 trueBalanceEl.style.color = 'var(--text-primary)';
             }
 
-            renderBudgetBars(envExp, masterSpent); renderSinkingFundsTracker(); renderChart(mainExp, envExp); renderDashList(cycleTx, currentChartFilter); renderPaymentAnalysisPage(); if (document.getElementById('income-detail-modal') && document.getElementById('income-detail-modal').classList.contains('show')) renderIncomeDetailList(); 
+            renderBudgetBars(envExp, masterSpent, cycleTx); renderSinkingFundsTracker(); renderChart(mainExp, envExp); renderDashList(cycleTx, currentChartFilter); renderPaymentAnalysisPage(); if (document.getElementById('income-detail-modal') && document.getElementById('income-detail-modal').classList.contains('show')) renderIncomeDetailList(); 
         }
 
 
-function renderBudgetBars(envExp, masterSpent) {
+function renderBudgetBars(envExp, masterSpent, cycleTx = []) {
+            const budgetState = getBudgetStateForDate(dashboardViewDate, cycleTx);
+            const activeEnvelopes = budgetState.envelopes || userEnvelopes;
+            const activeBudgets = budgetState.budgets || budgets;
+            const activeMasterBudgets = budgetState.masterBudgets || masterBudgets;
             const container = document.getElementById('budget-container'); container.innerHTML = ''; let hasAnyBudget = false; 
             ['固定支出', '變動支出'].forEach(mainCat => {
-                let bagCount = userEnvelopes[mainCat].length;
+                let bagCount = (activeEnvelopes[mainCat] || []).length;
                 if (bagCount === 0) {
-                    const budget = masterBudgets[mainCat] || 0; const spent = masterSpent[mainCat] || 0;
+                    const budget = activeMasterBudgets[mainCat] || 0; const spent = masterSpent[mainCat] || 0;
                     if (budget > 0 || spent > 0) {
                         hasAnyBudget = true; let percent = 0, colorVar = '--success';
                         if (budget > 0) { percent = (spent / budget) * 100; if (percent > 100) colorVar = '--danger'; else if (percent > 80) colorVar = '--warning'; }
@@ -5063,8 +5262,8 @@ function renderBudgetBars(envExp, masterSpent) {
                     }
                 } else {
                     let html = `<div class="budget-group-title"><i class="fas fa-folder-open"></i> ${mainCat}</div>`; let groupHasBudget = false;
-                    userEnvelopes[mainCat].forEach(env => {
-                        const budget = budgets[env] || 0; const spentData = envExp[env] || { spent: 0 }; const spent = spentData.spent;
+                    (activeEnvelopes[mainCat] || []).forEach(env => {
+                        const budget = activeBudgets[env] || 0; const spentData = envExp[env] || { spent: 0 }; const spent = spentData.spent;
                         if (budget > 0 || spent > 0) {
                             groupHasBudget = true; hasAnyBudget = true; let percent = 0, colorVar = '--success';
                             if (budget > 0) { percent = (spent / budget) * 100; if (percent > 100) colorVar = '--danger'; else if (percent > 80) colorVar = '--warning'; }
@@ -6623,6 +6822,7 @@ function exportToExcel() {
                 initSaved = data.initSaved || {};
                 masterBudgets = data.masterBudgets || { '固定支出': 0, '變動支出': 0, '預存支出': 0 };
                 monthlySavedPlans = data.monthlySavedPlans || {};
+                budgetCycleConfigs = data.budgetCycleConfigs || {};
                 sharedBudgetSettings = data.sharedBudgetSettings || { enabled: false, partnerName: '另一半', monthlyBudget: 0, splitMode: 'half', myRatio: 50, categories: [{name:'共同餐飲', budget:0},{name:'家用採買', budget:0},{name:'約會娛樂', budget:0},{name:'旅行交通', budget:0}] };
                         sharedDeposits = data.sharedDeposits || [];
 
@@ -6638,6 +6838,7 @@ function exportToExcel() {
                 localStorage.setItem('bear_init_saved', JSON.stringify(initSaved));
                 localStorage.setItem('bear_master_budgets', JSON.stringify(masterBudgets));
                 localStorage.setItem('bear_monthly_saved_plans', JSON.stringify(monthlySavedPlans));
+                localStorage.setItem('bear_budget_cycle_configs', JSON.stringify(budgetCycleConfigs));
                 localStorage.setItem('bear_shared_budget_settings', JSON.stringify(sharedBudgetSettings));
                 localStorage.setItem('bear_shared_deposits', JSON.stringify(sharedDeposits));
                 initSharedBudgetForm();
@@ -6658,7 +6859,7 @@ function exportToExcel() {
 
         // JSON 備份功能
         function exportData(showSuccessToast = false) { 
-            const data = { tx: transactions, budget: budgets, shop: shoppingList, networth: netWorthData, settings: sysSettings, envelopes: userEnvelopes, debts: userDebts, yearlyGoals: yearlyGoals, initSaved: initSaved, masterBudgets: masterBudgets, monthlySavedPlans: monthlySavedPlans, sharedBudgetSettings: sharedBudgetSettings, sharedDeposits: sharedDeposits }; 
+            const data = { tx: transactions, budget: budgets, shop: shoppingList, networth: netWorthData, settings: sysSettings, envelopes: userEnvelopes, debts: userDebts, yearlyGoals: yearlyGoals, initSaved: initSaved, masterBudgets: masterBudgets, monthlySavedPlans: monthlySavedPlans, budgetCycleConfigs: budgetCycleConfigs, sharedBudgetSettings: sharedBudgetSettings, sharedDeposits: sharedDeposits }; 
             const blob = new Blob([JSON.stringify(data)], {type: "text/json"}); 
             const link = document.createElement("a"); 
             link.href = URL.createObjectURL(blob); 
@@ -6689,6 +6890,7 @@ function exportToExcel() {
                         initSaved = data.initSaved || {}; 
                         masterBudgets = data.masterBudgets || { '固定支出': 0, '變動支出': 0, '預存支出': 0 }; 
                         monthlySavedPlans = data.monthlySavedPlans || {}; 
+                        budgetCycleConfigs = data.budgetCycleConfigs || {};
                         sharedBudgetSettings = data.sharedBudgetSettings || { enabled: false, partnerName: '另一半', monthlyBudget: 0, splitMode: 'half', myRatio: 50 };
                         sharedDeposits = data.sharedDeposits || [];
                     } 
@@ -6703,6 +6905,7 @@ function exportToExcel() {
                     localStorage.setItem('bear_init_saved', JSON.stringify(initSaved)); 
                     localStorage.setItem('bear_master_budgets', JSON.stringify(masterBudgets)); 
                     localStorage.setItem('bear_monthly_saved_plans', JSON.stringify(monthlySavedPlans)); 
+                    localStorage.setItem('bear_budget_cycle_configs', JSON.stringify(budgetCycleConfigs)); 
                     localStorage.setItem('bear_shared_budget_settings', JSON.stringify(sharedBudgetSettings)); 
                     localStorage.setItem('bear_shared_deposits', JSON.stringify(sharedDeposits)); 
                     writeAutoBackup('import');
@@ -6770,9 +6973,40 @@ function exportToExcel() {
             saveBackupMeta();
         });
 
+        saveBtnOriginalHtml = document.getElementById('save-btn') ? document.getElementById('save-btn').innerHTML : '';
+
         if ('serviceWorker' in navigator) { 
-            window.addEventListener('load', () => { 
-                navigator.serviceWorker.register('sw.js').catch(err => { console.log('ServiceWorker 註冊失敗: ', err); }); 
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').then(registration => {
+                    try {
+                        registration.update();
+                    } catch (err) {}
+
+                    const notifyHasNewVersion = () => {
+                        showAppToast('偵測到新版，重新整理後就會更新。', 'warn', 3200);
+                        const banner = document.getElementById('version-update-banner');
+                        const desc = document.getElementById('version-update-desc');
+                        if (banner && desc) {
+                            desc.innerHTML = '已偵測到新的版本檔。請先重新整理一次；如果還是舊畫面，請把這個舊分頁關掉再重開。手機主畫面捷徑 / App 模式可回到瀏覽器網址重新開一次。';
+                            banner.classList.remove('hidden');
+                        }
+                    };
+
+                    if (registration.waiting) notifyHasNewVersion();
+                    registration.addEventListener('updatefound', () => {
+                        const installing = registration.installing;
+                        if (!installing) return;
+                        installing.addEventListener('statechange', () => {
+                            if (installing.state === 'installed' && navigator.serviceWorker.controller) {
+                                notifyHasNewVersion();
+                            }
+                        });
+                    });
+
+                    navigator.serviceWorker.addEventListener('controllerchange', () => {
+                        showAppToast('版本已更新完成。', 'ok');
+                    });
+                }).catch(err => { console.log('ServiceWorker 註冊失敗: ', err); }); 
             }); 
         }
     </script>
