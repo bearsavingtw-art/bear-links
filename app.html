@@ -1535,7 +1535,6 @@
             const today = new Date(); document.getElementById('nw-input-month').value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
             document.getElementById('setting-cycle-start').value = sysSettings.cycleStart;
             document.getElementById('nw-input-month').addEventListener('change', function() { loadNetWorthDataForMonth(this.value); });
-            document.getElementById('input-date').addEventListener('change', updateSubCategories);
             normalizePaymentSettings();
             updateSubCategories(); initSharedBudgetForm(); bindSharedExpenseInputs(); renderPaymentSettings(); hydrateTransactionPaymentMetadata(); applyMainPaymentDefaults(); renderDashboard(); initExtraEntryArea(); setInterval(updateCountdowns, 1000);
             window.addEventListener('scroll', updateSettingsFloatingTopButton, { passive: true });
@@ -1606,31 +1605,24 @@
         function updateSubCategories() {
             const mainCatSelect = document.getElementById('input-main-category');
             const mainCat = mainCatSelect.value;
-            const dateStr = document.getElementById('input-date')?.value || '';
             const subSelect = document.getElementById('input-sub-category');
             const label = document.getElementById('sub-cat-label');
             const subGroup = document.getElementById('sub-category-group');
-            const prevValue = isCustomCatMode ? (document.getElementById('input-custom-category')?.value || '') : (subSelect?.value || '');
-            subSelect.innerHTML = '';
-            toggleCustomCatMode(false);
-
+            subSelect.innerHTML = ''; toggleCustomCatMode(false); 
+            
             if (mainCat === '收入') {
-                subGroup.style.display = 'block';
-                label.innerText = '收入來源';
-                document.getElementById('cat-switch-btn').style.display = 'none';
+                subGroup.style.display = 'block'; label.innerText = '收入來源'; document.getElementById('cat-switch-btn').style.display = 'none';
                 incomeCats.forEach(cat => { subSelect.innerHTML += `<option value="${cat}">${cat}</option>`; });
-                if (prevValue && Array.from(subSelect.options).some(opt => opt.value === prevValue)) subSelect.value = prevValue;
             } else {
                 document.getElementById('cat-switch-btn').style.display = 'block';
-                const options = getSubcategoryOptionsForMainCat(mainCat, dateStr);
-                if (!options || options.length === 0 || (options.length === 1 && options[0].value === '未分類')) {
-                    subGroup.style.display = 'none';
-                    subSelect.innerHTML = `<option value="未分類">未分類</option>`;
-                } else {
+                let realMainCat = mainCat;
+                if (mainCat === '存入預備金') realMainCat = '預存支出'; else if (mainCat.startsWith('支出-')) realMainCat = mainCat.replace('支出-', '') + '支出';
+                const envelopes = userEnvelopes[realMainCat];
+                if (!envelopes || envelopes.length === 0) { subGroup.style.display = 'none'; subSelect.innerHTML = `<option value="未分類">未分類</option>`; } 
+                else {
                     subGroup.style.display = 'block';
-                    label.innerText = mainCat === '存入預備金' ? '選擇要存入的目標' : '詳細分類';
-                    options.forEach(sub => { subSelect.innerHTML += `<option value="${sub.value}">${sub.label}</option>`; });
-                    if (prevValue && Array.from(subSelect.options).some(opt => opt.value === prevValue)) subSelect.value = prevValue;
+                    if (mainCat === '存入預備金') label.innerText = '選擇要存入的目標'; else label.innerText = '詳細分類';
+                    envelopes.forEach(sub => { subSelect.innerHTML += `<option value="${sub}">${sub}</option>`; });
                 }
             }
         }
@@ -1728,37 +1720,6 @@
             });
             return changed;
         }
-
-        function ensureCategoryExistsForEntry(entry) {
-            if (!entry || entry.type !== 'expense' || !entry.mainCategory || !entry.category || entry.category === '未分類') return;
-            const todayKey = getCycleConfigKey(new Date());
-            const entryDateObj = new Date((entry.date || '') + 'T00:00:00');
-            if (isNaN(entryDateObj.getTime())) return;
-            const entryKey = getCycleConfigKey(entryDateObj);
-
-            if (entryKey === todayKey) {
-                if (userEnvelopes[entry.mainCategory] && !userEnvelopes[entry.mainCategory].includes(entry.category)) {
-                    userEnvelopes[entry.mainCategory].push(entry.category);
-                }
-                return;
-            }
-
-            const state = getBudgetStateForDate(entryDateObj);
-            if (!state.envelopes[entry.mainCategory]) state.envelopes[entry.mainCategory] = [];
-            if (!state.envelopes[entry.mainCategory].includes(entry.category)) {
-                state.envelopes[entry.mainCategory].push(entry.category);
-            }
-            budgetCycleConfigs[entryKey] = {
-                envelopes: cloneJson(state.envelopes || defaultSuggestions),
-                budgets: cloneJson(state.budgets || {}),
-                masterBudgets: cloneJson(state.masterBudgets || { '固定支出': 0, '變動支出': 0, '預存支出': 0 }),
-                yearlyGoals: cloneJson(state.yearlyGoals || {}),
-                initSaved: cloneJson(state.initSaved || {}),
-                monthlySavedPlans: cloneJson(state.monthlySavedPlans || {})
-            };
-            persistBudgetCycleConfigs();
-        }
-
 
         // ===== Supabase 雲端同步 =====
         const SUPABASE_URL = 'https://hpgzgbxvszcoftfwrccw.supabase.co';
@@ -1860,6 +1821,40 @@
                     el.className = 'save-feedback-inline';
                 }, duration);
             }
+        }
+
+        async function saveToCloudWithTimeout(reason = 'autosave', options = {}, timeoutMs = 7000) {
+            let timeoutId = null;
+            try {
+                return await Promise.race([
+                    saveToCloud(reason, options),
+                    new Promise(resolve => {
+                        timeoutId = setTimeout(() => resolve('timeout'), timeoutMs);
+                    })
+                ]);
+            } finally {
+                if (timeoutId) clearTimeout(timeoutId);
+            }
+        }
+
+        function syncTransactionToCloudInBackground(reason = 'transaction-save', successMessage = '這筆記帳已存好，也同步到雲端了。', timeoutMessage = '這筆記帳先存到這台裝置了，雲端同步還在路上。') {
+            getCurrentUser().then(user => {
+                if (!user) return;
+                return saveToCloudWithTimeout(reason, { silent: true, skipConflictCheck: true }, 7000)
+                    .then(result => {
+                        if (result === true) {
+                            showSaveFeedback(successMessage, 'ok');
+                        } else if (result === 'timeout') {
+                            showSaveFeedback(timeoutMessage, 'ok', 4200);
+                        }
+                    })
+                    .catch(err => {
+                        console.error('syncTransactionToCloudInBackground error:', err);
+                        showSaveFeedback('這筆記帳先存到這台裝置了，雲端同步稍後再試。', 'warn', 4200);
+                    });
+            }).catch(err => {
+                console.error('getCurrentUser failed during transaction sync:', err);
+            });
         }
 
         function stableStringify(value) {
@@ -3143,38 +3138,7 @@
             });
         }
 
-        function getBudgetStateSourceForDate(dateStr = '') {
-            if (!dateStr) {
-                return {
-                    envelopes: cloneJson(userEnvelopes || defaultSuggestions),
-                    budgets: cloneJson(budgets || {}),
-                    masterBudgets: cloneJson(masterBudgets || { '固定支出': 0, '變動支出': 0, '預存支出': 0 }),
-                    yearlyGoals: cloneJson(yearlyGoals || {}),
-                    initSaved: cloneJson(initSaved || {}),
-                    monthlySavedPlans: cloneJson(monthlySavedPlans || {})
-                };
-            }
-            const dateObj = new Date(dateStr + 'T00:00:00');
-            if (isNaN(dateObj.getTime())) {
-                return {
-                    envelopes: cloneJson(userEnvelopes || defaultSuggestions),
-                    budgets: cloneJson(budgets || {}),
-                    masterBudgets: cloneJson(masterBudgets || { '固定支出': 0, '變動支出': 0, '預存支出': 0 }),
-                    yearlyGoals: cloneJson(yearlyGoals || {}),
-                    initSaved: cloneJson(initSaved || {}),
-                    monthlySavedPlans: cloneJson(monthlySavedPlans || {})
-                };
-            }
-            const cycleTx = transactions.filter(t => {
-                if (!t?.date) return false;
-                const tDate = new Date(t.date + 'T00:00:00');
-                const cycle = getCycleBoundary(dateObj, sysSettings.cycleStart);
-                return tDate >= cycle.start && tDate <= cycle.end;
-            });
-            return getBudgetStateForDate(dateObj, cycleTx);
-        }
-
-        function getSubcategoryOptionsForMainCat(mainCatRaw, dateStr = '') {
+        function getSubcategoryOptionsForMainCat(mainCatRaw) {
             if (mainCatRaw === '收入') {
                 return incomeCats.map(cat => ({ value: cat, label: cat }));
             }
@@ -3182,14 +3146,13 @@
             if (mainCatRaw === '存入預備金') realMainCat = '預存支出';
             else if (mainCatRaw.startsWith('支出-')) realMainCat = mainCatRaw.replace('支出-', '') + '支出';
 
-            const state = getBudgetStateSourceForDate(dateStr);
-            const envelopes = state.envelopes?.[realMainCat];
+            const envelopes = userEnvelopes[realMainCat];
             if (!envelopes || envelopes.length === 0) return [{ value: '未分類', label: '未分類' }];
             return envelopes.map(cat => ({ value: cat, label: cat }));
         }
 
-        function buildBatchSubcategorySelect(rowId, mainCatRaw, selected = '', dateStr = '') {
-            const options = getSubcategoryOptionsForMainCat(mainCatRaw, dateStr);
+        function buildBatchSubcategorySelect(rowId, mainCatRaw, selected = '') {
+            const options = getSubcategoryOptionsForMainCat(mainCatRaw);
             return `<select id="batch-sub-${rowId}">` + options.map(opt => `<option value="${opt.value}" ${opt.value === selected ? 'selected' : ''}>${opt.label}</option>`).join('') + `</select>`;
         }
 
@@ -3322,7 +3285,7 @@
             const tr = document.createElement('tr');
             tr.setAttribute('data-row-id', rowId);
             tr.innerHTML = `
-                <td><input type="date" id="batch-date-${rowId}" value="${mergedDefaults.date || today}" onchange="updateBatchSubcategory(${rowId})"></td>
+                <td><input type="date" id="batch-date-${rowId}" value="${mergedDefaults.date || today}"></td>
                 <td>
                     <select id="batch-main-${rowId}" onchange="updateBatchSubcategory(${rowId})">
                         <option value="支出-變動" ${mainCat === '支出-變動' ? 'selected' : ''}>💸 支出(變動)</option>
@@ -3332,7 +3295,7 @@
                         <option value="收入" ${mainCat === '收入' ? 'selected' : ''}>💰 收入</option>
                     </select>
                 </td>
-                <td id="batch-sub-wrap-${rowId}">${buildBatchSubcategorySelect(rowId, mainCat, mergedDefaults.subCat || '', mergedDefaults.date || today)}</td>
+                <td id="batch-sub-wrap-${rowId}">${buildBatchSubcategorySelect(rowId, mainCat, mergedDefaults.subCat || '')}</td>
                 <td>${buildBatchQuickApplyHtml(rowId)}<div id="batch-payment-wrap-${rowId}">${buildBatchPaymentDetailHtml(rowId, mergedDefaults)}</div></td>
                 <td><input type="number" step="any" inputmode="decimal" id="batch-amount-${rowId}" value="${mergedDefaults.amount || ''}" placeholder="0"></td>
                 <td><input type="text" id="batch-note-${rowId}" value="${mergedDefaults.note || ''}" placeholder="例如：午餐、全聯"></td>
@@ -3365,11 +3328,9 @@
 
         function updateBatchSubcategory(rowId) {
             const mainCat = document.getElementById(`batch-main-${rowId}`).value;
-            const dateStr = document.getElementById(`batch-date-${rowId}`)?.value || '';
-            const currentSelected = document.getElementById(`batch-sub-${rowId}`)?.value || '';
             const wrap = document.getElementById(`batch-sub-wrap-${rowId}`);
             if (!wrap) return;
-            wrap.innerHTML = buildBatchSubcategorySelect(rowId, mainCat, currentSelected, dateStr);
+            wrap.innerHTML = buildBatchSubcategorySelect(rowId, mainCat);
         }
 
         function removeBatchRow(rowId) {
@@ -3471,8 +3432,18 @@
         }
 
 
-        function getSubcategoryOptionsHtml(mainCatRaw, selected = '', dateStr = '') {
-            const options = getSubcategoryOptionsForMainCat(mainCatRaw, dateStr);
+        function getSubcategoryOptionsHtml(mainCatRaw, selected = '') {
+            let options = [];
+            if (mainCatRaw === '收入') {
+                options = incomeCats.map(cat => ({ value: cat, label: cat }));
+            } else {
+                let realMainCat = mainCatRaw;
+                if (mainCatRaw === '存入預備金') realMainCat = '預存支出';
+                else if (mainCatRaw.startsWith('支出-')) realMainCat = mainCatRaw.replace('支出-', '') + '支出';
+                const envelopes = userEnvelopes[realMainCat];
+                if (!envelopes || envelopes.length === 0) options = [{ value: '未分類', label: '未分類' }];
+                else options = envelopes.map(cat => ({ value: cat, label: cat }));
+            }
             return options.map(opt => `<option value="${opt.value}" ${opt.value === selected ? 'selected' : ''}>${opt.label}</option>`).join('');
         }
 
@@ -3628,7 +3599,7 @@
                     <div class="extra-entry-title">追加記帳 ${id}</div>
                     <button type="button" class="extra-entry-del" onclick="removeExtraEntryCard(${id})">刪除</button>
                 </div>
-                <div class="form-group"><label>日期</label><input type="date" id="extra-date-${id}" value="${mergedDefaults.date || today}" onchange="updateExtraSubCategories(${id})"></div>
+                <div class="form-group"><label>日期</label><input type="date" id="extra-date-${id}" value="${mergedDefaults.date || today}"></div>
                 <div class="form-group">
                     <label>資金流向</label>
                     <select id="extra-main-${id}" onchange="updateExtraSubCategories(${id})">
@@ -3641,7 +3612,7 @@
                 </div>
                 <div class="form-group">
                     <label>詳細分類</label>
-                    <select id="extra-sub-${id}">${getSubcategoryOptionsHtml(mainCat, mergedDefaults.subCat || '', mergedDefaults.date || today)}</select>
+                    <select id="extra-sub-${id}">${getSubcategoryOptionsHtml(mainCat, mergedDefaults.subCat || '')}</select>
                 </div>
                 <div class="form-group">
                     <label>支付方式</label>
@@ -3670,12 +3641,8 @@
 
         function updateExtraSubCategories(id) {
             const mainCat = document.getElementById(`extra-main-${id}`)?.value || '支出-變動';
-            const dateStr = document.getElementById(`extra-date-${id}`)?.value || '';
             const sub = document.getElementById(`extra-sub-${id}`);
-            const prevValue = sub?.value || '';
-            if (sub) {
-                sub.innerHTML = getSubcategoryOptionsHtml(mainCat, prevValue, dateStr);
-            }
+            if (sub) sub.innerHTML = getSubcategoryOptionsHtml(mainCat);
         }
 
         function removeExtraEntryCard(id) {
@@ -4854,11 +4821,7 @@ function getSharedBudgetSummary(cycleTx) {
                     sortTransactions();
                     localStorage.setItem('bear_transactions', JSON.stringify(transactions));
                     writeAutoBackup('transaction-edit');
-                    let cloudSaved = false;
-                    if (await getCurrentUser()) {
-                        const syncOk = await saveToCloud('transaction-edit', { silent: true, skipConflictCheck: true });
-                        cloudSaved = syncOk === true;
-                    }
+                    const hasCloudUser = !!(await getCurrentUser());
                     editingId = null;
                     resetForm();
                     renderRecentCombos();
@@ -4866,9 +4829,11 @@ function getSharedBudgetSummary(cycleTx) {
                     renderList();
                     renderSharedAccountPage();
                     switchPage('add');
-                    const successMsg = cloudSaved ? '這筆調整已儲存，並同步到雲端。' : '這筆調整已儲存。';
-                    showSaveFeedback(successMsg, 'ok');
-                    showAppToast(cloudSaved ? '已把這筆記帳上傳到雲端' : '修改成功！', 'ok');
+                    showSaveFeedback(hasCloudUser ? '這筆調整已儲存，雲端同步中...' : '這筆調整已儲存。', 'ok', hasCloudUser ? 4200 : 2600);
+                    showAppToast('修改成功！', 'ok');
+                    if (hasCloudUser) {
+                        syncTransactionToCloudInBackground('transaction-edit', '這筆調整已儲存，也同步到雲端了。', '這筆調整先存到這台裝置了，雲端同步還在路上。');
+                    }
                     return;
                 }
 
@@ -4903,7 +4868,11 @@ function getSharedBudgetSummary(cycleTx) {
                 }
 
                 entries.forEach(entry => {
-                    ensureCategoryExistsForEntry(entry);
+                    if (entry.type === 'expense' && userEnvelopes[entry.mainCategory] && entry.category !== '未分類') {
+                        if (!userEnvelopes[entry.mainCategory].includes(entry.category)) {
+                            userEnvelopes[entry.mainCategory].push(entry.category);
+                        }
+                    }
                     transactions.push(entry);
                 });
 
@@ -4911,11 +4880,7 @@ function getSharedBudgetSummary(cycleTx) {
                 localStorage.setItem('bear_transactions', JSON.stringify(transactions));
                 localStorage.setItem('bear_custom_envelopes', JSON.stringify(userEnvelopes));
                 writeAutoBackup('transaction-multi');
-                let cloudSaved = false;
-                if (await getCurrentUser()) {
-                    const syncOk = await saveToCloud('transaction-multi', { silent: true, skipConflictCheck: true });
-                    cloudSaved = syncOk === true;
-                }
+                const hasCloudUser = !!(await getCurrentUser());
                 resetForm();
                 renderRecentCombos();
                 renderDashboard();
@@ -4923,9 +4888,11 @@ function getSharedBudgetSummary(cycleTx) {
                 renderSharedAccountPage();
                 switchPage('add');
                 const successMsg = entries.length === 1 ? '這筆記帳已經存好了。' : `這次 ${entries.length} 筆記帳都存好了。`;
-                showSaveFeedback(cloudSaved ? `${successMsg} 也同步到雲端了。` : successMsg, 'ok');
-                if (cloudSaved) showAppToast(entries.length === 1 ? '已把這筆記帳上傳到雲端' : '已把這次記帳上傳到雲端', 'ok');
-                else showAppToast(entries.length === 1 ? '這筆記帳已存好' : `成功儲存 ${entries.length} 筆紀錄！`, 'ok');
+                showSaveFeedback(hasCloudUser ? `${successMsg} 雲端同步中...` : successMsg, 'ok', hasCloudUser ? 4200 : 2600);
+                showAppToast(entries.length === 1 ? '這筆記帳已存好' : `成功儲存 ${entries.length} 筆紀錄！`, 'ok');
+                if (hasCloudUser) {
+                    syncTransactionToCloudInBackground(entries.length === 1 ? 'transaction-single' : 'transaction-multi', `${successMsg} 也同步到雲端了。`, `${successMsg} 先存到這台裝置了，雲端同步還在路上。`);
+                }
             } finally {
                 isSavingTransaction = false;
                 setSaveButtonLoadingState(false);
