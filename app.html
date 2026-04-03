@@ -1535,6 +1535,7 @@
             const today = new Date(); document.getElementById('nw-input-month').value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
             document.getElementById('setting-cycle-start').value = sysSettings.cycleStart;
             document.getElementById('nw-input-month').addEventListener('change', function() { loadNetWorthDataForMonth(this.value); });
+            document.getElementById('input-date').addEventListener('change', updateSubCategories);
             normalizePaymentSettings();
             updateSubCategories(); initSharedBudgetForm(); bindSharedExpenseInputs(); renderPaymentSettings(); hydrateTransactionPaymentMetadata(); applyMainPaymentDefaults(); renderDashboard(); initExtraEntryArea(); setInterval(updateCountdowns, 1000);
             window.addEventListener('scroll', updateSettingsFloatingTopButton, { passive: true });
@@ -1605,24 +1606,31 @@
         function updateSubCategories() {
             const mainCatSelect = document.getElementById('input-main-category');
             const mainCat = mainCatSelect.value;
+            const dateStr = document.getElementById('input-date')?.value || '';
             const subSelect = document.getElementById('input-sub-category');
             const label = document.getElementById('sub-cat-label');
             const subGroup = document.getElementById('sub-category-group');
-            subSelect.innerHTML = ''; toggleCustomCatMode(false); 
-            
+            const prevValue = isCustomCatMode ? (document.getElementById('input-custom-category')?.value || '') : (subSelect?.value || '');
+            subSelect.innerHTML = '';
+            toggleCustomCatMode(false);
+
             if (mainCat === '收入') {
-                subGroup.style.display = 'block'; label.innerText = '收入來源'; document.getElementById('cat-switch-btn').style.display = 'none';
+                subGroup.style.display = 'block';
+                label.innerText = '收入來源';
+                document.getElementById('cat-switch-btn').style.display = 'none';
                 incomeCats.forEach(cat => { subSelect.innerHTML += `<option value="${cat}">${cat}</option>`; });
+                if (prevValue && Array.from(subSelect.options).some(opt => opt.value === prevValue)) subSelect.value = prevValue;
             } else {
                 document.getElementById('cat-switch-btn').style.display = 'block';
-                let realMainCat = mainCat;
-                if (mainCat === '存入預備金') realMainCat = '預存支出'; else if (mainCat.startsWith('支出-')) realMainCat = mainCat.replace('支出-', '') + '支出';
-                const envelopes = userEnvelopes[realMainCat];
-                if (!envelopes || envelopes.length === 0) { subGroup.style.display = 'none'; subSelect.innerHTML = `<option value="未分類">未分類</option>`; } 
-                else {
+                const options = getSubcategoryOptionsForMainCat(mainCat, dateStr);
+                if (!options || options.length === 0 || (options.length === 1 && options[0].value === '未分類')) {
+                    subGroup.style.display = 'none';
+                    subSelect.innerHTML = `<option value="未分類">未分類</option>`;
+                } else {
                     subGroup.style.display = 'block';
-                    if (mainCat === '存入預備金') label.innerText = '選擇要存入的目標'; else label.innerText = '詳細分類';
-                    envelopes.forEach(sub => { subSelect.innerHTML += `<option value="${sub}">${sub}</option>`; });
+                    label.innerText = mainCat === '存入預備金' ? '選擇要存入的目標' : '詳細分類';
+                    options.forEach(sub => { subSelect.innerHTML += `<option value="${sub.value}">${sub.label}</option>`; });
+                    if (prevValue && Array.from(subSelect.options).some(opt => opt.value === prevValue)) subSelect.value = prevValue;
                 }
             }
         }
@@ -1664,8 +1672,15 @@
             renderBudgetSettings();
             renderDashboard();
             if (showAlert) {
-                alert(`${cycle.label} 的預算設定已鎖定。之後妳再改分類名稱，也不會回頭改到這個帳期。`);
+                alert(`${cycle.label} 的預算設定已鎖定。之後妳再改袋子名稱、袋子預算或預存規劃，也不會回頭改到這個帳期。`);
             }
+        }
+
+        function syncSelectedCycleBudgetConfig(reason = 'sync-budget-cycle') {
+            const key = getCycleConfigKey(dashboardViewDate);
+            budgetCycleConfigs[key] = buildBudgetCycleSnapshot();
+            persistBudgetCycleConfigs();
+            writeAutoBackup(reason);
         }
 
         function getBudgetStateForDate(dateObj, cycleTx = []) {
@@ -1713,6 +1728,37 @@
             });
             return changed;
         }
+
+        function ensureCategoryExistsForEntry(entry) {
+            if (!entry || entry.type !== 'expense' || !entry.mainCategory || !entry.category || entry.category === '未分類') return;
+            const todayKey = getCycleConfigKey(new Date());
+            const entryDateObj = new Date((entry.date || '') + 'T00:00:00');
+            if (isNaN(entryDateObj.getTime())) return;
+            const entryKey = getCycleConfigKey(entryDateObj);
+
+            if (entryKey === todayKey) {
+                if (userEnvelopes[entry.mainCategory] && !userEnvelopes[entry.mainCategory].includes(entry.category)) {
+                    userEnvelopes[entry.mainCategory].push(entry.category);
+                }
+                return;
+            }
+
+            const state = getBudgetStateForDate(entryDateObj);
+            if (!state.envelopes[entry.mainCategory]) state.envelopes[entry.mainCategory] = [];
+            if (!state.envelopes[entry.mainCategory].includes(entry.category)) {
+                state.envelopes[entry.mainCategory].push(entry.category);
+            }
+            budgetCycleConfigs[entryKey] = {
+                envelopes: cloneJson(state.envelopes || defaultSuggestions),
+                budgets: cloneJson(state.budgets || {}),
+                masterBudgets: cloneJson(state.masterBudgets || { '固定支出': 0, '變動支出': 0, '預存支出': 0 }),
+                yearlyGoals: cloneJson(state.yearlyGoals || {}),
+                initSaved: cloneJson(state.initSaved || {}),
+                monthlySavedPlans: cloneJson(state.monthlySavedPlans || {})
+            };
+            persistBudgetCycleConfigs();
+        }
+
 
         // ===== Supabase 雲端同步 =====
         const SUPABASE_URL = 'https://hpgzgbxvszcoftfwrccw.supabase.co';
@@ -3097,7 +3143,38 @@
             });
         }
 
-        function getSubcategoryOptionsForMainCat(mainCatRaw) {
+        function getBudgetStateSourceForDate(dateStr = '') {
+            if (!dateStr) {
+                return {
+                    envelopes: cloneJson(userEnvelopes || defaultSuggestions),
+                    budgets: cloneJson(budgets || {}),
+                    masterBudgets: cloneJson(masterBudgets || { '固定支出': 0, '變動支出': 0, '預存支出': 0 }),
+                    yearlyGoals: cloneJson(yearlyGoals || {}),
+                    initSaved: cloneJson(initSaved || {}),
+                    monthlySavedPlans: cloneJson(monthlySavedPlans || {})
+                };
+            }
+            const dateObj = new Date(dateStr + 'T00:00:00');
+            if (isNaN(dateObj.getTime())) {
+                return {
+                    envelopes: cloneJson(userEnvelopes || defaultSuggestions),
+                    budgets: cloneJson(budgets || {}),
+                    masterBudgets: cloneJson(masterBudgets || { '固定支出': 0, '變動支出': 0, '預存支出': 0 }),
+                    yearlyGoals: cloneJson(yearlyGoals || {}),
+                    initSaved: cloneJson(initSaved || {}),
+                    monthlySavedPlans: cloneJson(monthlySavedPlans || {})
+                };
+            }
+            const cycleTx = transactions.filter(t => {
+                if (!t?.date) return false;
+                const tDate = new Date(t.date + 'T00:00:00');
+                const cycle = getCycleBoundary(dateObj, sysSettings.cycleStart);
+                return tDate >= cycle.start && tDate <= cycle.end;
+            });
+            return getBudgetStateForDate(dateObj, cycleTx);
+        }
+
+        function getSubcategoryOptionsForMainCat(mainCatRaw, dateStr = '') {
             if (mainCatRaw === '收入') {
                 return incomeCats.map(cat => ({ value: cat, label: cat }));
             }
@@ -3105,13 +3182,14 @@
             if (mainCatRaw === '存入預備金') realMainCat = '預存支出';
             else if (mainCatRaw.startsWith('支出-')) realMainCat = mainCatRaw.replace('支出-', '') + '支出';
 
-            const envelopes = userEnvelopes[realMainCat];
+            const state = getBudgetStateSourceForDate(dateStr);
+            const envelopes = state.envelopes?.[realMainCat];
             if (!envelopes || envelopes.length === 0) return [{ value: '未分類', label: '未分類' }];
             return envelopes.map(cat => ({ value: cat, label: cat }));
         }
 
-        function buildBatchSubcategorySelect(rowId, mainCatRaw, selected = '') {
-            const options = getSubcategoryOptionsForMainCat(mainCatRaw);
+        function buildBatchSubcategorySelect(rowId, mainCatRaw, selected = '', dateStr = '') {
+            const options = getSubcategoryOptionsForMainCat(mainCatRaw, dateStr);
             return `<select id="batch-sub-${rowId}">` + options.map(opt => `<option value="${opt.value}" ${opt.value === selected ? 'selected' : ''}>${opt.label}</option>`).join('') + `</select>`;
         }
 
@@ -3244,7 +3322,7 @@
             const tr = document.createElement('tr');
             tr.setAttribute('data-row-id', rowId);
             tr.innerHTML = `
-                <td><input type="date" id="batch-date-${rowId}" value="${mergedDefaults.date || today}"></td>
+                <td><input type="date" id="batch-date-${rowId}" value="${mergedDefaults.date || today}" onchange="updateBatchSubcategory(${rowId})"></td>
                 <td>
                     <select id="batch-main-${rowId}" onchange="updateBatchSubcategory(${rowId})">
                         <option value="支出-變動" ${mainCat === '支出-變動' ? 'selected' : ''}>💸 支出(變動)</option>
@@ -3254,7 +3332,7 @@
                         <option value="收入" ${mainCat === '收入' ? 'selected' : ''}>💰 收入</option>
                     </select>
                 </td>
-                <td id="batch-sub-wrap-${rowId}">${buildBatchSubcategorySelect(rowId, mainCat, mergedDefaults.subCat || '')}</td>
+                <td id="batch-sub-wrap-${rowId}">${buildBatchSubcategorySelect(rowId, mainCat, mergedDefaults.subCat || '', mergedDefaults.date || today)}</td>
                 <td>${buildBatchQuickApplyHtml(rowId)}<div id="batch-payment-wrap-${rowId}">${buildBatchPaymentDetailHtml(rowId, mergedDefaults)}</div></td>
                 <td><input type="number" step="any" inputmode="decimal" id="batch-amount-${rowId}" value="${mergedDefaults.amount || ''}" placeholder="0"></td>
                 <td><input type="text" id="batch-note-${rowId}" value="${mergedDefaults.note || ''}" placeholder="例如：午餐、全聯"></td>
@@ -3287,9 +3365,11 @@
 
         function updateBatchSubcategory(rowId) {
             const mainCat = document.getElementById(`batch-main-${rowId}`).value;
+            const dateStr = document.getElementById(`batch-date-${rowId}`)?.value || '';
+            const currentSelected = document.getElementById(`batch-sub-${rowId}`)?.value || '';
             const wrap = document.getElementById(`batch-sub-wrap-${rowId}`);
             if (!wrap) return;
-            wrap.innerHTML = buildBatchSubcategorySelect(rowId, mainCat);
+            wrap.innerHTML = buildBatchSubcategorySelect(rowId, mainCat, currentSelected, dateStr);
         }
 
         function removeBatchRow(rowId) {
@@ -3391,18 +3471,8 @@
         }
 
 
-        function getSubcategoryOptionsHtml(mainCatRaw, selected = '') {
-            let options = [];
-            if (mainCatRaw === '收入') {
-                options = incomeCats.map(cat => ({ value: cat, label: cat }));
-            } else {
-                let realMainCat = mainCatRaw;
-                if (mainCatRaw === '存入預備金') realMainCat = '預存支出';
-                else if (mainCatRaw.startsWith('支出-')) realMainCat = mainCatRaw.replace('支出-', '') + '支出';
-                const envelopes = userEnvelopes[realMainCat];
-                if (!envelopes || envelopes.length === 0) options = [{ value: '未分類', label: '未分類' }];
-                else options = envelopes.map(cat => ({ value: cat, label: cat }));
-            }
+        function getSubcategoryOptionsHtml(mainCatRaw, selected = '', dateStr = '') {
+            const options = getSubcategoryOptionsForMainCat(mainCatRaw, dateStr);
             return options.map(opt => `<option value="${opt.value}" ${opt.value === selected ? 'selected' : ''}>${opt.label}</option>`).join('');
         }
 
@@ -3558,7 +3628,7 @@
                     <div class="extra-entry-title">追加記帳 ${id}</div>
                     <button type="button" class="extra-entry-del" onclick="removeExtraEntryCard(${id})">刪除</button>
                 </div>
-                <div class="form-group"><label>日期</label><input type="date" id="extra-date-${id}" value="${mergedDefaults.date || today}"></div>
+                <div class="form-group"><label>日期</label><input type="date" id="extra-date-${id}" value="${mergedDefaults.date || today}" onchange="updateExtraSubCategories(${id})"></div>
                 <div class="form-group">
                     <label>資金流向</label>
                     <select id="extra-main-${id}" onchange="updateExtraSubCategories(${id})">
@@ -3571,7 +3641,7 @@
                 </div>
                 <div class="form-group">
                     <label>詳細分類</label>
-                    <select id="extra-sub-${id}">${getSubcategoryOptionsHtml(mainCat, mergedDefaults.subCat || '')}</select>
+                    <select id="extra-sub-${id}">${getSubcategoryOptionsHtml(mainCat, mergedDefaults.subCat || '', mergedDefaults.date || today)}</select>
                 </div>
                 <div class="form-group">
                     <label>支付方式</label>
@@ -3600,8 +3670,12 @@
 
         function updateExtraSubCategories(id) {
             const mainCat = document.getElementById(`extra-main-${id}`)?.value || '支出-變動';
+            const dateStr = document.getElementById(`extra-date-${id}`)?.value || '';
             const sub = document.getElementById(`extra-sub-${id}`);
-            if (sub) sub.innerHTML = getSubcategoryOptionsHtml(mainCat);
+            const prevValue = sub?.value || '';
+            if (sub) {
+                sub.innerHTML = getSubcategoryOptionsHtml(mainCat, prevValue, dateStr);
+            }
         }
 
         function removeExtraEntryCard(id) {
@@ -4829,11 +4903,7 @@ function getSharedBudgetSummary(cycleTx) {
                 }
 
                 entries.forEach(entry => {
-                    if (entry.type === 'expense' && userEnvelopes[entry.mainCategory] && entry.category !== '未分類') {
-                        if (!userEnvelopes[entry.mainCategory].includes(entry.category)) {
-                            userEnvelopes[entry.mainCategory].push(entry.category);
-                        }
-                    }
+                    ensureCategoryExistsForEntry(entry);
                     transactions.push(entry);
                 });
 
@@ -4900,7 +4970,7 @@ function getSharedBudgetSummary(cycleTx) {
             localStorage.setItem('bear_yearly_goals', JSON.stringify(yearlyGoals));
             localStorage.setItem('bear_init_saved', JSON.stringify(initSaved));
             localStorage.setItem('bear_monthly_saved_plans', JSON.stringify(monthlySavedPlans));
-            writeAutoBackup('save-sinking-settings');
+            syncSelectedCycleBudgetConfig('save-sinking-settings');
             renderBudgetSettings();
             renderDashboard();
         }
@@ -4967,7 +5037,7 @@ function getSharedBudgetSummary(cycleTx) {
             const env = userEnvelopes[mainCat][index];
             budgets[env] = parseFloat(value) || 0;
             localStorage.setItem('budgets_v7', JSON.stringify(budgets));
-            writeAutoBackup('save-envelope-budget');
+            syncSelectedCycleBudgetConfig('save-envelope-budget');
             renderBudgetSettings();
             renderDashboard();
         }
@@ -5008,7 +5078,7 @@ function getSharedBudgetSummary(cycleTx) {
             localStorage.setItem('initSaved_v1', JSON.stringify(initSaved));
             localStorage.setItem('monthlySavedPlans_v1', JSON.stringify(monthlySavedPlans));
             localStorage.setItem('bear_transactions', JSON.stringify(transactions));
-            writeAutoBackup('rename-envelope');
+            syncSelectedCycleBudgetConfig('rename-envelope');
 
             renderBudgetSettings();
             renderDashboard();
@@ -5031,7 +5101,7 @@ function getSharedBudgetSummary(cycleTx) {
             localStorage.setItem('yearlyGoals_v1', JSON.stringify(yearlyGoals));
             localStorage.setItem('initSaved_v1', JSON.stringify(initSaved));
             localStorage.setItem('monthlySavedPlans_v1', JSON.stringify(monthlySavedPlans));
-            writeAutoBackup('delete-envelope');
+            syncSelectedCycleBudgetConfig('delete-envelope');
             renderBudgetSettings();
             renderDashboard();
         }
@@ -5050,7 +5120,7 @@ function getSharedBudgetSummary(cycleTx) {
             container.innerHTML += `
                 <div class="soft-note" style="margin-bottom:16px;">
                     <div style="font-weight:700; margin-bottom:6px;">目前預算設定對應：${selectedCycle.label}</div>
-                    <div style="font-size:0.76rem; color:var(--text-secondary); line-height:1.55;">想把這個月份的分類名稱鎖住，可以按下面這顆按鈕。之後妳再改分類，也不會回頭影響這個帳期。</div>
+                    <div style="font-size:0.76rem; color:var(--text-secondary); line-height:1.55;">這個帳期只要有改袋子名稱、袋子預算、總預算或預存規劃，都會自動記住這一期。需要的話也可以再手動按下面這顆按鈕重存一次。</div>
                     <button type="button" class="btn btn-outline" style="margin-top:10px;" onclick="saveSelectedCycleBudgetConfig()">${hasSavedCycleConfig ? '重新儲存這個帳期設定' : '儲存這個帳期設定'}</button>
                 </div>`;
 
@@ -5169,7 +5239,7 @@ function getSharedBudgetSummary(cycleTx) {
             }
         }
 
-        function saveMasterBudget(mainCat) { const val = parseFloat(document.getElementById(`master-budget-${mainCat}`).value) || 0; masterBudgets[mainCat] = val; localStorage.setItem('bear_master_budgets', JSON.stringify(masterBudgets)); writeAutoBackup('save-master-budget'); renderDashboard(); }
+        function saveMasterBudget(mainCat) { const val = parseFloat(document.getElementById(`master-budget-${mainCat}`).value) || 0; masterBudgets[mainCat] = val; localStorage.setItem('bear_master_budgets', JSON.stringify(masterBudgets)); syncSelectedCycleBudgetConfig('save-master-budget'); renderBudgetSettings(); renderDashboard(); }
 
         function addNewEnvelope(mainCat) {
             const totalCount = getTotalEnvelopesCount();
@@ -5189,7 +5259,7 @@ function getSharedBudgetSummary(cycleTx) {
                 if (isDup) return alert('這個分類名稱已經存在囉！請換一個名字。');
                 userEnvelopes[mainCat].push(name);
                 localStorage.setItem('bear_custom_envelopes', JSON.stringify(userEnvelopes));
-                writeAutoBackup('new-envelope');
+                syncSelectedCycleBudgetConfig('new-envelope');
                 renderBudgetSettings();
                 updateSubCategories();
                 renderDashboard();
