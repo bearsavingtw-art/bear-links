@@ -1449,7 +1449,7 @@
         }
 
         let myChart = null; let nwChart = null; let reviewBarChart = null; let reviewPieChart = null; let paymentMixChart = null; 
-        let editingId = null; let dashboardViewDate = new Date(); let currentChartFilter = null; let paymentMethodDetailFilter = null; let editingDebtId = null; let inlineEditingTxId = null; let sharedInlineEditingTxId = null;
+        let editingId = null; let dashboardViewDate = new Date(); let currentChartFilter = null; let paymentMethodDetailFilter = null; let editingDebtId = null; let inlineEditingTxId = null; let sharedInlineEditingTxId = null; let sharedInlineEditingDepositId = null;
         let currentChartMode = localStorage.getItem('bear_chart_mode') || 'main';
         let editingSharedTxId = null;
         let dashListExpanded = false;
@@ -3857,6 +3857,93 @@
             if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
+        function startSharedInlineDepositEdit(id) {
+            const deposit = sharedDeposits.find(d => String(d.id) === String(id));
+            if (!deposit) return;
+            sharedInlineEditingDepositId = deposit.id;
+            renderSharedAccountPage();
+            setTimeout(() => {
+                const input = document.getElementById(`shared-inline-deposit-amount-${id}`);
+                if (input) {
+                    input.focus();
+                    input.select();
+                }
+            }, 0);
+        }
+
+        function cancelSharedInlineDepositEdit() {
+            sharedInlineEditingDepositId = null;
+            renderSharedAccountPage();
+        }
+
+        function handleSharedInlineDepositKeydown(event, id, inputEl) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                event.stopPropagation();
+                saveSharedInlineDepositEdit(id, inputEl || event.target);
+            } else if (event.key === 'Escape') {
+                event.preventDefault();
+                event.stopPropagation();
+                cancelSharedInlineDepositEdit();
+            }
+        }
+
+        function resolveSharedInlineDepositInput(id, sourceEl) {
+            if (sourceEl && sourceEl.classList && sourceEl.classList.contains('inline-amount-input')) return sourceEl;
+            if (sourceEl && sourceEl.closest) {
+                const scopedInput = sourceEl.closest('.inline-edit-wrap')?.querySelector('.inline-amount-input');
+                if (scopedInput) return scopedInput;
+            }
+            const activeEl = document.activeElement;
+            if (activeEl && activeEl.id === `shared-inline-deposit-amount-${id}`) return activeEl;
+            const inputs = document.querySelectorAll(`[id="shared-inline-deposit-amount-${id}"]`);
+            if (inputs.length === 1) return inputs[0];
+            for (const el of inputs) {
+                if (el === activeEl) return el;
+            }
+            return inputs[0] || null;
+        }
+
+        function saveSharedInlineDepositEdit(id, sourceEl = null) {
+            const input = resolveSharedInlineDepositInput(id, sourceEl);
+            if (!input) return;
+            const amount = parseFloat(input.value);
+            if (isNaN(amount) || amount <= 0) {
+                alert('請輸入正確金額');
+                input.focus();
+                return;
+            }
+            const index = sharedDeposits.findIndex(d => String(d.id) === String(id));
+            if (index === -1) return;
+            sharedDeposits[index].amount = amount;
+            sharedDeposits.sort((a, b) => new Date(b.date) - new Date(a.date) || b.id - a.id);
+            localStorage.setItem('bear_shared_deposits', JSON.stringify(sharedDeposits));
+            writeAutoBackup('inline-edit-shared-deposit-amount');
+            sharedInlineEditingDepositId = null;
+            renderSharedAccountPage();
+        }
+
+        function deleteSharedDeposit(id) {
+            const targetId = String(id);
+            const deposit = sharedDeposits.find(d => String(d.id) === targetId);
+            if (!deposit) return;
+            if (!confirm(`要刪除 ${deposit.date} 這筆共同入金嗎？`)) return;
+            sharedDeposits = sharedDeposits.filter(d => String(d.id) !== targetId);
+            localStorage.setItem('bear_shared_deposits', JSON.stringify(sharedDeposits));
+            writeAutoBackup('delete-shared-deposit');
+            if (String(sharedInlineEditingDepositId) === targetId) sharedInlineEditingDepositId = null;
+            renderSharedAccountPage();
+        }
+
+        function getSharedInlineDepositActionHtml(item) {
+            return `<span class="tx-amount amount-inc">+$${formatMoney(item.amount)}</span><i class="fas fa-edit edit-btn" onclick="startSharedInlineDepositEdit('${item.id}')"></i><i class="fas fa-trash delete-btn" onclick="deleteSharedDeposit('${item.id}')"></i>`;
+        }
+
+        function buildInlineSharedDepositEditHtml(item) {
+            const who = (item.from || 'me') === 'me' ? '我轉入' : `${sharedBudgetSettings.partnerName || '對方'}轉入`;
+            return `<li class="tx-item"><div class="tx-info"><span class="tx-cat">🫙 共同入金</span><span class="tx-date">${item.date} ・ ${who}${item.note ? ` ・ ${item.note}` : ''}</span></div><div class="action-btns"><div class="inline-edit-wrap"><input id="shared-inline-deposit-amount-${item.id}" class="inline-amount-input" type="number" step="any" min="0" value="${Number(item.amount) || 0}" onkeydown="handleSharedInlineDepositKeydown(event, '${item.id}', this)"><button type="button" class="inline-save-btn" onclick="saveSharedInlineDepositEdit('${item.id}', this)">存</button><button type="button" class="inline-save-btn" style="background:#999;" onclick="cancelSharedInlineDepositEdit()">取消</button></div></div></li>`;
+        }
+
         function renderSharedDepositList(currentCycle) {
             const listEl = document.getElementById('shared-deposit-list');
             if (!listEl) return;
@@ -3868,7 +3955,11 @@
             let html = '<ul class="tx-list">';
             summary.depositsInCycle.forEach(item => {
                 const who = (item.from || 'me') === 'me' ? '我轉入' : `${sharedBudgetSettings.partnerName || '對方'}轉入`;
-                html += `<li class="tx-item"><div class="tx-info"><span class="tx-cat">🫙 共同入金</span><span class="tx-date">${item.date} ・ ${who}${item.note ? ` ・ ${item.note}` : ''}</span></div><div class="tx-amount amount-inc">+$${formatMoney(item.amount)}</div></li>`;
+                if (String(sharedInlineEditingDepositId) === String(item.id)) {
+                    html += buildInlineSharedDepositEditHtml(item);
+                } else {
+                    html += `<li class="tx-item"><div class="tx-info"><span class="tx-cat">🫙 共同入金</span><span class="tx-date">${item.date} ・ ${who}${item.note ? ` ・ ${item.note}` : ''}</span></div><div class="action-btns">${getSharedInlineDepositActionHtml(item)}</div></li>`;
+                }
             });
             html += '</ul>';
             listEl.innerHTML = html;
