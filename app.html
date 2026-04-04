@@ -1427,7 +1427,7 @@
 
         
         let transactions = JSON.parse(localStorage.getItem('bear_transactions')) || [];
-        let budgets = JSON.parse(localStorage.getItem('bear_budgets')) || {};
+        let budgets = JSON.parse(localStorage.getItem('bear_budgets')) || JSON.parse(localStorage.getItem('budgets_v7')) || {};
         let masterBudgets = JSON.parse(localStorage.getItem('bear_master_budgets')) || { '固定支出': 0, '變動支出': 0, '預存支出': 0 };
         let yearlyGoals = JSON.parse(localStorage.getItem('bear_yearly_goals')) || {}; 
         let initSaved = JSON.parse(localStorage.getItem('bear_init_saved')) || {}; 
@@ -5003,6 +5003,7 @@ function getSharedBudgetSummary(cycleTx) {
         function saveEnvelopeBudget(mainCat, index, value) {
             const env = userEnvelopes[mainCat][index];
             budgets[env] = parseFloat(value) || 0;
+            localStorage.setItem('bear_budgets', JSON.stringify(budgets));
             localStorage.setItem('budgets_v7', JSON.stringify(budgets));
             syncSelectedCycleBudgetConfig('save-envelope-budget');
             renderBudgetSettings();
@@ -5040,6 +5041,7 @@ function getSharedBudgetSummary(cycleTx) {
             const changedCount = renameTransactionsInSelectedCycle(mainCat, oldName, trimmed);
 
             localStorage.setItem('bear_custom_envelopes', JSON.stringify(userEnvelopes));
+            localStorage.setItem('bear_budgets', JSON.stringify(budgets));
             localStorage.setItem('budgets_v7', JSON.stringify(budgets));
             localStorage.setItem('yearlyGoals_v1', JSON.stringify(yearlyGoals));
             localStorage.setItem('initSaved_v1', JSON.stringify(initSaved));
@@ -5064,6 +5066,7 @@ function getSharedBudgetSummary(cycleTx) {
             delete initSaved[env];
             delete monthlySavedPlans[env];
             localStorage.setItem('envelopes_v7', JSON.stringify(userEnvelopes));
+            localStorage.setItem('bear_budgets', JSON.stringify(budgets));
             localStorage.setItem('budgets_v7', JSON.stringify(budgets));
             localStorage.setItem('yearlyGoals_v1', JSON.stringify(yearlyGoals));
             localStorage.setItem('initSaved_v1', JSON.stringify(initSaved));
