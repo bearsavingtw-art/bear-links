@@ -1,128 +1,740 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>存錢與投資順序攻略 | Bear.saving</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bear 的三階段火箭 × 抗通膨順序整理包</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Noto+Serif+TC:wght@400;600;700&family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    :root {
+      --bg: #fcfbf9;
+      --card: #ffffff;
+      --text: #5a4d41;
+      --sub: #8f857d;
+      --accent: #b08d85;
+      --accent-soft: #f4ece8;
+      --line: #e9e1da;
+      --good: #7b9e87;
+      --warn: #e07a5f;
+      --shadow: 0 8px 28px rgba(90, 77, 65, 0.06);
+    }
 
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&family=Noto+Serif+TC:wght@400;600&display=swap" rel="stylesheet">
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: 'Montserrat', 'Noto Serif TC', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.8;
+    }
 
-<style>
-body{
-    font-family: 'Montserrat','Noto Serif TC',sans-serif;
-    background:#fcfbf9;
-    color:#5a4d41;
-    margin:0;
-    line-height:1.8;
-}
-.container{
-    max-width:800px;
-    margin:80px auto;
-    padding:20px;
-}
-h1{
-    text-align:center;
-    font-size:2rem;
-}
-.subtitle{
-    text-align:center;
-    color:#968c83;
-    margin-bottom:20px;
-}
-.highlight{
-    text-align:center;
-    margin:30px 0;
-    font-weight:600;
-}
-.card{
-    background:#fff;
-    padding:25px;
-    border-radius:12px;
-    margin-bottom:20px;
-}
-.check{
-    display:flex;
-    gap:10px;
-    margin-bottom:10px;
-}
-.btn{
-    display:inline-block;
-    margin:10px;
-    padding:12px 25px;
-    border-radius:30px;
-    text-decoration:none;
-    background:#5a4d41;
-    color:#fff;
-}
-.footer{
-    text-align:center;
-    margin-top:40px;
-}
-.small{
-    font-size:0.85rem;
-    color:#968c83;
-}
-</style>
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(252, 251, 249, 0.96);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid rgba(176, 141, 133, 0.12);
+    }
+
+    .nav-inner {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .brand {
+      text-decoration: none;
+      color: var(--text);
+      font-family: 'Playfair Display', serif;
+      font-size: 1.35rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .nav-link {
+      text-decoration: none;
+      color: var(--sub);
+      font-size: 0.92rem;
+      padding: 8px 12px;
+      border-radius: 999px;
+      transition: 0.2s ease;
+    }
+
+    .nav-link:hover {
+      background: var(--accent-soft);
+      color: var(--text);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .home-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-decoration: none;
+      color: #fff;
+      background: var(--text);
+      padding: 10px 16px;
+      border-radius: 999px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      white-space: nowrap;
+      box-shadow: 0 10px 20px rgba(90, 77, 65, 0.12);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .home-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 14px 24px rgba(90, 77, 65, 0.16);
+    }
+
+    .container {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 28px 20px 80px;
+    }
+
+    .hero {
+      padding: 42px 0 22px;
+      text-align: center;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 0.88rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    h1 {
+      margin: 18px 0 12px;
+      font-family: 'Noto Serif TC', serif;
+      font-size: clamp(2rem, 5vw, 3rem);
+      line-height: 1.35;
+    }
+
+    .hero-sub {
+      max-width: 760px;
+      margin: 0 auto;
+      color: var(--sub);
+      font-size: 1.05rem;
+    }
+
+    .hero-actions {
+      margin-top: 24px;
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 14px 22px;
+      border-radius: 999px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.95rem;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .btn:hover { transform: translateY(-2px); }
+    .btn-primary {
+      background: var(--text);
+      color: #fff;
+      box-shadow: 0 12px 24px rgba(90, 77, 65, 0.16);
+    }
+    .btn-secondary {
+      background: #fff;
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin: 28px 0 10px;
+    }
+
+    .mini-card, .card, .stage-card {
+      background: var(--card);
+      border: 1px solid rgba(176, 141, 133, 0.16);
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+    }
+
+    .mini-card {
+      padding: 20px;
+      text-align: left;
+    }
+
+    .mini-card i {
+      color: var(--accent);
+      font-size: 1.1rem;
+      margin-bottom: 10px;
+    }
+
+    .mini-card h3 {
+      margin: 0 0 8px;
+      font-size: 1.02rem;
+    }
+
+    .mini-card p {
+      margin: 0;
+      font-size: 0.93rem;
+      color: var(--sub);
+    }
+
+    .section {
+      margin-top: 28px;
+    }
+
+    .card {
+      padding: 28px;
+    }
+
+    .section-title {
+      margin: 0 0 10px;
+      font-size: 1.4rem;
+      font-family: 'Noto Serif TC', serif;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-desc {
+      margin: 0 0 22px;
+      color: var(--sub);
+      font-size: 0.97rem;
+    }
+
+    .req-grid, .check-grid, .etf-grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .req-grid { grid-template-columns: repeat(2, 1fr); }
+    .check-grid { grid-template-columns: repeat(2, 1fr); }
+    .etf-grid { grid-template-columns: repeat(3, 1fr); }
+
+    .req-step, .check-card, .etf-card {
+      background: #fdfbf8;
+      border: 1px dashed #ddd1c6;
+      border-radius: 16px;
+      padding: 18px;
+    }
+
+    .req-step-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .req-step-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--text);
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.88rem;
+      flex: 0 0 28px;
+    }
+
+    .req-step-title, .check-card h4, .etf-card h4 {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .req-step p, .check-card p, .etf-card p {
+      margin: 8px 0 0;
+      color: var(--sub);
+      font-size: 0.93rem;
+    }
+
+    .stage-wrap {
+      display: grid;
+      gap: 18px;
+      margin-top: 18px;
+    }
+
+    .stage-card {
+      padding: 28px;
+      border-left: 6px solid var(--accent);
+    }
+
+    .stage-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .stage-title {
+      margin: 0;
+      font-size: 1.35rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'Noto Serif TC', serif;
+    }
+
+    .stage-tag {
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 0.85rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .logic {
+      margin: 14px 0;
+      color: var(--sub);
+      font-size: 0.95rem;
+    }
+
+    .logic strong, .callout strong { color: var(--text); }
+
+    .target-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .target-list li {
+      position: relative;
+      padding-left: 30px;
+      margin-bottom: 14px;
+      color: var(--sub);
+      font-size: 0.95rem;
+    }
+
+    .target-list li::before {
+      content: '🎯';
+      position: absolute;
+      left: 0;
+      top: 2px;
+    }
+
+    .execution, .pass, .callout, .quote-box {
+      margin-top: 18px;
+      border-radius: 14px;
+      padding: 16px 18px;
+    }
+
+    .execution {
+      background: #fcfbf9;
+      border: 1px dashed #d9cdc2;
+      color: var(--text);
+    }
+
+    .pass {
+      background: rgba(123, 158, 135, 0.1);
+      border-left: 4px solid var(--good);
+      color: var(--good);
+      font-weight: 700;
+    }
+
+    .callout {
+      background: rgba(224, 122, 95, 0.08);
+      border-left: 4px solid var(--warn);
+      color: var(--text);
+    }
+
+    .quote-box {
+      background: var(--text);
+      color: #fff;
+      text-align: center;
+      padding: 34px 24px;
+      box-shadow: 0 18px 36px rgba(90, 77, 65, 0.14);
+    }
+
+    .quote-box h3 {
+      margin: 0 0 12px;
+      font-family: 'Playfair Display', serif;
+      color: #eaddd7;
+      font-size: 1.2rem;
+    }
+
+    .quote-main {
+      font-family: 'Noto Serif TC', serif;
+      font-size: 1.35rem;
+      font-weight: 700;
+      line-height: 1.7;
+    }
+
+    .quote-sub {
+      margin-top: 12px;
+      color: rgba(255,255,255,0.82);
+      font-size: 0.95rem;
+    }
+
+    .etf-card {
+      border-style: solid;
+      background: #fff;
+    }
+
+    .etf-badge {
+      display: inline-block;
+      margin-bottom: 10px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    .ticker {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .growth {
+      color: var(--good);
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    .check-card.good { border-left: 4px solid var(--good); }
+    .check-card.warn { border-left: 4px solid var(--warn); }
+
+    .cta-panel {
+      display: grid;
+      grid-template-columns: 1.35fr 1fr;
+      gap: 16px;
+      margin-top: 26px;
+    }
+
+    .qa-note {
+      margin-top: 34px;
+      background: #fff;
+      border: 1px solid rgba(176, 141, 133, 0.16);
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      padding: 22px;
+      text-align: center;
+    }
+
+    .qa-note-title {
+      margin: 0 0 8px;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .qa-note p {
+      margin: 0;
+      color: var(--sub);
+      font-size: 0.93rem;
+    }
+
+    .qa-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 12px;
+      text-decoration: none;
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .footer {
+      text-align: center;
+      color: var(--sub);
+      font-size: 0.82rem;
+      margin-top: 60px;
+      padding-top: 28px;
+      border-top: 1px solid var(--line);
+    }
+
+    @media (max-width: 900px) {
+      .grid-3, .etf-grid, .check-grid, .cta-panel { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 720px) {
+      .req-grid { grid-template-columns: 1fr; }
+      .card, .stage-card { padding: 22px 18px; }
+      .nav-inner { padding: 12px 14px; align-items: flex-start; }
+      .nav-actions { width: 100%; justify-content: space-between; }
+      .hero { padding-top: 28px; }
+      .hero-sub { font-size: 0.98rem; }
+      .stage-card { border-left-width: 4px; }
+      .home-btn { padding: 9px 14px; font-size: 0.84rem; }
+    }
+  </style>
 </head>
-
 <body>
+  <nav>
+    <div class="nav-inner">
+      <a class="brand" href="index.html">Bear.saving</a>
+      <div class="nav-actions">
+        <div class="nav-links">
+          <a class="nav-link" href="#stages">三階段火箭</a>
+          <a class="nav-link" href="#etf">ETF 怎麼看</a>
+          <a class="nav-link" href="#check">你現在能不能投資</a>
+        </div>
+        <a class="home-btn" href="https://bearsavingtw-art.github.io/bear-links/"><i class="fa-solid fa-house"></i> 回到首頁</a>
+      </div>
+    </div>
+  </nav>
 
-<div class="container">
+  <main class="container">
+    <section class="hero">
+      <div class="eyebrow"><i class="fa-solid fa-layer-group"></i> 存錢與投資順序攻略</div>
+      <h1>抗通膨不是先投資，<br>而是先把順序排對。</h1>
+      <p class="hero-sub">
+        這不是叫你把所有錢放在現金本裡。現金袋，是拿來分配這個月本來就要花掉的錢；真正要對抗通膨的那一塊，才輪到銀行、ETF、長期投資。
+      </p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="#check"><i class="fa-solid fa-list-check"></i> 先看我現在適不適合投資</a>
+        <a class="btn btn-secondary" href="app.html"><i class="fa-solid fa-arrow-up-right-from-square"></i> 打開 Bear 財務駕駛艙</a>
+      </div>
 
-<h1>存錢與投資順序攻略</h1>
-<div class="subtitle">先讓錢留下來，才有資格談投資</div>
+      <div class="grid-3">
+        <div class="mini-card">
+          <i class="fa-solid fa-wallet"></i>
+          <h3>現金袋怎麼分</h3>
+          <p>先把這個月一定會花掉的錢分好，不要讓錢在看不見的地方一直漏掉。</p>
+        </div>
+        <div class="mini-card">
+          <i class="fa-solid fa-chart-line"></i>
+          <h3>ETF 怎麼看</h3>
+          <p>不是先追報酬率，而是先分清楚什麼錢該活用，什麼錢才適合長期放大。</p>
+        </div>
+        <div class="mini-card">
+          <i class="fa-solid fa-traffic-light"></i>
+          <h3>你現在能不能投資</h3>
+          <p>先確認自己是不是已經站穩，再決定要不要把錢送去承擔波動。</p>
+        </div>
+      </div>
+    </section>
 
-<div class="highlight">
-如果你現在連錢都留不住，先不要急著看ETF
-</div>
+    <section class="section">
+      <div class="card">
+        <h2 class="section-title"><i class="fa-solid fa-clipboard-list"></i> 先講清楚：現金袋不是投資</h2>
+        <p class="section-desc">
+          很多人聽到「用現金袋分配」就直接反射說會輸給通膨。可是 Bear 這套方法，原本就在談順序：先守住短期生活，再安排中期目標，最後才輪到長期投資。
+        </p>
+        <div class="req-grid">
+          <div class="req-step">
+            <div class="req-step-header">
+              <div class="req-step-num">1</div>
+              <h3 class="req-step-title">先分「本月會花掉的錢」</h3>
+            </div>
+            <p>餐費、交通、娛樂、日用品，本來就會花掉。用現金袋不是為了賺利息，是為了讓你花錢有感，不要失控。</p>
+          </div>
+          <div class="req-step">
+            <div class="req-step-header">
+              <div class="req-step-num">2</div>
+              <h3 class="req-step-title">再留「快要用到的錢」</h3>
+            </div>
+            <p>保費、稅金、旅遊、美髮、維修，這些不是投資，也不是亂花，而是要提早預留的支出。</p>
+          </div>
+          <div class="req-step">
+            <div class="req-step-header">
+              <div class="req-step-num">3</div>
+              <h3 class="req-step-title">最後才是「長期不動的錢」</h3>
+            </div>
+            <p>真的能放 3 年、5 年以上，遇到波動也不會急著拿出來的錢，才適合放進 ETF 或其他投資。</p>
+          </div>
+          <div class="req-step">
+            <div class="req-step-header">
+              <div class="req-step-num">4</div>
+              <h3 class="req-step-title">順序錯了，報酬率也救不了你</h3>
+            </div>
+            <p>最可惜的不是沒投資，而是錢還沒開始長大，就先被生活和情緒花掉了。</p>
+          </div>
+        </div>
+      </div>
+    </section>
 
-<div class="card">
-<h3>① 現金袋怎麼分</h3>
-<p>把「這個月一定會花掉的錢」分開放，而不是全部混在一起。</p>
-<ul>
-<li>餐費</li>
-<li>交通</li>
-<li>娛樂</li>
-</ul>
-<p>👉 目的不是投資，是讓你「不要失控」</p>
-</div>
+    <section class="section" id="stages">
+      <div class="stage-wrap">
+        <article class="stage-card">
+          <div class="stage-top">
+            <h2 class="stage-title"><i class="fa-solid fa-life-ring" style="color:#78909c"></i> 第一階段｜短期目標（0–1 年）</h2>
+            <div class="stage-tag">系統維運與緩衝</div>
+          </div>
+          <div class="logic"><strong>核心邏輯：</strong> 確保生活不會突然掛掉。這一階段重點不是投資報酬，而是 <strong>流動性、安全感、可控感</strong>。</div>
+          <ul class="target-list">
+            <li><strong>現金袋 / 預算袋：</strong> 把這個月會花掉的錢先分好。你不是把所有錢都放現金，而是只把需要控管的那一塊拿出來。</li>
+            <li><strong>緊急預備金：</strong> 至少 3–6 個月生存底線。沒有這筆緩衝，市場一跌、工作一亂，你就會被迫賣在最不想賣的時候。</li>
+            <li><strong>年度預存支出：</strong> 保費、稅金、節慶、旅行，用倒推法先留位置，避免某個月突然爆掉。</li>
+          </ul>
+          <div class="execution"><strong>執行方式：</strong> 高活存帳戶 + 預算袋分配。這一層的任務，是先把錢守住，不是先證明自己很會投資。</div>
+          <div class="pass"><i class="fa-solid fa-check-circle"></i> 放行條件：你至少已經有基本緊急預備金，而且沒有高利息循環卡債在追著你跑。</div>
+        </article>
 
-<div class="card">
-<h3>② ETF 怎麼看</h3>
-<p>真正對抗通膨的錢，應該放在長期投資。</p>
-<ul>
-<li>穩定型：0050 / 006208</li>
-<li>成長型：科技ETF</li>
-<li>現金流：高股息</li>
-</ul>
-<p>👉 但這是「長期不用動的錢」</p>
-</div>
+        <article class="stage-card">
+          <div class="stage-top">
+            <h2 class="stage-title"><i class="fa-solid fa-rocket" style="color:var(--accent)"></i> 第二階段｜中期目標（1–5 年）</h2>
+            <div class="stage-tag">硬體升級與專款專用</div>
+          </div>
+          <div class="logic"><strong>核心邏輯：</strong> 不是所有剩下來的錢都拿去投資。先替未來 1–5 年會發生的大支出，建立專款專用的子帳戶。</div>
+          <ul class="target-list">
+            <li><strong>工具升級：</strong> 電腦、手機、麥克風、課程、作品設備。這些可能比亂追報酬率，更能幫你增加收入。</li>
+            <li><strong>體驗型目標：</strong> 旅遊、進修、搬家基金、大額家電。這些有明確期限，就不要丟去承擔太大波動。</li>
+            <li><strong>逆推法存錢：</strong> 目標金額 ÷ 剩餘月數 = 每月要留多少。算完才知道，自己到底是該調目標還是該加收入。</li>
+          </ul>
+          <div class="execution"><strong>執行方式：</strong> 用專款袋 / 子帳戶切開。不要把 1–3 年內會用到的錢，跟 10 年後才要用的投資錢混在一起。</div>
+          <div class="pass"><i class="fa-solid fa-check-circle"></i> 放行條件：每月現金流穩定為正，而且第一階段的救生圈沒有被挖去補洞。</div>
+        </article>
 
-<div class="card">
-<h3>③ 你現在能不能投資</h3>
+        <article class="stage-card">
+          <div class="stage-top">
+            <h2 class="stage-title"><i class="fa-solid fa-globe" style="color:#d4a373"></i> 第三階段｜長期目標（5 年以上）</h2>
+            <div class="stage-tag">自動化與資產放大</div>
+          </div>
+          <div class="logic"><strong>核心邏輯：</strong> 長期投資的前提，不是你很勇敢，而是你終於有一筆錢可以不急著用。這一層才開始談 <strong>複利、ETF、資產配置</strong>。</div>
+          <ul class="target-list">
+            <li><strong>退休金 / 財務自由帳戶：</strong> 不是為了很遠的未來而已，是為了讓你更早擁有選擇權。</li>
+            <li><strong>ETF / 長期投資：</strong> 真正要對抗通膨的，不是餐費，不是旅遊基金，而是這筆你願意長期不動的錢。</li>
+            <li><strong>定期定額：</strong> 重點不是每次買得多漂亮，而是你能不能穩定地留得下來、放得夠久。</li>
+          </ul>
+          <div class="execution"><strong>執行方式：</strong> 固定投入、長期持有、不要把本來要過生活的錢硬塞進投資帳戶。</div>
+          <div class="callout"><strong>提醒：</strong> 如果你現在連這個月餐費都常常超支，問題通常不是你沒買對 ETF，而是你還沒建立撐得住的底層系統。</div>
+          <div class="pass"><i class="fa-solid fa-check-circle"></i> 放行條件：你已經有基本安全墊，也知道投入市場的這筆錢不是最近兩三年要拿出來救急的。</div>
+        </article>
+      </div>
+    </section>
 
-<div class="check">☐ 每月有剩錢</div>
-<div class="check">☐ 有緊急預備金</div>
-<div class="check">☐ 沒有高利負債</div>
-<div class="check">☐ 有在記帳</div>
+    <section class="section">
+      <div class="quote-box">
+        <h3>Bear's Insight</h3>
+        <div class="quote-main">你不是輸給通膨，<br>你常常是輸在 ——<br>錢還沒投資，就先花掉。</div>
+        <div class="quote-sub">先把錢守住，才有資格談放大。</div>
+      </div>
+    </section>
 
-<p><strong>✔ 如果還沒做到 → 先回去存錢</strong></p>
-<p><strong>✔ 都做到 → 才開始投資</strong></p>
-</div>
+    <section class="section" id="etf">
+      <div class="card">
+        <h2 class="section-title"><i class="fa-solid fa-chart-line"></i> ETF 怎麼看：先看角色，不要先看名單</h2>
+        <p class="section-desc">
+          下面這區不是叫你現在立刻買，而是讓你先看懂：不同 ETF 的定位不同。真正重要的是，你現在拿去投資的，是否真的是長期不動的錢。
+        </p>
+        <div class="etf-grid">
+          <div class="etf-card">
+            <div class="etf-badge">市值型 / 穩定核心</div>
+            <div class="ticker">0050 / 006208</div>
+            <h4>適合：想先跟著大盤長期累積的人</h4>
+            <p>邏輯簡單，重點不是配息有多香，而是長期跟著市場一起成長。</p>
+            <p class="growth">你可以把它理解成：先把「核心部位」站穩。</p>
+          </div>
+          <div class="etf-card">
+            <div class="etf-badge">科技 / 成長型</div>
+            <div class="ticker">科技類 ETF</div>
+            <h4>適合：知道自己在承擔較高波動的人</h4>
+            <p>成長潛力高，但波動也可能更明顯。這類更不適合拿生活緩衝金去碰。</p>
+            <p class="growth">你可以把它理解成：加速器，但不是救生圈。</p>
+          </div>
+          <div class="etf-card">
+            <div class="etf-badge">高股息 / 現金流型</div>
+            <div class="ticker">0056 / 00878 / 00919</div>
+            <h4>適合：重視現金流感受的人</h4>
+            <p>不是不能買，而是要知道自己買的是什麼。如果你還在累積期，先理解總報酬更重要。</p>
+            <p class="growth">你可以把它理解成：感受比較強，但不一定跑最快。</p>
+          </div>
+        </div>
+        <div class="callout" style="margin-top:18px;"><strong>一句話版：</strong> ETF 不是不能買，問題是你現在拿去買 ETF 的錢，原本到底是「生活費」、還是「真的可以長期不動的資產」？</div>
+      </div>
+    </section>
 
-<div class="footer">
+    <section class="section" id="check">
+      <div class="card">
+        <h2 class="section-title"><i class="fa-solid fa-list-check"></i> 你現在能不能投資？先勾這幾題</h2>
+        <p class="section-desc">
+          不用急著證明自己有投資能力。先看你現在站在哪裡，再決定下一步。能留得下來，才是開始的資格。
+        </p>
+        <div class="check-grid">
+          <div class="check-card warn">
+            <h4>1. 我有沒有基本緊急預備金？</h4>
+            <p>沒有的話，請先建緩衝。市場波動不可怕，沒現金可用才可怕。</p>
+          </div>
+          <div class="check-card warn">
+            <h4>2. 我有沒有高利率債務？</h4>
+            <p>如果循環利息、卡債、急用債還在燒，先處理它，通常比急著投資更划算。</p>
+          </div>
+          <div class="check-card good">
+            <h4>3. 我每個月有沒有穩定剩錢？</h4>
+            <p>如果每個月都只是剛好打平，代表你還需要先把支出系統穩定下來。</p>
+          </div>
+          <div class="check-card good">
+            <h4>4. 這筆錢 3–5 年內會不會用到？</h4>
+            <p>會用到，就不要勉強塞進長期投資。先把短中期目標留好位置。</p>
+          </div>
+        </div>
 
-<a href="app.html" class="btn">前往財務駕駛艙</a>
-<a href="https://bearsavingtw-art.github.io/bear-links/tool.html" class="btn">財務診斷室</a>
-<a href="index.html" class="btn">回到首頁</a>
+        <div class="cta-panel">
+          <div class="req-step" style="background:#fff; border-style:solid;">
+            <h4 style="margin:0 0 8px;">簡單判斷</h4>
+            <p style="margin:0;">如果你前兩題還沒過，先不要急著談投資績效。先把現金袋、預存支出、緊急預備金做起來。<br><br>如果四題大多都能點頭，恭喜你，才比較適合慢慢開始長期投入。</p>
+          </div>
+          <div class="req-step" style="background:#fff; border-style:solid;">
+            <h4 style="margin:0 0 8px;">下一步建議</h4>
+            <p style="margin:0;">先用 Bear 財務駕駛艙把每筆錢找位置。錢留得住，再來談放大；不然報酬率只是你腦中的安慰劑。</p>
+            <div style="margin-top:16px; display:flex; gap:10px; flex-wrap:wrap;">
+              <a class="btn btn-primary" href="app.html">前往財務駕駛艙</a>
+              <a class="btn btn-secondary" href="https://bearsavingtw-art.github.io/bear-links/tool.html" target="_blank" rel="noopener">前往財務診斷室</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-<div class="small">
-更多關於存錢的 QA，可以回到首頁慢慢看
-</div>
+    <section class="qa-note">
+      <h3 class="qa-note-title">更多真實案例 QA</h3>
+      <p>如果你也在卡關：現金袋怎麼分、卡費怎麼記、到底先存錢還是先投資，可以到 Bear 財務診斷室看更多真實情境與整理。</p>
+      <a class="qa-link" href="https://bearsavingtw-art.github.io/bear-links/" target="_blank" rel="noopener">
+        <i class="fa-solid fa-circle-question"></i> 前往查看更多案例與 QA
+      </a>
+    </section>
 
-</div>
-
-</div>
-
+    <footer class="footer">
+      © 2026 Bear.saving · 先把錢守住，才有資格談投資。
+    </footer>
+  </main>
 </body>
 </html>
