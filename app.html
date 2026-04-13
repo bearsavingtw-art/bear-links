@@ -1093,11 +1093,11 @@
                 <div class="status-panel-desc" id="cloud-status-desc">目前尚未登入，資料先留在這台裝置。</div>
                 <div class="status-meta-list">
                     <div class="status-meta-item">
-                        <div class="status-meta-label">本機最後更新</div>
+                        <div class="status-meta-label">這台裝置目前版本</div>
                         <div class="status-meta-value" id="cloud-local-meta">尚未建立</div>
                     </div>
                     <div class="status-meta-item">
-                        <div class="status-meta-label">雲端最後狀態</div>
+                        <div class="status-meta-label">雲端目前版本</div>
                         <div class="status-meta-value" id="cloud-remote-meta">尚未登入</div>
                     </div>
                 </div>
@@ -1147,6 +1147,7 @@
                 <button class="btn btn-outline" type="button" onclick="handleCloudLoadNow()"><i class="fas fa-cloud-arrow-down"></i> 從雲端載回資料</button>
                 <button class="btn btn-cancel" type="button" onclick="signOutCloud()"><i class="fas fa-right-from-bracket"></i> 登出</button>
             </div>
+            <div class="sync-inline-note" id="cloud-sync-sequence-note" style="margin-top:10px;"><strong>跨裝置建議順序：</strong> 原本有新資料的那台先按「把目前資料同步到雲端」，另一台再按「從雲端載回資料」。</div>
             <div class="section-back-top"><button type="button" class="mini-link-btn" onclick="scrollToSettingsSection('settings-shortcuts-top')"><i class="fas fa-arrow-up"></i> 點我回到最上方</button></div>
         </div>
 
@@ -1763,6 +1764,7 @@
         let cloudSaveTimer = null;
         let suppressCloudAutoSave = false;
         let lastCloudSnapshotMeta = null;
+        let lastCloudSnapshotFingerprint = '';
         let syncConflictState = null;
         let cloudRealtimeChannel = null;
         let cloudRefreshInterval = null;
@@ -1911,38 +1913,58 @@
             return buildStateFingerprint(collectAppState());
         }
 
-        function renderSyncHints() {
-            const localMetaEl = document.getElementById('cloud-local-meta');
-            const remoteMetaEl = document.getElementById('cloud-remote-meta');
-            const addBadge = document.getElementById('add-sync-badge');
-            const addDesc = document.getElementById('add-sync-desc');
-            const localUpdatedAt = getLocalUpdatedAt();
-            if (localMetaEl) localMetaEl.textContent = formatDateTimeDisplay(localUpdatedAt);
-            if (remoteMetaEl) {
-                if (lastCloudSnapshotMeta && lastCloudSnapshotMeta.updatedAt) {
-                    remoteMetaEl.textContent = `${formatDateTimeDisplay(lastCloudSnapshotMeta.updatedAt)}${lastCloudSnapshotMeta.email ? ' ・ ' + lastCloudSnapshotMeta.email : ''}`;
-                } else {
-                    remoteMetaEl.textContent = '尚未登入';
-                }
-            }
-            if (addBadge && addDesc) {
-                if (lastCloudSnapshotMeta && lastCloudSnapshotMeta.hasConflict) {
-                    addBadge.textContent = '注意差異';
-                    addBadge.className = 'status-badge warn';
-                    addDesc.innerHTML = '這台裝置和雲端看起來不是同一份資料。<strong>先確認要保留哪一份，再按載入或同步。</strong>';
-                } else if (lastCloudSnapshotMeta && lastCloudSnapshotMeta.isLoggedIn) {
-                    addBadge.textContent = '雲端已連線';
-                    addBadge.className = 'status-badge cloud';
-                    addDesc.textContent = '按下儲存後，這筆記帳會直接上傳到雲端，其他裝置也會自動更新到最新版本。';
-                } else {
-                    addBadge.textContent = '本機中';
-                    addBadge.className = 'status-badge local';
-                    addDesc.textContent = '這頁先專心記帳，系統會自動保留這台裝置的最新變更。';
-                }
-            }
-        }
+function renderSyncHints() {
+    const localMetaEl = document.getElementById('cloud-local-meta');
+    const remoteMetaEl = document.getElementById('cloud-remote-meta');
+    const addBadge = document.getElementById('add-sync-badge');
+    const addDesc = document.getElementById('add-sync-desc');
+    const localUpdatedAt = getLocalUpdatedAt();
+    const localFingerprint = getLocalStateFingerprint();
+    const cloudFingerprint = lastCloudSnapshotFingerprint || lastAppliedCloudFingerprint || '';
+    const hasLoggedInCloud = !!(lastCloudSnapshotMeta && lastCloudSnapshotMeta.isLoggedIn);
+    const isSynced = !!(hasLoggedInCloud && cloudFingerprint && localFingerprint === cloudFingerprint);
 
-        function compareLocalAndCloud(cloudRow) {
+    if (localMetaEl) {
+        localMetaEl.textContent = `${formatDateTimeDisplay(localUpdatedAt)}${hasLoggedInCloud ? (isSynced ? ' ・ 已和雲端一致' : ' ・ 這台可能有尚未同步的變更') : ' ・ 目前只存在這台裝置'}`;
+    }
+
+    if (remoteMetaEl) {
+        if (lastCloudSnapshotMeta && lastCloudSnapshotMeta.updatedAt) {
+            const syncLabel = isSynced ? '已和這台一致' : '可載回的上一版';
+            remoteMetaEl.textContent = `${formatDateTimeDisplay(lastCloudSnapshotMeta.updatedAt)}${lastCloudSnapshotMeta.email ? ' ・ ' + lastCloudSnapshotMeta.email : ''} ・ ${syncLabel}`;
+        } else if (hasLoggedInCloud) {
+            remoteMetaEl.textContent = `${lastCloudSnapshotMeta.email ? lastCloudSnapshotMeta.email + ' ・ ' : ''}雲端目前還沒有資料`;
+        } else {
+            remoteMetaEl.textContent = '尚未登入';
+        }
+    }
+
+    if (addBadge && addDesc) {
+        if (lastCloudSnapshotMeta && lastCloudSnapshotMeta.hasConflict) {
+            addBadge.textContent = '注意差異';
+            addBadge.className = 'status-badge warn';
+            addDesc.innerHTML = '這台裝置和雲端看起來不是同一份資料。<strong>先確認要保留哪一份，再按載入或同步。</strong>';
+        } else if (hasLoggedInCloud && isSynced) {
+            addBadge.textContent = '已同步';
+            addBadge.className = 'status-badge cloud';
+            addDesc.textContent = '這台裝置現在和雲端是同一份資料。另一台裝置若還沒更新，請在那台按「從雲端載回資料」。';
+        } else if (hasLoggedInCloud && cloudFingerprint) {
+            addBadge.textContent = '尚未同步';
+            addBadge.className = 'status-badge warn';
+            addDesc.textContent = '這台裝置有新的變更，但雲端還不是這一版。若要把這台的最新資料帶到別台，先按「把目前資料同步到雲端」。';
+        } else if (hasLoggedInCloud) {
+            addBadge.textContent = '雲端已連線';
+            addBadge.className = 'status-badge cloud';
+            addDesc.textContent = '目前已登入，但雲端還沒有可用版本。第一次使用時，請先按「把目前資料同步到雲端」。';
+        } else {
+            addBadge.textContent = '本機中';
+            addBadge.className = 'status-badge local';
+            addDesc.textContent = '這頁先專心記帳，系統會自動保留這台裝置的最新變更。';
+        }
+    }
+}
+
+function compareLocalAndCloud(cloudRow) {
             const payload = cloudRow?.data_json || {};
             const cloudMeta = payload._syncMeta || {};
             const localUpdatedAt = getLocalUpdatedAt();
@@ -2105,6 +2127,8 @@
 
         function renderAllAfterCloudLoad() {
             try { if (typeof initSharedBudgetForm === 'function') initSharedBudgetForm(); } catch(e) {}
+            try { if (typeof renderPaymentSettings === 'function') renderPaymentSettings(); } catch(e) {}
+            try { if (typeof applyMainPaymentDefaults === 'function') applyMainPaymentDefaults(); } catch(e) {}
             try { if (typeof renderDashboard === 'function') renderDashboard(); } catch(e) {}
             try { if (typeof renderList === 'function') renderList(); } catch(e) {}
             try { if (typeof renderBudgetSettings === 'function') renderBudgetSettings(); } catch(e) {}
@@ -2180,6 +2204,7 @@
             const sameAsLocal = incomingFingerprint === localFingerprint;
             const alreadyApplied = !!(incomingFingerprint && incomingFingerprint === lastAppliedCloudFingerprint && cloudUpdatedAt && cloudUpdatedAt === lastAppliedCloudUpdatedAt);
 
+            lastCloudSnapshotFingerprint = incomingFingerprint || '';
             lastCloudSnapshotMeta = {
                 updatedAt: cloudUpdatedAt || row.updated_at || '',
                 email: (lastCloudSnapshotMeta && lastCloudSnapshotMeta.email) ? lastCloudSnapshotMeta.email : '',
@@ -2219,6 +2244,7 @@
             }
             if (!data || !data.data_json) return false;
             lastCloudReadAt = Date.now();
+            lastCloudSnapshotFingerprint = (data?.data_json?._syncMeta?.fingerprint) || buildStateFingerprint(data?.data_json || {});
             lastCloudSnapshotMeta = { updatedAt: data.updated_at || '', email: user.email, isLoggedIn: true, hasConflict: false };
             renderSyncHints();
             return await applyIncomingCloudSnapshot(data, source);
@@ -2318,6 +2344,7 @@
             lastAppliedCloudFingerprint = fingerprint || '';
             lastQueuedCloudFingerprint = fingerprint || '';
             lastAppliedCloudUpdatedAt = nowIso;
+            lastCloudSnapshotFingerprint = fingerprint || '';
             lastCloudSnapshotMeta = { updatedAt: nowIso, email: user.email, isLoggedIn: true, hasConflict: false };
             updateCloudAuthStatus({ type: 'ok', badge: '已同步', desc: `已登入 ${user.email}，目前最新版本已同步到雲端。` });
             renderSyncHints();
@@ -2339,12 +2366,14 @@
                 return false;
             }
             if (!data || !data.data_json) {
+                lastCloudSnapshotFingerprint = '';
                 lastCloudSnapshotMeta = { updatedAt: '', email: user.email, isLoggedIn: true, hasConflict: false };
                 updateCloudAuthStatus({ type: 'neutral', badge: '雲端空白', desc: `已登入 ${user.email}，雲端目前還沒有資料。` });
                 renderSyncHints();
                 return true;
             }
             const compare = compareLocalAndCloud(data);
+            lastCloudSnapshotFingerprint = compare.cloudFingerprint || buildStateFingerprint(data.data_json || {});
             lastCloudSnapshotMeta = {
                 updatedAt: compare.cloudUpdatedAt || data.updated_at || '',
                 email: user.email,
@@ -2367,6 +2396,7 @@
             lastQueuedCloudFingerprint = compare.cloudFingerprint || buildStateFingerprint(data.data_json || {});
             lastAppliedCloudFingerprint = lastQueuedCloudFingerprint;
             lastAppliedCloudUpdatedAt = compare.cloudUpdatedAt || data.updated_at || '';
+            lastCloudSnapshotFingerprint = compare.cloudFingerprint || buildStateFingerprint(data.data_json || {});
             lastCloudSnapshotMeta = { updatedAt: compare.cloudUpdatedAt || data.updated_at || '', email: user.email, isLoggedIn: true, hasConflict: false };
             updateCloudAuthStatus({ type: 'ok', badge: '已載入', desc: `已登入 ${user.email}，雲端資料已載入到這台裝置。` });
             renderSyncHints();
@@ -2399,13 +2429,14 @@
         async function refreshCloudAuthStatus() {
             const user = await getCurrentUser();
             if (!user) {
+                lastCloudSnapshotFingerprint = '';
                 lastCloudSnapshotMeta = { updatedAt: '', email: '', isLoggedIn: false, hasConflict: false };
                 updateCloudAuthStatus({ type: 'neutral', badge: '尚未登入', desc: '目前尚未登入，資料先留在這台裝置。' });
                 syncCloudPasswordPanelState({ loggedIn: false });
                 return;
             }
             lastCloudSnapshotMeta = { ...(lastCloudSnapshotMeta || {}), email: user.email, isLoggedIn: true };
-            updateCloudAuthStatus({ type: 'neutral', badge: '已登入', desc: `已登入 ${user.email}，按下儲存後會自動上傳，其他裝置也會自動更新到最新版本。` });
+            updateCloudAuthStatus({ type: 'neutral', badge: '已登入', desc: `已登入 ${user.email}。若要跨裝置手動確認版本，可用下方的同步到雲端 / 從雲端載回。` });
             syncCloudPasswordPanelState({ loggedIn: true });
         }
 
@@ -2916,7 +2947,7 @@
             } else if (isSameUserAlreadySignedIn) {
                 showAppToast('妳已經登入這個帳號，資料狀態已重新同步。', 'ok');
             } else {
-                showAppToast('登入成功，資料已同步', 'ok');
+                showAppToast('登入成功，已完成雲端資料檢查。', 'ok');
             }
         }
 
@@ -2938,7 +2969,7 @@
             }
             const firstTry = await loadFromCloud();
             if (firstTry === 'conflict') return;
-            if (firstTry) alert('已從雲端載回資料。');
+            if (firstTry) showAppToast('已從雲端載回資料。', 'ok');
         }
 
         async function signOutCloud() {
@@ -3046,7 +3077,8 @@
                             lastQueuedCloudFingerprint = '';
                             lastAppliedCloudFingerprint = '';
                             lastAppliedCloudUpdatedAt = '';
-                            lastCloudSnapshotMeta = { updatedAt: '', email: '', isLoggedIn: false, hasConflict: false };
+                            lastCloudSnapshotFingerprint = '';
+                lastCloudSnapshotMeta = { updatedAt: '', email: '', isLoggedIn: false, hasConflict: false };
                             cloudPasswordPanelManuallyOpened = false;
                             if (!cloudPasswordRecoveryMode) clearCloudPasswordInputs();
                             updateCloudAuthStatus({ type: 'neutral', badge: '尚未登入', desc: '目前尚未登入，資料先留在這台裝置。' });
@@ -7103,6 +7135,7 @@ function exportToExcel() {
                 initSaved: initSaved,
                 masterBudgets: masterBudgets,
                 monthlySavedPlans: monthlySavedPlans,
+                budgetCycleConfigs: budgetCycleConfigs,
                 sharedBudgetSettings: sharedBudgetSettings,
                 sharedDeposits: sharedDeposits,
                 exported_at: new Date().toISOString()
@@ -7201,6 +7234,7 @@ function exportToExcel() {
                 shoppingList = data.shop || [];
                 netWorthData = data.networth || [];
                 sysSettings = data.settings || { cycleStart: 1 };
+                paymentSettings = data.paymentSettings || { defaultMethod: 'cash', defaultCardId: '', defaultWalletId: '', cards: [], wallets: [] };
                 userEnvelopes = data.envelopes || JSON.parse(JSON.stringify(defaultSuggestions));
                 userDebts = data.debts || [];
                 yearlyGoals = data.yearlyGoals || {};
@@ -7233,6 +7267,8 @@ function exportToExcel() {
                 renderDashboard();
                 renderList();
                 renderBudgetSettings();
+                renderPaymentSettings();
+                applyMainPaymentDefaults();
                 renderNetWorthPage();
                 renderDebtTracker();
                 renderBackupStatus();
@@ -7244,7 +7280,7 @@ function exportToExcel() {
 
         // JSON 備份功能
         function exportData(showSuccessToast = false) { 
-            const data = { tx: transactions, budget: budgets, shop: shoppingList, networth: netWorthData, settings: sysSettings, envelopes: userEnvelopes, debts: userDebts, yearlyGoals: yearlyGoals, initSaved: initSaved, masterBudgets: masterBudgets, monthlySavedPlans: monthlySavedPlans, budgetCycleConfigs: budgetCycleConfigs, sharedBudgetSettings: sharedBudgetSettings, sharedDeposits: sharedDeposits }; 
+            const data = { tx: transactions, budget: budgets, shop: shoppingList, networth: netWorthData, settings: sysSettings, paymentSettings: paymentSettings, envelopes: userEnvelopes, debts: userDebts, yearlyGoals: yearlyGoals, initSaved: initSaved, masterBudgets: masterBudgets, monthlySavedPlans: monthlySavedPlans, budgetCycleConfigs: budgetCycleConfigs, sharedBudgetSettings: sharedBudgetSettings, sharedDeposits: sharedDeposits }; 
             const blob = new Blob([JSON.stringify(data)], {type: "text/json"}); 
             const link = document.createElement("a"); 
             link.href = URL.createObjectURL(blob); 
@@ -7269,6 +7305,7 @@ function exportToExcel() {
                         shoppingList = data.shop || []; 
                         netWorthData = data.networth || []; 
                         sysSettings = data.settings || { cycleStart: 1 }; 
+                        paymentSettings = data.paymentSettings || { defaultMethod: 'cash', defaultCardId: '', defaultWalletId: '', cards: [], wallets: [] };
                         userEnvelopes = data.envelopes || null; 
                         userDebts = data.debts || []; 
                         yearlyGoals = data.yearlyGoals || {}; 
@@ -7284,6 +7321,7 @@ function exportToExcel() {
                     localStorage.setItem('bear_shopping_list', JSON.stringify(shoppingList)); 
                     localStorage.setItem('bear_networth', JSON.stringify(netWorthData)); 
                     localStorage.setItem('bear_sys_settings', JSON.stringify(sysSettings)); 
+                    localStorage.setItem('bear_payment_settings', JSON.stringify(paymentSettings)); 
                     if(userEnvelopes) localStorage.setItem('bear_custom_envelopes', JSON.stringify(userEnvelopes)); 
                     localStorage.setItem('bear_debts_tracker', JSON.stringify(userDebts)); 
                     localStorage.setItem('bear_yearly_goals', JSON.stringify(yearlyGoals)); 
