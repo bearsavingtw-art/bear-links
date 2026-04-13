@@ -132,6 +132,11 @@
         .save-feedback-inline { margin-top: 10px; font-size: 0.78rem; color: var(--text-secondary); line-height: 1.5; min-height: 1.2em; }
         .save-feedback-inline.ok { color: var(--success); }
         .save-feedback-inline.warn { color: var(--danger); }
+        .balance-action-row { display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
+        .balance-action-btn { flex:1 1 220px; margin-top:0; padding:13px 14px; font-size:0.86rem; border-radius:16px; }
+        .balance-action-btn.secondary { background: linear-gradient(135deg, #7a6759 0%, #5a4d41 100%); }
+        .balance-action-btn.tertiary { background: linear-gradient(135deg, #7d8f9b 0%, #5d7280 100%); }
+        .modal-mini-note { font-size:0.76rem; color:var(--text-secondary); line-height:1.55; margin-top:8px; }
         .version-update-banner { margin-top: 12px; background: linear-gradient(135deg, #fff8f0 0%, #fffdf9 100%); border: 1px dashed rgba(184,135,107,0.35); border-radius: 16px; padding: 12px 14px; }
         .version-update-banner.hidden { display: none !important; }
         .version-update-title { font-size: 0.84rem; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
@@ -410,6 +415,26 @@
         .settings-version-note { font-size:0.72rem; color:var(--text-secondary); text-align:center; margin:12px 2px 6px; line-height:1.45; }
         .settings-version-note strong { color:var(--text-primary); }
 
+        .page-intro-collapsible { background: linear-gradient(135deg, #fffaf4 0%, #f6ede3 100%); border: 1px solid var(--line-soft); border-radius: 24px; margin-bottom: 18px; box-shadow: 0 12px 30px rgba(184,135,107,0.08); overflow: hidden; }
+        .page-intro-collapsible summary { list-style: none; cursor: pointer; padding: 16px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+        .page-intro-collapsible summary::-webkit-details-marker { display:none; }
+        .page-intro-collapsible-head { min-width:0; }
+        .page-intro-collapsible .page-intro-title { margin-bottom: 0; }
+        .page-intro-collapsible .page-intro-desc { margin-top: 8px; }
+        .page-intro-collapsible-body { padding: 0 18px 16px; }
+        .page-intro-toggle { color: var(--accent-deep); font-size: 0.9rem; transition: transform 0.25s ease; }
+        .page-intro-collapsible[open] .page-intro-toggle { transform: rotate(180deg); }
+        .today-spend-strip { background: linear-gradient(135deg, #fffdf9 0%, #f7efe5 100%); border: 1px solid rgba(184,135,107,0.18); border-radius: 18px; padding: 14px 16px; margin-bottom: 15px; display:flex; justify-content:space-between; align-items:center; gap:12px; box-shadow: 0 8px 18px rgba(92,75,66,0.05); }
+        .today-spend-label { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 3px; }
+        .today-spend-sub { font-size: 0.7rem; color: var(--text-secondary); }
+        .today-spend-value { font-size: 1.15rem; font-weight: 700; color: var(--accent-deep); white-space: nowrap; }
+        .inline-help-icon { display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px; border:none; border-radius:50%; background: rgba(184,135,107,0.12); color: var(--accent-deep); font-size: 0.82rem; cursor:pointer; margin-left:6px; vertical-align:middle; }
+        .inline-help-icon:active { transform: scale(0.96); }
+        .help-bullet-list { margin: 12px 0 0; padding-left: 18px; color: var(--text-primary); }
+        .help-bullet-list li { margin-bottom: 8px; line-height: 1.6; }
+        .planned-save-chip-list { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+        .planned-save-chip { display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px; background: rgba(184,135,107,0.1); border:1px solid rgba(184,135,107,0.16); color: var(--accent-deep); font-size: 0.76rem; font-weight: 700; }
+
     </style>
 </head>
 <body>
@@ -436,11 +461,18 @@
     </div>
 
     <div id="page-dash" class="page active">
-        <div class="page-intro">
-            <div class="section-kicker"><i class="fas fa-seedling"></i> 本期陪跑區</div>
-            <div class="page-intro-title">先把一定會花的留起來，再決定其他位置。</div>
-            <div class="page-intro-desc">這裡不用一次做很完美，而是讓妳每次打開都知道：現在站在哪、接下來先顧哪一塊。</div>
-        </div>
+        <details class="page-intro-collapsible">
+            <summary>
+                <div class="page-intro-collapsible-head">
+                    <div class="section-kicker"><i class="fas fa-seedling"></i> 本期陪跑區</div>
+                    <div class="page-intro-title">先把一定會花的留起來，再決定其他位置。</div>
+                </div>
+                <i class="fas fa-chevron-down page-intro-toggle"></i>
+            </summary>
+            <div class="page-intro-collapsible-body">
+                <div class="page-intro-desc">這裡不用一次做很完美，而是讓妳每次打開都知道：現在站在哪、接下來先顧哪一塊。</div>
+            </div>
+        </details>
         <div class="dashboard-header">
             <button class="month-nav-btn" onclick="changeDashboardMonth(-1)"><i class="fas fa-chevron-left"></i></button>
             <div class="current-cycle-display">
@@ -459,7 +491,14 @@
             <div class="stat-box" onclick="openIncomeDetailModal()" style="cursor:pointer;"><div class="stat-label">本期收入 <i class="fas fa-chevron-right" style="font-size:0.7rem;"></i></div><div class="stat-value income" id="display-income">$0</div><div style="font-size:0.72rem; color:var(--text-secondary); margin-top:4px;">點擊查看 / 編輯收入</div></div>
             <div class="stat-box"><div class="stat-label">本期支出（含預存）</div><div class="stat-value expense" id="display-expense">$0</div></div>
         </div>
-        
+
+        <div class="today-spend-strip">
+            <div>
+                <div class="today-spend-label">今日花費總額</div>
+                <div class="today-spend-sub">只算今天已記錄的日常支出</div>
+            </div>
+            <div class="today-spend-value" id="display-today-expense">$0</div>
+        </div>
 
         <div class="card" style="text-align:center;">
             <div class="stat-label" id="balance-card-title">本期日常總結餘</div>
@@ -467,12 +506,16 @@
             
             <div style="background: rgba(176,141,133,0.05); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px dashed rgba(176,141,133,0.3); text-align: left;">
                 <div style="font-size: 0.85rem; color: var(--text-secondary); display: flex; justify-content: space-between; margin-bottom: 8px;">
-                    <span>🛡️ 本月預存金 (先存起來,之後要花)</span>
+                    <span>🛡️ 本月預存金 (先存起來,之後要花)<button type="button" class="inline-help-icon" onclick="openSinkingHistory('未分類預存金')" aria-label="查看本月預存金明細" title="查看本月預存金明細">☞</button></span>
                     <span id="display-planned-save" style="color: var(--gold); font-weight:600;">-$0</span>
                 </div>
                 <div style="font-size: 1rem; color: var(--text-primary); display: flex; justify-content: space-between; font-weight: 700; border-top: 1px solid rgba(0,0,0,0.05); padding-top: 8px;">
                     <span>✨ 真實可動用餘額</span>
                     <span id="display-true-balance">$0</span>
+                </div>
+                <div class="balance-action-row">
+                    <button class="btn balance-action-btn secondary" type="button" onclick="openMoveBalanceToSaveModal()">把餘額存入預備金</button>
+                    <button class="btn balance-action-btn tertiary" type="button" onclick="openMoveBalanceToBankModal()">把餘額存入銀行 → 資產盤點更新</button>
                 </div>
             </div>
 
@@ -1300,6 +1343,55 @@
         </div>
     </div>
 
+    <div id="move-balance-save-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="card-title" style="margin-bottom:12px;">
+                <span>把餘額存入預備金</span>
+                <i class="fas fa-times" style="font-size: 1.2rem; color: #aaa; cursor: pointer;" onclick="closeMoveBalanceToSaveModal()"></i>
+            </div>
+            <div class="soft-note" style="margin-bottom:14px;">這會同時做兩件事：<br>1. 依照妳這次分配，新增多筆「存入預備金」紀錄<br>2. 把設定頁預存支出的當月 12 宮格自動加上這次多存的金額</div>
+            <div class="form-group">
+                <label>這次要分配到哪些預存項目</label>
+                <div id="move-balance-save-rows"></div>
+            </div>
+            <div class="modal-mini-note" id="move-balance-save-note">目前可動用餘額：$0</div>
+            <div class="modal-mini-note" id="move-balance-save-total-note">目前已分配：$0｜剩餘可分配：$0</div>
+            <button class="btn" onclick="confirmMoveBalanceToSave()">存進去</button>
+            <button class="btn btn-outline" onclick="closeMoveBalanceToSaveModal()">取消</button>
+        </div>
+    </div>
+
+    <div id="move-balance-bank-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="card-title" style="margin-bottom:12px;">
+                <span>把餘額存入銀行</span>
+                <i class="fas fa-times" style="font-size: 1.2rem; color: #aaa; cursor: pointer;" onclick="closeMoveBalanceToBankModal()"></i>
+            </div>
+            <div class="soft-note" style="margin-bottom:14px;">這會新增一個新的資產盤點點位，不會覆蓋你本月原本的紀錄。</div>
+            <div class="form-group">
+                <label>這次要存入銀行多少</label>
+                <input type="number" step="any" id="move-balance-bank-amount" placeholder="輸入金額" inputmode="decimal">
+            </div>
+            <div class="modal-mini-note" id="move-balance-bank-note">目前可動用餘額：$0</div>
+            <button class="btn" onclick="confirmMoveBalanceToBank()">存入銀行並更新資產盤點</button>
+            <button class="btn btn-outline" onclick="closeMoveBalanceToBankModal()">取消</button>
+        </div>
+    </div>
+
+    <div id="planned-save-help-modal" class="modal-overlay">
+        <div class="modal-content" style="max-height: 85vh; overflow-y: auto; background: #fdfbf7;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 15px;">
+                <h3 style="margin:0; color:var(--text-primary);">
+                    <i class="fas fa-hand-point-up" style="color:var(--accent);"></i>
+                    本月預存金是什麼？
+                </h3>
+                <i class="fas fa-times" style="font-size: 1.2rem; color: #aaa; cursor: pointer;" onclick="closePlannedSaveHelpModal()"></i>
+            </div>
+            <div id="planned-save-help-content" style="font-size: 0.92rem; line-height: 1.75; color: var(--text-secondary);">載入中...</div>
+            <button class="btn btn-outline" style="margin-top:14px;" onclick="closePlannedSaveHelpModal()">我知道了</button>
+        </div>
+    </div>
+
     <div id="income-detail-modal" class="modal-overlay">
         <div class="modal-content" style="text-align: left; max-height: 80vh; overflow-y: auto;">
             <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 2px solid #eee; padding-bottom:10px; margin-bottom:15px;">
@@ -1469,6 +1561,33 @@
         let monthlySavedPlans = JSON.parse(localStorage.getItem('bear_monthly_saved_plans')) || {};
         let shoppingList = JSON.parse(localStorage.getItem('bear_shopping_list')) || [];
         let netWorthData = JSON.parse(localStorage.getItem('bear_networth')) || [];
+        function createNetWorthRecordId() { return `nw_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`; }
+        function getNetWorthSortKey(item) {
+            if (!item) return '';
+            const base = item.createdAt || `${item.month || ''}-01T00:00:00`;
+            const idPart = item.id || '';
+            return `${base}_${idPart}`;
+        }
+        function normalizeNetWorthData() {
+            if (!Array.isArray(netWorthData)) netWorthData = [];
+            netWorthData = netWorthData.map((item, index) => {
+                const month = item.month || '';
+                const createdAt = item.createdAt || `${month || '2000-01'}-${String(Math.min(index + 1, 28)).padStart(2, '0')}T12:00:00`;
+                return {
+                    id: item.id || `nw_legacy_${month || 'unknown'}_${index}`,
+                    month,
+                    createdAt,
+                    cash: Number(item.cash) || 0,
+                    invest: Number(item.invest) || 0,
+                    debt: Number(item.debt) || 0,
+                    net: Number.isFinite(item.net) ? Number(item.net) : ((Number(item.cash) || 0) + (Number(item.invest) || 0) - (Number(item.debt) || 0)),
+                    details: item.details || { cash: [], invest: [], debt: [] }
+                };
+            });
+            netWorthData.sort((a, b) => getNetWorthSortKey(a).localeCompare(getNetWorthSortKey(b)));
+            localStorage.setItem('bear_networth', JSON.stringify(netWorthData));
+        }
+        normalizeNetWorthData();
         let sysSettings = JSON.parse(localStorage.getItem('bear_sys_settings')) || { cycleStart: 1 };
         let paymentSettings = JSON.parse(localStorage.getItem('bear_payment_settings')) || { defaultMethod: 'cash', defaultCardId: '', defaultWalletId: '', cards: [], wallets: [] };
         let userDebts = JSON.parse(localStorage.getItem('bear_debts_tracker')) || [];
@@ -1690,24 +1809,85 @@
             };
         }
 
+        function buildBudgetCycleSnapshotFromState(state = {}) {
+            return {
+                envelopes: cloneJson(state.envelopes || defaultSuggestions),
+                budgets: cloneJson(state.budgets || {}),
+                masterBudgets: cloneJson(state.masterBudgets || { '固定支出': 0, '變動支出': 0, '預存支出': 0 }),
+                yearlyGoals: cloneJson(state.yearlyGoals || {}),
+                initSaved: cloneJson(state.initSaved || {}),
+                monthlySavedPlans: cloneJson(state.monthlySavedPlans || {})
+            };
+        }
+
+        function isViewingCurrentBudgetCycle() {
+            return getCycleConfigKey(dashboardViewDate) === getCycleConfigKey(new Date());
+        }
+
+        function persistBudgetGlobals() {
+            localStorage.setItem('bear_custom_envelopes', JSON.stringify(userEnvelopes));
+            localStorage.setItem('envelopes_v7', JSON.stringify(userEnvelopes));
+            localStorage.setItem('bear_budgets', JSON.stringify(budgets));
+            localStorage.setItem('budgets_v7', JSON.stringify(budgets));
+            localStorage.setItem('bear_master_budgets', JSON.stringify(masterBudgets));
+            localStorage.setItem('yearlyGoals_v1', JSON.stringify(yearlyGoals));
+            localStorage.setItem('initSaved_v1', JSON.stringify(initSaved));
+            localStorage.setItem('monthlySavedPlans_v1', JSON.stringify(monthlySavedPlans));
+            localStorage.setItem('bear_yearly_goals', JSON.stringify(yearlyGoals));
+            localStorage.setItem('bear_init_saved', JSON.stringify(initSaved));
+            localStorage.setItem('bear_monthly_saved_plans', JSON.stringify(monthlySavedPlans));
+        }
+
+        function applyBudgetStateToGlobals(state) {
+            userEnvelopes = cloneJson(state.envelopes || defaultSuggestions);
+            budgets = cloneJson(state.budgets || {});
+            masterBudgets = cloneJson(state.masterBudgets || { '固定支出': 0, '變動支出': 0, '預存支出': 0 });
+            yearlyGoals = cloneJson(state.yearlyGoals || {});
+            initSaved = cloneJson(state.initSaved || {});
+            monthlySavedPlans = cloneJson(state.monthlySavedPlans || {});
+            persistBudgetGlobals();
+        }
+
+        function getEditableBudgetState(dateObj = dashboardViewDate) {
+            const cycle = getCycleBoundary(dateObj, sysSettings.cycleStart);
+            const cycleTx = transactions.filter(t => {
+                const txDate = new Date(t.date);
+                return txDate >= cycle.start && txDate <= cycle.end;
+            });
+            const key = getCycleConfigKey(dateObj);
+            if (!budgetCycleConfigs[key]) {
+                budgetCycleConfigs[key] = buildBudgetCycleSnapshotFromState(getBudgetStateForDate(dateObj, cycleTx));
+                persistBudgetCycleConfigs();
+            }
+            return budgetCycleConfigs[key];
+        }
+
         function saveSelectedCycleBudgetConfig(showAlert = true) {
             const cycle = getCycleBoundary(dashboardViewDate, sysSettings.cycleStart);
-            const key = getCycleConfigKey(dashboardViewDate);
-            budgetCycleConfigs[key] = buildBudgetCycleSnapshot();
+            const state = getEditableBudgetState(dashboardViewDate);
+            budgetCycleConfigs[getCycleConfigKey(dashboardViewDate)] = buildBudgetCycleSnapshotFromState(state);
+            if (isViewingCurrentBudgetCycle()) applyBudgetStateToGlobals(state);
             persistBudgetCycleConfigs();
             writeAutoBackup('save-budget-cycle-config');
             renderBudgetSettings();
             renderDashboard();
             if (showAlert) {
-                alert(`${cycle.label} 的預算設定已鎖定。之後妳再改袋子名稱、袋子預算或預存規劃，也不會回頭改到這個帳期。`);
+                alert(`${cycle.label} 的預算設定已獨立儲存。之後各月份會各自記住，不會互相蓋掉。`);
             }
         }
 
         function syncSelectedCycleBudgetConfig(reason = 'sync-budget-cycle') {
-            const key = getCycleConfigKey(dashboardViewDate);
-            budgetCycleConfigs[key] = buildBudgetCycleSnapshot();
+            const state = getEditableBudgetState(dashboardViewDate);
+            budgetCycleConfigs[getCycleConfigKey(dashboardViewDate)] = buildBudgetCycleSnapshotFromState(state);
+            if (isViewingCurrentBudgetCycle()) applyBudgetStateToGlobals(state);
             persistBudgetCycleConfigs();
             writeAutoBackup(reason);
+        }
+
+        function changeBudgetSettingsMonth(offset) {
+            dashboardViewDate.setMonth(dashboardViewDate.getMonth() + offset);
+            renderBudgetSettings();
+            renderDashboard();
         }
 
         function getBudgetStateForDate(dateObj, cycleTx = []) {
@@ -2109,7 +2289,7 @@ function compareLocalAndCloud(cloudRow) {
             transactions = data.tx || [];
             budgets = data.budget || {};
             shoppingList = data.shop || [];
-            netWorthData = data.networth || [];
+            netWorthData = data.networth || []; normalizeNetWorthData();
             sysSettings = data.settings || { cycleStart: 1 };
             paymentSettings = data.paymentSettings || { defaultMethod: 'cash', defaultCardId: '', defaultWalletId: '', cards: [], wallets: [] };
             userEnvelopes = data.envelopes || JSON.parse(JSON.stringify(defaultSuggestions));
@@ -2997,6 +3177,9 @@ function compareLocalAndCloud(cloudRow) {
             const syncKeepLocalBtn = document.getElementById('sync-keep-local-btn');
             const syncKeepCloudBtn = document.getElementById('sync-keep-cloud-btn');
             const syncModal = document.getElementById('sync-conflict-modal');
+            const plannedSaveHelpModal = document.getElementById('planned-save-help-modal');
+            const moveBalanceSaveModal = document.getElementById('move-balance-save-modal');
+            const moveBalanceBankModal = document.getElementById('move-balance-bank-modal');
             const resendVerifyBtn = document.getElementById('resendVerifyBtn');
             const emailInput = document.getElementById('cloudEmail');
             const hashText = location.hash || '';
@@ -3010,6 +3193,9 @@ function compareLocalAndCloud(cloudRow) {
             if (syncKeepLocalBtn) syncKeepLocalBtn.addEventListener('click', () => resolveSyncConflict('keep-local'));
             if (syncKeepCloudBtn) syncKeepCloudBtn.addEventListener('click', () => resolveSyncConflict('keep-cloud'));
             if (syncModal) syncModal.addEventListener('click', (e) => { if (e.target === syncModal) closeSyncConflictModal(); });
+            if (plannedSaveHelpModal) plannedSaveHelpModal.addEventListener('click', (e) => { if (e.target === plannedSaveHelpModal) closePlannedSaveHelpModal(); });
+            if (moveBalanceSaveModal) moveBalanceSaveModal.addEventListener('click', (e) => { if (e.target === moveBalanceSaveModal) closeMoveBalanceToSaveModal(); });
+            if (moveBalanceBankModal) moveBalanceBankModal.addEventListener('click', (e) => { if (e.target === moveBalanceBankModal) closeMoveBalanceToBankModal(); });
             if (resendVerifyBtn) resendVerifyBtn.addEventListener('click', handleResendVerifyEmail);
             if (emailInput) {
                 emailInput.addEventListener('input', () => {
@@ -5160,68 +5346,114 @@ function getSharedBudgetSummary(cycleTx) {
             return Math.max(0, totalSaved - totalSpent);
         }
 
+        function calculateSinkingCurrentBalanceFromState(env, state) {
+            const snapshotYearlyGoals = (state && state.yearlyGoals) || {};
+            const snapshotInitSaved = (state && state.initSaved) || {};
+            const snapshotPlans = (state && state.monthlySavedPlans) || {};
+            const initialVal = snapshotInitSaved[env] || 0;
+            const today = new Date();
+            const includeCurrentMonth = true;
+            const lastIncludedMonth = includeCurrentMonth ? today.getMonth() : today.getMonth() - 1;
+            const manualSavesByMonth = Array(12).fill(0);
+
+            transactions.forEach(t => {
+                if (t.type !== 'save' || t.mainCategory !== '預存支出' || t.category !== env) return;
+                const txDate = new Date(t.date);
+                const mIndex = txDate.getMonth();
+                if (mIndex >= 0 && mIndex < 12) manualSavesByMonth[mIndex] += t.amount;
+            });
+
+            let effectiveSaved = 0;
+            for (let m = 0; m < 12; m++) {
+                let planned = 0;
+                if (snapshotPlans[env] && snapshotPlans[env][m] !== '' && snapshotPlans[env][m] !== undefined) {
+                    planned = parseFloat(snapshotPlans[env][m]) || 0;
+                }
+                let manual = manualSavesByMonth[m] || 0;
+                if (m <= lastIncludedMonth) effectiveSaved += Math.max(planned, manual);
+                else effectiveSaved += manual;
+            }
+
+            let totalSaved = initialVal + effectiveSaved;
+            let totalSpent = 0;
+            transactions.forEach(t => {
+                if (t.type === 'expense' && t.mainCategory === '預存支出' && t.category === env) totalSpent += t.amount;
+            });
+
+            return Math.max(0, totalSaved - totalSpent);
+        }
+
         function saveYearlyGoal(env, value) {
-            yearlyGoals[env] = value === '' ? '' : (parseFloat(value) || 0);
-            persistSinkingSettings();
+            const state = getEditableBudgetState(dashboardViewDate);
+            state.yearlyGoals[env] = value === '' ? '' : (parseFloat(value) || 0);
+            syncSelectedCycleBudgetConfig('save-sinking-settings');
+            renderBudgetSettings();
+            renderDashboard();
         }
 
         function saveInitSaved(env, value) {
-            initSaved[env] = value === '' ? '' : (parseFloat(value) || 0);
-            persistSinkingSettings();
+            const state = getEditableBudgetState(dashboardViewDate);
+            state.initSaved[env] = value === '' ? '' : (parseFloat(value) || 0);
+            syncSelectedCycleBudgetConfig('save-sinking-settings');
+            renderBudgetSettings();
+            renderDashboard();
         }
 
         function saveMonthlySavedPlan(env, monthIndex, value) {
-            if (!monthlySavedPlans[env]) monthlySavedPlans[env] = Array(12).fill('');
-            monthlySavedPlans[env][monthIndex] = value === '' ? '' : (parseFloat(value) || 0);
-            persistSinkingSettings();
+            const state = getEditableBudgetState(dashboardViewDate);
+            if (!state.monthlySavedPlans[env]) state.monthlySavedPlans[env] = Array(12).fill('');
+            state.monthlySavedPlans[env][monthIndex] = value === '' ? '' : (parseFloat(value) || 0);
+            syncSelectedCycleBudgetConfig('save-sinking-settings');
+            renderBudgetSettings();
+            renderDashboard();
         }
 
         function saveEnvelopeBudget(mainCat, index, value) {
-            const env = userEnvelopes[mainCat][index];
-            budgets[env] = parseFloat(value) || 0;
-            localStorage.setItem('bear_budgets', JSON.stringify(budgets));
-            localStorage.setItem('budgets_v7', JSON.stringify(budgets));
+            const state = getEditableBudgetState(dashboardViewDate);
+            const env = (state.envelopes[mainCat] || [])[index];
+            if (!env) return;
+            state.budgets[env] = parseFloat(value) || 0;
             syncSelectedCycleBudgetConfig('save-envelope-budget');
             renderBudgetSettings();
             renderDashboard();
         }
 
         function renameEnvelope(mainCat, index, newName) {
-            const oldName = userEnvelopes[mainCat][index];
+            const state = getEditableBudgetState(dashboardViewDate);
+            const oldName = (state.envelopes[mainCat] || [])[index];
             const trimmed = (newName || '').trim();
-            if (!trimmed || trimmed === oldName) {
+            if (!oldName || !trimmed || trimmed === oldName) {
                 renderBudgetSettings();
                 return;
             }
-            if (Object.values(userEnvelopes).flat().includes(trimmed)) {
+            if (Object.values(state.envelopes || {}).flat().includes(trimmed)) {
                 alert('這個名稱已經存在囉，請換一個。');
                 renderBudgetSettings();
                 return;
             }
 
-            userEnvelopes[mainCat][index] = trimmed;
+            state.envelopes[mainCat][index] = trimmed;
 
-            if (budgets.hasOwnProperty(oldName) && !budgets.hasOwnProperty(trimmed)) {
-                budgets[trimmed] = budgets[oldName];
+            if (state.budgets.hasOwnProperty(oldName) && !state.budgets.hasOwnProperty(trimmed)) {
+                state.budgets[trimmed] = state.budgets[oldName];
             }
-            if (yearlyGoals.hasOwnProperty(oldName) && !yearlyGoals.hasOwnProperty(trimmed)) {
-                yearlyGoals[trimmed] = yearlyGoals[oldName];
+            if (state.yearlyGoals.hasOwnProperty(oldName) && !state.yearlyGoals.hasOwnProperty(trimmed)) {
+                state.yearlyGoals[trimmed] = state.yearlyGoals[oldName];
             }
-            if (initSaved.hasOwnProperty(oldName) && !initSaved.hasOwnProperty(trimmed)) {
-                initSaved[trimmed] = initSaved[oldName];
+            if (state.initSaved.hasOwnProperty(oldName) && !state.initSaved.hasOwnProperty(trimmed)) {
+                state.initSaved[trimmed] = state.initSaved[oldName];
             }
-            if (monthlySavedPlans.hasOwnProperty(oldName) && !monthlySavedPlans.hasOwnProperty(trimmed)) {
-                monthlySavedPlans[trimmed] = cloneJson(monthlySavedPlans[oldName]);
+            if (state.monthlySavedPlans.hasOwnProperty(oldName) && !state.monthlySavedPlans.hasOwnProperty(trimmed)) {
+                state.monthlySavedPlans[trimmed] = cloneJson(state.monthlySavedPlans[oldName]);
             }
+
+            delete state.budgets[oldName];
+            delete state.yearlyGoals[oldName];
+            delete state.initSaved[oldName];
+            delete state.monthlySavedPlans[oldName];
 
             const changedCount = renameTransactionsInSelectedCycle(mainCat, oldName, trimmed);
 
-            localStorage.setItem('bear_custom_envelopes', JSON.stringify(userEnvelopes));
-            localStorage.setItem('bear_budgets', JSON.stringify(budgets));
-            localStorage.setItem('budgets_v7', JSON.stringify(budgets));
-            localStorage.setItem('yearlyGoals_v1', JSON.stringify(yearlyGoals));
-            localStorage.setItem('initSaved_v1', JSON.stringify(initSaved));
-            localStorage.setItem('monthlySavedPlans_v1', JSON.stringify(monthlySavedPlans));
             localStorage.setItem('bear_transactions', JSON.stringify(transactions));
             syncSelectedCycleBudgetConfig('rename-envelope');
 
@@ -5230,23 +5462,19 @@ function getSharedBudgetSummary(cycleTx) {
             renderList();
 
             const cycle = getCycleBoundary(dashboardViewDate, sysSettings.cycleStart);
-            alert(`名稱已更新。${cycle.label} 內已同步調整 ${changedCount} 筆記帳；更早月份會保留原本名稱。`);
+            alert(`名稱已更新。${cycle.label} 內已同步調整 ${changedCount} 筆記帳；其他月份會保留各自版本。`);
         }
 
         function deleteBag(mainCat, index) {
             if (!confirm('確定要刪除這一袋嗎？')) return;
-            const env = userEnvelopes[mainCat][index];
-            userEnvelopes[mainCat].splice(index, 1);
-            delete budgets[env];
-            delete yearlyGoals[env];
-            delete initSaved[env];
-            delete monthlySavedPlans[env];
-            localStorage.setItem('envelopes_v7', JSON.stringify(userEnvelopes));
-            localStorage.setItem('bear_budgets', JSON.stringify(budgets));
-            localStorage.setItem('budgets_v7', JSON.stringify(budgets));
-            localStorage.setItem('yearlyGoals_v1', JSON.stringify(yearlyGoals));
-            localStorage.setItem('initSaved_v1', JSON.stringify(initSaved));
-            localStorage.setItem('monthlySavedPlans_v1', JSON.stringify(monthlySavedPlans));
+            const state = getEditableBudgetState(dashboardViewDate);
+            const env = (state.envelopes[mainCat] || [])[index];
+            if (!env) return;
+            state.envelopes[mainCat].splice(index, 1);
+            delete state.budgets[env];
+            delete state.yearlyGoals[env];
+            delete state.initSaved[env];
+            delete state.monthlySavedPlans[env];
             syncSelectedCycleBudgetConfig('delete-envelope');
             renderBudgetSettings();
             renderDashboard();
@@ -5263,18 +5491,35 @@ function getSharedBudgetSummary(cycleTx) {
             const selectedCycle = getCycleBoundary(dashboardViewDate, sysSettings.cycleStart);
             const selectedCycleKey = getCycleConfigKey(dashboardViewDate);
             const hasSavedCycleConfig = !!budgetCycleConfigs[selectedCycleKey];
+            const cycleTx = transactions.filter(t => {
+                const txDate = new Date(t.date);
+                return txDate >= selectedCycle.start && txDate <= selectedCycle.end;
+            });
+            const budgetState = getBudgetStateForDate(dashboardViewDate, cycleTx);
+            const renderEnvelopes = budgetState.envelopes || defaultSuggestions;
+            const renderBudgets = budgetState.budgets || {};
+            const renderMasterBudgets = budgetState.masterBudgets || { '固定支出': 0, '變動支出': 0, '預存支出': 0 };
+            const renderYearlyGoals = budgetState.yearlyGoals || {};
+            const renderInitSaved = budgetState.initSaved || {};
+            const renderMonthlySavedPlans = budgetState.monthlySavedPlans || {};
             container.innerHTML += `
                 <div class="soft-note" style="margin-bottom:16px;">
-                    <div style="font-weight:700; margin-bottom:6px;">目前預算設定對應：${selectedCycle.label}</div>
-                    <div style="font-size:0.76rem; color:var(--text-secondary); line-height:1.55;">這個帳期只要有改袋子名稱、袋子預算、總預算或預存規劃，都會自動記住這一期。需要的話也可以再手動按下面這顆按鈕重存一次。</div>
-                    <button type="button" class="btn btn-outline" style="margin-top:10px;" onclick="saveSelectedCycleBudgetConfig()">${hasSavedCycleConfig ? '重新儲存這個帳期設定' : '儲存這個帳期設定'}</button>
+                    <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:6px;">
+                        <div style="font-weight:700;">目前預算設定對應：${selectedCycle.label}</div>
+                        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                            <button type="button" class="mini-link-btn" onclick="changeBudgetSettingsMonth(-1)">← 上個月</button>
+                            <button type="button" class="mini-link-btn" onclick="changeBudgetSettingsMonth(1)">下個月 →</button>
+                        </div>
+                    </div>
+                    <div style="font-size:0.76rem; color:var(--text-secondary); line-height:1.55;">這裡可以切換不同月份的預算設定。每個月份都會各自記住，不應互相干擾；需要時也可以手動按下面這顆按鈕再存一次。</div>
+                    <button type="button" class="btn btn-outline" style="margin-top:10px;" onclick="saveSelectedCycleBudgetConfig()">儲存各個月份的預算設定</button>
                 </div>`;
 
             ['固定支出', '變動支出'].forEach(mainCat => {
-                let bagCount = userEnvelopes[mainCat].length;
+                let bagCount = (renderEnvelopes[mainCat] || []).length;
                 let masterBudgetHtml = '';
                 if (bagCount === 0) {
-                    let masterVal = masterBudgets[mainCat] || '';
+                    let masterVal = renderMasterBudgets[mainCat] || '';
                     masterBudgetHtml = `<div class="labeled-input"><label>每月總預算</label><input type="number" step="any" id="master-budget-${mainCat}" class="master-budget-input" value="${masterVal}" onchange="saveMasterBudget('${mainCat}')"></div>`;
                 }
 
@@ -5282,8 +5527,8 @@ function getSharedBudgetSummary(cycleTx) {
 
                 if (bagCount > 0) {
                     sectionHtml += `<div class="envelope-grid">`;
-                    userEnvelopes[mainCat].forEach((env, index) => {
-                        let val = budgets[env] || ''; 
+                    (renderEnvelopes[mainCat] || []).forEach((env, index) => {
+                        let val = renderBudgets[env] || ''; 
                         sectionHtml += `
                             <div class="envelope-tile">
                                 <div class="envelope-tile-body">
@@ -5309,26 +5554,25 @@ function getSharedBudgetSummary(cycleTx) {
             });
 
             const mainCat = '預存支出';
-            let bagCount = userEnvelopes[mainCat].length;
+            let bagCount = (renderEnvelopes[mainCat] || []).length;
             let masterBudgetHtml = '';
             if (bagCount === 0) {
-                let masterVal = masterBudgets[mainCat] || '';
+                let masterVal = renderMasterBudgets[mainCat] || '';
                 masterBudgetHtml = `<div class="labeled-input"><label>年度總目標</label><input type="number" step="any" id="master-budget-${mainCat}" class="master-budget-input" value="${masterVal}" onchange="saveMasterBudget('${mainCat}')"></div>`;
             }
 
             container.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; margin: 20px 0 10px; border-bottom:1px solid #eee; padding-bottom:5px;"><span style="font-weight:700; color:var(--accent); font-size:1.05rem;">${mainCat} <span style="font-size:0.8rem; font-weight:normal; color:var(--text-secondary);">(${bagCount}袋)</span></span>${masterBudgetHtml}</div>`;
 
             if (bagCount > 0) {
-                userEnvelopes[mainCat].forEach((env, index) => {
-                    let goalVal = yearlyGoals[env] ?? '';
-                    let initVal = initSaved[env] ?? ''; 
-                    let currentBalance = calculateSinkingCurrentBalance(env);
-
-                    if (!monthlySavedPlans[env]) monthlySavedPlans[env] = Array(12).fill('');
+                (renderEnvelopes[mainCat] || []).forEach((env, index) => {
+                    let goalVal = renderYearlyGoals[env] ?? '';
+                    let initVal = renderInitSaved[env] ?? ''; 
+                    let currentBalance = calculateSinkingCurrentBalanceFromState(env, budgetState);
+                    const renderPlan = Array.isArray(renderMonthlySavedPlans[env]) ? renderMonthlySavedPlans[env] : Array(12).fill('');
 
                     let monthMatrixHtml = '<div class="month-matrix">';
                     for(let m=1; m<=12; m++) {
-                        let mVal = monthlySavedPlans[env][m-1] ?? '';
+                        let mVal = renderPlan[m-1] ?? '';
                         monthMatrixHtml += `
                             <div class="month-cell">
                                 <label>${m}月</label>
@@ -5385,10 +5629,11 @@ function getSharedBudgetSummary(cycleTx) {
             }
         }
 
-        function saveMasterBudget(mainCat) { const val = parseFloat(document.getElementById(`master-budget-${mainCat}`).value) || 0; masterBudgets[mainCat] = val; localStorage.setItem('bear_master_budgets', JSON.stringify(masterBudgets)); syncSelectedCycleBudgetConfig('save-master-budget'); renderBudgetSettings(); renderDashboard(); }
+        function saveMasterBudget(mainCat) { const val = parseFloat(document.getElementById(`master-budget-${mainCat}`).value) || 0; const state = getEditableBudgetState(dashboardViewDate); state.masterBudgets[mainCat] = val; syncSelectedCycleBudgetConfig('save-master-budget'); renderBudgetSettings(); renderDashboard(); }
 
         function addNewEnvelope(mainCat) {
-            const totalCount = getTotalEnvelopesCount();
+            const state = getEditableBudgetState(dashboardViewDate);
+            const totalCount = Object.values(state.envelopes || {}).reduce((sum, arr) => sum + ((arr || []).length), 0);
             if (totalCount >= 15) {
                 alert('已達 15 袋上限！請先刪除其他袋子再新增。');
                 return;
@@ -5399,12 +5644,11 @@ function getSharedBudgetSummary(cycleTx) {
             if (newName && newName.trim()) {
                 const name = newName.trim();
                 let isDup = false;
-                for (let cat in userEnvelopes) {
-                    if (userEnvelopes[cat].includes(name)) isDup = true;
+                for (let cat in state.envelopes) {
+                    if ((state.envelopes[cat] || []).includes(name)) isDup = true;
                 }
                 if (isDup) return alert('這個分類名稱已經存在囉！請換一個名字。');
-                userEnvelopes[mainCat].push(name);
-                localStorage.setItem('bear_custom_envelopes', JSON.stringify(userEnvelopes));
+                state.envelopes[mainCat].push(name);
                 syncSelectedCycleBudgetConfig('new-envelope');
                 renderBudgetSettings();
                 updateSubCategories();
@@ -5622,6 +5866,16 @@ function renderDashboard() {
             document.getElementById('display-income').innerText = `$${formatMoney(totalInc)}`; 
             document.getElementById('display-expense').innerText = `$${formatMoney(totalExp)}`; 
 
+            const todayStr = getTodayLocalDateString();
+            let todayExpense = 0;
+            transactions.forEach(t => {
+                if (t.type !== 'expense') return;
+                if (t.sharedMeta && t.sharedMeta.enabled) return;
+                if (t.date === todayStr) todayExpense += Number(t.amount) || 0;
+            });
+            const todayExpenseEl = document.getElementById('display-today-expense');
+            if (todayExpenseEl) todayExpenseEl.innerText = `$${formatMoney(todayExpense)}`;
+
             let currentBalance = totalInc - totalExp;
             document.getElementById('display-balance').innerText = `$${formatMoney(currentBalance)}`;
 
@@ -5740,6 +5994,37 @@ function renderBudgetBars(envExp, masterSpent, cycleTx = []) {
             document.getElementById('sinking-history-title').innerHTML = `🎯 ${envName} 歷史明細`;
             const listContainer = document.getElementById('sinking-history-list'); listContainer.innerHTML = '';
             let monthlyData = {};
+
+            if (envName === '未分類預存金') {
+                const currentCycle = getCycleBoundary(dashboardViewDate, sysSettings.cycleStart);
+                const cycleMonthIndex = currentCycle.start.getMonth();
+                const budgetState = getBudgetStateForDate(dashboardViewDate, transactions.filter(t => {
+                    const tDate = new Date(t.date);
+                    tDate.setHours(0,0,0,0);
+                    return tDate >= currentCycle.start && tDate <= currentCycle.end;
+                }));
+                const targets = (budgetState.envelopes['預存支出'] || []).filter(Boolean);
+                let breakdownHtml = '';
+                if (targets.length) {
+                    const rows = targets.map(env => {
+                        const planned = (budgetState.monthlySavedPlans && budgetState.monthlySavedPlans[env] && budgetState.monthlySavedPlans[env][cycleMonthIndex] !== '' && budgetState.monthlySavedPlans[env][cycleMonthIndex] !== undefined)
+                            ? (parseFloat(budgetState.monthlySavedPlans[env][cycleMonthIndex]) || 0)
+                            : 0;
+                        const spent = transactions.filter(t => t.type === 'expense' && t.mainCategory === '預存支出' && t.category === env && (() => {
+                            const d = new Date(t.date); d.setHours(0,0,0,0); return d >= currentCycle.start && d <= currentCycle.end;
+                        })()).reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+                        return { env, planned, spent };
+                    }).filter(row => row.planned > 0 || row.spent > 0);
+                    if (rows.length) {
+                        breakdownHtml = `<div style="margin-bottom:15px; padding:12px; background:#fdfbf7; border-radius:10px; border:1px solid #f0e6d2;">
+                            <div style="font-weight:bold; color:var(--text-primary); border-bottom:1px dashed #ddd; padding-bottom:5px; margin-bottom:8px;">這期預存金目前存去哪裡</div>
+                            <div style="font-size:0.76rem; color:var(--text-secondary); margin-bottom:8px;">下面這些就是組成首頁「本月預存金」的各預存項目。</div>
+                            ${rows.map(row => `<div style="display:flex; justify-content:space-between; gap:10px; padding:6px 0; border-bottom:1px dashed #eee;"><span>${row.env}</span><span style="text-align:right;"><span style="color:var(--gold); font-weight:700;">存入 $${formatMoney(row.planned)}</span>${row.spent > 0 ? `<span style="color:var(--danger); font-size:0.76rem; margin-left:8px;">已花 -$${formatMoney(row.spent)}</span>` : ''}</span></div>`).join('')}
+                        </div>`;
+                    }
+                }
+                if (breakdownHtml) listContainer.innerHTML += breakdownHtml;
+            }
             
             transactions.forEach(t => {
                 let match = false;
@@ -5747,7 +6032,8 @@ function renderBudgetBars(envExp, masterSpent, cycleTx = []) {
                 else { if (t.category === envName && (t.mainCategory === '預存支出' || t.type === 'save')) match = true; }
 
                 if (match) {
-                    let month = t.date.substring(0, 7);
+                    const month = getTxCycleMonthKey(t);
+                    if (!month) return;
                     if (!monthlyData[month]) monthlyData[month] = { spent: 0, saved: 0, txs: [] };
                     if (t.type === 'expense') { monthlyData[month].spent += t.amount; monthlyData[month].txs.push(t); } 
                     else if (t.type === 'save') { monthlyData[month].saved += t.amount; monthlyData[month].txs.push(t); }
@@ -5756,7 +6042,7 @@ function renderBudgetBars(envExp, masterSpent, cycleTx = []) {
 
             const sortedMonths = Object.keys(monthlyData).sort((a,b) => b.localeCompare(a));
             
-            if (sortedMonths.length === 0) { listContainer.innerHTML = '<div style="text-align:center; padding:20px; color:#999;">尚未有任何手動存入或花費紀錄。<br><span style="font-size:0.75rem;">(不包含系統每月自動推移的預算配額)</span></div>'; } 
+            if (sortedMonths.length === 0) { listContainer.innerHTML += '<div style="text-align:center; padding:20px; color:#999;">尚未有任何手動存入或花費紀錄。<br><span style="font-size:0.75rem;">(不包含系統每月自動推移的預算配額)</span></div>'; } 
             else {
                 sortedMonths.forEach(m => {
                     const data = monthlyData[m]; const monthLabel = m.replace('-', '年') + '月';
@@ -5765,7 +6051,9 @@ function renderBudgetBars(envExp, masterSpent, cycleTx = []) {
                         html += `<ul style="list-style:none; padding:0; margin:8px 0 0 0; font-size:0.8rem; color:var(--text-secondary); border-top:1px dashed #eee; padding-top:8px;">`;
                         data.txs.sort((a,b) => b.date.localeCompare(a.date)).forEach(tx => {
                             let sign = tx.type === 'save' ? '+' : '-'; let color = tx.type === 'save' ? 'var(--gold)' : 'var(--danger)';
-                            html += `<li style="display:flex; justify-content:space-between; padding:3px 0;"><span>${tx.date.substring(8,10)}日 - ${tx.note || '無備註'}</span><span style="color:${color}; font-weight:600;">${sign}$${formatMoney(tx.amount)}</span></li>`;
+                            let txLabel = tx.category || tx.note || '無備註';
+                            if (tx.note && tx.category && tx.note !== tx.category) txLabel = `${tx.category}｜${tx.note}`;
+                            html += `<li style="display:flex; justify-content:space-between; gap:10px; padding:3px 0;"><span>${tx.date.substring(8,10)}日 - ${txLabel}</span><span style="color:${color}; font-weight:600; white-space:nowrap;">${sign}$${formatMoney(tx.amount)}</span></li>`;
                         });
                         html += `</ul>`;
                     }
@@ -5794,6 +6082,220 @@ function renderBudgetBars(envExp, masterSpent, cycleTx = []) {
             }
         }
 
+
+        function formatLocalDateString(dateObj) {
+            const y = dateObj.getFullYear();
+            const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const d = String(dateObj.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
+
+        function getBalanceMoveContext() {
+            const selectedCycle = getCycleBoundary(dashboardViewDate, sysSettings.cycleStart);
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            let effectiveDateObj = new Date(today);
+
+            if (today > selectedCycle.end) {
+                effectiveDateObj = new Date(selectedCycle.end);
+            } else if (today < selectedCycle.start) {
+                effectiveDateObj = new Date(selectedCycle.start);
+            }
+
+            effectiveDateObj.setHours(0,0,0,0);
+
+            return {
+                selectedCycle,
+                effectiveDate: formatLocalDateString(effectiveDateObj),
+                cycleMonthKey: `${selectedCycle.start.getFullYear()}-${String(selectedCycle.start.getMonth() + 1).padStart(2, '0')}`,
+                cycleMonthIndex: selectedCycle.start.getMonth()
+            };
+        }
+
+        function getTxCycleMonthKey(tx) {
+            if (tx && tx.sourceCycleMonth) return tx.sourceCycleMonth;
+            if (tx && tx.date) return tx.date.substring(0, 7);
+            return '';
+        }
+
+        function getCurrentTrueBalanceAmount() {
+            const currentCycle = getCycleBoundary(dashboardViewDate, sysSettings.cycleStart);
+            const cycleMonthKey = `${currentCycle.start.getFullYear()}-${String(currentCycle.start.getMonth() + 1).padStart(2, '0')}`;
+            const cycleTx = transactions.filter(t => {
+                const txCycleMonth = getTxCycleMonthKey(t);
+                if ((t.type === 'save' || t.mainCategory === '預存支出') && txCycleMonth) {
+                    return txCycleMonth === cycleMonthKey;
+                }
+                const tDate = new Date(t.date);
+                tDate.setHours(0,0,0,0);
+                return tDate >= currentCycle.start && tDate <= currentCycle.end;
+            });
+            let totalInc = 0, totalExp = 0;
+            const manualSavesInCycle = {};
+            cycleTx.forEach(t => {
+                if (t.type === 'income') totalInc += Number(t.amount) || 0;
+                else if (t.type === 'expense') {
+                    if (t.sharedMeta && t.sharedMeta.enabled) return;
+                    totalExp += Number(t.amount) || 0;
+                } else if (t.type === 'save') {
+                    if (!manualSavesInCycle[t.category]) manualSavesInCycle[t.category] = 0;
+                    manualSavesInCycle[t.category] += Number(t.amount) || 0;
+                }
+            });
+            const budgetState = getBudgetStateForDate(dashboardViewDate, cycleTx);
+            const cycleMonthIndex = currentCycle.start.getMonth();
+            let totalLockedSave = 0;
+            if (budgetState.envelopes['預存支出'] && budgetState.envelopes['預存支出'].length > 0) {
+                budgetState.envelopes['預存支出'].forEach(env => {
+                    const statePlans = budgetState.monthlySavedPlans || {};
+                    let planned = 0;
+                    if (statePlans[env] && statePlans[env][cycleMonthIndex] !== '' && statePlans[env][cycleMonthIndex] !== undefined) {
+                        planned = parseFloat(statePlans[env][cycleMonthIndex]) || 0;
+                    }
+                    let manual = manualSavesInCycle[env] || 0;
+                    totalLockedSave += Math.max(planned, manual);
+                });
+            } else {
+                let planned = (budgetState.masterBudgets['預存支出'] || 0) / 12;
+                let totalManual = 0;
+                for (let cat in manualSavesInCycle) totalManual += manualSavesInCycle[cat];
+                totalLockedSave = Math.max(planned, totalManual);
+            }
+            return (totalInc - totalExp) - totalLockedSave;
+        }
+
+        function renderMoveBalanceSaveRows(balance) {
+            const targets = userEnvelopes['預存支出'] || [];
+            const rows = document.getElementById('move-balance-save-rows');
+            rows.innerHTML = targets.map((env, index) => `
+                <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+                    <div style="flex:1; background:#f8f2ea; border:1px solid rgba(184,135,107,0.14); border-radius:14px; padding:12px 14px; font-weight:700; color:var(--text-primary);">${env}</div>
+                    <input type="number" step="any" inputmode="decimal" class="move-balance-save-input" data-env="${env}" value="${index === 0 ? Math.max(0, Math.floor(balance)) : ''}" placeholder="0" style="width:120px; text-align:right;">
+                </div>
+            `).join('');
+            refreshMoveBalanceSaveTotal();
+        }
+        function refreshMoveBalanceSaveTotal() {
+            const balance = getCurrentTrueBalanceAmount();
+            const inputs = Array.from(document.querySelectorAll('.move-balance-save-input'));
+            let total = 0;
+            inputs.forEach(input => { total += parseFloat(input.value) || 0; });
+            const remain = balance - total;
+            const note = document.getElementById('move-balance-save-total-note');
+            if (note) {
+                note.innerText = `目前已分配：$${formatMoney(total)}｜剩餘可分配：$${formatMoney(Math.max(remain, 0))}`;
+                note.style.color = remain < 0 ? 'var(--danger)' : 'var(--text-secondary)';
+            }
+        }
+        function openMoveBalanceToSaveModal() {
+            const targets = userEnvelopes['預存支出'] || [];
+            if (!targets.length) {
+                alert('妳還沒有設定預存支出項目，先去設定頁新增一個預存袋喔。');
+                return;
+            }
+            const balance = getCurrentTrueBalanceAmount();
+            if (balance <= 0) {
+                alert('目前真實可動用餘額不足，暫時沒有可以轉進預備金的金額。');
+                return;
+            }
+            document.getElementById('move-balance-save-note').innerText = `目前可動用餘額：$${formatMoney(balance)}`;
+            renderMoveBalanceSaveRows(balance);
+            document.querySelectorAll('.move-balance-save-input').forEach(input => {
+                input.addEventListener('input', refreshMoveBalanceSaveTotal);
+            });
+            document.getElementById('move-balance-save-modal').classList.add('show');
+        }
+        function closeMoveBalanceToSaveModal() {
+            document.getElementById('move-balance-save-modal').classList.remove('show');
+        }
+        function confirmMoveBalanceToSave() {
+            const balance = getCurrentTrueBalanceAmount();
+            const inputs = Array.from(document.querySelectorAll('.move-balance-save-input'));
+            const allocations = inputs.map(input => ({ env: input.dataset.env, amount: parseFloat(input.value) || 0 })).filter(item => item.amount > 0);
+            const total = allocations.reduce((sum, item) => sum + item.amount, 0);
+            if (!allocations.length) { alert('請至少輸入一個要存入的金額。'); return; }
+            if (total > balance) { alert('這次分配的總金額超過目前真實可動用餘額喔。'); return; }
+            const moveContext = getBalanceMoveContext();
+            const effectiveDate = moveContext.effectiveDate;
+            const monthIndex = moveContext.cycleMonthIndex;
+            allocations.forEach((item, idx) => {
+                const payload = collectEntryPayload(effectiveDate, '存入預備金', item.env, { method: 'cash', paymentToolId: null, fundingCardId: null, transferLabel: '餘額轉入預備金' }, item.amount, '由真實可動用餘額轉入');
+                transactions.push({ id: Date.now() + idx, sourceCycleMonth: moveContext.cycleMonthKey, ...payload });
+                if (!monthlySavedPlans[item.env]) monthlySavedPlans[item.env] = Array(12).fill('');
+                const currentVal = parseFloat(monthlySavedPlans[item.env][monthIndex]) || 0;
+                monthlySavedPlans[item.env][monthIndex] = currentVal + item.amount;
+            });
+            sortTransactions();
+            localStorage.setItem('bear_transactions', JSON.stringify(transactions));
+            localStorage.setItem('bear_monthly_saved_plans', JSON.stringify(monthlySavedPlans));
+            writeAutoBackup('move-balance-to-save');
+            closeMoveBalanceToSaveModal();
+            renderDashboard();
+            renderSinkingFundsSettings();
+            renderSinkingFundsTracker();
+            renderList();
+            const summary = allocations.map(item => `${item.env} $${formatMoney(item.amount)}`).join('、');
+            alert(`已分配存入：${summary}`);
+        }
+
+        function getLatestNetWorthEntry() {
+            normalizeNetWorthData();
+            return netWorthData.length ? netWorthData[netWorthData.length - 1] : null;
+        }
+
+        function openMoveBalanceToBankModal() {
+            const balance = getCurrentTrueBalanceAmount();
+            if (balance <= 0) {
+                alert('目前真實可動用餘額不足，暫時沒有可以轉進銀行的金額。');
+                return;
+            }
+            document.getElementById('move-balance-bank-amount').value = Math.max(0, Math.floor(balance));
+            document.getElementById('move-balance-bank-note').innerText = `目前可動用餘額：$${formatMoney(balance)}`;
+            document.getElementById('move-balance-bank-modal').classList.add('show');
+        }
+        function closeMoveBalanceToBankModal() {
+            document.getElementById('move-balance-bank-modal').classList.remove('show');
+        }
+        function confirmMoveBalanceToBank() {
+            const amount = parseFloat(document.getElementById('move-balance-bank-amount').value);
+            const balance = getCurrentTrueBalanceAmount();
+            if (!amount || amount <= 0) { alert('請輸入要存入銀行多少。'); return; }
+            if (amount > balance) { alert('這次要存的金額超過目前真實可動用餘額喔。'); return; }
+            const latest = getLatestNetWorthEntry();
+            const now = new Date();
+            const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+            const timestamp = now.toISOString();
+            const cashDetails = latest && latest.details && Array.isArray(latest.details.cash) ? [...latest.details.cash] : [];
+            cashDetails.push({ name: `餘額轉銀行 ${month}/${String(now.getDate()).padStart(2, '0')}`, val: amount });
+            const baseCash = latest ? (Number(latest.cash) || 0) : 0;
+            const baseInvest = latest ? (Number(latest.invest) || 0) : 0;
+            const baseDebt = latest ? (Number(latest.debt) || 0) : 0;
+            const newData = {
+                id: createNetWorthRecordId(),
+                month,
+                createdAt: timestamp,
+                cash: baseCash + amount,
+                invest: baseInvest,
+                debt: baseDebt,
+                net: (baseCash + amount + baseInvest) - baseDebt,
+                details: {
+                    cash: cashDetails,
+                    invest: latest && latest.details && Array.isArray(latest.details.invest) ? [...latest.details.invest] : [],
+                    debt: latest && latest.details && Array.isArray(latest.details.debt) ? [...latest.details.debt] : []
+                }
+            };
+            netWorthData.push(newData);
+            normalizeNetWorthData();
+            localStorage.setItem('bear_networth', JSON.stringify(netWorthData));
+            writeAutoBackup('move-balance-to-bank');
+            closeMoveBalanceToBankModal();
+            switchPage('networth');
+            document.getElementById('nw-input-month').value = month;
+            loadNetWorthDataForMonth(month);
+            renderNetWorthPage();
+            alert(`已新增一筆資產盤點，並把銀行存款加上 $${formatMoney(amount)}。`);
+        }
+
         function openGuideModal() {
             guideStep = 0;
             renderGuideStep();
@@ -5801,6 +6303,38 @@ function renderBudgetBars(envExp, masterSpent, cycleTx = []) {
         }
 
         function closeGuideModal() { document.getElementById('guide-modal').classList.remove('show'); }
+
+        function openPlannedSaveHelpModal() {
+            renderPlannedSaveHelpModal();
+            document.getElementById('planned-save-help-modal').classList.add('show');
+        }
+
+        function closePlannedSaveHelpModal() {
+            const modal = document.getElementById('planned-save-help-modal');
+            if (modal) modal.classList.remove('show');
+        }
+
+        function renderPlannedSaveHelpModal() {
+            const el = document.getElementById('planned-save-help-content');
+            if (!el) return;
+
+            const budgetState = getBudgetStateForDate(dashboardViewDate, transactions);
+            const sinkingNames = ((budgetState.envelopes && budgetState.envelopes['預存支出']) || []).filter(Boolean);
+            const chipHtml = sinkingNames.length
+                ? `<div class="planned-save-chip-list">${sinkingNames.map(name => `<span class="planned-save-chip">🗂️ ${escapeHtml(name)}</span>`).join('')}</div>`
+                : '<div style="margin-top:12px;">目前還沒有設定預存項目，可以先到設定裡新增。</div>';
+
+            el.innerHTML = `
+                <div style="color:var(--text-primary); font-weight:700; margin-bottom:8px;">它不是今天已經花掉的錢，而是這個月先替未來支出留的位置。</div>
+                <div>例如：保險、旅遊、美髮、稅金、生日、回診、年繳費用這類，不是每天都花，但到了那天會需要一筆錢。</div>
+                <ul class="help-bullet-list">
+                    <li>妳先把這些錢留起來，之後真的發生支出時，比較不容易突然爆掉。</li>
+                    <li>這一欄是在提醒：<strong style="color:var(--text-primary);">有一部分餘額其實已經有任務了</strong>，不建議當成可以隨便花的錢。</li>
+                    <li>下面這些就是妳目前設定在「預存支出」裡的項目：</li>
+                </ul>
+                ${chipHtml}
+            `;
+        }
 
         function nextGuideStep() {
             if (guideStep < guideSteps.length - 1) {
@@ -6359,12 +6893,15 @@ function renderBudgetBars(envExp, masterSpent, cycleTx = []) {
             if(!month) { alert('請選擇盤點月份！'); return; }
             const details = { cash: [], invest: [], debt: [] };
             ['cash', 'invest', 'debt'].forEach(t => { const names = document.querySelectorAll(`.nw-dtl-name-${t}`); const vals = document.querySelectorAll(`.nw-dtl-val-${t}`); for(let i=0; i<names.length; i++) { if (names[i].value || vals[i].value) { details[t].push({ name: names[i].value || '未命名', val: parseFloat(vals[i].value) || 0 }); } } });
-            const net = (cash + invest) - debt; const existingIndex = netWorthData.findIndex(item => item.month === month); const newData = { month, cash, invest, debt, net, details };
-            if (existingIndex !== -1) { netWorthData[existingIndex] = newData; } else { netWorthData.push(newData); }
-            netWorthData.sort((a, b) => a.month.localeCompare(b.month)); localStorage.setItem('bear_networth', JSON.stringify(netWorthData)); writeAutoBackup('networth'); alert('盤點資料已更新！🚀'); renderNetWorthPage();
+            const net = (cash + invest) - debt;
+            const newData = { id: createNetWorthRecordId(), month, createdAt: new Date().toISOString(), cash, invest, debt, net, details };
+            netWorthData.push(newData);
+            normalizeNetWorthData();
+            localStorage.setItem('bear_networth', JSON.stringify(netWorthData)); writeAutoBackup('networth'); alert('盤點資料已新增一個新點位！🚀'); renderNetWorthPage();
         }
 
         function renderNetWorthPage() {
+            normalizeNetWorthData();
             if (netWorthData.length > 0) { const latest = netWorthData[netWorthData.length - 1]; document.getElementById('nw-display-total').innerText = `$${formatMoney(latest.net)}`; document.getElementById('nw-display-asset').innerText = `$${formatMoney(latest.cash + latest.invest)}`; document.getElementById('nw-display-debt').innerText = `$${formatMoney(latest.debt)}`; } 
             else { document.getElementById('nw-display-total').innerText = '$0'; document.getElementById('nw-display-asset').innerText = '$0'; document.getElementById('nw-display-debt').innerText = '$0'; }
 
@@ -6377,26 +6914,35 @@ function renderBudgetBars(envExp, masterSpent, cycleTx = []) {
                 const reversedData = [...netWorthData].reverse();
                 reversedData.forEach(item => {
                     const parts = item.month.split('-'); const displayMonth = `${parts[0]}年 ${parseInt(parts[1])}月`;
-                    let hasDetailIcon = ''; if (item.details && (item.details.cash.length > 0 || item.details.invest.length > 0 || item.details.debt.length > 0)) { hasDetailIcon = '<i class="fas fa-list-alt" style="font-size:0.7rem; color:var(--accent); margin-left:5px;" title="包含明細"></i>'; }
-                    listContainer.innerHTML += `<div class="nw-history-item" style="cursor:pointer;" onclick="document.getElementById('nw-input-month').value='${item.month}'; loadNetWorthDataForMonth('${item.month}'); window.scrollTo({ top: document.getElementById('nw-form-title').offsetTop - 50, behavior: 'smooth' });"><div><div class="nw-history-month">${displayMonth} ${hasDetailIcon}</div><div class="nw-history-details">存款 $${(item.cash/10000).toFixed(1)}W | 投資 $${(item.invest/10000).toFixed(1)}W | 負債 $${(item.debt/10000).toFixed(1)}W</div></div><div style="display:flex; align-items:center;"><div class="nw-history-net">$${formatMoney(item.net)}</div><i class="fas fa-trash delete-btn" style="margin-left:15px;" onclick="event.stopPropagation(); deleteNetWorth('${item.month}')"></i></div></div>`;
+                    const createdDate = item.createdAt ? new Date(item.createdAt) : null;
+                    const createdText = createdDate && !isNaN(createdDate.getTime()) ? `${createdDate.getMonth() + 1}/${createdDate.getDate()} ${String(createdDate.getHours()).padStart(2, '0')}:${String(createdDate.getMinutes()).padStart(2, '0')}` : '未記錄時間';
+                    let hasDetailIcon = ''; if (item.details && ((item.details.cash || []).length > 0 || (item.details.invest || []).length > 0 || (item.details.debt || []).length > 0)) { hasDetailIcon = '<i class="fas fa-list-alt" style="font-size:0.7rem; color:var(--accent); margin-left:5px;" title="包含明細"></i>'; }
+                    listContainer.innerHTML += `<div class="nw-history-item" style="cursor:pointer;" onclick="document.getElementById('nw-input-month').value='${item.month}'; loadNetWorthDataForMonth('${item.month}', '${item.id}'); window.scrollTo({ top: document.getElementById('nw-form-title').offsetTop - 50, behavior: 'smooth' });"><div><div class="nw-history-month">${displayMonth}｜${createdText} ${hasDetailIcon}</div><div class="nw-history-details">存款 $${(item.cash/10000).toFixed(1)}W | 投資 $${(item.invest/10000).toFixed(1)}W | 負債 $${(item.debt/10000).toFixed(1)}W</div></div><div style="display:flex; align-items:center;"><div class="nw-history-net">$${formatMoney(item.net)}</div><i class="fas fa-trash delete-btn" style="margin-left:15px;" onclick="event.stopPropagation(); deleteNetWorth('${item.id}')"></i></div></div>`;
                 });
             }
             renderNetWorthChart();
         }
 
         function renderNetWorthChart() {
+            normalizeNetWorthData();
             const ctx = document.getElementById('networthChart').getContext('2d'); if (netWorthData.length === 0) { if(nwChart) nwChart.destroy(); return; }
-            const labels = netWorthData.map(item => { const parts = item.month.split('-'); return `${parts[1]}月`; }); const dataPoints = netWorthData.map(item => item.net);
+            const labels = netWorthData.map(item => { const parts = item.month.split('-'); const createdDate = item.createdAt ? new Date(item.createdAt) : null; if (createdDate && !isNaN(createdDate.getTime())) return `${parts[1]}月${createdDate.getDate()}日`; return `${parts[1]}月`; }); const dataPoints = netWorthData.map(item => item.net);
             if (nwChart) nwChart.destroy();
             let gradient = ctx.createLinearGradient(0, 0, 0, 400); gradient.addColorStop(0, 'rgba(176, 141, 133, 0.5)'); gradient.addColorStop(1, 'rgba(252, 251, 249, 0)');   
             nwChart = new Chart(ctx, { type: 'line', data: { labels: labels, datasets: [{ label: '淨資產走勢', data: dataPoints, borderColor: '#b08d85', backgroundColor: gradient, borderWidth: 3, pointBackgroundColor: '#5a4d41', pointBorderColor: '#fff', pointBorderWidth: 2, pointRadius: 5, fill: true, tension: 0.3 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: false, grid: { color: '#eee', borderDash: [5, 5] }, ticks: { color: '#968c83', callback: function(value) { return (value / 10000) + 'W'; } } }, x: { grid: { display: false }, ticks: { color: '#968c83' } } } } });
         }
-        function deleteNetWorth(monthStr) { if(confirm(`確定刪除 ${monthStr} 的盤點紀錄嗎？`)) { netWorthData = netWorthData.filter(item => item.month !== monthStr); localStorage.setItem('bear_networth', JSON.stringify(netWorthData)); writeAutoBackup('delete-networth'); renderNetWorthPage(); } }
+        function deleteNetWorth(recordId) { if(confirm('確定刪除這筆盤點紀錄嗎？')) { netWorthData = netWorthData.filter(item => item.id !== recordId && item.month !== recordId); normalizeNetWorthData(); localStorage.setItem('bear_networth', JSON.stringify(netWorthData)); writeAutoBackup('delete-networth'); renderNetWorthPage(); } }
 
-        function loadNetWorthDataForMonth(monthStr) {
+        function loadNetWorthDataForMonth(monthStr, recordId = '') {
+            normalizeNetWorthData();
             ['cash', 'invest', 'debt'].forEach(t => { document.getElementById(`nw-list-${t}`).innerHTML = ''; document.getElementById(`nw-input-${t}`).readOnly = false; document.getElementById(`nw-input-${t}`).value = ''; document.getElementById(`nw-details-${t}`).classList.add('hidden'); });
             if (!monthStr) return;
-            const data = netWorthData.find(d => d.month === monthStr);
+            let data = null;
+            if (recordId) data = netWorthData.find(d => d.id === recordId);
+            if (!data) {
+                const sameMonth = netWorthData.filter(d => d.month === monthStr);
+                if (sameMonth.length) data = sameMonth[sameMonth.length - 1];
+            }
             if (data) {
                 document.getElementById('nw-input-cash').value = data.cash || ''; document.getElementById('nw-input-invest').value = data.invest || ''; document.getElementById('nw-input-debt').value = data.debt || '';
                 if (data.details) { ['cash', 'invest', 'debt'].forEach(t => { if (data.details[t] && data.details[t].length > 0) { document.getElementById(`nw-details-${t}`).classList.remove('hidden'); data.details[t].forEach(item => addNwDetailRow(t, item.name, item.val)); sumNwDetails(t); } }); }
@@ -7233,7 +7779,7 @@ function exportToExcel() {
                 transactions = data.tx || [];
                 budgets = data.budget || {};
                 shoppingList = data.shop || [];
-                netWorthData = data.networth || [];
+                netWorthData = data.networth || []; normalizeNetWorthData(); normalizeNetWorthData();
                 sysSettings = data.settings || { cycleStart: 1 };
                 paymentSettings = data.paymentSettings || { defaultMethod: 'cash', defaultCardId: '', defaultWalletId: '', cards: [], wallets: [] };
                 userEnvelopes = data.envelopes || JSON.parse(JSON.stringify(defaultSuggestions));
@@ -7304,7 +7850,7 @@ function exportToExcel() {
                         transactions = data.tx || []; 
                         budgets = data.budget || {}; 
                         shoppingList = data.shop || []; 
-                        netWorthData = data.networth || []; 
+                        netWorthData = data.networth || []; normalizeNetWorthData(); normalizeNetWorthData(); normalizeNetWorthData(); 
                         sysSettings = data.settings || { cycleStart: 1 }; 
                         paymentSettings = data.paymentSettings || { defaultMethod: 'cash', defaultCardId: '', defaultWalletId: '', cards: [], wallets: [] };
                         userEnvelopes = data.envelopes || null; 
@@ -7348,7 +7894,7 @@ function exportToExcel() {
         let privacyMode = false;
         function togglePrivacyMode() {
             privacyMode = !privacyMode;
-            const elements = ['display-income', 'display-expense', 'display-balance', 'display-planned-save', 'display-true-balance'];
+            const elements = ['display-income', 'display-expense', 'display-balance', 'display-planned-save', 'display-true-balance', 'display-today-expense'];
             const icon = document.getElementById('privacy-icon');
             const btn = document.getElementById('privacy-btn');
             
