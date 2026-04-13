@@ -1016,10 +1016,9 @@
             </div>
             <div id="wallet-settings-list"></div>
             <div class="settings-add-row"><button class="settings-add-link" type="button" onclick="addWalletSetting()">＋ 再新增一個電子支付</button></div>
-            <button class="btn btn-outline" type="button" onclick="saveWalletSettings()"><i class="fas fa-save"></i> 儲存電子支付設定</button>
-            <button class="btn" type="button" onclick="savePaymentSettings()"><i class="fas fa-save"></i> 儲存付款工具設定</button>
+            <button class="btn" type="button" onclick="savePaymentSettings()"><i class="fas fa-save"></i> 儲存所有付款設定</button>
+            <div class="sync-inline-note" style="margin-top:10px;"><strong>提醒：</strong> 這邊按完「儲存所有付款設定」後，若妳要把這版支付設定帶去另一個裝置，還要再按一次下面的「把目前資料同步到雲端」；另一個裝置再按「從雲端載回資料」。</div>
             <button class="btn btn-outline" type="button" onclick="handleCloudSaveNow()"><i class="fas fa-cloud-arrow-up"></i> 把目前資料同步到雲端</button>
-            <div class="sync-inline-note" style="margin-top:10px;"><strong>提醒：</strong> 按完「儲存付款工具設定」後，若要把支付設定帶去另一個裝置👉要再按「把目前資料同步到雲端」；之後打開另一個裝置按「從雲端載回資料」。</div>
             <div class="section-back-top"><button type="button" class="mini-link-btn" onclick="scrollToSettingsSection('settings-shortcuts-top')"><i class="fas fa-arrow-up"></i> 點我回到最上方</button></div>
         </div>
 
@@ -1221,8 +1220,8 @@
             </div>
             <div id="sync-conflict-body" class="sync-conflict-card"></div>
             <div class="sync-modal-actions">
-                <button id="sync-keep-local-btn" type="button" class="btn"><i class="fas fa-cloud-arrow-up"></i> 保留這版設定，覆蓋雲端</button>
-                <button id="sync-keep-cloud-btn" type="button" class="btn btn-outline"><i class="fas fa-cloud-arrow-down"></i> 使用雲端版本，覆蓋這台裝置</button>
+                <button id="sync-keep-local-btn" type="button" class="btn"><i class="fas fa-cloud-arrow-up"></i> 保留本機，覆蓋雲端</button>
+                <button id="sync-keep-cloud-btn" type="button" class="btn btn-outline"><i class="fas fa-cloud-arrow-down"></i> 保留雲端，載回這台裝置</button>
                 <button id="sync-cancel-btn" type="button" class="btn btn-cancel">先不要，晚點再決定</button>
             </div>
             <div class="sync-modal-note">時間皆以台灣時間顯示。為了避免直接蓋掉上一版，系統會先停在這裡，等妳選擇。</div>
