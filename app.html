@@ -1050,8 +1050,41 @@
 
         <div class="card" id="settings-cloud">
             <div class="section-top-back"><button type="button" class="mini-link-btn" onclick="scrollToSettingsSection('settings-shortcuts-top')"><i class="fas fa-arrow-up"></i> 點我回到最上方</button></div>
-            <div class="card-title">Email 雲端同步</div>
+            <div class="card-title">
+                <span>Email 雲端同步</span>
+                <button type="button" class="mini-link-btn" onclick="toggleCloudTroubleshooting()"><i class="fas fa-circle-question"></i> 排錯步驟</button>
+            </div>
             <div class="soft-note" style="margin-bottom:14px;">把資料綁定 Email 後，換手機或換瀏覽器也能把這份底氣帶回來。建議先用同一台裝置登入，再按一次同步到雲端。</div>
+            <div id="cloudTroubleshootingPanel" class="status-panel neutral hidden" style="margin-bottom:14px;">
+                <div class="status-panel-head">
+                    <div class="status-panel-title">如果跳出錯誤訊息，可以先照這樣排查</div>
+                    <div class="status-badge local">先做這 5 步</div>
+                </div>
+                <div class="status-panel-desc" style="margin-bottom:8px;">大部分情況不是資料壞掉，而是卡在登入、驗證信、密碼或載入順序。先照這個順序看，通常會快很多。</div>
+                <div style="display:grid; gap:10px;">
+                    <div class="status-meta-item">
+                        <div class="status-meta-label">1. 先確認是不是同一個 Email</div>
+                        <div class="status-meta-value">手機、電腦、平板都要用同一個註冊信箱登入，不是重新註冊新的帳號。</div>
+                    </div>
+                    <div class="status-meta-item">
+                        <div class="status-meta-label">2. 看錯誤發生在哪一步</div>
+                        <div class="status-meta-value">是註冊失敗、登入失敗、沒收到驗證信、忘記密碼失敗，還是登入後資料沒出現。先分清楚是哪一段。</div>
+                    </div>
+                    <div class="status-meta-item">
+                        <div class="status-meta-label">3. 如果看到 Invalid login credentials</div>
+                        <div class="status-meta-value">先確認密碼有沒有打錯；不確定就直接用「忘記密碼？」重設，再回來登入。</div>
+                    </div>
+                    <div class="status-meta-item">
+                        <div class="status-meta-label">4. 如果有收到驗證信或重設信</div>
+                        <div class="status-meta-value">請直接點信裡的連結回到財務駕駛艙，不要另外重開一個新分頁重新註冊。</div>
+                    </div>
+                    <div class="status-meta-item">
+                        <div class="status-meta-label">5. 如果登入成功但資料沒出現</div>
+                        <div class="status-meta-value">先按「從雲端載回資料」。若跳出本機 / 雲端不同版本提示，先選要保留哪一份再繼續。</div>
+                    </div>
+                </div>
+                <div class="sync-inline-note" style="margin-top:10px;"><strong>還是不行時，最有用的是這 3 張截圖：</strong> ① 錯誤訊息 ② 目前登入畫面 ③ 點按後的結果。再把操作順序一起傳給我，會最快找到原因。</div>
+            </div>
             <div id="cloud-auth-status" class="status-panel neutral" style="margin-bottom:14px;">
                 <div class="status-panel-head">
                     <div class="status-panel-title">同步狀態</div>
@@ -2577,6 +2610,16 @@
         }
         function getCloudSignupBtn() {
             return document.getElementById('cloudSignUpBtn');
+        }
+
+        function toggleCloudTroubleshooting(forceOpen = null) {
+            const panel = document.getElementById('cloudTroubleshootingPanel');
+            if (!panel) return;
+            const shouldOpen = forceOpen === null ? panel.classList.contains('hidden') : !!forceOpen;
+            panel.classList.toggle('hidden', !shouldOpen);
+            if (shouldOpen) {
+                panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
         }
 
         function clearSignupCooldownTimer() {
