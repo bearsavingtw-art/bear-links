@@ -2445,6 +2445,30 @@
             syncCloudPasswordPanelState({ loggedIn: !!cachedAuthUser });
         }
 
+        async function restoreRecoverySessionFromUrl() {
+            try {
+                const searchParams = new URLSearchParams(window.location.search || '');
+                const hashParams = new URLSearchParams((window.location.hash || '').replace(/^#/, ''));
+                const recoveryCode = searchParams.get('code') || hashParams.get('code');
+                const recoveryType = (searchParams.get('type') || hashParams.get('type') || '').toLowerCase();
+                if (!recoveryCode || recoveryType !== 'recovery') return false;
+
+                const { error } = await supabaseClient.auth.exchangeCodeForSession(recoveryCode);
+                if (error) {
+                    console.error('recovery exchange error:', error);
+                    alert('重設密碼連結已失效或無法驗證，請重新寄送一次重設密碼信。');
+                    return false;
+                }
+
+                const cleanUrl = location.pathname + (searchParams.get('page') ? ('?page=' + encodeURIComponent(searchParams.get('page'))) : '');
+                history.replaceState(null, '', cleanUrl + '#type=recovery');
+                return true;
+            } catch (err) {
+                console.error('restore recovery session failed:', err);
+                return false;
+            }
+        }
+
         async function handleForgotPassword() {
             const email = normalizeCloudEmail(document.getElementById('cloudEmail')?.value || '');
             if (!email) {
@@ -2943,6 +2967,7 @@
                 });
             }
             if (hasAnyUserData() && !getLocalUpdatedAt()) setLocalUpdatedAt('init-existing-local-data');
+            await restoreRecoverySessionFromUrl();
             await refreshCloudAuthStatus();
             renderSyncHints();
             if (emailInput && emailInput.value.trim()) {
