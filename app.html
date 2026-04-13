@@ -2445,30 +2445,6 @@
             syncCloudPasswordPanelState({ loggedIn: !!cachedAuthUser });
         }
 
-        async function restoreRecoverySessionFromUrl() {
-            try {
-                const searchParams = new URLSearchParams(window.location.search || '');
-                const hashParams = new URLSearchParams((window.location.hash || '').replace(/^#/, ''));
-                const recoveryCode = searchParams.get('code') || hashParams.get('code');
-                const recoveryType = (searchParams.get('type') || hashParams.get('type') || '').toLowerCase();
-                if (!recoveryCode || recoveryType !== 'recovery') return false;
-
-                const { error } = await supabaseClient.auth.exchangeCodeForSession(recoveryCode);
-                if (error) {
-                    console.error('recovery exchange error:', error);
-                    alert('重設密碼連結已失效或無法驗證，請重新寄送一次重設密碼信。');
-                    return false;
-                }
-
-                const cleanUrl = location.pathname + (searchParams.get('page') ? ('?page=' + encodeURIComponent(searchParams.get('page'))) : '');
-                history.replaceState(null, '', cleanUrl + '#type=recovery');
-                return true;
-            } catch (err) {
-                console.error('restore recovery session failed:', err);
-                return false;
-            }
-        }
-
         async function handleForgotPassword() {
             const email = normalizeCloudEmail(document.getElementById('cloudEmail')?.value || '');
             if (!email) {
@@ -2540,6 +2516,46 @@
         let resendVerifyTimer = null;
         let signupCooldownTimer = null;
         window.lastSignupEmail = window.lastSignupEmail || '';
+
+
+        async function restoreRecoverySessionFromUrl() {
+            try {
+                const hashParams = new URLSearchParams((location.hash || '').replace(/^#/, ''));
+                const searchParams = new URLSearchParams(location.search || '');
+                const hashType = hashParams.get('type') || '';
+                const searchType = searchParams.get('type') || '';
+                const code = searchParams.get('code') || hashParams.get('code') || '';
+                const accessToken = hashParams.get('access_token') || searchParams.get('access_token') || '';
+                const refreshToken = hashParams.get('refresh_token') || searchParams.get('refresh_token') || '';
+                const isRecoveryLink = /recovery/i.test(hashType) || /recovery/i.test(searchType);
+
+                if (!isRecoveryLink) return false;
+
+                if (code) {
+                    const { error } = await supabaseClient.auth.exchangeCodeForSession(code);
+                    if (error) {
+                        console.error('exchangeCodeForSession error:', error);
+                        return false;
+                    }
+                    return true;
+                }
+
+                if (accessToken && refreshToken) {
+                    const { error } = await supabaseClient.auth.setSession({
+                        access_token: accessToken,
+                        refresh_token: refreshToken
+                    });
+                    if (error) {
+                        console.error('setSession from recovery url error:', error);
+                        return false;
+                    }
+                    return true;
+                }
+            } catch (err) {
+                console.error('restoreRecoverySessionFromUrl error:', err);
+            }
+            return false;
+        }
 
         function normalizeCloudEmail(email = '') {
             return String(email || '').trim().toLowerCase();
@@ -2947,6 +2963,9 @@
                 cloudPasswordRecoveryMode = true;
                 cloudPasswordPanelManuallyOpened = true;
             }
+            if (cloudPasswordRecoveryMode) {
+                await restoreRecoverySessionFromUrl();
+            }
             syncCloudPasswordPanelState({ loggedIn: false });
             if (syncCancelBtn) syncCancelBtn.addEventListener('click', () => resolveSyncConflict('cancel'));
             if (syncKeepLocalBtn) syncKeepLocalBtn.addEventListener('click', () => resolveSyncConflict('keep-local'));
@@ -2967,7 +2986,6 @@
                 });
             }
             if (hasAnyUserData() && !getLocalUpdatedAt()) setLocalUpdatedAt('init-existing-local-data');
-            await restoreRecoverySessionFromUrl();
             await refreshCloudAuthStatus();
             renderSyncHints();
             if (emailInput && emailInput.value.trim()) {
@@ -2983,6 +3001,8 @@
                 document.getElementById('cloudEmail').value = normalizeCloudEmail(cachedAuthUser.email || '');
                 switchPage('settings');
                 syncCloudPasswordPanelState({ loggedIn: true });
+            } else if (cloudPasswordRecoveryMode) {
+                showAppToast('重設連結啟動中，若停留太久請重新點一次信箱連結。', 'warn', 3200);
             }
             if (data && data.session) {
                 try {
