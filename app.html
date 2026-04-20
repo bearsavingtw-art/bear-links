@@ -5346,6 +5346,12 @@ function getSharedBudgetSummary(cycleTx) {
             return Math.max(0, totalSaved - totalSpent);
         }
 
+        function calculateSinkingLockedAmount(env) {
+            const initialVal = initSaved[env] || 0;
+            let effectiveSaved = getSinkingEffectiveSaved(env, { includeCurrentMonth: true });
+            return Math.max(0, initialVal + effectiveSaved);
+        }
+
         function calculateSinkingCurrentBalanceFromState(env, state) {
             const snapshotYearlyGoals = (state && state.yearlyGoals) || {};
             const snapshotInitSaved = (state && state.initSaved) || {};
@@ -5852,7 +5858,10 @@ function renderDashboard() {
                 if (t.type === 'income') { totalInc += t.amount; } 
                 else if (t.type === 'expense') {
                     if (t.sharedMeta && t.sharedMeta.enabled) return;
-                    totalExp += t.amount;
+                    const isSinkingExpense = t.mainCategory === '預存支出';
+                    if (!isSinkingExpense) {
+                        totalExp += t.amount;
+                    }
                     if(mainExp[t.mainCategory] !== undefined) mainExp[t.mainCategory] += t.amount;
                     if(masterSpent[t.mainCategory] !== undefined) masterSpent[t.mainCategory] += t.amount;
                     let subCatDisplay = t.category; if (!envExp[subCatDisplay]) envExp[subCatDisplay] = { spent: 0, mainGroup: t.mainCategory }; envExp[subCatDisplay].spent += t.amount;
@@ -5871,6 +5880,7 @@ function renderDashboard() {
             transactions.forEach(t => {
                 if (t.type !== 'expense') return;
                 if (t.sharedMeta && t.sharedMeta.enabled) return;
+                if (t.mainCategory === '預存支出') return;
                 if (t.date === todayStr) todayExpense += Number(t.amount) || 0;
             });
             const todayExpenseEl = document.getElementById('display-today-expense');
@@ -5880,25 +5890,20 @@ function renderDashboard() {
             document.getElementById('display-balance').innerText = `$${formatMoney(currentBalance)}`;
 
             const budgetState = getBudgetStateForDate(dashboardViewDate, cycleTx);
-            const cycleMonthIndex = currentCycle.start.getMonth(); 
             let totalLockedSave = 0;
+            const sinkingEnvelopes = (budgetState.envelopes && budgetState.envelopes['預存支出']) ? budgetState.envelopes['預存支出'] : [];
 
-            if (budgetState.envelopes['預存支出'] && budgetState.envelopes['預存支出'].length > 0) {
-                budgetState.envelopes['預存支出'].forEach(env => {
-                    const statePlans = budgetState.monthlySavedPlans || {};
-                    let planned = 0;
-                    if (statePlans[env] && statePlans[env][cycleMonthIndex]) {
-                        planned = parseFloat(statePlans[env][cycleMonthIndex]) || 0;
-                    }
-                    let manual = manualSavesInCycle[env] || 0;
-                    let locked = Math.max(planned, manual);
-                    totalLockedSave += locked;
+            if (sinkingEnvelopes.length > 0) {
+                sinkingEnvelopes.forEach(env => {
+                    totalLockedSave += calculateSinkingLockedAmount(env);
                 });
             } else {
-                let planned = (budgetState.masterBudgets['預存支出'] || 0) / 12;
-                let totalManual = 0;
-                for (let cat in manualSavesInCycle) { totalManual += manualSavesInCycle[cat]; }
-                totalLockedSave = Math.max(planned, totalManual);
+                let totalSaved = 0;
+                transactions.forEach(t => {
+                    if (t.type === 'save') totalSaved += Number(t.amount) || 0;
+                });
+
+                totalLockedSave = Math.max(0, totalSaved);
             }
 
             let trueBalance = currentBalance - totalLockedSave;
@@ -6136,6 +6141,7 @@ function renderBudgetBars(envExp, masterSpent, cycleTx = []) {
                 if (t.type === 'income') totalInc += Number(t.amount) || 0;
                 else if (t.type === 'expense') {
                     if (t.sharedMeta && t.sharedMeta.enabled) return;
+                    if (t.mainCategory === '預存支出') return;
                     totalExp += Number(t.amount) || 0;
                 } else if (t.type === 'save') {
                     if (!manualSavesInCycle[t.category]) manualSavesInCycle[t.category] = 0;
@@ -6143,23 +6149,15 @@ function renderBudgetBars(envExp, masterSpent, cycleTx = []) {
                 }
             });
             const budgetState = getBudgetStateForDate(dashboardViewDate, cycleTx);
-            const cycleMonthIndex = currentCycle.start.getMonth();
             let totalLockedSave = 0;
             if (budgetState.envelopes['預存支出'] && budgetState.envelopes['預存支出'].length > 0) {
                 budgetState.envelopes['預存支出'].forEach(env => {
-                    const statePlans = budgetState.monthlySavedPlans || {};
-                    let planned = 0;
-                    if (statePlans[env] && statePlans[env][cycleMonthIndex] !== '' && statePlans[env][cycleMonthIndex] !== undefined) {
-                        planned = parseFloat(statePlans[env][cycleMonthIndex]) || 0;
-                    }
-                    let manual = manualSavesInCycle[env] || 0;
-                    totalLockedSave += Math.max(planned, manual);
+                    totalLockedSave += calculateSinkingLockedAmount(env);
                 });
             } else {
-                let planned = (budgetState.masterBudgets['預存支出'] || 0) / 12;
-                let totalManual = 0;
-                for (let cat in manualSavesInCycle) totalManual += manualSavesInCycle[cat];
-                totalLockedSave = Math.max(planned, totalManual);
+                transactions.forEach(t => {
+                    if (t.type === 'save') totalLockedSave += Number(t.amount) || 0;
+                });
             }
             return (totalInc - totalExp) - totalLockedSave;
         }
