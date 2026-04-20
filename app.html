@@ -513,6 +513,10 @@
                     <span>✨ 真實可動用餘額</span>
                     <span id="display-true-balance">$0</span>
                 </div>
+                <div style="margin-top:10px;">
+                    <button type="button" class="mini-link-btn" onclick="toggleBalanceComposition()">查看組成</button>
+                </div>
+                <div id="balance-composition-box" class="hidden" style="margin-top:14px; padding:14px 16px; background:#fffaf5; border:1px dashed rgba(184,135,107,0.24); border-radius:16px;"></div>
                 <div class="balance-action-row">
                     <button class="btn balance-action-btn secondary" type="button" onclick="openMoveBalanceToSaveModal()">把餘額存入預備金</button>
                     <button class="btn balance-action-btn tertiary" type="button" onclick="openMoveBalanceToBankModal()">把餘額存入銀行 → 資產盤點更新</button>
@@ -5284,13 +5288,20 @@ function getSharedBudgetSummary(cycleTx) {
 
         function deleteTx(id) { 
             if(confirm('確定刪除這筆紀錄？')) { 
+                const deletingTx = transactions.find(t => String(t.id) === String(id));
                 if (String(inlineEditingTxId) === String(id)) inlineEditingTxId = null;
+                if (isDashboardSaveTx(deletingTx)) {
+                    applyDashboardSavePlanDeltaByMeta(getDashboardSaveMeta(deletingTx), deletingTx.category, -(Number(deletingTx.amount) || 0));
+                }
                 transactions = transactions.filter(t => String(t.id) !== String(id)); 
                 localStorage.setItem('bear_transactions', JSON.stringify(transactions)); 
                 writeAutoBackup('delete-transaction');
                 renderRecentCombos();
                 renderDashboard(); 
+                renderBudgetSettings();
+                renderSinkingFundsTracker();
                 renderList(); 
+                renderBalanceCompositionBox();
                 if (document.getElementById('income-detail-modal') && document.getElementById('income-detail-modal').classList.contains('show')) renderIncomeDetailList();
             } 
         }
@@ -5889,24 +5900,9 @@ function renderDashboard() {
             let currentBalance = totalInc - totalExp;
             document.getElementById('display-balance').innerText = `$${formatMoney(currentBalance)}`;
 
-            const budgetState = getBudgetStateForDate(dashboardViewDate, cycleTx);
-            let totalLockedSave = 0;
-            const sinkingEnvelopes = (budgetState.envelopes && budgetState.envelopes['預存支出']) ? budgetState.envelopes['預存支出'] : [];
-
-            if (sinkingEnvelopes.length > 0) {
-                sinkingEnvelopes.forEach(env => {
-                    totalLockedSave += calculateSinkingLockedAmount(env);
-                });
-            } else {
-                let totalSaved = 0;
-                transactions.forEach(t => {
-                    if (t.type === 'save') totalSaved += Number(t.amount) || 0;
-                });
-
-                totalLockedSave = Math.max(0, totalSaved);
-            }
-
-            let trueBalance = currentBalance - totalLockedSave;
+            const balanceData = getDashboardBalanceCompositionData();
+            const totalLockedSave = balanceData.locked;
+            const trueBalance = balanceData.trueBalance;
 
             document.getElementById('display-planned-save').innerText = `-$${formatMoney(totalLockedSave)}`;
             const trueBalanceEl = document.getElementById('display-true-balance');
@@ -5917,6 +5913,7 @@ function renderDashboard() {
                 trueBalanceEl.style.color = 'var(--text-primary)';
             }
 
+            renderBalanceCompositionBox();
             renderBudgetBars(envExp, masterSpent, cycleTx); renderSinkingFundsTracker(); renderChart(mainExp, envExp); renderDashList(cycleTx, currentChartFilter); renderPaymentAnalysisPage(); if (document.getElementById('income-detail-modal') && document.getElementById('income-detail-modal').classList.contains('show')) renderIncomeDetailList(); 
         }
 
@@ -6124,42 +6121,200 @@ function renderBudgetBars(envExp, masterSpent, cycleTx = []) {
         }
 
         function getCurrentTrueBalanceAmount() {
+            return getDashboardBalanceCompositionData().trueBalance;
+        }
+
+
+        function getDashboardSaveCycleConfigKeyByMonthKey(monthKey) {
+            if (!monthKey) return getCycleConfigKey(dashboardViewDate);
+            const seed = new Date(`${monthKey}-01T00:00:00`);
+            return getCycleConfigKey(seed);
+        }
+
+        function getDashboardSaveStateByCycleKey(cycleConfigKey) {
+            if (!cycleConfigKey) return getEditableBudgetState(dashboardViewDate);
+            if (!budgetCycleConfigs[cycleConfigKey]) {
+                const seed = new Date(`${cycleConfigKey}T00:00:00`);
+                const cycle = getCycleBoundary(seed, sysSettings.cycleStart);
+                const cycleTx = transactions.filter(t => {
+                    const txDate = new Date(t.date);
+                    return txDate >= cycle.start && txDate <= cycle.end;
+                });
+                budgetCycleConfigs[cycleConfigKey] = buildBudgetCycleSnapshotFromState(getBudgetStateForDate(seed, cycleTx));
+                persistBudgetCycleConfigs();
+            }
+            return budgetCycleConfigs[cycleConfigKey];
+        }
+
+        function applyDashboardSavePlanDeltaByMeta(meta, env, delta) {
+            if (!meta || !env || !delta) return;
+            const monthIndex = Number(meta.monthIndex);
+            if (isNaN(monthIndex) || monthIndex < 0 || monthIndex > 11) return;
+            const cycleConfigKey = meta.cycleConfigKey || getDashboardSaveCycleConfigKeyByMonthKey(meta.monthKey || meta.cycleMonthKey || '');
+            const state = getDashboardSaveStateByCycleKey(cycleConfigKey);
+            if (!state.monthlySavedPlans) state.monthlySavedPlans = {};
+            if (!state.monthlySavedPlans[env]) state.monthlySavedPlans[env] = Array(12).fill('');
+            const currentVal = parseFloat(state.monthlySavedPlans[env][monthIndex]) || 0;
+            const nextVal = Math.max(0, currentVal + delta);
+            state.monthlySavedPlans[env][monthIndex] = nextVal > 0 ? nextVal : '';
+            budgetCycleConfigs[cycleConfigKey] = buildBudgetCycleSnapshotFromState(state);
+            if (cycleConfigKey === getCycleConfigKey(dashboardViewDate) || cycleConfigKey === getCycleConfigKey(new Date())) {
+                monthlySavedPlans = cloneJson(state.monthlySavedPlans || {});
+                persistBudgetGlobals();
+            }
+            persistBudgetCycleConfigs();
+            localStorage.setItem('bear_monthly_saved_plans', JSON.stringify(monthlySavedPlans));
+        }
+
+        function getDashboardSaveMeta(tx) {
+            if (!tx || tx.type !== 'save') return null;
+            if (tx.balanceMoveMeta && tx.balanceMoveMeta.kind === 'dashboard-save') return tx.balanceMoveMeta;
+            if (tx.transferLabel === '餘額轉入預備金' && tx.note === '由真實可動用餘額轉入') {
+                const monthKey = getTxCycleMonthKey(tx);
+                return {
+                    kind: 'dashboard-save',
+                    batchId: `legacy-${tx.id}`,
+                    monthIndex: new Date(tx.date).getMonth(),
+                    monthKey,
+                    cycleConfigKey: getDashboardSaveCycleConfigKeyByMonthKey(monthKey),
+                    createdAt: tx.date
+                };
+            }
+            return null;
+        }
+
+        function isDashboardSaveTx(tx) {
+            return !!getDashboardSaveMeta(tx);
+        }
+
+        function getDashboardBalanceCompositionData() {
             const currentCycle = getCycleBoundary(dashboardViewDate, sysSettings.cycleStart);
             const cycleMonthKey = `${currentCycle.start.getFullYear()}-${String(currentCycle.start.getMonth() + 1).padStart(2, '0')}`;
             const cycleTx = transactions.filter(t => {
                 const txCycleMonth = getTxCycleMonthKey(t);
-                if ((t.type === 'save' || t.mainCategory === '預存支出') && txCycleMonth) {
-                    return txCycleMonth === cycleMonthKey;
-                }
+                if ((t.type === 'save' || t.mainCategory === '預存支出') && txCycleMonth) return txCycleMonth === cycleMonthKey;
                 const tDate = new Date(t.date);
                 tDate.setHours(0,0,0,0);
                 return tDate >= currentCycle.start && tDate <= currentCycle.end;
             });
-            let totalInc = 0, totalExp = 0;
-            const manualSavesInCycle = {};
+            let income = 0, regularExpense = 0;
             cycleTx.forEach(t => {
-                if (t.type === 'income') totalInc += Number(t.amount) || 0;
+                if (t.type === 'income') income += Number(t.amount) || 0;
                 else if (t.type === 'expense') {
                     if (t.sharedMeta && t.sharedMeta.enabled) return;
                     if (t.mainCategory === '預存支出') return;
-                    totalExp += Number(t.amount) || 0;
-                } else if (t.type === 'save') {
-                    if (!manualSavesInCycle[t.category]) manualSavesInCycle[t.category] = 0;
-                    manualSavesInCycle[t.category] += Number(t.amount) || 0;
+                    regularExpense += Number(t.amount) || 0;
                 }
             });
             const budgetState = getBudgetStateForDate(dashboardViewDate, cycleTx);
-            let totalLockedSave = 0;
-            if (budgetState.envelopes['預存支出'] && budgetState.envelopes['預存支出'].length > 0) {
-                budgetState.envelopes['預存支出'].forEach(env => {
-                    totalLockedSave += calculateSinkingLockedAmount(env);
-                });
+            const moveContext = getBalanceMoveContext();
+            const monthIndex = moveContext.cycleMonthIndex;
+            const sinkingTargets = ((budgetState.envelopes && budgetState.envelopes['預存支出']) || []).filter(Boolean);
+            const rows = sinkingTargets.map(env => ({
+                env,
+                amount: (budgetState.monthlySavedPlans && budgetState.monthlySavedPlans[env] && budgetState.monthlySavedPlans[env][monthIndex] !== '' && budgetState.monthlySavedPlans[env][monthIndex] !== undefined)
+                    ? (parseFloat(budgetState.monthlySavedPlans[env][monthIndex]) || 0)
+                    : 0
+            })).filter(row => row.amount > 0);
+            const locked = rows.reduce((sum, row) => sum + row.amount, 0);
+            const trueBalance = income - regularExpense - locked;
+            return { income, regularExpense, locked, trueBalance, rows };
+        }
+
+        function getDashboardSaveBatchesForCurrentCycle() {
+            const moveContext = getBalanceMoveContext();
+            const map = {};
+            transactions.forEach(tx => {
+                if (!isDashboardSaveTx(tx)) return;
+                const meta = getDashboardSaveMeta(tx) || {};
+                if ((meta.monthKey || getTxCycleMonthKey(tx)) !== moveContext.cycleMonthKey) return;
+                const batchId = meta.batchId || `single-${tx.id}`;
+                if (!map[batchId]) map[batchId] = { batchId, createdAt: meta.createdAt || tx.date || '', items: [], total: 0 };
+                map[batchId].items.push(tx);
+                map[batchId].total += Number(tx.amount) || 0;
+            });
+            return Object.values(map).sort((a,b) => String(b.createdAt).localeCompare(String(a.createdAt)));
+        }
+
+        function toggleBalanceComposition() {
+            const box = document.getElementById('balance-composition-box');
+            if (!box) return;
+            if (box.classList.contains('hidden')) {
+                renderBalanceCompositionBox();
+                box.classList.remove('hidden');
             } else {
-                transactions.forEach(t => {
-                    if (t.type === 'save') totalLockedSave += Number(t.amount) || 0;
-                });
+                box.classList.add('hidden');
             }
-            return (totalInc - totalExp) - totalLockedSave;
+        }
+
+        function renderBalanceCompositionBox() {
+            const box = document.getElementById('balance-composition-box');
+            if (!box) return;
+            const data = getDashboardBalanceCompositionData();
+            const batches = getDashboardSaveBatchesForCurrentCycle();
+            const rowsHtml = data.rows.length
+                ? data.rows.map(row => `<div style="display:flex; justify-content:space-between; gap:10px; padding:4px 0;"><span>${row.env}</span><span style="font-weight:700; color:var(--gold);">$${formatMoney(row.amount)}</span></div>`).join('')
+                : '<div style="color:var(--text-secondary); font-size:0.78rem;">這個月的 12 宮格目前還沒有填入預存金。</div>';
+            const batchHtml = batches.length
+                ? batches.map(batch => `
+                    <div style="margin-top:12px; padding:10px 12px; background:#fff; border:1px solid rgba(184,135,107,0.16); border-radius:12px;">
+                        <div style="font-size:0.76rem; color:var(--text-secondary); margin-bottom:6px;">從這裡存入預備金｜合計 $${formatMoney(batch.total)}</div>
+                        ${batch.items.map(tx => `<div style="display:flex; justify-content:space-between; gap:10px; align-items:center; padding:6px 0; border-top:1px dashed #eee;"><div><div style="font-weight:700; color:var(--text-primary);">${tx.category}</div><div style="font-size:0.75rem; color:var(--text-secondary);">$${formatMoney(tx.amount)}</div></div><div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;"><button type="button" class="mini-link-btn" onclick="editDashboardSavedTx('${tx.id}')">修改</button><button type="button" class="mini-link-btn" onclick="cancelDashboardSavedTx('${tx.id}')">取消這筆</button></div></div>`).join('')}
+                    </div>
+                `).join('')
+                : '<div style="margin-top:12px; color:var(--text-secondary); font-size:0.78rem;">最近沒有從這裡把餘額存入預備金。</div>';
+            box.innerHTML = `
+                <div style="display:flex; justify-content:space-between; gap:12px; padding-bottom:8px; border-bottom:1px solid rgba(0,0,0,0.06); margin-bottom:10px;"><span>收入</span><strong>$${formatMoney(data.income)}</strong></div>
+                <div style="display:flex; justify-content:space-between; gap:12px; padding:8px 0;"><span>本月花費（固定＋變動）</span><strong>-$${formatMoney(data.regularExpense)}</strong></div>
+                <div style="display:flex; justify-content:space-between; gap:12px; padding:4px 0 8px;"><span>先留給未來的錢</span><strong>-$${formatMoney(data.locked)}</strong></div>
+                <div style="margin:8px 0 10px; padding:10px 12px; background:#fff; border-radius:12px; border:1px dashed rgba(184,135,107,0.2);">
+                    <div style="font-size:0.76rem; color:var(--text-secondary); margin-bottom:6px;">這個月 12 宮格填入的預存金</div>
+                    ${rowsHtml}
+                </div>
+                <div style="display:flex; justify-content:space-between; gap:12px; padding-top:10px; border-top:1px solid rgba(0,0,0,0.06); font-weight:700;"><span>目前真實可動用餘額</span><strong>$${formatMoney(data.trueBalance)}</strong></div>
+                ${batchHtml}
+            `;
+        }
+
+        function editDashboardSavedTx(id) {
+            const tx = transactions.find(t => String(t.id) === String(id));
+            if (!isDashboardSaveTx(tx)) return;
+            const currentAmount = Number(tx.amount) || 0;
+            const maxAmount = Math.max(0, getCurrentTrueBalanceAmount() + currentAmount);
+            const input = prompt(`要把這筆改成多少？
+（目前：$${formatMoney(currentAmount)}，最多可改到 $${formatMoney(maxAmount)}）`, String(currentAmount));
+            if (input === null) return;
+            const nextAmount = parseFloat(input);
+            if (!nextAmount || nextAmount <= 0) { alert('請輸入大於 0 的金額。'); return; }
+            if (nextAmount > maxAmount) { alert('這次調整後會超過目前可動用餘額喔。'); return; }
+            const delta = nextAmount - currentAmount;
+            tx.amount = nextAmount;
+            applyDashboardSavePlanDeltaByMeta(getDashboardSaveMeta(tx), tx.category, delta);
+            sortTransactions();
+            localStorage.setItem('bear_transactions', JSON.stringify(transactions));
+            writeAutoBackup('edit-dashboard-save');
+            renderDashboard();
+            renderBudgetSettings();
+            renderSinkingFundsTracker();
+            renderList();
+            renderBalanceCompositionBox();
+            alert('這筆存入預備金已更新。');
+        }
+
+        function cancelDashboardSavedTx(id) {
+            const tx = transactions.find(t => String(t.id) === String(id));
+            if (!isDashboardSaveTx(tx)) return;
+            if (!confirm(`確定取消這筆「${tx.category} $${formatMoney(tx.amount)}」嗎？`)) return;
+            applyDashboardSavePlanDeltaByMeta(getDashboardSaveMeta(tx), tx.category, -(Number(tx.amount) || 0));
+            transactions = transactions.filter(t => String(t.id) !== String(id));
+            localStorage.setItem('bear_transactions', JSON.stringify(transactions));
+            writeAutoBackup('cancel-dashboard-save');
+            renderDashboard();
+            renderBudgetSettings();
+            renderSinkingFundsTracker();
+            renderList();
+            renderBalanceCompositionBox();
+            alert('已取消這筆預備金，真實可動用餘額已恢復。');
         }
 
         function renderMoveBalanceSaveRows(balance) {
@@ -6216,22 +6371,27 @@ function renderBudgetBars(envExp, masterSpent, cycleTx = []) {
             const moveContext = getBalanceMoveContext();
             const effectiveDate = moveContext.effectiveDate;
             const monthIndex = moveContext.cycleMonthIndex;
+            const cycleConfigKey = getCycleConfigKey(dashboardViewDate);
+            const batchId = `dashboard-save-${Date.now()}`;
+            const state = getEditableBudgetState(dashboardViewDate);
             allocations.forEach((item, idx) => {
                 const payload = collectEntryPayload(effectiveDate, '存入預備金', item.env, { method: 'cash', paymentToolId: null, fundingCardId: null, transferLabel: '餘額轉入預備金' }, item.amount, '由真實可動用餘額轉入');
-                transactions.push({ id: Date.now() + idx, sourceCycleMonth: moveContext.cycleMonthKey, ...payload });
-                if (!monthlySavedPlans[item.env]) monthlySavedPlans[item.env] = Array(12).fill('');
-                const currentVal = parseFloat(monthlySavedPlans[item.env][monthIndex]) || 0;
-                monthlySavedPlans[item.env][monthIndex] = currentVal + item.amount;
+                transactions.push({ id: Date.now() + idx, sourceCycleMonth: moveContext.cycleMonthKey, balanceMoveMeta: { kind: 'dashboard-save', batchId, monthIndex, monthKey: moveContext.cycleMonthKey, cycleConfigKey, createdAt: new Date().toISOString() }, ...payload });
+                if (!state.monthlySavedPlans[item.env]) state.monthlySavedPlans[item.env] = Array(12).fill('');
+                const currentVal = parseFloat(state.monthlySavedPlans[item.env][monthIndex]) || 0;
+                state.monthlySavedPlans[item.env][monthIndex] = currentVal + item.amount;
             });
+            syncSelectedCycleBudgetConfig('move-balance-to-save');
             sortTransactions();
             localStorage.setItem('bear_transactions', JSON.stringify(transactions));
             localStorage.setItem('bear_monthly_saved_plans', JSON.stringify(monthlySavedPlans));
             writeAutoBackup('move-balance-to-save');
             closeMoveBalanceToSaveModal();
             renderDashboard();
-            renderSinkingFundsSettings();
+            renderBudgetSettings();
             renderSinkingFundsTracker();
             renderList();
+            renderBalanceCompositionBox();
             const summary = allocations.map(item => `${item.env} $${formatMoney(item.amount)}`).join('、');
             alert(`已分配存入：${summary}`);
         }
