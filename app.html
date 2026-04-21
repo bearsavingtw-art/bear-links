@@ -6008,14 +6008,13 @@ function renderBudgetBars(envExp, masterSpent, cycleTx = []) {
                 const targets = (budgetState.envelopes['預存支出'] || []).filter(Boolean);
                 let breakdownHtml = '';
                 if (targets.length) {
+                    const lockedRows = getCurrentCycleLockedSaveRows();
                     const rows = targets.map(env => {
-                        const planned = (budgetState.monthlySavedPlans && budgetState.monthlySavedPlans[env] && budgetState.monthlySavedPlans[env][cycleMonthIndex] !== '' && budgetState.monthlySavedPlans[env][cycleMonthIndex] !== undefined)
-                            ? (parseFloat(budgetState.monthlySavedPlans[env][cycleMonthIndex]) || 0)
-                            : 0;
+                        const lockedRow = lockedRows.find(row => row.env === env) || { amount: 0, planned: 0, dashboardSaved: 0, otherManualSaved: 0 };
                         const spent = transactions.filter(t => t.type === 'expense' && t.mainCategory === '預存支出' && t.category === env && (() => {
                             const d = new Date(t.date); d.setHours(0,0,0,0); return d >= currentCycle.start && d <= currentCycle.end;
                         })()).reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
-                        return { env, planned, spent };
+                        return { env, planned: lockedRow.amount, spent, rawPlanned: lockedRow.planned, dashboardSaved: lockedRow.dashboardSaved, otherManualSaved: lockedRow.otherManualSaved };
                     }).filter(row => row.planned > 0 || row.spent > 0);
                     if (rows.length) {
                         breakdownHtml = `<div style="margin-bottom:15px; padding:12px; background:#fdfbf7; border-radius:10px; border:1px solid #f0e6d2;">
@@ -6187,6 +6186,49 @@ function renderBudgetBars(envExp, masterSpent, cycleTx = []) {
             return !!getDashboardSaveMeta(tx);
         }
 
+
+        function getCurrentCycleLockedSaveRows() {
+            const currentCycle = getCycleBoundary(dashboardViewDate, sysSettings.cycleStart);
+            const cycleMonthKey = `${currentCycle.start.getFullYear()}-${String(currentCycle.start.getMonth() + 1).padStart(2, '0')}`;
+            const cycleTx = transactions.filter(t => {
+                const txCycleMonth = getTxCycleMonthKey(t);
+                if ((t.type === 'save' || t.mainCategory === '預存支出') && txCycleMonth) return txCycleMonth === cycleMonthKey;
+                const tDate = new Date(t.date);
+                tDate.setHours(0,0,0,0);
+                return tDate >= currentCycle.start && tDate <= currentCycle.end;
+            });
+            const budgetState = getBudgetStateForDate(dashboardViewDate, cycleTx);
+            const moveContext = getBalanceMoveContext();
+            const monthIndex = moveContext.cycleMonthIndex;
+            const sinkingTargets = ((budgetState.envelopes && budgetState.envelopes['預存支出']) || []).filter(Boolean);
+            const planMap = {};
+            const otherManualMap = {};
+            const dashboardManualMap = {};
+            sinkingTargets.forEach(env => {
+                planMap[env] = (budgetState.monthlySavedPlans && budgetState.monthlySavedPlans[env] && budgetState.monthlySavedPlans[env][monthIndex] !== '' && budgetState.monthlySavedPlans[env][monthIndex] !== undefined)
+                    ? (parseFloat(budgetState.monthlySavedPlans[env][monthIndex]) || 0)
+                    : 0;
+            });
+            cycleTx.forEach(t => {
+                if (t.type !== 'save' || (t.sharedMeta && t.sharedMeta.enabled)) return;
+                const env = t.category;
+                if (!env) return;
+                if (!sinkingTargets.includes(env)) return;
+                if (isDashboardSaveTx(t)) {
+                    dashboardManualMap[env] = (dashboardManualMap[env] || 0) + (Number(t.amount) || 0);
+                } else {
+                    otherManualMap[env] = (otherManualMap[env] || 0) + (Number(t.amount) || 0);
+                }
+            });
+            return sinkingTargets.map(env => {
+                const planned = planMap[env] || 0;
+                const dashboardSaved = dashboardManualMap[env] || 0;
+                const otherManualSaved = otherManualMap[env] || 0;
+                const amount = Math.max(planned, dashboardSaved) + otherManualSaved;
+                return { env, amount, planned, dashboardSaved, otherManualSaved };
+            }).filter(row => row.amount > 0 || row.planned > 0 || row.dashboardSaved > 0 || row.otherManualSaved > 0);
+        }
+
         function getDashboardBalanceCompositionData() {
             const currentCycle = getCycleBoundary(dashboardViewDate, sysSettings.cycleStart);
             const cycleMonthKey = `${currentCycle.start.getFullYear()}-${String(currentCycle.start.getMonth() + 1).padStart(2, '0')}`;
@@ -6206,16 +6248,7 @@ function renderBudgetBars(envExp, masterSpent, cycleTx = []) {
                     regularExpense += Number(t.amount) || 0;
                 }
             });
-            const budgetState = getBudgetStateForDate(dashboardViewDate, cycleTx);
-            const moveContext = getBalanceMoveContext();
-            const monthIndex = moveContext.cycleMonthIndex;
-            const sinkingTargets = ((budgetState.envelopes && budgetState.envelopes['預存支出']) || []).filter(Boolean);
-            const rows = sinkingTargets.map(env => ({
-                env,
-                amount: (budgetState.monthlySavedPlans && budgetState.monthlySavedPlans[env] && budgetState.monthlySavedPlans[env][monthIndex] !== '' && budgetState.monthlySavedPlans[env][monthIndex] !== undefined)
-                    ? (parseFloat(budgetState.monthlySavedPlans[env][monthIndex]) || 0)
-                    : 0
-            })).filter(row => row.amount > 0);
+            const rows = getCurrentCycleLockedSaveRows();
             const locked = rows.reduce((sum, row) => sum + row.amount, 0);
             const trueBalance = income - regularExpense - locked;
             return { income, regularExpense, locked, trueBalance, rows };
