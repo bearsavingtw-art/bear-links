@@ -81,7 +81,7 @@ header{
 /* HERO */
 
 .hero{
-  padding:80px 0 60px;
+  padding:80px 0 56px;
 }
 
 .hero small{
@@ -112,6 +112,9 @@ header{
 }
 
 .btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
   padding:13px 22px;
   border-radius:999px;
   font-size:13px;
@@ -137,7 +140,7 @@ header{
 }
 
 .hero-bottom{
-  margin-top:50px;
+  margin-top:46px;
   display:flex;
   align-items:center;
   gap:20px;
@@ -159,7 +162,7 @@ header{
 /* SECTION */
 
 section{
-  padding:80px 0;
+  padding:70px 0;
 }
 
 .section-label{
@@ -171,9 +174,9 @@ section{
 
 .section-title{
   font-family:'Cormorant Garamond','Noto Serif TC',serif;
-  font-size:54px;
-  line-height:1;
-  margin-bottom:18px;
+  font-size:50px;
+  line-height:1.02;
+  margin-bottom:16px;
   font-weight:500;
   letter-spacing:-1px;
 }
@@ -187,7 +190,7 @@ section{
 /* STATS */
 
 .stats-grid{
-  margin-top:38px;
+  margin-top:34px;
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
   gap:18px;
@@ -222,7 +225,7 @@ section{
 /* SCENARIOS */
 
 .scenario-grid{
-  margin-top:40px;
+  margin-top:36px;
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(270px,1fr));
   gap:18px;
@@ -316,84 +319,193 @@ section{
 
 /* INVESTMENT */
 
-.investment-layout{
-  margin-top:42px;
+.investment-section{
+  padding-top:72px;
+}
+
+.investment-hero{
+  margin-top:34px;
   display:grid;
-  grid-template-columns:1fr 1fr;
+  grid-template-columns:1.15fr .85fr;
   gap:18px;
+  align-items:stretch;
 }
 
-.investment-card{
-  background:white;
+.investment-card,
+.chart-card,
+.concept-card,
+.note-card{
+  background:rgba(255,255,255,.82);
   border-radius:30px;
-  padding:34px;
-  border:1px solid rgba(0,0,0,.04);
+  padding:32px;
+  border:1px solid rgba(255,255,255,.72);
+  box-shadow:0 16px 40px rgba(0,0,0,.035);
 }
 
-.investment-card h3{
+.investment-card h3,
+.chart-card h3,
+.concept-card h3,
+.note-card h3{
   font-family:'Cormorant Garamond','Noto Serif TC',serif;
-  font-size:36px;
-  line-height:1;
+  font-size:34px;
+  line-height:1.05;
   margin-bottom:14px;
   font-weight:500;
 }
 
-.investment-card p{
-  color:#6d6d6d;
-  margin-bottom:14px;
+.investment-card p,
+.chart-card p,
+.concept-card p,
+.note-card p{
+  color:#666;
+  margin-bottom:12px;
   font-size:14px;
 }
 
-.investment-card a{
-  color:#8d7157;
+.investment-list{
+  margin-top:18px;
+  display:grid;
+  gap:10px;
+}
+
+.investment-list div{
+  display:flex;
+  justify-content:space-between;
+  gap:16px;
+  padding:12px 0;
+  border-bottom:1px solid rgba(0,0,0,.06);
   font-size:13px;
 }
 
-.investment-note{
-  margin-top:22px;
-  padding-top:18px;
-  border-top:1px solid rgba(0,0,0,.06);
+.investment-list b{
+  font-weight:500;
 }
 
-.investment-note h4{
-  margin-bottom:10px;
-  font-size:15px;
+.investment-list span{
+  color:#777;
+  text-align:right;
 }
 
-.investment-note ul{
-  padding-left:18px;
-}
-
-.investment-note li{
-  margin-bottom:6px;
-  font-size:13px;
-  color:#555;
+.table-wrap{
+  overflow-x:auto;
 }
 
 table{
   width:100%;
   border-collapse:collapse;
-  margin-top:16px;
+  margin-top:18px;
+  min-width:430px;
 }
 
 th{
   text-align:left;
-  padding-bottom:14px;
+  padding:0 16px 12px 0;
   border-bottom:1px solid rgba(0,0,0,.06);
   font-size:12px;
   color:#8d7966;
+  white-space:nowrap;
 }
 
 td{
-  padding:14px 0;
+  padding:13px 16px 13px 0;
   border-bottom:1px solid rgba(0,0,0,.05);
   font-size:13px;
+  white-space:nowrap;
+}
+
+.chart-card{
+  margin-top:18px;
+}
+
+.bar-chart{
+  margin-top:24px;
+  display:grid;
+  gap:18px;
+}
+
+.bar-row{
+  display:grid;
+  grid-template-columns:86px 1fr 74px;
+  align-items:center;
+  gap:12px;
+  font-size:13px;
+}
+
+.bar-label{
+  color:#555;
+}
+
+.bar-track{
+  height:12px;
+  background:#eee7df;
+  border-radius:999px;
+  overflow:hidden;
+}
+
+.bar-fill{
+  height:100%;
+  border-radius:999px;
+  background:linear-gradient(90deg,#cdb9a4,#8e7257);
+}
+
+.bar-value{
+  text-align:right;
+  color:#6d6258;
+  font-variant-numeric:tabular-nums;
+}
+
+.investment-grid{
+  margin-top:18px;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:18px;
+}
+
+.concept-card ul,
+.note-card ul{
+  padding-left:18px;
+  margin-top:12px;
+}
+
+.concept-card li,
+.note-card li{
+  color:#555;
+  font-size:13px;
+  margin-bottom:7px;
+}
+
+.note-card{
+  margin-top:18px;
+  background:#f7f0e8;
+}
+
+.cta-strip{
+  margin-top:18px;
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  background:#292725;
+  color:#fff;
+  padding:24px 28px;
+  border-radius:28px;
+}
+
+.cta-strip p{
+  color:#e8e1da;
+  font-size:14px;
+}
+
+.cta-strip .btn{
+  background:#fff;
+  color:#292725;
 }
 
 /* METHOD */
 
 .method-grid{
-  margin-top:42px;
+  margin-top:38px;
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
   gap:18px;
@@ -428,7 +540,7 @@ td{
 /* FOOTER */
 
 footer{
-  padding:60px 0;
+  padding:56px 0;
   text-align:center;
   color:#8d8d8d;
   font-size:12px;
@@ -438,25 +550,51 @@ footer{
 
 @media(max-width:860px){
 
-  .hero{
-    padding:70px 0 50px;
-  }
-
-  .hero h1{
-    font-size:62px;
-  }
-
-  .investment-layout{
-    grid-template-columns:1fr;
-  }
-
-  .section-title{
-    font-size:44px;
+  .nav{
+    align-items:flex-start;
+    gap:12px;
   }
 
   .menu{
-    gap:14px;
+    gap:12px;
     font-size:11px;
+    flex-wrap:wrap;
+    justify-content:flex-end;
+  }
+
+  .hero{
+    padding:64px 0 46px;
+  }
+
+  .hero h1{
+    font-size:58px;
+  }
+
+  section{
+    padding:56px 0;
+  }
+
+  .section-title{
+    font-size:40px;
+  }
+
+  .investment-hero,
+  .investment-grid{
+    grid-template-columns:1fr;
+  }
+
+  .bar-row{
+    grid-template-columns:74px 1fr 64px;
+  }
+
+  .stat-card,
+  .scenario-card,
+  .investment-card,
+  .chart-card,
+  .concept-card,
+  .note-card,
+  .method-card{
+    padding:26px;
   }
 
 }
@@ -482,6 +620,10 @@ footer{
 
       <a href="https://bearsavingtw-art.github.io/bear-links/app.html" target="_blank">
         財務駕駛艙
+      </a>
+
+      <a href="https://bearsavingtw-art.github.io/bear-links/bear_investment_leadmagnet.html" target="_blank">
+        投資筆記
       </a>
 
       <a href="https://myship.7-11.com.tw/general/detail/GM2502152714662?utm_source=ig&utm_medium=social" target="_blank">
@@ -572,7 +714,7 @@ footer{
         <span>7.8Y</span>
         <p>
           每月多存 5000<br>
-          存到 1000 萬少 6 年
+          提早 7.8 年存到 1000 萬
         </p>
       </div>
 
@@ -682,7 +824,7 @@ footer{
 
         <div class="tool-links">
 
-          <a href="#investment-notes">
+          <a href="https://bearsavingtw-art.github.io/bear-links/bear_investment_leadmagnet.html" target="_blank">
             投資筆記
           </a>
 
@@ -743,7 +885,7 @@ footer{
 
 </section>
 
-<section id="investment-notes">
+<section id="investment-notes" class="investment-section">
 
   <div class="container">
 
@@ -755,7 +897,11 @@ footer{
       Bear 的投資筆記
     </h2>
 
-    <div class="investment-layout">
+    <p class="section-desc">
+      投資不是把錢丟進市場就結束。現金流、預存金、生活安全感，都會影響你能不能長期留在市場裡。
+    </p>
+
+    <div class="investment-hero">
 
       <div class="investment-card">
 
@@ -764,26 +910,34 @@ footer{
         </h3>
 
         <p>
-          市場下跌時。<br>
-          情緒比數字更難熬。
+          市場下跌時，情緒比數字更難熬。
         </p>
 
         <p>
-          很多人離開市場的原因。<br>
-          不是不知道長期投資。<br>
-          是波動發生時，沒有辦法繼續留下來。
+          很多人知道長期投資的道理，遇到波動時，還是會想停止投入、停損離開，連原本預計交給時間的複利也一起中斷。
         </p>
 
-        <div class="investment-note">
+        <div class="investment-list">
 
-          <h4>Bear 的投資觀察</h4>
+          <div>
+            <b>開始前</b>
+            <span>先確認緊急預備金與生活水位</span>
+          </div>
 
-          <ul>
-            <li>長期投資比想像中更無聊</li>
-            <li>現金流穩定，投資才容易長期</li>
-            <li>預存金會影響投資穩定度</li>
-            <li>投資前先建立生活安全感</li>
-          </ul>
+          <div>
+            <b>投入中</b>
+            <span>用定期定額降低情緒判斷</span>
+          </div>
+
+          <div>
+            <b>波動時</b>
+            <span>回到原本的時間與資金規劃</span>
+          </div>
+
+          <div>
+            <b>長期看</b>
+            <span>重點是不中斷、不亂賣、不借錢投資</span>
+          </div>
 
         </div>
 
@@ -792,53 +946,171 @@ footer{
       <div class="investment-card">
 
         <h3>
-          每月存 5000 的長期差距
+          每月投入的時間差
         </h3>
 
         <p>
-          時間拉長後。<br>
-          小額存款也會慢慢累積出差距。
+          以年化報酬率 8% 估算。每月多留下 5000 元，存到 1000 萬的時間差約 7.8 年。
         </p>
 
-        <table>
+        <div class="table-wrap">
 
-          <tr>
-            <th>每月存款</th>
-            <th>100萬</th>
-            <th>500萬</th>
-            <th>1000萬</th>
-          </tr>
+          <table>
 
-          <tr>
-            <td>5000</td>
-            <td>約10.7年</td>
-            <td>約25.6年</td>
-            <td>約33.4年</td>
-          </tr>
+            <tr>
+              <th>每月存款</th>
+              <th>100萬</th>
+              <th>500萬</th>
+              <th>1000萬</th>
+            </tr>
 
-          <tr>
-            <td>10000</td>
-            <td>約6.4年</td>
-            <td>約18.4年</td>
-            <td>約25.6年</td>
-          </tr>
+            <tr>
+              <td>5000</td>
+              <td>約10.7年</td>
+              <td>約25.6年</td>
+              <td>約33.4年</td>
+            </tr>
 
-        </table>
+            <tr>
+              <td>10000</td>
+              <td>約6.4年</td>
+              <td>約18.4年</td>
+              <td>約25.6年</td>
+            </tr>
 
-        <div class="investment-note">
+            <tr>
+              <td>20000</td>
+              <td>約3.9年</td>
+              <td>約12.9年</td>
+              <td>約18.4年</td>
+            </tr>
 
-          <h4>投資前可以先做的事</h4>
-
-          <ul>
-            <li>建立 3 ~ 6 個月預備金</li>
-            <li>先整理固定支出</li>
-            <li>避免投資期間一直中斷</li>
-            <li>讓存款率穩定提高</li>
-          </ul>
+          </table>
 
         </div>
 
       </div>
+
+    </div>
+
+    <div class="chart-card">
+
+      <h3>
+        存到 1000 萬需要多久？
+      </h3>
+
+      <p>
+        每月投入金額提高後，縮短的不只是年數，也會影響你需要用多少時間換取安全感。
+      </p>
+
+      <div class="bar-chart">
+
+        <div class="bar-row">
+          <div class="bar-label">5000/月</div>
+          <div class="bar-track">
+            <div class="bar-fill" style="width:100%;"></div>
+          </div>
+          <div class="bar-value">33.4年</div>
+        </div>
+
+        <div class="bar-row">
+          <div class="bar-label">10000/月</div>
+          <div class="bar-track">
+            <div class="bar-fill" style="width:76.6%;"></div>
+          </div>
+          <div class="bar-value">25.6年</div>
+        </div>
+
+        <div class="bar-row">
+          <div class="bar-label">20000/月</div>
+          <div class="bar-track">
+            <div class="bar-fill" style="width:55.1%;"></div>
+          </div>
+          <div class="bar-value">18.4年</div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="investment-grid">
+
+      <div class="concept-card">
+
+        <h3>
+          投資前先做什麼？
+        </h3>
+
+        <ul>
+          <li>建立 3～6 個月緊急預備金</li>
+          <li>整理固定支出與卡費壓力</li>
+          <li>把年繳、稅金、保險先放進預存金</li>
+          <li>確認每月可以穩定投入的金額</li>
+        </ul>
+
+      </div>
+
+      <div class="concept-card">
+
+        <h3>
+          小資族更需要的事
+        </h3>
+
+        <ul>
+          <li>不要因為本金小就放棄</li>
+          <li>先求開始，再慢慢提高金額</li>
+          <li>不要用下個月的薪水救這個月</li>
+          <li>讓投資變成固定習慣，不靠心情</li>
+        </ul>
+
+      </div>
+
+      <div class="concept-card">
+
+        <h3>
+          Bear 的投資觀察
+        </h3>
+
+        <ul>
+          <li>長期投資比想像中更無聊</li>
+          <li>現金流穩定，投資才容易長期</li>
+          <li>預存金會影響投資穩定度</li>
+          <li>生活不一直爆掉，投資比較不會中斷</li>
+        </ul>
+
+      </div>
+
+    </div>
+
+    <div class="note-card">
+
+      <h3>
+        投資順序
+      </h3>
+
+      <p>
+        先把生活整理到不會一直失控，再開始把一部分錢交給時間。這樣的投資，比較容易長期。
+      </p>
+
+      <ul>
+        <li>第一步：整理收支與固定支出</li>
+        <li>第二步：建立預存金與緊急預備金</li>
+        <li>第三步：用固定金額開始定期定額</li>
+        <li>第四步：收入增加時，優先提高存款率與投資率</li>
+      </ul>
+
+    </div>
+
+    <div class="cta-strip">
+
+      <div>
+        <strong>想看完整投資筆記？</strong>
+        <p>把小資族定期定額、長期投資與存錢順序整理成一份完整資源。</p>
+      </div>
+
+      <a class="btn" href="https://bearsavingtw-art.github.io/bear-links/bear_investment_leadmagnet.html" target="_blank">
+        前往投資筆記
+      </a>
 
     </div>
 
