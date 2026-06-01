@@ -1565,12 +1565,20 @@
         let monthlySavedPlans = JSON.parse(localStorage.getItem('bear_monthly_saved_plans')) || {};
         let shoppingList = JSON.parse(localStorage.getItem('bear_shopping_list')) || [];
         let netWorthData = JSON.parse(localStorage.getItem('bear_networth')) || [];
+        let editingNetWorthId = '';
         function createNetWorthRecordId() { return `nw_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`; }
         function getNetWorthSortKey(item) {
             if (!item) return '';
-            const base = item.createdAt || `${item.month || ''}-01T00:00:00`;
+            const month = item.month || '2000-01';
+            const createdAt = item.createdAt || `${month}-01T00:00:00`;
             const idPart = item.id || '';
-            return `${base}_${idPart}`;
+            return `${month}_${createdAt}_${idPart}`;
+        }
+        function getNetWorthMonthTime(item) {
+            if (!item || !item.month) return 0;
+            const [year, month] = item.month.split('-').map(Number);
+            if (!year || !month) return 0;
+            return year * 100 + month;
         }
         function normalizeNetWorthData() {
             if (!Array.isArray(netWorthData)) netWorthData = [];
@@ -1585,7 +1593,8 @@
                     invest: Number(item.invest) || 0,
                     debt: Number(item.debt) || 0,
                     net: Number.isFinite(item.net) ? Number(item.net) : ((Number(item.cash) || 0) + (Number(item.invest) || 0) - (Number(item.debt) || 0)),
-                    details: item.details || { cash: [], invest: [], debt: [] }
+                    details: item.details || { cash: [], invest: [], debt: [] },
+                    updatedAt: item.updatedAt || ''
                 };
             });
             netWorthData.sort((a, b) => getNetWorthSortKey(a).localeCompare(getNetWorthSortKey(b)));
@@ -7080,15 +7089,54 @@ function renderBudgetBars(envExp, masterSpent, cycleTx = []) {
         }
 
         function saveNetWorth() {
-            const month = document.getElementById('nw-input-month').value; const cash = parseFloat(document.getElementById('nw-input-cash').value) || 0; const invest = parseFloat(document.getElementById('nw-input-invest').value) || 0; const debt = parseFloat(document.getElementById('nw-input-debt').value) || 0;
+            const month = document.getElementById('nw-input-month').value;
+            const cash = parseFloat(document.getElementById('nw-input-cash').value) || 0;
+            const invest = parseFloat(document.getElementById('nw-input-invest').value) || 0;
+            const debt = parseFloat(document.getElementById('nw-input-debt').value) || 0;
             if(!month) { alert('請選擇盤點月份！'); return; }
+
             const details = { cash: [], invest: [], debt: [] };
-            ['cash', 'invest', 'debt'].forEach(t => { const names = document.querySelectorAll(`.nw-dtl-name-${t}`); const vals = document.querySelectorAll(`.nw-dtl-val-${t}`); for(let i=0; i<names.length; i++) { if (names[i].value || vals[i].value) { details[t].push({ name: names[i].value || '未命名', val: parseFloat(vals[i].value) || 0 }); } } });
+            ['cash', 'invest', 'debt'].forEach(t => {
+                const names = document.querySelectorAll(`.nw-dtl-name-${t}`);
+                const vals = document.querySelectorAll(`.nw-dtl-val-${t}`);
+                for(let i=0; i<names.length; i++) {
+                    if (names[i].value || vals[i].value) {
+                        details[t].push({ name: names[i].value || '未命名', val: parseFloat(vals[i].value) || 0 });
+                    }
+                }
+            });
+
             const net = (cash + invest) - debt;
-            const newData = { id: createNetWorthRecordId(), month, createdAt: new Date().toISOString(), cash, invest, debt, net, details };
+            const nowIso = new Date().toISOString();
+            let existingIndex = -1;
+
+            if (editingNetWorthId) {
+                existingIndex = netWorthData.findIndex(item => item.id === editingNetWorthId);
+            }
+            if (existingIndex === -1) {
+                existingIndex = netWorthData.findIndex(item => item.month === month);
+            }
+
+            if (existingIndex >= 0) {
+                const oldData = netWorthData[existingIndex];
+                netWorthData[existingIndex] = { ...oldData, month, cash, invest, debt, net, details, updatedAt: nowIso };
+                editingNetWorthId = '';
+                normalizeNetWorthData();
+                localStorage.setItem('bear_networth', JSON.stringify(netWorthData));
+                writeAutoBackup('update-networth');
+                alert('已更新這個月份的盤點資料！');
+                renderNetWorthPage();
+                return;
+            }
+
+            const newData = { id: createNetWorthRecordId(), month, createdAt: nowIso, cash, invest, debt, net, details };
             netWorthData.push(newData);
+            editingNetWorthId = '';
             normalizeNetWorthData();
-            localStorage.setItem('bear_networth', JSON.stringify(netWorthData)); writeAutoBackup('networth'); alert('盤點資料已新增一個新點位！🚀'); renderNetWorthPage();
+            localStorage.setItem('bear_networth', JSON.stringify(netWorthData));
+            writeAutoBackup('networth');
+            alert('盤點資料已新增一個新點位！🚀');
+            renderNetWorthPage();
         }
 
         function renderNetWorthPage() {
@@ -7102,7 +7150,13 @@ function renderBudgetBars(envExp, masterSpent, cycleTx = []) {
             const listContainer = document.getElementById('nw-history-list'); listContainer.innerHTML = '';
             if (netWorthData.length === 0) { listContainer.innerHTML = '<div style="text-align:center; padding:15px; color:#999; font-size:0.9rem;">尚未有盤點紀錄</div>'; } 
             else {
-                const reversedData = [...netWorthData].reverse();
+                const reversedData = [...netWorthData].sort((a, b) => {
+                    const monthDiff = getNetWorthMonthTime(b) - getNetWorthMonthTime(a);
+                    if (monthDiff !== 0) return monthDiff;
+                    const timeA = new Date(a.createdAt || 0).getTime();
+                    const timeB = new Date(b.createdAt || 0).getTime();
+                    return timeB - timeA;
+                });
                 reversedData.forEach(item => {
                     const parts = item.month.split('-'); const displayMonth = `${parts[0]}年 ${parseInt(parts[1])}月`;
                     const createdDate = item.createdAt ? new Date(item.createdAt) : null;
@@ -7117,15 +7171,24 @@ function renderBudgetBars(envExp, masterSpent, cycleTx = []) {
         function renderNetWorthChart() {
             normalizeNetWorthData();
             const ctx = document.getElementById('networthChart').getContext('2d'); if (netWorthData.length === 0) { if(nwChart) nwChart.destroy(); return; }
-            const labels = netWorthData.map(item => { const parts = item.month.split('-'); const createdDate = item.createdAt ? new Date(item.createdAt) : null; if (createdDate && !isNaN(createdDate.getTime())) return `${parts[1]}月${createdDate.getDate()}日`; return `${parts[1]}月`; }); const dataPoints = netWorthData.map(item => item.net);
+            const chartData = [...netWorthData].sort((a, b) => {
+                const monthDiff = getNetWorthMonthTime(a) - getNetWorthMonthTime(b);
+                if (monthDiff !== 0) return monthDiff;
+                const timeA = new Date(a.createdAt || 0).getTime();
+                const timeB = new Date(b.createdAt || 0).getTime();
+                return timeA - timeB;
+            });
+            const labels = chartData.map(item => { const parts = item.month.split('-'); const createdDate = item.createdAt ? new Date(item.createdAt) : null; if (createdDate && !isNaN(createdDate.getTime())) return `${parts[1]}月${createdDate.getDate()}日`; return `${parts[1]}月`; }); const dataPoints = chartData.map(item => item.net);
             if (nwChart) nwChart.destroy();
             let gradient = ctx.createLinearGradient(0, 0, 0, 400); gradient.addColorStop(0, 'rgba(176, 141, 133, 0.5)'); gradient.addColorStop(1, 'rgba(252, 251, 249, 0)');   
             nwChart = new Chart(ctx, { type: 'line', data: { labels: labels, datasets: [{ label: '淨資產走勢', data: dataPoints, borderColor: '#b08d85', backgroundColor: gradient, borderWidth: 3, pointBackgroundColor: '#5a4d41', pointBorderColor: '#fff', pointBorderWidth: 2, pointRadius: 5, fill: true, tension: 0.3 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: false, grid: { color: '#eee', borderDash: [5, 5] }, ticks: { color: '#968c83', callback: function(value) { return (value / 10000) + 'W'; } } }, x: { grid: { display: false }, ticks: { color: '#968c83' } } } } });
         }
+        
         function deleteNetWorth(recordId) { if(confirm('確定刪除這筆盤點紀錄嗎？')) { netWorthData = netWorthData.filter(item => item.id !== recordId && item.month !== recordId); normalizeNetWorthData(); localStorage.setItem('bear_networth', JSON.stringify(netWorthData)); writeAutoBackup('delete-networth'); renderNetWorthPage(); } }
 
         function loadNetWorthDataForMonth(monthStr, recordId = '') {
             normalizeNetWorthData();
+            editingNetWorthId = recordId || '';
             ['cash', 'invest', 'debt'].forEach(t => { document.getElementById(`nw-list-${t}`).innerHTML = ''; document.getElementById(`nw-input-${t}`).readOnly = false; document.getElementById(`nw-input-${t}`).value = ''; document.getElementById(`nw-details-${t}`).classList.add('hidden'); });
             if (!monthStr) return;
             let data = null;
@@ -7136,8 +7199,10 @@ function renderBudgetBars(envExp, masterSpent, cycleTx = []) {
             }
             if (data) {
                 document.getElementById('nw-input-cash').value = data.cash || ''; document.getElementById('nw-input-invest').value = data.invest || ''; document.getElementById('nw-input-debt').value = data.debt || '';
+                editingNetWorthId = data.id || '';
                 if (data.details) { ['cash', 'invest', 'debt'].forEach(t => { if (data.details[t] && data.details[t].length > 0) { document.getElementById(`nw-details-${t}`).classList.remove('hidden'); data.details[t].forEach(item => addNwDetailRow(t, item.name, item.val)); sumNwDetails(t); } }); }
             } else {
+                editingNetWorthId = '';
                 const diagnosedDebt = localStorage.getItem('bear_diagnosed_debt'); const today = new Date(); const thisMonthStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
                 if (monthStr === thisMonthStr && diagnosedDebt && parseFloat(diagnosedDebt) > 0) { document.getElementById('nw-input-debt').value = Math.round(parseFloat(diagnosedDebt)); document.getElementById('nw-form-title').innerHTML = '更新本月盤點數據 <span style="font-size:0.75rem; color:var(--success); font-weight:normal;">(已載入診斷室負債)</span>'; } else { document.getElementById('nw-form-title').innerHTML = '更新本月盤點數據'; }
             }
