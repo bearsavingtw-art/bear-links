@@ -7113,11 +7113,8 @@ function renderBudgetBars(envExp, masterSpent, cycleTx = []) {
             if (editingNetWorthId) {
                 existingIndex = netWorthData.findIndex(item => item.id === editingNetWorthId);
             }
-            if (existingIndex === -1) {
-                existingIndex = netWorthData.findIndex(item => item.month === month);
-            }
 
-            if (existingIndex >= 0) {
+            if (editingNetWorthId && existingIndex >= 0) {
                 const oldData = netWorthData[existingIndex];
                 netWorthData[existingIndex] = { ...oldData, month, cash, invest, debt, net, details, updatedAt: nowIso };
                 editingNetWorthId = '';
@@ -7199,7 +7196,7 @@ function renderBudgetBars(envExp, masterSpent, cycleTx = []) {
             }
             if (data) {
                 document.getElementById('nw-input-cash').value = data.cash || ''; document.getElementById('nw-input-invest').value = data.invest || ''; document.getElementById('nw-input-debt').value = data.debt || '';
-                editingNetWorthId = data.id || '';
+                editingNetWorthId = recordId ? (data.id || '') : '';
                 if (data.details) { ['cash', 'invest', 'debt'].forEach(t => { if (data.details[t] && data.details[t].length > 0) { document.getElementById(`nw-details-${t}`).classList.remove('hidden'); data.details[t].forEach(item => addNwDetailRow(t, item.name, item.val)); sumNwDetails(t); } }); }
             } else {
                 editingNetWorthId = '';
