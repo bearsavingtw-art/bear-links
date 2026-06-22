@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bear Saving｜年度預算試算器</title>
+  <style>
+    :root{
+      --bg:#f6f1ef;
+      --card:#fffaf8;
+      --rose:#9a6667;
+      --rose2:#c98d8d;
+      --rose3:#ead8d4;
+      --text:#5e4040;
+      --muted:#8b6b6b;
+      --line:#eadbd8;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:"Noto Sans TC","Microsoft JhengHei",Arial,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      line-height:1.7;
+    }
+    .wrap{
+      max-width:860px;
+      margin:auto;
+      padding:28px 18px 56px;
+    }
+    header{
+      text-align:center;
+      padding:36px 12px 24px;
+    }
+    .tag{
+      display:inline-block;
+      background:var(--rose3);
+      color:var(--rose2);
+      padding:6px 14px;
+      border-radius:8px;
+      font-size:14px;
+      margin-bottom:18px;
+    }
+    h1{
+      font-size:32px;
+      margin:0 0 8px;
+      letter-spacing:.04em;
+    }
+    .sub{
+      color:var(--muted);
+      margin:0;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns:1.05fr .95fr;
+      gap:18px;
+      align-items:start;
+    }
+    .card{
+      background:var(--card);
+      border-radius:18px;
+      padding:22px;
+      box-shadow:0 6px 20px rgba(94,64,64,.06);
+      border:1px solid rgba(234,219,216,.7);
+    }
+    label{
+      display:block;
+      margin:12px 0 6px;
+      font-weight:700;
+    }
+    input{
+      width:100%;
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius:10px;
+      padding:13px 14px;
+      font-size:17px;
+      color:var(--text);
+      outline:none;
+    }
+    input:focus{
+      border-color:var(--rose2);
+      box-shadow:0 0 0 3px rgba(201,141,141,.18);
+    }
+    .hint{
+      color:var(--muted);
+      font-size:13px;
+      margin-top:4px;
+    }
+    button{
+      width:100%;
+      margin-top:18px;
+      border:none;
+      background:var(--rose);
+      color:#fff;
+      font-size:18px;
+      padding:14px 18px;
+      border-radius:12px;
+      cursor:pointer;
+      letter-spacing:.08em;
+    }
+    button:hover{filter:brightness(.97)}
+    .result-title{
+      font-size:20px;
+      font-weight:800;
+      margin-bottom:14px;
+    }
+    .result-box{
+      background:#f1e3e0;
+      border-radius:14px;
+      padding:16px;
+      margin:12px 0;
+    }
+    .money{
+      font-size:28px;
+      font-weight:900;
+      color:var(--rose);
+      line-height:1.2;
+    }
+    .row{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      padding:10px 0;
+      border-bottom:1px solid var(--line);
+    }
+    .row:last-child{border-bottom:none}
+    .small{
+      font-size:14px;
+      color:var(--muted);
+    }
+    .bar{
+      height:18px;
+      border-radius:99px;
+      overflow:hidden;
+      display:flex;
+      margin:16px 0 8px;
+      background:#eee;
+    }
+    .bar span:first-child{background:var(--rose2)}
+    .bar span:nth-child(2){background:#dfbcb7}
+    .bar span:nth-child(3){background:#f0e3df}
+    .legend{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:8px;
+      font-size:13px;
+      color:var(--muted);
+    }
+    .notice{
+      margin-top:18px;
+      background:var(--rose);
+      color:#fff;
+      border-radius:14px;
+      padding:18px;
+      text-align:center;
+    }
+    .ai-box{
+      margin-top:18px;
+      background:#fff;
+      border:1px dashed var(--rose2);
+      border-radius:14px;
+      padding:16px;
+    }
+    textarea{
+      width:100%;
+      min-height:180px;
+      border:none;
+      background:#fff8f6;
+      border-radius:12px;
+      padding:14px;
+      color:var(--text);
+      font-size:14px;
+      line-height:1.7;
+      resize:vertical;
+    }
+    .footer{
+      text-align:center;
+      color:var(--muted);
+      margin-top:28px;
+      font-size:14px;
+    }
+    @media(max-width:760px){
+      .grid{grid-template-columns:1fr}
+      h1{font-size:26px}
+      .legend{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="tag">年度預算試算器</div>
+      <h1>除了記帳之外的理財秘笈</h1>
+      <p class="sub">輸入幾個數字，幫你算出每月生活預算與預留金分配。</p>
+    </header>
+
+    <main class="grid">
+      <section class="card">
+        <label>年收入</label>
+        <input id="income" type="number" placeholder="例如：500000" />
+        <div class="hint">薪水、獎金、年終、副業收入都可以估進去。</div>
+
+        <label>年度儲蓄目標</label>
+        <input id="saving" type="number" placeholder="例如：50000" />
+        <div class="hint">新手可以先從年收入的 5%～10% 開始。</div>
+
+        <label>年度固定支出</label>
+        <input id="fixed" type="number" placeholder="例如：120000" />
+        <div class="hint">房租、保險、交通、手機費、貸款等固定扣款。</div>
+
+        <label>預留金比例</label>
+        <input id="bufferRate" type="number" value="30" />
+        <div class="hint">建議先抓月生活預算的 30%，可依狀況調整。</div>
+
+        <label>預留金中，緊急備用金比例</label>
+        <input id="emergencyRate" type="number" value="50" />
+        <div class="hint">例如 50 代表預留金的一半先補緊急備用金。</div>
+
+        <button onclick="calculate()">開始試算</button>
+      </section>
+
+      <section class="card">
+        <div class="result-title">你的試算結果</div>
+
+        <div class="result-box">
+          <div class="small">每月生活預算</div>
+          <div class="money" id="monthlyBudget">—</div>
+        </div>
+
+        <div class="row">
+          <span>年可花費金額</span>
+          <strong id="yearSpend">—</strong>
+        </div>
+        <div class="row">
+          <span>每月預留金</span>
+          <strong id="buffer">—</strong>
+        </div>
+        <div class="row">
+          <span>每月日常花費</span>
+          <strong id="daily">—</strong>
+        </div>
+        <div class="row">
+          <span>緊急備用金</span>
+          <strong id="emergency">—</strong>
+        </div>
+        <div class="row">
+          <span>娛樂／享受金</span>
+          <strong id="fun">—</strong>
+        </div>
+
+        <div class="bar">
+          <span id="barSaving" style="width:20%"></span>
+          <span id="barFixed" style="width:30%"></span>
+          <span id="barSpend" style="width:50%"></span>
+        </div>
+        <div class="legend">
+          <div>深色：年度儲蓄</div>
+          <div>中間：固定支出</div>
+          <div>淺色：可花費金額</div>
+        </div>
+
+        <div class="notice" id="notice">
+          先填數字，再按試算。先求有，再求好。
+        </div>
+      </section>
+    </main>
+
+    <section class="ai-box">
+      <strong>收入不固定的人，可以複製這段問 AI：</strong>
+      <textarea readonly id="promptText">請你扮演我的預算規劃教練，幫我用「收入不固定」的情況設計一套存錢方法。
+
+我的狀況如下：
+1. 我最近 6～12 個月的收入分別是：
+1月：____
+2月：____
+3月：____
+4月：____
+5月：____
+6月：____
+
+2. 我每個月固定支出大約是：____ 元
+3. 我目前存款是：____ 元
+4. 我希望一年可以存下：____ 元
+5. 我希望每個月最少保留生活費：____ 元
+
+請你幫我：
+- 算出我的安全月收入基準
+- 不要用最高收入規劃生活
+- 設計收入高低都能執行的預算分配
+- 告訴我收入高的月份，多出來的錢怎麼分
+- 告訴我收入低的月份，哪些支出要先暫停
+- 用表格整理，並用新手聽得懂的方式說明。</textarea>
+      <button onclick="copyPrompt()">複製 AI 指令</button>
+    </section>
+
+    <div class="footer">bear.saving｜IG：@bear.saving</div>
+  </div>
+
+  <script>
+    function fmt(n){
+      if(!isFinite(n)) return "—";
+      return "$" + Math.round(n).toLocaleString("zh-TW");
+    }
+
+    function calculate(){
+      const income = Number(document.getElementById("income").value);
+      const saving = Number(document.getElementById("saving").value);
+      const fixed = Number(document.getElementById("fixed").value);
+      const bufferRate = Number(document.getElementById("bufferRate").value) / 100;
+      const emergencyRate = Number(document.getElementById("emergencyRate").value) / 100;
+
+      if(!income || income <= 0){
+        alert("請先填年收入");
+        return;
+      }
+
+      const yearSpend = income - saving - fixed;
+      const monthlyBudget = yearSpend / 12;
+      const buffer = monthlyBudget * bufferRate;
+      const daily = monthlyBudget - buffer;
+      const emergency = buffer * emergencyRate;
+      const fun = buffer - emergency;
+
+      document.getElementById("yearSpend").textContent = fmt(yearSpend);
+      document.getElementById("monthlyBudget").textContent = fmt(monthlyBudget);
+      document.getElementById("buffer").textContent = fmt(buffer);
+      document.getElementById("daily").textContent = fmt(daily);
+      document.getElementById("emergency").textContent = fmt(emergency);
+      document.getElementById("fun").textContent = fmt(fun);
+
+      const savingPct = Math.max(0, saving / income * 100);
+      const fixedPct = Math.max(0, fixed / income * 100);
+      const spendPct = Math.max(0, yearSpend / income * 100);
+      document.getElementById("barSaving").style.width = savingPct + "%";
+      document.getElementById("barFixed").style.width = fixedPct + "%";
+      document.getElementById("barSpend").style.width = spendPct + "%";
+
+      let msg = "這是一版可以開始執行的預算。";
+      if(yearSpend < 0){
+        msg = "目前儲蓄目標＋固定支出已超過年收入，需要先調整目標或固定支出。";
+      }else if(monthlyBudget < 10000){
+        msg = "月生活預算偏緊，建議先降低儲蓄目標，或檢查固定支出。";
+      }else if(buffer > 0){
+        msg = "建議先把預留金中的一部分補緊急備用金，存滿後再考慮投資。";
+      }
+      document.getElementById("notice").textContent = msg;
+    }
+
+    function copyPrompt(){
+      const t = document.getElementById("promptText");
+      t.select();
+      document.execCommand("copy");
+      alert("已複製 AI 指令");
+    }
+  </script>
+</body>
+</html>
