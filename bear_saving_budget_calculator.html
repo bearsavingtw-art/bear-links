@@ -11,11 +11,18 @@
       --rose:#9a6667;
       --rose2:#c98d8d;
       --rose3:#ead8d4;
+      --rose4:#f1e5e2;
       --text:#5e4040;
       --muted:#8b6b6b;
       --line:#eadbd8;
+      --white:#ffffff;
+      --ok:#7f8f76;
+      --warn:#b98762;
+      --bad:#a86a6a;
     }
+
     *{box-sizing:border-box}
+
     body{
       margin:0;
       font-family:"Noto Sans TC","Microsoft JhengHei",Arial,sans-serif;
@@ -23,15 +30,18 @@
       color:var(--text);
       line-height:1.7;
     }
+
     .wrap{
-      max-width:860px;
+      max-width:980px;
       margin:auto;
       padding:28px 18px 56px;
     }
+
     header{
       text-align:center;
-      padding:36px 12px 24px;
+      padding:34px 12px 24px;
     }
+
     .tag{
       display:inline-block;
       background:var(--rose3);
@@ -39,23 +49,37 @@
       padding:6px 14px;
       border-radius:8px;
       font-size:14px;
-      margin-bottom:18px;
+      margin-bottom:16px;
     }
+
     h1{
       font-size:32px;
       margin:0 0 8px;
       letter-spacing:.04em;
     }
+
+    h2{
+      margin:0 0 14px;
+      font-size:22px;
+    }
+
+    h3{
+      margin:0 0 10px;
+      font-size:18px;
+    }
+
     .sub{
       color:var(--muted);
       margin:0;
     }
+
     .grid{
       display:grid;
-      grid-template-columns:1.05fr .95fr;
+      grid-template-columns:1fr 1.15fr;
       gap:18px;
       align-items:start;
     }
+
     .card{
       background:var(--card);
       border-radius:18px;
@@ -63,11 +87,13 @@
       box-shadow:0 6px 20px rgba(94,64,64,.06);
       border:1px solid rgba(234,219,216,.7);
     }
+
     label{
       display:block;
       margin:12px 0 6px;
       font-weight:700;
     }
+
     input{
       width:100%;
       border:1px solid var(--line);
@@ -78,15 +104,18 @@
       color:var(--text);
       outline:none;
     }
+
     input:focus{
       border-color:var(--rose2);
       box-shadow:0 0 0 3px rgba(201,141,141,.18);
     }
+
     .hint{
       color:var(--muted);
       font-size:13px;
       margin-top:4px;
     }
+
     button{
       width:100%;
       margin-top:18px;
@@ -97,26 +126,83 @@
       padding:14px 18px;
       border-radius:12px;
       cursor:pointer;
-      letter-spacing:.08em;
+      letter-spacing:.06em;
     }
+
     button:hover{filter:brightness(.97)}
-    .result-title{
-      font-size:20px;
-      font-weight:800;
-      margin-bottom:14px;
+
+    .ghost-btn{
+      background:#fff;
+      color:var(--rose);
+      border:1px solid var(--rose2);
+      margin-top:10px;
     }
-    .result-box{
-      background:#f1e3e0;
-      border-radius:14px;
-      padding:16px;
-      margin:12px 0;
+
+    .result-hero{
+      background:var(--rose4);
+      border-radius:18px;
+      padding:20px;
+      margin-bottom:16px;
     }
+
+    .result-hero .label-small{
+      color:var(--muted);
+      font-size:15px;
+      margin-bottom:2px;
+    }
+
     .money{
-      font-size:28px;
+      font-size:34px;
       font-weight:900;
       color:var(--rose);
       line-height:1.2;
     }
+
+    .section{
+      margin-top:18px;
+    }
+
+    .formula-box{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:16px;
+      margin-top:10px;
+    }
+
+    .formula-row{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      padding:8px 0;
+      border-bottom:1px solid var(--line);
+    }
+
+    .formula-row:last-child{border-bottom:none}
+
+    .formula-row.total{
+      background:var(--rose4);
+      margin:8px -8px -4px;
+      padding:10px 8px;
+      border-radius:10px;
+      border-bottom:none;
+      color:var(--rose);
+      font-weight:800;
+    }
+
+    .explain{
+      background:#fff8f6;
+      border-radius:12px;
+      padding:12px;
+      color:var(--muted);
+      font-size:14px;
+      margin-top:10px;
+    }
+
+    .result-list{
+      margin-top:12px;
+    }
+
     .row{
       display:flex;
       justify-content:space-between;
@@ -124,29 +210,126 @@
       padding:10px 0;
       border-bottom:1px solid var(--line);
     }
+
     .row:last-child{border-bottom:none}
+
     .small{
       font-size:14px;
       color:var(--muted);
     }
-    .bar{
-      height:18px;
-      border-radius:99px;
-      overflow:hidden;
-      display:flex;
-      margin:16px 0 8px;
-      background:#eee;
-    }
-    .bar span:first-child{background:var(--rose2)}
-    .bar span:nth-child(2){background:#dfbcb7}
-    .bar span:nth-child(3){background:#f0e3df}
-    .legend{
+
+    .pie-wrap{
       display:grid;
-      grid-template-columns:repeat(3,1fr);
-      gap:8px;
+      grid-template-columns:180px 1fr;
+      gap:18px;
+      align-items:center;
+      margin-top:12px;
+    }
+
+    .pie{
+      width:170px;
+      height:170px;
+      border-radius:50%;
+      background:conic-gradient(
+        var(--rose) 0% 0%,
+        #dfbcb7 0% 0%,
+        #f0e3df 0% 100%
+      );
+      position:relative;
+      margin:auto;
+      box-shadow:inset 0 0 0 1px rgba(94,64,64,.04);
+    }
+
+    .pie::after{
+      content:"";
+      position:absolute;
+      inset:42px;
+      background:var(--card);
+      border-radius:50%;
+    }
+
+    .pie-center{
+      position:absolute;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      z-index:2;
       font-size:13px;
       color:var(--muted);
+      line-height:1.4;
     }
+
+    .legend{
+      display:grid;
+      gap:8px;
+      font-size:14px;
+    }
+
+    .legend-item{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+      background:#fff;
+      border-radius:10px;
+      padding:9px 10px;
+      border:1px solid var(--line);
+    }
+
+    .dot{
+      width:12px;
+      height:12px;
+      border-radius:50%;
+      display:inline-block;
+      margin-right:6px;
+      vertical-align:-1px;
+    }
+
+    .dot.saving{background:var(--rose)}
+    .dot.fixed{background:#dfbcb7}
+    .dot.spend{background:#f0e3df}
+
+    .split-cards{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+      margin-top:12px;
+    }
+
+    .mini-card{
+      border-radius:14px;
+      padding:14px;
+      background:#fff;
+      border:1px solid var(--line);
+    }
+
+    .mini-card.dark{
+      background:var(--rose);
+      color:#fff;
+      border:none;
+    }
+
+    .mini-card.pink{
+      background:var(--rose4);
+    }
+
+    .mini-title{
+      font-weight:800;
+      font-size:16px;
+      margin-bottom:4px;
+    }
+
+    .mini-money{
+      font-weight:900;
+      font-size:24px;
+      color:var(--rose);
+      line-height:1.2;
+    }
+
+    .dark .mini-money{color:#fff}
+
     .notice{
       margin-top:18px;
       background:var(--rose);
@@ -154,7 +337,13 @@
       border-radius:14px;
       padding:18px;
       text-align:center;
+      white-space:pre-line;
     }
+
+    .notice.ok{background:var(--ok)}
+    .notice.warn{background:var(--warn)}
+    .notice.bad{background:var(--bad)}
+
     .ai-box{
       margin-top:18px;
       background:#fff;
@@ -162,9 +351,10 @@
       border-radius:14px;
       padding:16px;
     }
+
     textarea{
       width:100%;
-      min-height:180px;
+      min-height:210px;
       border:none;
       background:#fff8f6;
       border-radius:12px;
@@ -173,17 +363,21 @@
       font-size:14px;
       line-height:1.7;
       resize:vertical;
+      margin-top:10px;
     }
+
     .footer{
       text-align:center;
       color:var(--muted);
       margin-top:28px;
       font-size:14px;
     }
-    @media(max-width:760px){
+
+    @media(max-width:820px){
       .grid{grid-template-columns:1fr}
       h1{font-size:26px}
-      .legend{grid-template-columns:1fr}
+      .pie-wrap{grid-template-columns:1fr}
+      .split-cards{grid-template-columns:1fr}
     }
   </style>
 </head>
@@ -192,11 +386,13 @@
     <header>
       <div class="tag">年度預算試算器</div>
       <h1>除了記帳之外的理財秘笈</h1>
-      <p class="sub">輸入幾個數字，幫你算出每月生活預算與預留金分配。</p>
+      <p class="sub">輸入幾個數字，幫你看懂「可自由使用的錢」是怎麼算出來的。</p>
     </header>
 
     <main class="grid">
       <section class="card">
+        <h2>填入你的數字</h2>
+
         <label>年收入</label>
         <input id="income" type="number" placeholder="例如：500000" />
         <div class="hint">薪水、獎金、年終、副業收入都可以估進去。</div>
@@ -205,59 +401,122 @@
         <input id="saving" type="number" placeholder="例如：50000" />
         <div class="hint">新手可以先從年收入的 5%～10% 開始。</div>
 
-        <label>年度固定支出</label>
+        <label>年度生活必須花費</label>
         <input id="fixed" type="number" placeholder="例如：120000" />
         <div class="hint">房租、保險、交通、手機費、貸款等固定扣款。</div>
 
-        <label>預留金比例</label>
+        <label>預存帳戶比例</label>
         <input id="bufferRate" type="number" value="30" />
-        <div class="hint">建議先抓月生活預算的 30%，可依狀況調整。</div>
+        <div class="hint">例如 30 代表從每月可自由使用金額中，切出 30% 放進預存帳戶。</div>
 
-        <label>預留金中，緊急備用金比例</label>
+        <label>預存帳戶中，安全感基金比例</label>
         <input id="emergencyRate" type="number" value="50" />
-        <div class="hint">例如 50 代表預留金的一半先補緊急備用金。</div>
+        <div class="hint">例如 50 代表預存帳戶的一半先補安全感基金。</div>
 
         <button onclick="calculate()">開始試算</button>
+        <button class="ghost-btn" onclick="fillExample()">填入範例數字</button>
       </section>
 
       <section class="card">
-        <div class="result-title">你的試算結果</div>
+        <h2>你的試算結果</h2>
 
-        <div class="result-box">
-          <div class="small">每月生活預算</div>
+        <div class="result-hero">
+          <div class="label-small">每月可自由使用金額</div>
           <div class="money" id="monthlyBudget">—</div>
+          <div class="small" id="monthlyFormula">先填數字，再按試算。</div>
         </div>
 
-        <div class="row">
-          <span>年可花費金額</span>
-          <strong id="yearSpend">—</strong>
-        </div>
-        <div class="row">
-          <span>每月預留金</span>
-          <strong id="buffer">—</strong>
-        </div>
-        <div class="row">
-          <span>每月日常花費</span>
-          <strong id="daily">—</strong>
-        </div>
-        <div class="row">
-          <span>緊急備用金</span>
-          <strong id="emergency">—</strong>
-        </div>
-        <div class="row">
-          <span>娛樂／享受金</span>
-          <strong id="fun">—</strong>
+        <div class="section">
+          <h3>① 年度預算怎麼來？</h3>
+          <div class="formula-box">
+            <div class="formula-row">
+              <span>年收入</span>
+              <strong id="fIncome">—</strong>
+            </div>
+            <div class="formula-row">
+              <span>－ 年度儲蓄目標</span>
+              <strong id="fSaving">—</strong>
+            </div>
+            <div class="formula-row">
+              <span>－ 年度生活必須花費</span>
+              <strong id="fFixed">—</strong>
+            </div>
+            <div class="formula-row total">
+              <span>＝ 可自由使用的錢</span>
+              <strong id="yearSpend">—</strong>
+            </div>
+          </div>
+          <div class="explain" id="yearExplain">
+            公式：年收入－年度儲蓄目標－年度生活必須花費＝可自由使用的錢
+          </div>
         </div>
 
-        <div class="bar">
-          <span id="barSaving" style="width:20%"></span>
-          <span id="barFixed" style="width:30%"></span>
-          <span id="barSpend" style="width:50%"></span>
+        <div class="section">
+          <h3>② 年收入分配圓餅圖</h3>
+          <div class="pie-wrap">
+            <div class="pie" id="pie">
+              <div class="pie-center">年收入<br>分配</div>
+            </div>
+            <div class="legend">
+              <div class="legend-item">
+                <span><span class="dot saving"></span>年度儲蓄</span>
+                <strong id="pctSaving">—</strong>
+              </div>
+              <div class="legend-item">
+                <span><span class="dot fixed"></span>生活必須花費</span>
+                <strong id="pctFixed">—</strong>
+              </div>
+              <div class="legend-item">
+                <span><span class="dot spend"></span>可自由使用的錢</span>
+                <strong id="pctSpend">—</strong>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="legend">
-          <div>深色：年度儲蓄</div>
-          <div>中間：固定支出</div>
-          <div>淺色：可花費金額</div>
+
+        <div class="section">
+          <h3>③ 預存帳戶怎麼來？</h3>
+          <div class="formula-box">
+            <div class="formula-row">
+              <span>每月可自由使用金額</span>
+              <strong id="mBudget2">—</strong>
+            </div>
+            <div class="formula-row">
+              <span>× 預存帳戶比例</span>
+              <strong id="bufferRateShow">—</strong>
+            </div>
+            <div class="formula-row total">
+              <span>＝ 每月預存帳戶</span>
+              <strong id="buffer">—</strong>
+            </div>
+          </div>
+          <div class="explain" id="bufferExplain">
+            預存帳戶是從每月可自由使用金額裡切出來的，用來準備未來的大筆支出。
+          </div>
+        </div>
+
+        <div class="section">
+          <h3>④ 預存帳戶再拆成兩份</h3>
+          <div class="split-cards">
+            <div class="mini-card pink">
+              <div class="mini-title">安全感基金</div>
+              <div class="mini-money" id="emergency">—</div>
+              <div class="small" id="emergencyExplain">預存帳戶 × 安全感基金比例</div>
+            </div>
+            <div class="mini-card dark">
+              <div class="mini-title">開心基金</div>
+              <div class="mini-money" id="fun">—</div>
+              <div class="small" id="funExplain" style="color:#fbeeed;">預存帳戶剩下的部分</div>
+            </div>
+          </div>
+
+          <div class="result-list">
+            <div class="row">
+              <span>每月日常花費</span>
+              <strong id="daily">—</strong>
+            </div>
+            <div class="small" id="dailyExplain">日常花費＝每月可自由使用金額－每月預存帳戶</div>
+          </div>
         </div>
 
         <div class="notice" id="notice">
@@ -279,7 +538,7 @@
 5月：____
 6月：____
 
-2. 我每個月固定支出大約是：____ 元
+2. 我每個月生活必須花費大約是：____ 元
 3. 我目前存款是：____ 元
 4. 我希望一年可以存下：____ 元
 5. 我希望每個月最少保留生活費：____ 元
@@ -303,12 +562,33 @@
       return "$" + Math.round(n).toLocaleString("zh-TW");
     }
 
+    function pct(n){
+      if(!isFinite(n)) return "—";
+      return Math.round(n * 10) / 10 + "%";
+    }
+
+    function clamp(n, min, max){
+      return Math.max(min, Math.min(max, n));
+    }
+
+    function fillExample(){
+      document.getElementById("income").value = 200000;
+      document.getElementById("saving").value = 50000;
+      document.getElementById("fixed").value = 50000;
+      document.getElementById("bufferRate").value = 30;
+      document.getElementById("emergencyRate").value = 50;
+      calculate();
+    }
+
     function calculate(){
       const income = Number(document.getElementById("income").value);
       const saving = Number(document.getElementById("saving").value);
       const fixed = Number(document.getElementById("fixed").value);
-      const bufferRate = Number(document.getElementById("bufferRate").value) / 100;
-      const emergencyRate = Number(document.getElementById("emergencyRate").value) / 100;
+      const bufferRateInput = Number(document.getElementById("bufferRate").value);
+      const emergencyRateInput = Number(document.getElementById("emergencyRate").value);
+
+      const bufferRate = bufferRateInput / 100;
+      const emergencyRate = emergencyRateInput / 100;
 
       if(!income || income <= 0){
         alert("請先填年收入");
@@ -322,29 +602,76 @@
       const emergency = buffer * emergencyRate;
       const fun = buffer - emergency;
 
-      document.getElementById("yearSpend").textContent = fmt(yearSpend);
       document.getElementById("monthlyBudget").textContent = fmt(monthlyBudget);
+      document.getElementById("monthlyFormula").textContent =
+        `${fmt(yearSpend)} ÷ 12 ＝ ${fmt(monthlyBudget)} / 月`;
+
+      document.getElementById("fIncome").textContent = fmt(income);
+      document.getElementById("fSaving").textContent = fmt(saving);
+      document.getElementById("fFixed").textContent = fmt(fixed);
+      document.getElementById("yearSpend").textContent = fmt(yearSpend);
+      document.getElementById("yearExplain").textContent =
+        `公式：${fmt(income)}－${fmt(saving)}－${fmt(fixed)}＝${fmt(yearSpend)}`;
+
+      document.getElementById("mBudget2").textContent = fmt(monthlyBudget);
+      document.getElementById("bufferRateShow").textContent = bufferRateInput + "%";
       document.getElementById("buffer").textContent = fmt(buffer);
+      document.getElementById("bufferExplain").textContent =
+        `公式：${fmt(monthlyBudget)} × ${bufferRateInput}% ＝ ${fmt(buffer)}。這筆錢可以用來準備旅遊、換手機、家電、節慶支出等未來大筆花費。`;
+
       document.getElementById("daily").textContent = fmt(daily);
+      document.getElementById("dailyExplain").textContent =
+        `公式：${fmt(monthlyBudget)}－${fmt(buffer)}＝${fmt(daily)}。這是每月餐飲、交通、日用品、休閒等日常可用金額。`;
+
       document.getElementById("emergency").textContent = fmt(emergency);
       document.getElementById("fun").textContent = fmt(fun);
+      document.getElementById("emergencyExplain").textContent =
+        `公式：${fmt(buffer)} × ${emergencyRateInput}% ＝ ${fmt(emergency)}`;
+      document.getElementById("funExplain").textContent =
+        `公式：${fmt(buffer)}－${fmt(emergency)}＝${fmt(fun)}`;
 
-      const savingPct = Math.max(0, saving / income * 100);
-      const fixedPct = Math.max(0, fixed / income * 100);
-      const spendPct = Math.max(0, yearSpend / income * 100);
-      document.getElementById("barSaving").style.width = savingPct + "%";
-      document.getElementById("barFixed").style.width = fixedPct + "%";
-      document.getElementById("barSpend").style.width = spendPct + "%";
+      const savingPct = income ? saving / income * 100 : 0;
+      const fixedPct = income ? fixed / income * 100 : 0;
+      const spendPct = income ? yearSpend / income * 100 : 0;
 
-      let msg = "這是一版可以開始執行的預算。";
+      document.getElementById("pctSaving").textContent = `${fmt(saving)}｜${pct(savingPct)}`;
+      document.getElementById("pctFixed").textContent = `${fmt(fixed)}｜${pct(fixedPct)}`;
+      document.getElementById("pctSpend").textContent = `${fmt(yearSpend)}｜${pct(spendPct)}`;
+
+      const s = clamp(savingPct, 0, 100);
+      const f = clamp(fixedPct, 0, 100);
+      const sp = clamp(spendPct, 0, 100);
+      const sEnd = s;
+      const fEnd = s + f;
+      const spEnd = s + f + sp;
+
+      document.getElementById("pie").style.background =
+        `conic-gradient(
+          var(--rose) 0% ${sEnd}%,
+          #dfbcb7 ${sEnd}% ${fEnd}%,
+          #f0e3df ${fEnd}% ${spEnd}%,
+          #eee ${spEnd}% 100%
+        )`;
+
+      const notice = document.getElementById("notice");
+      notice.className = "notice";
+
       if(yearSpend < 0){
-        msg = "目前儲蓄目標＋固定支出已超過年收入，需要先調整目標或固定支出。";
+        notice.classList.add("bad");
+        notice.textContent =
+          "目前儲蓄目標＋生活必須花費已經超過年收入。\n建議先降低儲蓄目標，或重新檢查生活必須花費。";
       }else if(monthlyBudget < 10000){
-        msg = "月生活預算偏緊，建議先降低儲蓄目標，或檢查固定支出。";
-      }else if(buffer > 0){
-        msg = "建議先把預留金中的一部分補緊急備用金，存滿後再考慮投資。";
+        notice.classList.add("warn");
+        notice.textContent =
+          "每月可自由使用金額偏緊。\n建議先降低儲蓄目標，或檢查生活必須花費，不需要一次做到完美。";
+      }else if(savingPct >= 20){
+        notice.classList.add("ok");
+        notice.textContent =
+          "儲蓄比例很不錯。\n可以先補足安全感基金，再慢慢考慮定期定額投資。";
+      }else{
+        notice.textContent =
+          "這是一版可以開始執行的預算。\n先把預存帳戶中的一部分補安全感基金，存滿後再考慮投資。";
       }
-      document.getElementById("notice").textContent = msg;
     }
 
     function copyPrompt(){
