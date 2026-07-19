@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="依《原來有錢人都這麼做》的公式，估算資產累積參考值。" />
+  <title>資產累積參考計算器｜Bear.saving</title>
+  <style>
+    :root{
+      --bg:#f8f3ef;
+      --card:#fffdfb;
+      --text:#3f3631;
+      --muted:#7d7069;
+      --accent:#b77b76;
+      --accent-dark:#8d5c58;
+      --accent-soft:#f2dfdc;
+      --line:#eadfd9;
+      --good:#52735e;
+      --good-soft:#e6f0e8;
+      --warn:#9b6d37;
+      --warn-soft:#f7ead9;
+      --low:#9a5656;
+      --low-soft:#f6e1e1;
+      --shadow:0 14px 38px rgba(91,66,54,.10);
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      background:
+        radial-gradient(circle at top left, #fff9f5 0, transparent 32rem),
+        var(--bg);
+      color:var(--text);
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+      line-height:1.65;
+    }
+
+    .wrap{
+      width:min(760px, calc(100% - 28px));
+      margin:32px auto 56px;
+    }
+
+    .hero{
+      padding:30px 24px;
+      border-radius:24px;
+      background:linear-gradient(145deg,#fffdfb,#f7eae6);
+      box-shadow:var(--shadow);
+      border:1px solid rgba(183,123,118,.18);
+      margin-bottom:18px;
+    }
+
+    .eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:6px 11px;
+      border-radius:999px;
+      background:var(--accent-soft);
+      color:var(--accent-dark);
+      font-size:13px;
+      font-weight:700;
+      letter-spacing:.04em;
+    }
+
+    h1{
+      margin:14px 0 8px;
+      font-size:clamp(28px,6vw,44px);
+      line-height:1.2;
+      letter-spacing:-.03em;
+    }
+
+    .lead{
+      margin:0;
+      color:var(--muted);
+      font-size:16px;
+    }
+
+    .card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:22px;
+      padding:22px;
+      box-shadow:0 8px 24px rgba(91,66,54,.06);
+      margin-top:18px;
+    }
+
+    .card h2{
+      margin:0 0 16px;
+      font-size:21px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:15px;
+    }
+
+    .field.full{grid-column:1/-1}
+
+    label{
+      display:block;
+      margin-bottom:7px;
+      font-size:14px;
+      font-weight:700;
+    }
+
+    .hint{
+      display:block;
+      margin-top:6px;
+      color:var(--muted);
+      font-size:12px;
+      font-weight:400;
+    }
+
+    .input-wrap{
+      position:relative;
+    }
+
+    input{
+      width:100%;
+      appearance:none;
+      border:1px solid #d9cbc4;
+      border-radius:13px;
+      background:#fff;
+      color:var(--text);
+      padding:14px 54px 14px 14px;
+      font-size:17px;
+      outline:none;
+      transition:.2s ease;
+    }
+
+    input:focus{
+      border-color:var(--accent);
+      box-shadow:0 0 0 4px rgba(183,123,118,.13);
+    }
+
+    .unit{
+      position:absolute;
+      right:14px;
+      top:50%;
+      transform:translateY(-50%);
+      color:var(--muted);
+      font-size:14px;
+      pointer-events:none;
+    }
+
+    button{
+      width:100%;
+      margin-top:18px;
+      border:0;
+      border-radius:14px;
+      padding:15px 18px;
+      background:var(--accent);
+      color:white;
+      font-size:17px;
+      font-weight:800;
+      cursor:pointer;
+      transition:.2s ease;
+    }
+
+    button:hover{background:var(--accent-dark); transform:translateY(-1px)}
+    button:active{transform:translateY(0)}
+
+    .formula{
+      margin-top:16px;
+      border-radius:14px;
+      padding:13px 15px;
+      background:#f7f1ed;
+      color:var(--muted);
+      font-size:14px;
+      text-align:center;
+    }
+
+    .result{
+      display:none;
+      margin-top:18px;
+      border-radius:18px;
+      padding:20px;
+      border:1px solid var(--line);
+    }
+
+    .result.show{display:block}
+    .result.good{background:var(--good-soft); border-color:#bed4c4}
+    .result.mid{background:var(--warn-soft); border-color:#ead0aa}
+    .result.low{background:var(--low-soft); border-color:#e4bbbb}
+
+    .result-title{
+      margin:0 0 6px;
+      font-size:21px;
+    }
+
+    .big-number{
+      margin:8px 0 2px;
+      font-size:clamp(30px,8vw,46px);
+      font-weight:900;
+      letter-spacing:-.03em;
+    }
+
+    .comparison{
+      margin:12px 0 0;
+      font-weight:700;
+    }
+
+    .progress-track{
+      height:10px;
+      margin-top:14px;
+      background:rgba(255,255,255,.68);
+      border-radius:999px;
+      overflow:hidden;
+    }
+
+    .progress-bar{
+      height:100%;
+      width:0;
+      border-radius:999px;
+      background:currentColor;
+      transition:width .55s ease;
+    }
+
+    .details{
+      margin-top:14px;
+      padding-top:14px;
+      border-top:1px dashed rgba(63,54,49,.2);
+      font-size:14px;
+    }
+
+    .recommend{
+      display:none;
+      margin-top:17px;
+    }
+
+    .recommend.show{display:block}
+
+    .resource-list{
+      display:grid;
+      gap:11px;
+      margin-top:14px;
+    }
+
+    .resource{
+      display:block;
+      padding:14px 15px;
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:#fff;
+      color:var(--text);
+      text-decoration:none;
+      transition:.2s ease;
+    }
+
+    .resource:hover{
+      border-color:var(--accent);
+      transform:translateY(-1px);
+      box-shadow:0 8px 18px rgba(91,66,54,.07);
+    }
+
+    .resource strong{
+      display:block;
+      color:var(--accent-dark);
+      margin-bottom:2px;
+    }
+
+    .note{
+      margin-top:16px;
+      padding:14px 15px;
+      border-left:4px solid var(--accent);
+      border-radius:10px;
+      background:#faf5f2;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    footer{
+      text-align:center;
+      color:var(--muted);
+      font-size:12px;
+      margin-top:18px;
+    }
+
+    @media (max-width:620px){
+      .wrap{margin-top:16px}
+      .hero,.card{border-radius:18px}
+      .grid{grid-template-columns:1fr}
+      .field.full{grid-column:auto}
+      .hero{padding:24px 19px}
+      .card{padding:19px}
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="hero">
+      <div class="eyebrow">Bear.saving｜財務小工具</div>
+      <h1>資產累積參考計算器</h1>
+      <p class="lead">
+        輸入年齡、稅前年收入、繼承財產與目前淨資產，
+        看看你的資產累積進度與書中公式的參考值相差多少。
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>輸入你的資料</h2>
+
+      <div class="grid">
+        <div class="field">
+          <label for="age">年齡</label>
+          <div class="input-wrap">
+            <input id="age" type="number" min="18" max="100" step="1" inputmode="numeric" placeholder="例如：30" />
+            <span class="unit">歲</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="income">
+            稅前年收入
+            <span class="hint">薪資、副業等年度收入合計</span>
+          </label>
+          <div class="input-wrap">
+            <input id="income" type="number" min="0" step="0.1" inputmode="decimal" placeholder="例如：55.7" />
+            <span class="unit">萬元</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="inheritance">
+            已取得的繼承財產
+            <span class="hint">沒有就填 0</span>
+          </label>
+          <div class="input-wrap">
+            <input id="inheritance" type="number" min="0" step="0.1" inputmode="decimal" value="0" />
+            <span class="unit">萬元</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="networth">
+            目前淨資產
+            <span class="hint">現金＋投資＋其他資產－負債</span>
+          </label>
+          <div class="input-wrap">
+            <input id="networth" type="number" step="0.1" inputmode="decimal" placeholder="例如：120" />
+            <span class="unit">萬元</span>
+          </div>
+        </div>
+      </div>
+
+      <button id="calculateBtn" type="button">看看我的資產累積進度</button>
+
+      <div class="formula">
+        書中參考公式：（年齡 × 稅前年收入）÷ 10 − 繼承財產
+      </div>
+
+      <section id="result" class="result" aria-live="polite">
+        <h3 id="resultTitle" class="result-title"></h3>
+        <div id="referenceValue" class="big-number"></div>
+        <div id="resultText"></div>
+        <div class="progress-track" aria-hidden="true">
+          <div id="progressBar" class="progress-bar"></div>
+        </div>
+        <div id="comparison" class="comparison"></div>
+        <div id="details" class="details"></div>
+      </section>
+
+      <section id="recommend" class="recommend">
+        <h2>接下來可以從「看清楚錢去哪裡」開始</h2>
+        <p>
+          若目前的資產累積進度低於公式參考值，不用急著否定自己。
+          可以先記帳一段時間，找出固定支出、變動支出和真正想留下來的錢。
+          APP 或紙本都可以，選你願意持續使用的方式最重要。
+        </p>
+
+        <div class="resource-list">
+          <a class="resource" href="https://myship.7-11.com.tw/general/detail/GM2502152714662?utm_source=ig&utm_medium=social" target="_blank" rel="noopener noreferrer">
+            <strong>紙本記帳工具賣場</strong>
+            喜歡手寫、想用紙本整理財務的人可以從這裡開始。
+          </a>
+
+          <a class="resource" href="https://drive.google.com/file/d/1kB0xr1XLYX4X5fnKg04Z1wgnm1gdq4SF/view?usp=drive_link" target="_blank" rel="noopener noreferrer">
+            <strong>免費財務整理表格</strong>
+            預算分配與財務整理資源；開啟前記得先登入 Google 雲端。
+          </a>
+
+          <a class="resource" href="https://drive.google.com/file/d/17Z-uV6pGjC4XR0z7VKciwd5AnAop9zsI/view?usp=drive_link" target="_blank" rel="noopener noreferrer">
+            <strong>記帳以外的理財祕笈</strong>
+            除了記錄花費，也一起整理更完整的理財觀念；開啟前記得先登入 Google 雲端。
+          </a>
+        </div>
+      </section>
+
+      <div class="note">
+        <strong>提醒：</strong>
+        這是《原來有錢人都這麼做》提出的資產累積估算法，只適合當作自我檢視的參考，
+        不是人生及格線，也不代表財務建議。年齡、職涯階段、房貸、家庭責任與人生選擇，
+        都可能讓結果產生很大差異。
+      </div>
+    </section>
+
+    <footer>© Bear.saving｜先看見自己的進度，再慢慢走向想過的生活。</footer>
+  </main>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+
+    function formatWan(value) {
+      return new Intl.NumberFormat('zh-TW', {
+        maximumFractionDigits: 1,
+        minimumFractionDigits: 0
+      }).format(value) + ' 萬元';
+    }
+
+    function showError(message) {
+      const result = $('result');
+      result.className = 'result show low';
+      $('resultTitle').textContent = '請再確認輸入資料';
+      $('referenceValue').textContent = '';
+      $('resultText').textContent = message;
+      $('comparison').textContent = '';
+      $('details').textContent = '';
+      $('progressBar').style.width = '0%';
+      $('recommend').classList.remove('show');
+    }
+
+    function calculate() {
+      const age = Number($('age').value);
+      const income = Number($('income').value);
+      const inheritance = Number($('inheritance').value || 0);
+      const networth = Number($('networth').value);
+
+      if (!Number.isFinite(age) || age < 18 || age > 100) {
+        return showError('請輸入 18～100 歲之間的年齡。');
+      }
+      if (!Number.isFinite(income) || income < 0) {
+        return showError('請輸入正確的稅前年收入。');
+      }
+      if (!Number.isFinite(inheritance) || inheritance < 0) {
+        return showError('繼承財產不可小於 0。');
+      }
+      if (!Number.isFinite(networth)) {
+        return showError('請輸入目前淨資產，才能和參考值比較。');
+      }
+
+      const rawReference = (age * income) / 10 - inheritance;
+      const reference = Math.max(0, rawReference);
+      const result = $('result');
+      const recommend = $('recommend');
+
+      let ratio;
+      if (reference === 0) {
+        ratio = networth > 0 ? Infinity : 1;
+      } else {
+        ratio = networth / reference;
+      }
+
+      result.className = 'result show';
+      $('referenceValue').textContent = formatWan(reference);
+
+      let title = '';
+      let text = '';
+      let className = '';
+      let comparisonText = '';
+
+      if (ratio >= 2) {
+        title = '資產累積明顯高於公式參考值';
+        text = '依照書中的分類方式，你目前的資產累積速度相對突出。';
+        className = 'good';
+        comparisonText = reference > 0
+          ? `目前淨資產約為參考值的 ${ratio.toFixed(1)} 倍。`
+          : '目前淨資產高於計算後的最低參考值。';
+        recommend.classList.remove('show');
+      } else if (ratio >= 0.5) {
+        title = '目前落在公式的廣泛參考區間';
+        text = '你的結果和書中公式推估值處於可比較的範圍，可以繼續觀察自己的累積趨勢。';
+        className = 'mid';
+        comparisonText = reference > 0
+          ? `目前淨資產約為參考值的 ${(ratio * 100).toFixed(0)}%。`
+          : '目前結果可作為後續追蹤的起點。';
+        recommend.classList.remove('show');
+      } else {
+        title = '目前低於公式推估的參考區間';
+        text = '這不代表失敗，只表示目前的資產累積速度低於這套公式的推估值。';
+        className = 'low';
+        comparisonText = reference > 0
+          ? `目前淨資產約為參考值的 ${(ratio * 100).toFixed(0)}%。`
+          : '可以先從盤點收入、支出與負債開始。';
+        recommend.classList.add('show');
+      }
+
+      result.classList.add(className);
+      $('resultTitle').textContent = title;
+      $('resultText').textContent = text;
+      $('comparison').textContent = comparisonText;
+
+      const difference = networth - reference;
+      const direction = difference >= 0 ? '高於' : '低於';
+      $('details').innerHTML =
+        `你的目前淨資產：<strong>${formatWan(networth)}</strong><br>` +
+        `公式參考值：<strong>${formatWan(reference)}</strong><br>` +
+        `相差：<strong>${direction} ${formatWan(Math.abs(difference))}</strong>`;
+
+      const visualPercent = reference <= 0 ? 100 : Math.max(0, Math.min(ratio * 50, 100));
+      $('progressBar').style.width = visualPercent + '%';
+      $('progressBar').style.color =
+        className === 'good' ? 'var(--good)' :
+        className === 'mid' ? 'var(--warn)' : 'var(--low)';
+
+      result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    $('calculateBtn').addEventListener('click', calculate);
+
+    ['age', 'income', 'inheritance', 'networth'].forEach(id => {
+      $(id).addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') calculate();
+      });
+    });
+  </script>
+</body>
+</html>
