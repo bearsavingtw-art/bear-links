@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="計算存款能替生活換到多少財務緩衝時間，以及加入微退休收入後的續航力。" />
+  <title>財務緩衝時間計算器｜Bear Saving</title>
+  <style>
+    :root {
+      --bg: #f7f1e8;
+      --card: #fffdf9;
+      --text: #40372f;
+      --muted: #75695f;
+      --accent: #9b765a;
+      --accent-dark: #71513d;
+      --line: #e7d9ca;
+      --soft: #efe3d6;
+      --success: #60745f;
+      --warning: #a16f45;
+      --shadow: 0 14px 40px rgba(84, 62, 44, 0.10);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family:
+        -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC",
+        "PingFang TC", "Microsoft JhengHei", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 15% 10%, rgba(255,255,255,.75), transparent 30%),
+        linear-gradient(180deg, #f4ebdf 0%, var(--bg) 45%, #f8f3ec 100%);
+      line-height: 1.65;
+    }
+
+    .page {
+      width: min(720px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 44px 0 56px;
+    }
+
+    .hero {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .bear {
+      width: 72px;
+      height: 72px;
+      margin: 0 auto 14px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--soft);
+      font-size: 38px;
+      box-shadow: inset 0 0 0 1px rgba(113,81,61,.08);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(28px, 6vw, 42px);
+      line-height: 1.2;
+      letter-spacing: .02em;
+    }
+
+    .subtitle {
+      margin: 12px auto 0;
+      max-width: 560px;
+      color: var(--muted);
+      font-size: 16px;
+    }
+
+    .card {
+      background: rgba(255, 253, 249, .96);
+      border: 1px solid rgba(155, 118, 90, .16);
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 18px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 7px;
+      font-weight: 700;
+      font-size: 15px;
+    }
+
+    .hint {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 400;
+    }
+
+    .input-wrap {
+      position: relative;
+    }
+
+    input {
+      width: 100%;
+      height: 52px;
+      padding: 0 56px 0 15px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+      color: var(--text);
+      font: inherit;
+      font-size: 17px;
+      outline: none;
+      transition: .2s ease;
+    }
+
+    input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px rgba(155,118,90,.12);
+    }
+
+    .unit {
+      position: absolute;
+      top: 50%;
+      right: 16px;
+      transform: translateY(-50%);
+      color: var(--muted);
+      font-size: 14px;
+      pointer-events: none;
+    }
+
+    .optional {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    button {
+      width: 100%;
+      min-height: 54px;
+      margin-top: 6px;
+      border: 0;
+      border-radius: 15px;
+      background: var(--accent);
+      color: white;
+      font: inherit;
+      font-size: 17px;
+      font-weight: 800;
+      letter-spacing: .04em;
+      cursor: pointer;
+      transition: transform .15s ease, background .15s ease;
+    }
+
+    button:hover {
+      background: var(--accent-dark);
+    }
+
+    button:active {
+      transform: scale(.99);
+    }
+
+    .error {
+      display: none;
+      margin: 14px 0 0;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: #fff0e5;
+      color: #8a4f2b;
+      font-size: 14px;
+    }
+
+    .results {
+      display: none;
+      margin-top: 22px;
+      animation: rise .35s ease;
+    }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .result-title {
+      margin: 0 0 14px;
+      text-align: center;
+      font-size: 19px;
+    }
+
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .result-box {
+      min-height: 154px;
+      padding: 18px 15px;
+      border-radius: 18px;
+      background: var(--soft);
+      text-align: center;
+    }
+
+    .result-box.secondary {
+      background: #edf1e9;
+    }
+
+    .result-label {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .big-number {
+      margin: 8px 0 3px;
+      color: var(--accent-dark);
+      font-size: clamp(28px, 7vw, 40px);
+      font-weight: 900;
+      line-height: 1.1;
+    }
+
+    .secondary .big-number {
+      color: var(--success);
+    }
+
+    .result-note {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .summary {
+      margin-top: 14px;
+      padding: 16px;
+      border: 1px dashed #d5c1ad;
+      border-radius: 15px;
+      background: #fffaf4;
+      font-size: 15px;
+    }
+
+    .summary strong {
+      color: var(--accent-dark);
+    }
+
+    .formula {
+      margin-top: 18px;
+      padding: 17px;
+      border-radius: 16px;
+      background: rgba(255,255,255,.65);
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .formula b {
+      color: var(--text);
+    }
+
+    .disclaimer {
+      margin: 20px 4px 0;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+    }
+
+    footer {
+      margin-top: 26px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 13px;
+    }
+
+    @media (max-width: 560px) {
+      .page {
+        width: min(100% - 22px, 720px);
+        padding-top: 28px;
+      }
+
+      .card {
+        padding: 19px;
+        border-radius: 20px;
+      }
+
+      .result-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .result-box {
+        min-height: 132px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="page">
+    <header class="hero">
+      <div class="bear" aria-hidden="true">🐻</div>
+      <h1>你的錢能養你多久？</h1>
+      <p class="subtitle">
+        算算存下來的錢，能替人生換到多少財務緩衝時間；
+        加入微退休收入後，也能看見這段生活可能延續多久。
+      </p>
+    </header>
+
+    <section class="card">
+      <form id="calculator" novalidate>
+        <div class="form-grid">
+          <div>
+            <label for="assets">
+              目前可計入的存款／資產
+              <span class="hint">請填入準備拿來支撐這段生活的金額。</span>
+            </label>
+            <div class="input-wrap">
+              <input id="assets" type="number" min="0" step="1000"
+                     inputmode="decimal" placeholder="例如：1000000" value="1000000" />
+              <span class="unit">元</span>
+            </div>
+          </div>
+
+          <div>
+            <label for="emergency">
+              預留不動用的緊急預備金
+              <span class="hint">這筆錢不納入一般生活緩衝。</span>
+            </label>
+            <div class="input-wrap">
+              <input id="emergency" type="number" min="0" step="1000"
+                     inputmode="decimal" placeholder="例如：300000" value="300000" />
+              <span class="unit">元</span>
+            </div>
+          </div>
+
+          <div>
+            <label for="expense">
+              每月必要生活費
+              <span class="hint">包含房租、飲食、交通、保險等基本支出。</span>
+            </label>
+            <div class="input-wrap">
+              <input id="expense" type="number" min="1" step="100"
+                     inputmode="decimal" placeholder="例如：30000" value="30000" />
+              <span class="unit">元</span>
+            </div>
+          </div>
+
+          <div>
+            <label for="income">
+              微退休期間每月預估收入
+              <span class="optional">（選填）</span>
+              <span class="hint">例如兼職、接案、副業或平台收入；沒有可填 0。</span>
+            </label>
+            <div class="input-wrap">
+              <input id="income" type="number" min="0" step="100"
+                     inputmode="decimal" placeholder="例如：20000" value="0" />
+              <span class="unit">元</span>
+            </div>
+          </div>
+
+          <button type="submit">計算我的財務緩衝時間</button>
+        </div>
+
+        <p id="error" class="error" role="alert"></p>
+      </form>
+
+      <section id="results" class="results" aria-live="polite">
+        <h2 class="result-title">你的計算結果</h2>
+
+        <div class="result-grid">
+          <article class="result-box">
+            <div class="result-label">完全沒有收入時</div>
+            <div id="baseResult" class="big-number">—</div>
+            <div id="baseMonths" class="result-note">—</div>
+          </article>
+
+          <article class="result-box secondary">
+            <div class="result-label">加入微退休收入後</div>
+            <div id="microResult" class="big-number">—</div>
+            <div id="microMonths" class="result-note">—</div>
+          </article>
+        </div>
+
+        <div id="summary" class="summary"></div>
+
+        <div class="formula">
+          <b>基本緩衝月數</b>＝（資產－預留緊急預備金）÷ 每月必要生活費<br />
+          <b>微退休緩衝月數</b>＝（資產－預留緊急預備金）÷
+          （每月必要生活費－每月預估收入）
+        </div>
+      </section>
+    </section>
+
+    <p class="disclaimer">
+      本工具僅供個人財務整理與情境試算，不代表投資、退休或離職建議。
+      實際情況仍需考量通膨、稅務、資產波動與突發支出。
+    </p>
+
+    <footer>Bear Saving｜把存下來的錢，換成更多人生選擇</footer>
+  </main>
+
+  <script>
+    const form = document.getElementById("calculator");
+    const errorBox = document.getElementById("error");
+    const results = document.getElementById("results");
+
+    const getValue = (id) => Number(document.getElementById(id).value);
+
+    function formatMoney(value) {
+      return new Intl.NumberFormat("zh-TW", {
+        maximumFractionDigits: 0
+      }).format(value);
+    }
+
+    function durationText(months) {
+      if (!Number.isFinite(months)) return "可持續維持";
+      if (months <= 0) return "0 個月";
+
+      const roundedMonths = Math.floor(months);
+      const years = Math.floor(roundedMonths / 12);
+      const remainingMonths = roundedMonths % 12;
+
+      if (years === 0) return `${remainingMonths} 個月`;
+      if (remainingMonths === 0) return `${years} 年`;
+      return `${years} 年 ${remainingMonths} 個月`;
+    }
+
+    function showError(message) {
+      errorBox.textContent = message;
+      errorBox.style.display = "block";
+      results.style.display = "none";
+    }
+
+    function hideError() {
+      errorBox.textContent = "";
+      errorBox.style.display = "none";
+    }
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      hideError();
+
+      const assets = getValue("assets");
+      const emergency = getValue("emergency");
+      const expense = getValue("expense");
+      const income = getValue("income");
+
+      if ([assets, emergency, expense, income].some(value => Number.isNaN(value))) {
+        showError("請確認每一欄都輸入有效數字。");
+        return;
+      }
+
+      if (assets < 0 || emergency < 0 || income < 0 || expense <= 0) {
+        showError("金額不可為負數，而且每月必要生活費必須大於 0。");
+        return;
+      }
+
+      if (emergency > assets) {
+        showError("預留的緊急預備金不能高於目前資產。");
+        return;
+      }
+
+      const usableAssets = assets - emergency;
+      const baseMonths = usableAssets / expense;
+      const monthlyGap = expense - income;
+      const monthlySurplus = income - expense;
+      const microMonths = monthlyGap <= 0 ? Infinity : usableAssets / monthlyGap;
+
+      document.getElementById("baseResult").textContent = durationText(baseMonths);
+      document.getElementById("baseMonths").textContent =
+        `約 ${Math.floor(baseMonths)} 個月`;
+
+      if (monthlyGap < 0) {
+        document.getElementById("microResult").textContent = `每月多存 ${formatMoney(monthlySurplus)} 元`;
+        document.getElementById("microMonths").textContent =
+          `一年可再累積約 ${formatMoney(monthlySurplus * 12)} 元`;
+      } else if (monthlyGap === 0) {
+        document.getElementById("microResult").textContent = "剛好收支打平";
+        document.getElementById("microMonths").textContent =
+          "目前不需要動用這筆緩衝資產";
+      } else {
+        document.getElementById("microResult").textContent = durationText(microMonths);
+        document.getElementById("microMonths").textContent =
+          `每月需由存款補足 ${formatMoney(monthlyGap)} 元`;
+      }
+
+      const summary = document.getElementById("summary");
+      const baseText = durationText(baseMonths);
+
+      if (monthlyGap < 0) {
+        summary.innerHTML =
+          `扣除緊急預備金後，你有 <strong>${formatMoney(usableAssets)} 元</strong>` +
+          `可以作為生活緩衝。若完全沒有收入，大約可支撐 <strong>${baseText}</strong>；` +
+          `加入每月 <strong>${formatMoney(income)} 元</strong>的微退休收入後，` +
+          `不只不需要動用存款，每月還能再存下 <strong>${formatMoney(monthlySurplus)} 元</strong>，` +
+          `一年約可增加 <strong>${formatMoney(monthlySurplus * 12)} 元</strong>。`;
+      } else if (monthlyGap === 0) {
+        summary.innerHTML =
+          `扣除緊急預備金後，你有 <strong>${formatMoney(usableAssets)} 元</strong>` +
+          `可以作為生活緩衝。若完全沒有收入，大約可支撐 <strong>${baseText}</strong>；` +
+          `加入目前預估收入後，每月收入剛好足以負擔必要生活費，` +
+          `這筆資產暫時不需要被日常生活消耗。`;
+      } else {
+        const microText = durationText(microMonths);
+        summary.innerHTML =
+          `扣除緊急預備金後，你有 <strong>${formatMoney(usableAssets)} 元</strong>` +
+          `可以作為生活緩衝。若完全沒有收入，大約可支撐 <strong>${baseText}</strong>；` +
+          `加入每月 <strong>${formatMoney(income)} 元</strong>的微退休收入後，` +
+          `推估可延長至 <strong>${microText}</strong>。`;
+      }
+
+      results.style.display = "block";
+      results.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    });
+
+    // 頁面開啟後，先顯示預設範例結果。
+    form.requestSubmit();
+  </script>
+</body>
+</html>
