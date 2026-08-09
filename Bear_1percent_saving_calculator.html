@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>1% 儲蓄小工具｜Bear Saving</title>
+  <style>
+    :root{
+      --bg:#f7f1e8; --card:#fffdf9; --text:#40372f; --muted:#786d63;
+      --accent:#9d785c; --accent-dark:#73513d; --line:#e8daca;
+      --soft:#efe3d6; --soft2:#f6ece3; --shadow:0 14px 40px rgba(84,62,44,.10);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; min-height:100vh;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+      color:var(--text);
+      background:linear-gradient(180deg,#f3eadf 0%,var(--bg) 45%,#faf6f0 100%);
+      line-height:1.65;
+    }
+    .page{width:min(720px,calc(100% - 28px));margin:0 auto;padding:38px 0 54px}
+    .hero{text-align:center;margin-bottom:22px}
+    .bear{width:72px;height:72px;margin:0 auto 14px;display:grid;place-items:center;border-radius:50%;background:var(--soft);font-size:38px}
+    h1{margin:0;font-size:clamp(28px,6vw,42px);line-height:1.2}
+    .subtitle{margin:12px auto 0;max-width:560px;color:var(--muted);font-size:16px}
+    .card{background:rgba(255,253,249,.96);border:1px solid rgba(157,120,92,.16);border-radius:24px;padding:24px;box-shadow:var(--shadow)}
+    .form-grid{display:grid;gap:18px}
+    label{display:block;margin-bottom:7px;font-size:15px;font-weight:800}
+    .hint{display:block;margin-top:5px;color:var(--muted);font-size:13px;font-weight:400}
+    .input-wrap{position:relative}
+    input[type="number"]{
+      width:100%;height:52px;padding:0 58px 0 15px;border:1px solid var(--line);
+      border-radius:14px;background:#fff;color:var(--text);font:inherit;font-size:17px;outline:none
+    }
+    input:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(157,120,92,.12)}
+    .unit{position:absolute;top:50%;right:16px;transform:translateY(-50%);color:var(--muted);font-size:14px;pointer-events:none}
+    .rate-buttons{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:10px}
+    .rate-btn{min-height:42px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--text);font:inherit;font-size:14px;font-weight:800;cursor:pointer}
+    .rate-btn.active{background:var(--soft);border-color:var(--accent);color:var(--accent-dark)}
+    .range-row{display:grid;grid-template-columns:1fr 88px;gap:12px;align-items:center}
+    input[type="range"]{width:100%;accent-color:var(--accent)}
+    .calculate{width:100%;min-height:54px;margin-top:4px;border:0;border-radius:15px;background:var(--accent);color:#fff;font:inherit;font-size:17px;font-weight:900;cursor:pointer}
+    .calculate:hover{background:var(--accent-dark)}
+    .error{display:none;margin:14px 0 0;padding:12px 14px;border-radius:12px;background:#fff0e5;color:#8a4f2b;font-size:14px}
+    .results{display:none;margin-top:22px}
+    .result-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    .result-box{padding:18px 14px;border-radius:18px;background:var(--soft);text-align:center}
+    .result-box:nth-child(2){background:var(--soft2)}
+    .result-box:nth-child(3){background:#edf0e8}
+    .result-label{color:var(--muted);font-size:13px;font-weight:700}
+    .big-number{margin:8px 0 2px;color:var(--accent-dark);font-size:clamp(24px,5vw,34px);font-weight:900;line-height:1.2}
+    .result-note{color:var(--muted);font-size:12px}
+    .summary{margin-top:14px;padding:16px;border:1px dashed #d5c1ad;border-radius:15px;background:#fffaf4;font-size:15px}
+    .summary strong{color:var(--accent-dark)}
+    .comparison{margin-top:18px;padding:16px;border-radius:16px;background:rgba(255,255,255,.72)}
+    .comparison h3{margin:0 0 12px;font-size:16px}
+    .compare-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+    .compare-item{padding:12px 8px;border-radius:12px;background:#faf6f0;text-align:center}
+    .compare-rate{font-size:13px;color:var(--muted);font-weight:700}
+    .compare-value{margin-top:4px;font-size:15px;font-weight:900}
+    .formula{margin-top:18px;padding:15px;border-radius:14px;background:#fbf7f1;color:var(--muted);font-size:13px}
+    footer{margin-top:24px;text-align:center;color:var(--muted);font-size:12px}
+    @media(max-width:580px){
+      .card{padding:19px}
+      .rate-buttons{grid-template-columns:repeat(5,1fr);gap:6px}
+      .rate-btn{font-size:13px;padding:0 4px}
+      .result-grid{grid-template-columns:1fr}
+      .compare-grid{grid-template-columns:repeat(2,1fr)}
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <div class="bear">🐻</div>
+      <h1>先存 1% 就好</h1>
+      <p class="subtitle">不用一開始就逼自己存很多。先看看如果每個月固定留下 1%、3%、5% 或更多，一年可以真的留下多少錢。</p>
+    </header>
+
+    <section class="card">
+      <form id="calculator">
+        <div class="form-grid">
+          <div>
+            <label for="income">每月收入<span class="hint">填入每個月實際可分配的收入。</span></label>
+            <div class="input-wrap">
+              <input id="income" type="number" min="0" step="100" value="40000">
+              <span class="unit">元</span>
+            </div>
+          </div>
+
+          <div>
+            <label for="rateInput">想先存下幾％？<span class="hint">如果每次都存錢失敗，先從 1% 開始也可以。</span></label>
+            <div class="range-row">
+              <input id="rateRange" type="range" min="1" max="50" step="1" value="1">
+              <div class="input-wrap">
+                <input id="rateInput" type="number" min="1" max="100" step="1" value="1">
+                <span class="unit">%</span>
+              </div>
+            </div>
+            <div class="rate-buttons">
+              <button type="button" class="rate-btn active" data-rate="1">1%</button>
+              <button type="button" class="rate-btn" data-rate="3">3%</button>
+              <button type="button" class="rate-btn" data-rate="5">5%</button>
+              <button type="button" class="rate-btn" data-rate="10">10%</button>
+              <button type="button" class="rate-btn" data-rate="20">20%</button>
+            </div>
+          </div>
+
+          <button type="submit" class="calculate">看看我可以存多少</button>
+        </div>
+        <p id="error" class="error"></p>
+      </form>
+
+      <section id="results" class="results">
+        <div class="result-grid">
+          <article class="result-box">
+            <div class="result-label">每月先存</div>
+            <div id="monthlySave" class="big-number">—</div>
+            <div class="result-note">先讓這筆錢真的留下來</div>
+          </article>
+          <article class="result-box">
+            <div class="result-label">一年可以留下</div>
+            <div id="yearlySave" class="big-number">—</div>
+            <div class="result-note">不含利息與投資報酬</div>
+          </article>
+          <article class="result-box">
+            <div class="result-label">五年可以留下</div>
+            <div id="fiveYearSave" class="big-number">—</div>
+            <div class="result-note">假設收入與比例不變</div>
+          </article>
+        </div>
+
+        <div id="summary" class="summary"></div>
+
+        <div class="comparison">
+          <h3>如果慢慢把比例往上拉：</h3>
+          <div class="compare-grid">
+            <div class="compare-item"><div class="compare-rate">1%</div><div id="cmp1" class="compare-value">—</div></div>
+            <div class="compare-item"><div class="compare-rate">3%</div><div id="cmp3" class="compare-value">—</div></div>
+            <div class="compare-item"><div class="compare-rate">5%</div><div id="cmp5" class="compare-value">—</div></div>
+            <div class="compare-item"><div class="compare-rate">10%</div><div id="cmp10" class="compare-value">—</div></div>
+          </div>
+        </div>
+
+        <div class="formula">
+          <b>每月儲蓄金額</b>＝每月收入 × 儲蓄率<br>
+          <b>一年累積</b>＝每月儲蓄金額 × 12<br>
+          <b>五年累積</b>＝每月儲蓄金額 × 60
+        </div>
+      </section>
+    </section>
+
+    <footer>Bear Saving｜1% 不是終點，只是先讓自己第一次真的存下來。</footer>
+  </main>
+
+  <script>
+    const form = document.getElementById("calculator");
+    const incomeInput = document.getElementById("income");
+    const rateInput = document.getElementById("rateInput");
+    const rateRange = document.getElementById("rateRange");
+    const errorBox = document.getElementById("error");
+    const results = document.getElementById("results");
+    const rateButtons = [...document.querySelectorAll(".rate-btn")];
+
+    function formatMoney(value){
+      return new Intl.NumberFormat("zh-TW",{style:"currency",currency:"TWD",maximumFractionDigits:0}).format(value);
+    }
+    function showError(message){
+      errorBox.textContent = message;
+      errorBox.style.display = "block";
+      results.style.display = "none";
+    }
+    function hideError(){
+      errorBox.textContent = "";
+      errorBox.style.display = "none";
+    }
+    function setRate(rate){
+      const safeRate = Math.max(1,Math.min(100,Number(rate)||1));
+      rateInput.value = safeRate;
+      rateRange.value = Math.min(50,safeRate);
+      rateButtons.forEach(btn => btn.classList.toggle("active",Number(btn.dataset.rate) === safeRate));
+    }
+    function calculate(event){
+      if(event) event.preventDefault();
+      hideError();
+
+      const income = Number(incomeInput.value);
+      const rate = Number(rateInput.value);
+
+      if(!Number.isFinite(income) || income <= 0){
+        showError("請輸入大於 0 的每月收入。");
+        return;
+      }
+      if(!Number.isFinite(rate) || rate <= 0 || rate > 100){
+        showError("儲蓄率請輸入 1%～100%。");
+        return;
+      }
+
+      const monthly = income * (rate/100);
+      const yearly = monthly * 12;
+      const fiveYear = monthly * 60;
+
+      monthlySave.textContent = formatMoney(monthly);
+      yearlySave.textContent = formatMoney(yearly);
+      fiveYearSave.textContent = formatMoney(fiveYear);
+
+      cmp1.textContent = formatMoney(income*0.01*12) + "/年";
+      cmp3.textContent = formatMoney(income*0.03*12) + "/年";
+      cmp5.textContent = formatMoney(income*0.05*12) + "/年";
+      cmp10.textContent = formatMoney(income*0.10*12) + "/年";
+
+      if(rate <= 1){
+        summary.innerHTML = `如果每月收入是 <strong>${formatMoney(income)}</strong>，先存 <strong>${rate}%</strong>，每月只需要先留下 <strong>${formatMoney(monthly)}</strong>。重點不是一次存很多，而是先把「先存再花」這件事真的做起來。`;
+      }else if(rate <= 5){
+        summary.innerHTML = `你現在設定的儲蓄率是 <strong>${rate}%</strong>。每月可以先留下 <strong>${formatMoney(monthly)}</strong>，一年大約累積 <strong>${formatMoney(yearly)}</strong>。如果這個比例能穩定做到，再慢慢往上調就好。`;
+      }else{
+        summary.innerHTML = `你現在設定的儲蓄率是 <strong>${rate}%</strong>，一年大約可以留下 <strong>${formatMoney(yearly)}</strong>。重點還是以「能長期做到」為優先，不需要為了追求高比例讓生活失去彈性。`;
+      }
+
+      results.style.display = "block";
+    }
+
+    rateButtons.forEach(btn => {
+      btn.addEventListener("click",() => {
+        setRate(btn.dataset.rate);
+        calculate();
+      });
+    });
+    rateRange.addEventListener("input",() => {
+      setRate(rateRange.value);
+      calculate();
+    });
+    rateInput.addEventListener("input",() => setRate(rateInput.value));
+    incomeInput.addEventListener("input",calculate);
+    form.addEventListener("submit",calculate);
+
+    setRate(1);
+    calculate();
+  </script>
+</body>
+</html>
