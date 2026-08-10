@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Bear Money Tools｜Bear.saving 免費理財工具庫</title>
+    <meta name="description" content="Bear Money Tools 免費理財工具庫：從財務診斷、1%存錢、年度預算、資產累積、投資順序，到財務緩衝時間，找到現在最適合自己的下一步。">
+    <meta name="author" content="Bear.saving">
+    <meta name="theme-color" content="#fcfbf9">
+
+    <link rel="icon" href="favicon.png" type="image/png">
+    <link rel="apple-touch-icon" href="favicon.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Noto+Serif+TC:wght@400;600;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+    <style>
+        :root {
+            --bg: #fcfbf9;
+            --surface: #ffffff;
+            --text: #5a4d41;
+            --muted: #968c83;
+            --accent: #b08d85;
+            --accent-soft: #f5eeeb;
+            --line: #ece6e1;
+            --warm: #fdf9f5;
+            --shadow: 0 12px 35px rgba(90, 77, 65, 0.06);
+        }
+
+        * { box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Montserrat', 'Noto Serif TC', serif;
+            line-height: 1.8;
+        }
+
+        a { color: inherit; }
+
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 28px;
+            background: rgba(252, 251, 249, 0.92);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(90,77,65,0.06);
+        }
+
+        .nav-logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.35rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            font-size: 0.85rem;
+            color: var(--muted);
+            transition: .25s;
+        }
+
+        .nav-links a:hover { color: var(--accent); }
+
+        .hero {
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 90px 22px 55px;
+            text-align: center;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 6px 13px;
+            border-radius: 999px;
+            background: var(--accent-soft);
+            color: var(--accent);
+            font-size: .75rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            margin-bottom: 18px;
+        }
+
+        .hero h1 {
+            font-family: 'Playfair Display', 'Noto Serif TC', serif;
+            font-size: clamp(2.5rem, 7vw, 4.6rem);
+            line-height: 1.08;
+            margin: 0 0 18px;
+            letter-spacing: -1px;
+        }
+
+        .hero h1 span {
+            display: block;
+            color: var(--accent);
+            font-style: italic;
+            font-weight: 400;
+        }
+
+        .hero-desc {
+            max-width: 640px;
+            margin: 0 auto 32px;
+            color: var(--muted);
+            font-size: 1rem;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 48px;
+            padding: 12px 22px;
+            border-radius: 999px;
+            text-decoration: none;
+            font-size: .88rem;
+            font-weight: 600;
+            transition: .25s;
+        }
+
+        .btn-primary {
+            background: var(--text);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #fff;
+            border: 1px solid var(--line);
+            color: var(--text);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .quick-start {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 22px 70px;
+        }
+
+        .quick-shell {
+            background:
+                radial-gradient(circle at top right, rgba(176,141,133,.13), transparent 35%),
+                #fff;
+            border: 1px solid var(--line);
+            border-radius: 25px;
+            padding: 32px;
+            box-shadow: var(--shadow);
+        }
+
+        .quick-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.45rem;
+            margin-bottom: 6px;
+        }
+
+        .quick-desc {
+            color: var(--muted);
+            font-size: .9rem;
+            margin-bottom: 22px;
+        }
+
+        .quick-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .quick-card {
+            padding: 18px 15px;
+            background: var(--warm);
+            border: 1px solid #f0e9e5;
+            border-radius: 15px;
+            text-decoration: none;
+            transition: .25s;
+        }
+
+        .quick-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--accent);
+        }
+
+        .quick-card i {
+            color: var(--accent);
+            margin-bottom: 9px;
+            font-size: 1.15rem;
+        }
+
+        .quick-card strong {
+            display: block;
+            font-size: .93rem;
+            margin-bottom: 4px;
+        }
+
+        .quick-card span {
+            color: var(--muted);
+            font-size: .78rem;
+            line-height: 1.55;
+        }
+
+        .journey-nav-wrap {
+            max-width: 980px;
+            margin: 0 auto 55px;
+            padding: 0 22px;
+        }
+
+        .journey-nav {
+            display: flex;
+            gap: 9px;
+            overflow-x: auto;
+            padding-bottom: 6px;
+            scrollbar-width: none;
+        }
+
+        .journey-nav::-webkit-scrollbar { display: none; }
+
+        .journey-nav a {
+            flex: 0 0 auto;
+            padding: 8px 14px;
+            border-radius: 999px;
+            border: 1px solid var(--line);
+            background: #fff;
+            text-decoration: none;
+            color: var(--muted);
+            font-size: .78rem;
+            font-weight: 600;
+        }
+
+        .journey-nav a:hover {
+            color: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .section {
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 60px 22px;
+        }
+
+        .section-head {
+            margin-bottom: 26px;
+            display: flex;
+            justify-content: space-between;
+            align-items: end;
+            gap: 20px;
+        }
+
+        .section-step {
+            color: var(--accent);
+            font-size: .72rem;
+            font-weight: 700;
+            letter-spacing: 1.4px;
+            margin-bottom: 5px;
+        }
+
+        .section h2 {
+            font-family: 'Playfair Display', 'Noto Serif TC', serif;
+            font-size: clamp(1.8rem, 4vw, 2.5rem);
+            margin: 0 0 7px;
+            line-height: 1.2;
+        }
+
+        .section-desc {
+            margin: 0;
+            color: var(--muted);
+            font-size: .9rem;
+            max-width: 570px;
+        }
+
+        .tool-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .tool-card {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            min-height: 260px;
+            padding: 28px;
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 20px;
+            text-decoration: none;
+            box-shadow: 0 8px 24px rgba(90,77,65,.035);
+            transition: .28s;
+            overflow: hidden;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(176,141,133,.65);
+            box-shadow: var(--shadow);
+        }
+
+        .tool-card.featured {
+            background:
+                radial-gradient(circle at top right, rgba(176,141,133,.14), transparent 36%),
+                #fff;
+        }
+
+        .tool-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 22px;
+        }
+
+        .tool-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--accent-soft);
+            color: var(--accent);
+            font-size: 1.2rem;
+        }
+
+        .tag-row {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .tag {
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            padding: 4px 9px;
+            font-size: .65rem;
+            color: var(--muted);
+            background: rgba(255,255,255,.7);
+        }
+
+        .tool-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 7px;
+        }
+
+        .tool-copy {
+            color: var(--muted);
+            font-size: .84rem;
+            line-height: 1.7;
+            margin-bottom: 23px;
+        }
+
+        .tool-link {
+            margin-top: auto;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            color: var(--accent);
+            font-size: .82rem;
+            font-weight: 700;
+        }
+
+        .wide-card {
+            grid-column: 1 / -1;
+            min-height: 230px;
+        }
+
+        .system-card {
+            display: grid;
+            grid-template-columns: 1.2fr .8fr;
+            gap: 28px;
+            align-items: center;
+        }
+
+        .system-card .tool-copy { max-width: 570px; }
+
+        .system-features {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .system-feature {
+            padding: 11px 12px;
+            border-radius: 11px;
+            background: var(--warm);
+            color: var(--muted);
+            font-size: .72rem;
+            line-height: 1.45;
+        }
+
+        .secret-section {
+            max-width: 900px;
+            margin: 40px auto 80px;
+            padding: 0 22px;
+        }
+
+        .secret-box {
+            border: 1.5px dashed var(--accent);
+            border-radius: 25px;
+            background: #fff;
+            padding: 42px 38px;
+            text-align: center;
+        }
+
+        .secret-title {
+            font-family: 'Playfair Display', serif;
+            color: var(--accent);
+            font-size: 1.9rem;
+            margin-bottom: 12px;
+        }
+
+        .secret-desc {
+            color: var(--muted);
+            font-size: .9rem;
+            margin-bottom: 28px;
+        }
+
+        .keyword-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 14px;
+            padding: 15px 0;
+            border-bottom: 1px solid #f0ece9;
+            text-align: left;
+            font-size: .9rem;
+        }
+
+        .keyword-item:last-child { border-bottom: none; }
+
+        .keyword-btn {
+            flex: 0 0 auto;
+            padding: 7px 14px;
+            border: 1px solid #e5ddd8;
+            background: var(--warm);
+            color: var(--text);
+            border-radius: 10px;
+            font: inherit;
+            font-size: .8rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: .2s;
+        }
+
+        .keyword-btn:hover {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
+
+        .bottom-note {
+            max-width: 700px;
+            margin: 0 auto 70px;
+            padding: 0 22px;
+            text-align: center;
+            color: var(--muted);
+            font-size: .84rem;
+        }
+
+        footer {
+            padding: 35px 20px 45px;
+            text-align: center;
+            color: var(--muted);
+            font-size: .74rem;
+            border-top: 1px solid var(--line);
+            letter-spacing: .5px;
+        }
+
+        .toast {
+            position: fixed;
+            left: 50%;
+            bottom: 28px;
+            transform: translate(-50%, 80px);
+            opacity: 0;
+            background: rgba(90,77,65,.96);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 999px;
+            font-size: .8rem;
+            transition: .3s;
+            z-index: 2000;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            transform: translate(-50%, 0);
+            opacity: 1;
+        }
+
+        @media (max-width: 760px) {
+            nav { padding: 14px 18px; }
+            .nav-links .hide-mobile { display: none; }
+
+            .hero { padding-top: 65px; }
+
+            .quick-grid,
+            .tool-grid,
+            .system-card {
+                grid-template-columns: 1fr;
+            }
+
+            .wide-card { grid-column: auto; }
+
+            .quick-shell { padding: 24px 18px; }
+
+            .section { padding-top: 45px; padding-bottom: 45px; }
+
+            .section-head {
+                display: block;
+            }
+
+            .tool-card { min-height: 235px; padding: 23px; }
+
+            .secret-box { padding: 35px 22px; }
+
+            .system-features { grid-template-columns: 1fr 1fr; }
+        }
+
+        @media (max-width: 480px) {
+            .hero-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .hero-actions .btn { width: 100%; }
+
+            .system-features { grid-template-columns: 1fr; }
+
+            .keyword-item {
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <a href="./" class="nav-logo">Bear.saving</a>
+        <div class="nav-links">
+            <a href="#all-tools" class="hide-mobile">Money Tools</a>
+            <a href="https://myship.7-11.com.tw/general/detail/GM2502152714662?utm_source=ig&utm_medium=social" target="_blank" rel="noopener" aria-label="實體工具賣場">
+                <i class="fas fa-shopping-bag"></i>
+            </a>
+            <a href="https://www.instagram.com/bear.saving/" target="_blank" rel="noopener" aria-label="Instagram">
+                <i class="fab fa-instagram"></i>
+            </a>
+        </div>
+    </nav>
+
+    <div id="toast" class="toast">關鍵字已複製</div>
+
+    <header class="hero">
+        <div class="eyebrow"><i class="fas fa-sparkles"></i> FREE MONEY TOOLS</div>
+        <h1>Bear Money <span>Tools.</span></h1>
+        <p class="hero-desc">
+            把複雜的理財拆成一個一個可以開始的小動作。<br>
+            不知道該先存錢、做預算、整理資產，還是開始投資？先從現在最像妳的狀態開始。
+        </p>
+        <div class="hero-actions">
+            <a href="#quick-start" class="btn btn-primary">
+                我只有 30 秒 <i class="fas fa-arrow-down"></i>
+            </a>
+            <a href="#all-tools" class="btn btn-secondary">
+                看全部免費工具
+            </a>
+        </div>
+    </header>
+
+    <section class="quick-start" id="quick-start">
+        <div class="quick-shell">
+            <div class="quick-title">只有 30 秒？先從這三個開始。</div>
+            <div class="quick-desc">輸入幾個數字，先得到一個可以拿來思考的結果。</div>
+
+            <div class="quick-grid">
+                <a class="quick-card" href="Bear_1percent_saving_calculator.html">
+                    <i class="fas fa-seedling"></i>
+                    <strong>我每月先存 1% 會是多少？</strong>
+                    <span>存錢常常失敗，先把第一步縮小一點。</span>
+                </a>
+
+                <a class="quick-card" href="Bear_time.html">
+                    <i class="fas fa-hourglass-half"></i>
+                    <strong>我的錢可以養我多久？</strong>
+                    <span>算出存款能替生活換到多少緩衝時間。</span>
+                </a>
+
+                <a class="quick-card" href="bear_wealth_reference_calculator.html">
+                    <i class="fas fa-chart-line"></i>
+                    <strong>我的資產累積到哪裡？</strong>
+                    <span>用參考公式看看目前進度，再決定下一步。</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <div class="journey-nav-wrap" id="all-tools">
+        <div class="journey-nav">
+            <a href="#check">01 看見</a>
+            <a href="#save">02 留下</a>
+            <a href="#stabilize">03 穩住</a>
+            <a href="#grow">04 累積</a>
+            <a href="#freedom">05 選擇</a>
+            <a href="#family">06 親子</a>
+            <a href="#secret">免費資源</a>
+        </div>
+    </div>
+
+    <!-- 01 -->
+    <section class="section" id="check">
+        <div class="section-head">
+            <div>
+                <div class="section-step">STEP 01 · CHECK</div>
+                <h2>先看懂現在的自己</h2>
+                <p class="section-desc">還不確定問題在哪裡，就先盤點。先知道自己站在哪，後面的工具才會更好選。</p>
+            </div>
+        </div>
+
+        <div class="tool-grid">
+            <a class="tool-card featured" href="tool.html">
+                <div class="tool-top">
+                    <div class="tool-icon"><i class="fas fa-stethoscope"></i></div>
+                    <div class="tag-row"><span class="tag">推薦起點</span><span class="tag">診斷</span></div>
+                </div>
+                <div class="tool-name">Bear 財務診斷室 6.4</div>
+                <div class="tool-copy">
+                    從負債、緊急預備金、收入性質與收入狀況開始，幫妳快速整理目前的財務站位。
+                </div>
+                <div class="tool-link">開始診斷 <i class="fas fa-arrow-right"></i></div>
+            </a>
+
+            <a class="tool-card" href="bear_wealth_reference_calculator.html">
+                <div class="tool-top">
+                    <div class="tool-icon"><i class="fas fa-chart-line"></i></div>
+                    <div class="tag-row"><span class="tag">30 秒</span><span class="tag">資產</span></div>
+                </div>
+                <div class="tool-name">資產累積參考計算器</div>
+                <div class="tool-copy">
+                    輸入年齡、收入、繼承財產與目前淨資產，看看自己的累積進度和參考公式落在哪裡。
+                </div>
+                <div class="tool-link">看看我的進度 <i class="fas fa-arrow-right"></i></div>
+            </a>
+        </div>
+    </section>
+
+    <!-- 02 -->
+    <section class="section" id="save">
+        <div class="section-head">
+            <div>
+                <div class="section-step">STEP 02 · SAVE</div>
+                <h2>開始把錢留下來</h2>
+                <p class="section-desc">先從做得到的比例開始，再替每一筆錢安排位置。存錢會慢慢從意志力變成日常流程。</p>
+            </div>
+        </div>
+
+        <div class="tool-grid">
+            <a class="tool-card featured" href="Bear_1percent_saving_calculator.html">
+                <div class="tool-top">
+                    <div class="tool-icon"><i class="fas fa-seedling"></i></div>
+                    <div class="tag-row"><span class="tag">新手</span><span class="tag">30 秒</span></div>
+                </div>
+                <div class="tool-name">先存 1% 就好</div>
+                <div class="tool-copy">
+                    輸入每月收入與儲蓄比例，看看每月、一年和五年可以留下多少。很適合每次開始存錢都撐不久的人。
+                </div>
+                <div class="tool-link">算算看 <i class="fas fa-arrow-right"></i></div>
+            </a>
+
+            <a class="tool-card" href="bear_saving_budget_calculator.html">
+                <div class="tool-top">
+                    <div class="tool-icon"><i class="fas fa-calculator"></i></div>
+                    <div class="tag-row"><span class="tag">預算</span><span class="tag">試算器</span></div>
+                </div>
+                <div class="tool-name">年度預算試算器</div>
+                <div class="tool-copy">
+                    把年收入、儲蓄目標、必要支出與預存比例放進去，看看真正可以自由使用的錢有多少。
+                </div>
+                <div class="tool-link">開始分配 <i class="fas fa-arrow-right"></i></div>
+            </a>
+
+            <a class="tool-card wide-card" href="envelopes.html">
+                <div class="tool-top">
+                    <div class="tool-icon"><i class="fas fa-envelope-open-text"></i></div>
+                    <div class="tag-row"><span class="tag">分袋</span><span class="tag">新手系統</span></div>
+                </div>
+                <div class="tool-name">新手無腦存袋法</div>
+                <div class="tool-copy">
+                    固定支出、變動支出、預存支出先分開。領薪水後就照自己的比例分流，日常花錢會更容易看見餘額。
+                </div>
+                <div class="tool-link">看看 10 個存袋 <i class="fas fa-arrow-right"></i></div>
+            </a>
+        </div>
+    </section>
+
+    <!-- 03 -->
+    <section class="section" id="stabilize">
+        <div class="section-head">
+            <div>
+                <div class="section-step">STEP 03 · STABILIZE</div>
+                <h2>讓整套財務系統穩下來</h2>
+                <p class="section-desc">緩衝、預存、日常記帳與資產盤點都有自己的位置，遇到收入變動或大筆支出時會更有餘裕。</p>
+            </div>
+        </div>
+
+        <div class="tool-grid">
+            <a class="tool-card" href="rocket.html">
+                <div class="tool-top">
+                    <div class="tool-icon"><i class="fas fa-rocket"></i></div>
+                    <div class="tag-row"><span class="tag">路線圖</span><span class="tag">短中長期</span></div>
+                </div>
+                <div class="tool-name">三階段火箭存錢目標法</div>
+                <div class="tool-copy">
+                    把短期緩衝、中期目標與長期累積拆開，知道現在該先顧哪一層，也比較不容易把不同用途的錢混在一起。
+                </div>
+                <div class="tool-link">看看火箭升到哪 <i class="fas fa-arrow-right"></i></div>
+            </a>
+
+            <a class="tool-card featured" href="app.html">
+                <div class="system-card">
+                    <div>
+                        <div class="tool-top">
+                            <div class="tool-icon"><i class="fas fa-gauge-high"></i></div>
+                            <div class="tag-row"><span class="tag">完整系統</span><span class="tag">進階</span></div>
+                        </div>
+                        <div class="tool-name">Bear 財務駕駛艙</div>
+                        <div class="tool-copy">
+                            記帳、預算、預存金、資產盤點、負債追蹤與共同帳戶都放進同一個系統。適合想把零散做法整合成固定流程的人。
+                        </div>
+                        <div class="tool-link">進入財務駕駛艙 <i class="fas fa-arrow-right"></i></div>
+                    </div>
+                    <div class="system-features">
+                        <div class="system-feature">日常記帳</div>
+                        <div class="system-feature">預存金</div>
+                        <div class="system-feature">資產盤點</div>
+                        <div class="system-feature">負債追蹤</div>
+                        <div class="system-feature">共同帳戶</div>
+                        <div class="system-feature">報表回顧</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </section>
+
+    <!-- 04 -->
+    <section class="section" id="grow">
+        <div class="section-head">
+            <div>
+                <div class="section-step">STEP 04 · GROW</div>
+                <h2>把留下來的錢慢慢放大</h2>
+                <p class="section-desc">先確認短期生活已經站穩，再整理中長期的投資順序與累積節奏。</p>
+            </div>
+        </div>
+
+        <div class="tool-grid">
+            <a class="tool-card featured" href="bear_investment_leadmagnet.html">
+                <div class="tool-top">
+                    <div class="tool-icon"><i class="fas fa-arrow-trend-up"></i></div>
+                    <div class="tag-row"><span class="tag">投資前</span><span class="tag">順序</span></div>
+                </div>
+                <div class="tool-name">三階段火箭 × 投資順序整理包</div>
+                <div class="tool-copy">
+                    從本月會花的錢、快要用到的錢，一路整理到能長期不動的資金。用順序幫投資留出適合的位置。
+                </div>
+                <div class="tool-link">整理我的投資順序 <i class="fas fa-arrow-right"></i></div>
+            </a>
+
+            <a class="tool-card" href="money.html">
+                <div class="tool-top">
+                    <div class="tool-icon"><i class="fas fa-coins"></i></div>
+                    <div class="tag-row"><span class="tag">情境</span><span class="tag">長期累積</span></div>
+                </div>
+                <div class="tool-name">Bear Saving Life</div>
+                <div class="tool-copy">
+                    看不同收入與財務狀態的分配情境，也可以比較每月投入金額不同時，長期累積的時間差。
+                </div>
+                <div class="tool-link">看看不同情境 <i class="fas fa-arrow-right"></i></div>
+            </a>
+        </div>
+    </section>
+
+    <!-- 05 -->
+    <section class="section" id="freedom">
+        <div class="section-head">
+            <div>
+                <div class="section-step">STEP 05 · FREEDOM</div>
+                <h2>看看錢可以換到多少時間</h2>
+                <p class="section-desc">存款累積到某個階段後，數字開始和人生選擇連在一起。可以休息多久、能不能降低工時，都能先用情境試算看看。</p>
+            </div>
+        </div>
+
+        <div class="tool-grid">
+            <a class="tool-card featured wide-card" href="Bear_time.html">
+                <div class="tool-top">
+                    <div class="tool-icon"><i class="fas fa-hourglass-half"></i></div>
+                    <div class="tag-row"><span class="tag">30 秒</span><span class="tag">微退休</span><span class="tag">選擇權</span></div>
+                </div>
+                <div class="tool-name">財務緩衝時間計算器</div>
+                <div class="tool-copy">
+                    輸入可動用資產、預留緊急預備金、每月生活費與微退休收入，算算目前的錢可以支撐多久。
+                </div>
+                <div class="tool-link">算算我的緩衝時間 <i class="fas fa-arrow-right"></i></div>
+            </a>
+        </div>
+    </section>
+
+    <!-- 06 -->
+    <section class="section" id="family">
+        <div class="section-head">
+            <div>
+                <div class="section-step">STEP 06 · FAMILY</div>
+                <h2>把金錢選擇帶進孩子的生活</h2>
+                <p class="section-desc">用看得見的分幣方式，讓零用錢變成選擇、等待、目標和分享的練習。</p>
+            </div>
+        </div>
+
+        <div class="tool-grid">
+            <a class="tool-card wide-card" href="kids.html">
+                <div class="tool-top">
+                    <div class="tool-icon"><i class="fas fa-paw"></i></div>
+                    <div class="tag-row"><span class="tag">親子</span><span class="tag">零用錢</span></div>
+                </div>
+                <div class="tool-name">小熊任務分幣法</div>
+                <div class="tool-copy">
+                    用日常零用、夢想儲蓄與分享三個方向分配零用錢，也能建立孩子自己的夢想存錢軌道。
+                </div>
+                <div class="tool-link">進入 Bear Coin System <i class="fas fa-arrow-right"></i></div>
+            </a>
+        </div>
+    </section>
+
+    <!-- Secret resources -->
+    <section class="secret-section" id="secret">
+        <div class="secret-box">
+            <div class="secret-title">Bear's Secret</div>
+            <div class="secret-desc">
+                點擊右側按鈕複製關鍵字，<br>
+                再到 IG 私訊 @bear.saving 領取專屬資源。
+            </div>
+
+            <div class="keyword-item">
+                <span>💰 原創存錢系統 PDF</span>
+                <button class="keyword-btn" onclick="copyText('財務/ 2026')">財務/ 2026</button>
+            </div>
+
+            <div class="keyword-item">
+                <span>💧 獲取離職底氣計算機</span>
+                <button class="keyword-btn" onclick="copyText('預備金')">預備金</button>
+            </div>
+
+            <div class="keyword-item">
+                <span>🌊 收入不穩專用「蓄水池」</span>
+                <button class="keyword-btn" onclick="copyText('蓄水池')">蓄水池</button>
+            </div>
+
+            <div class="keyword-item">
+                <span>📊 各類預算盤點表格</span>
+                <button class="keyword-btn" onclick="copyText('表格')">表格</button>
+            </div>
+        </div>
+    </section>
+
+    <div class="bottom-note">
+        這些工具用來幫妳整理自己的財務狀況與情境。涉及投資、退休、離職或重大財務決策時，還是要把個人收入、負債、稅務、家庭責任與風險承受度一起考慮。
+    </div>
+
+    <footer>
+        © 2026 Bear.saving. All Rights Reserved.<br>
+        Money tools for a life with more choices.
+    </footer>
+
+    <script>
+        function copyText(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                const toast = document.getElementById('toast');
+                toast.innerHTML = '<i class="fas fa-check-circle"></i> 已複製：' + text;
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 1800);
+            }).catch(() => {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                textarea.remove();
+
+                const toast = document.getElementById('toast');
+                toast.innerHTML = '<i class="fas fa-check-circle"></i> 已複製：' + text;
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 1800);
+            });
+        }
+    </script>
+</body>
+</html>
