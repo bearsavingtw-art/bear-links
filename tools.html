@@ -600,6 +600,28 @@
                 align-items: flex-start;
             }
         }
+
+        .btn-dashboard {
+            background: var(--accent);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.35);
+            box-shadow: 0 12px 28px rgba(90,77,65,0.22);
+            min-width: 190px;
+        }
+
+        .btn-dashboard:hover {
+            background: var(--text);
+            color: #fff;
+            transform: translateY(-3px);
+            box-shadow: 0 15px 32px rgba(90,77,65,0.28);
+        }
+
+        @media (max-width: 480px) {
+            .hero-actions .btn-dashboard {
+                width: 100%;
+            }
+        }
+
     </style>
 </head>
 
@@ -628,6 +650,9 @@
             不知道該先存錢、做預算、整理資產，還是開始投資？先從現在最像妳的狀態開始。
         </p>
         <div class="hero-actions">
+            <a href="app.html" class="btn btn-dashboard">
+                進入 Bear 財務駕駛艙 <i class="fas fa-gauge-high"></i>
+            </a>
             <a href="#quick-start" class="btn btn-primary">
                 我只有 30 秒 <i class="fas fa-arrow-down"></i>
             </a>
