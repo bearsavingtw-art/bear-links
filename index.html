@@ -283,6 +283,172 @@
         .fade-in { opacity: 0; transform: translateY(20px); transition: 0.8s ease; }
         .fade-in.visible { opacity: 1; transform: translateY(0); }
         @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+
+        /* ===== 2026 Homepage IA Refresh ===== */
+
+        .hero-actions {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn-elegant-secondary {
+            display: inline-block;
+            padding: 14px 35px;
+            background: rgba(255,255,255,0.10);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.85);
+            text-decoration: none;
+            border-radius: 50px;
+            font-size: 0.95rem;
+            letter-spacing: 1px;
+            font-weight: 600;
+            transition: all 0.3s;
+            backdrop-filter: blur(6px);
+        }
+
+        .btn-elegant-secondary:hover {
+            background: rgba(255,255,255,0.95);
+            color: var(--text-primary);
+            transform: translateY(-3px);
+        }
+
+        .money-tools-home {
+            max-width: 760px;
+            margin: 0 auto;
+            padding: 45px 35px;
+            border-radius: 24px;
+            background:
+                radial-gradient(circle at top right, rgba(176,141,133,0.12), transparent 34%),
+                linear-gradient(135deg, #ffffff 0%, #fdfbf7 100%);
+            border: 1px solid rgba(176,141,133,0.22);
+            box-shadow: 0 15px 45px rgba(90,77,65,0.06);
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .money-tools-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: rgba(176,141,133,0.10);
+            color: var(--accent);
+            font-size: 0.76rem;
+            font-weight: 700;
+            letter-spacing: 1.3px;
+            margin-bottom: 16px;
+        }
+
+        .money-tools-title {
+            font-family: 'Playfair Display', 'Noto Serif TC', serif;
+            font-size: 2rem;
+            color: var(--text-primary);
+            margin: 0 0 10px;
+            line-height: 1.25;
+        }
+
+        .money-tools-desc {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.85;
+            max-width: 620px;
+            margin-bottom: 24px;
+        }
+
+        .money-tools-preview {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 25px 0;
+        }
+
+        .money-preview-item {
+            background: rgba(255,255,255,0.8);
+            border: 1px solid #eee7e2;
+            border-radius: 14px;
+            padding: 16px 12px;
+            text-align: center;
+        }
+
+        .money-preview-item i {
+            color: var(--accent);
+            font-size: 1.15rem;
+            margin-bottom: 8px;
+        }
+
+        .money-preview-item span {
+            display: block;
+            color: var(--text-primary);
+            font-size: 0.82rem;
+            font-weight: 600;
+            line-height: 1.5;
+        }
+
+        .money-tools-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            padding: 13px 24px;
+            border-radius: 50px;
+            background: var(--text-primary);
+            color: #fff;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+
+        .money-tools-cta:hover {
+            background: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .physical-tools-heading {
+            margin-bottom: 8px !important;
+        }
+
+        .physical-tools-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin: 0 auto 28px;
+            max-width: 560px;
+        }
+
+        @media (max-width: 640px) {
+            .hero {
+                height: 88vh;
+            }
+
+            .hero-actions {
+                flex-direction: column;
+                width: min(92vw, 360px);
+                margin: 0 auto;
+            }
+
+            .hero-actions .btn-elegant,
+            .hero-actions .btn-elegant-secondary {
+                width: 100%;
+                padding: 13px 18px;
+            }
+
+            .money-tools-home {
+                padding: 34px 22px;
+            }
+
+            .money-tools-title {
+                font-size: 1.65rem;
+            }
+
+            .money-tools-preview {
+                grid-template-columns: 1fr;
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -304,9 +470,14 @@
         <div class="hero-content">
             <h1>Make Ordinary<br>Life Confident.</h1>
             <p>存錢不用靠意志力，<br>做好預算分配就能不再逼自己</p>
-            <a href="https://myship.7-11.com.tw/general/detail/GM2502152714662?utm_source=ig&utm_medium=social" target="_blank" class="btn-elegant">
-                從這裡開始（前往存錢工具賣場） <i class="fas fa-arrow-right" style="margin-left:8px; font-size:0.8em;"></i>
-            </a>
+            <div class="hero-actions">
+                <a href="tools.html" class="btn-elegant">
+                    找到適合我的免費工具 <i class="fas fa-arrow-right" style="margin-left:8px; font-size:0.8em;"></i>
+                </a>
+                <a href="https://myship.7-11.com.tw/general/detail/GM2502152714662?utm_source=ig&utm_medium=social" target="_blank" rel="noopener" class="btn-elegant-secondary">
+                    前往實體工具賣場 <i class="fas fa-shopping-bag" style="margin-left:8px; font-size:0.8em;"></i>
+                </a>
+            </div>
         </div>
         <div class="scroll-indicator">
             <span>( 往下滑，也許妳會找到一個不那麼累的方法 )</span>
@@ -364,7 +535,7 @@
                 <i class="fas fa-rotate-left news-icon"></i>
                 <div>
                     <span class="news-title-text">一直重來</span>
-                    <span class="news-desc">每次都很認真開始記帳，卻總是一下就停掉。這不是妳懶，是很多方法本來就很難長久。</span>
+                    <span class="news-desc">每次都很認真開始記帳，卻總是一下就停掉。用勉強的方法本來就很難長久。</span>
                 </div>
             </div>
             <div class="news-item">
@@ -378,7 +549,7 @@
                 <i class="fas fa-seedling news-icon" style="color: var(--danger);"></i>
                 <div>
                     <span class="news-title-text" style="color: var(--danger);">開始想改變，但不知道從哪裡開始？</span>
-                    <span class="news-desc">可以先從 <a href="tool.html" style="color: var(--danger); font-weight: 600; text-decoration: underline;">財務診療室</a> 看清現況，再到 <a href="app.html" style="color: var(--danger); font-weight: 600; text-decoration: underline;">財務駕駛艙</a> 找一個比較不那麼累的方法。</span>
+                    <span class="news-desc">先不用一次搞懂全部。可以到 <a href="tools.html" style="color: var(--danger); font-weight: 600; text-decoration: underline;">Bear Money Tools</a>，從現在最像妳的狀態開始，找到一個 30 秒就能先試的小工具。</span>
                 </div>
             </div>
         </div>
@@ -387,11 +558,11 @@
 
     <section class="section fade-in" style="padding-top: 50px; padding-bottom: 20px;">
         <div class="statement-box">
-            <div class="statement-title">不是要妳更厲害。<br>是讓妳不用一直逼自己。</div>
+            <div class="statement-title">妳需要更厲害。<br>是讓妳不用一直逼自己。</div>
             <div class="statement-desc">
-                很多人不是不想存錢，也不是不夠努力。<br>
+                很多人存錢失敗，不是也不夠努力。<br>
                 是大部分的方法，都在叫妳一次做好、一次整理、一次面對全部。<br><br>
-                Bear.saving 想做的不是再給妳更多壓力，<br>
+                Bear.saving 想做的是不再給妳更多壓力，<br>
                 而是陪妳從內耗、失控與一直重來裡，慢慢找到一個比較不那麼累的方法。
             </div>
         </div>
@@ -399,17 +570,17 @@
 
     <section class="section fade-in" style="padding-top: 40px; padding-bottom: 0;">
         <h2 style="font-family:'Playfair Display'; margin-bottom:5px;">Why It Feels So Hard</h2>
-        <p style="color:var(--text-secondary); font-size:0.95rem; margin-bottom:30px; font-weight:600;">妳不是做不到，很多時候，只是這些狀態真的很難靠意志力一直逼自己。</p>
+        <p style="color:var(--text-secondary); font-size:0.95rem; margin-bottom:30px; font-weight:600;">很多時候，只是這些狀態真的很難靠意志力一直逼自己。</p>
         <div class="feature-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
             <div class="feature-card">
                 <div class="feature-icon"><i class="fas fa-wallet" style="color: var(--danger);"></i></div>
-                <div class="feature-title">錢不是花掉的，是慢慢不見的</div>
-                <div class="feature-desc">沒有買什麼大東西，卻總覺得戶頭一直變少。不是妳沒有感覺，是小額支出太容易把人拖走。</div>
+                <div class="feature-title">錢莫名慢慢不見的</div>
+                <div class="feature-desc">沒有買什麼大東西，卻總覺得戶頭一直變少。其實就是小額支出太容易把人拖走。</div>
             </div>
             <div class="feature-card">
                 <div class="feature-icon"><i class="fas fa-calendar-times" style="color: var(--danger);"></i></div>
                 <div class="feature-title">每次都很認真開始，最後還是放棄</div>
-                <div class="feature-desc">想到月底要補帳、要分類、要整理，就先累了。很多記帳失敗，不是懶，是方法本來就不貼近生活。</div>
+                <div class="feature-desc">想到月底要補帳、要分類、要整理，就先累了。很多記帳失敗，因為是方法本來就不貼近生活。</div>
             </div>
             <div class="feature-card">
                 <div class="feature-icon"><i class="fas fa-file-invoice-dollar" style="color: var(--danger);"></i></div>
@@ -421,7 +592,7 @@
 
     <section class="section fade-in" style="padding-top: 40px; padding-bottom: 0;">
         <h2 style="font-family:'Playfair Display'; margin-bottom:5px;">The Bear System</h2>
-        <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:30px;">不是叫妳一次變好，而是陪妳一步一步把選擇權拿回來。</p>
+        <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:30px;">不需要妳一次變好，而是陪妳一步一步把選擇權拿回來。</p>
         
         <div class="system-trilogy">
             <div class="trilogy-card card-step-1">
@@ -432,7 +603,7 @@
                         <div class="trilogy-title">先看清楚，不用硬撐</div>
                     </div>
                 </div>
-                <div class="trilogy-desc">如果妳現在連自己到底卡在哪裡都說不清楚，可以先從「財務診療室」開始。它不是拿來評分妳，而是幫妳看清現況：哪裡在漏、哪裡太緊、哪裡需要先保命。</div>
+                <div class="trilogy-desc">如果妳現在連自己到底卡在哪裡都說不清楚，可以先從「財務診療室」開始。幫助你看清現況：哪裡在漏、哪裡太緊、哪裡需要先保命。</div>
                 <a href="tool.html" class="trilogy-btn btn-step-1">先看看現在的我 <i class="fas fa-arrow-right"></i></a>
             </div>
 
@@ -444,7 +615,7 @@
                         <div class="trilogy-title">讓方法貼近生活，才走得下去</div>
                     </div>
                 </div>
-                <div class="trilogy-desc">很多人不是不會記帳，是想到月底補登就先累了。財務駕駛艙把流程改成「想到一筆，補一筆」，不用一次整理，不用假裝很完美，只要先找到一個自己做得下去的方式。</div>
+                <div class="trilogy-desc">很多人不記帳，是想到月底補登就先累了。財務駕駛艙把流程改成「想到一筆，補一筆」，不用一次整理，不用假裝很完美，只要先找到一個自己做得下去的方式。</div>
                 <a href="app.html" class="trilogy-btn btn-step-2">我想試試看這個方式 <i class="fas fa-arrow-right"></i></a>
             </div>
 
@@ -456,7 +627,7 @@
                         <div class="trilogy-title">把抽象的改變，變成摸得到的日常</div>
                     </div>
                 </div>
-                <div class="trilogy-desc">有些人需要螢幕上的清楚，有些人需要紙上的踏實。原創記帳本與實體工具，不是為了更厲害，而是讓妳在混亂的日子裡，還有一個地方可以慢慢整理自己。</div>
+                <div class="trilogy-desc">有些人需要螢幕上的清楚，有些人需要紙上的踏實。原創記帳本與實體工具，讓妳在混亂的日子裡，還有一個地方可以慢慢整理自己。</div>
                 <a href="https://myship.7-11.com.tw/general/detail/GM2502152714662?utm_source=ig&utm_medium=social" target="_blank" class="trilogy-btn btn-step-3">看看這些陪我走過來的工具 <i class="fas fa-shopping-bag"></i></a>
             </div>
         </div>
@@ -464,114 +635,76 @@
 
     <section class="section fade-in" style="padding-top: 50px;">
         <h2 style="font-family:'Playfair Display'; margin-bottom:5px;">Why This Feels Different</h2>
-        <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:30px;">不是塞更多功能給妳，而是把真正會讓人覺得很累、很容易放棄的地方，一個一個拆開。</p>
+        <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:30px;">讓人覺得很累、很容易放棄的地方，熊幫忙你一個一個拆開。</p>
 
         <div class="feature-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
             <div class="feature-card">
                 <div class="feature-icon"><i class="fas fa-lock"></i></div>
                 <div class="feature-title">先把一定會花的留起來，再看自己剩多少</div>
-                <div class="feature-desc">不是每次都靠意志力硬撐。把保費、稅金、旅行金先搬好位置，妳才看得到真正能用的餘額。</div>
+                <div class="feature-desc">不用只每次都靠意志力硬撐。把保費、稅金、旅行金先搬好位置，妳才看得到真正能用的餘額。</div>
             </div>
             <div class="feature-card">
                 <div class="feature-icon"><i class="fas fa-brain"></i></div>
-                <div class="feature-title">讓衝動慢半拍，不是靠自責停下來</div>
-                <div class="feature-desc">不是叫妳什麼都不能買，而是幫妳在刷下去之前，多看一眼：這筆錢，現在的我真的要嗎？</div>
+                <div class="feature-title">讓衝動慢半拍，就不需要靠自責停下來</div>
+                <div class="feature-desc">並不是甚麼都不能買，而是幫妳在刷下去之前，多看一眼：這筆錢，現在的我真的要嗎？</div>
             </div>
             <div class="feature-card">
                 <div class="feature-icon"><i class="fas fa-hand-holding-usd"></i></div>
-                <div class="feature-title">債務不是一團霧，拆開之後才有出口</div>
+                <div class="feature-title">債務這一團霧，拆開之後才有出口</div>
                 <div class="feature-desc">當妳看懂每筆負債、每期利息、每一步要怎麼還，焦慮會少很多。先看清楚，才不會被嚇住。</div>
             </div>
             <div class="feature-card">
                 <div class="feature-icon"><i class="fas fa-file-excel"></i></div>
-                <div class="feature-title">不是為了交作業，是為了看見自己有在前進</div>
-                <div class="feature-desc">報表不是拿來責備妳的，是讓妳回頭看見：原來我有撐住、原來我有慢慢把自己拉回來。</div>
+                <div class="feature-title">為了看見自己有在前進</div>
+                <div class="feature-desc">報表讓妳回頭看見：原來我有撐住、原來我有慢慢把自己拉回來。</div>
             </div>
         </div>
 
-        <div style="text-align: center; margin-top: 40px; margin-bottom: 20px;">
-            <span class="click-alert-badge">
-                👇 從現在最需要被接住的地方開始 👇
-            </span>
-        </div>
+        <div style="margin-top: 38px;"></div>
+    </section>
 
-        <a href="rocket.html" class="service-card" style="border-color: var(--accent); background: #fdfbf7;">
-            <div class="service-icon" style="background:#fff; color:var(--accent);"><i class="fas fa-rocket"></i></div>
-            <div>
-                <div style="font-weight:600; font-size:1.05rem;">先有緩衝，才有底氣前進</div>
-                <div style="font-size:0.85rem; color:var(--text-secondary); margin-top:5px;">如果現在連生活都很緊，先別急著衝。這是給想先讓自己喘口氣的人。</div>
+    <section class="section fade-in" style="padding-top: 35px; padding-bottom: 30px;">
+        <div class="money-tools-home">
+            <div class="money-tools-eyebrow">
+                <i class="fas fa-sparkles"></i> FREE DIGITAL TOOLS
             </div>
-            <i class="fas fa-chevron-right" style="margin-left:auto; color:#ddd;"></i>
-        </a>
+            <h2 class="money-tools-title">Bear Money Tools</h2>
+            <div class="money-tools-desc">
+                從存錢、預算、資產累積，到投資與人生選擇。<br>
+                我把一支支 Reels 延伸出來的免費試算器與工作表，慢慢整理成一個地方。
+                不用一次學會全部，只要先找到現在最需要的那一個。
+            </div>
 
-        <a href="envelopes.html" class="service-card" style="border-color: #f8bbd0; background: #fffafa;">
-            <div class="service-icon" style="background:#fff; color:#e57373;"><i class="fas fa-envelope-open-text"></i></div>
-            <div>
-                <div style="font-weight:600; font-size:1.05rem;">不知道怎麼分，就先從這裡開始</div>
-                <div style="font-size:0.85rem; color:var(--text-secondary); margin-top:5px;">建立自動化的分配系統 💌</div>
+            <div class="money-tools-preview">
+                <div class="money-preview-item">
+                    <i class="fas fa-seedling"></i>
+                    <span>1% 存錢<br>從最小一步開始</span>
+                </div>
+                <div class="money-preview-item">
+                    <i class="fas fa-stethoscope"></i>
+                    <span>財務診療<br>先看懂現在的自己</span>
+                </div>
+                <div class="money-preview-item">
+                    <i class="fas fa-hourglass-half"></i>
+                    <span>時間與選擇<br>看看錢能換多少餘裕</span>
+                </div>
             </div>
-            <i class="fas fa-chevron-right" style="margin-left:auto; color:#ddd;"></i>
-        </a>
 
-        <a href="tool.html" class="service-card">
-            <div class="service-icon"><i class="fas fa-chart-pie"></i></div>
-            <div>
-                <div style="font-weight:600; font-size:1.05rem;">財務診療室 v6.4</div>
-                <div style="font-size:0.85rem; color:var(--text-secondary); margin-top:5px;">測測人格，算出專屬預算 (含防呆紅綠燈) 🦁</div>
-            </div>
-            <i class="fas fa-chevron-right" style="margin-left:auto; color:#ddd;"></i>
-        </a>
-
-        <a href="app.html" class="service-card">
-            <div class="service-icon" style="background:#f0f4f8; color:#546e7a;"><i class="fas fa-tachometer-alt"></i></div>
-            <div>
-                <div style="font-weight:600; font-size:1.05rem;">Bear 財務駕駛艙 v5.1</div>
-                <div style="font-size:0.85rem; color:var(--text-secondary); margin-top:5px;">自由分類 x 慢慢熊還債計算機 x 里程碑</div>
-            </div>
-            <i class="fas fa-chevron-right" style="margin-left:auto; color:#ddd;"></i>
-        </a>
-
-        <a href="kids.html" class="service-card" style="border-color: #ffe082; background: #fffdf7;">
-            <div class="service-icon" style="background:#fff; color:#ffa000;"><i class="fas fa-paw"></i></div>
-            <div>
-                <div style="font-weight:600; font-size:1.05rem; color: var(--text-primary);">親子理財：小熊任務分幣法</div>
-                <div style="font-size:0.85rem; color:var(--text-secondary); margin-top:5px;">不給零用錢，給選擇權！視覺化存錢軌道 🧸</div>
-            </div>
-            <i class="fas fa-chevron-right" style="margin-left:auto; color:#ddd;"></i>
-        </a>
-
-        <div class="gift-section">
-            <div class="gift-title">Bear's Secret</div>
-            <p style="font-size:0.9rem; color:var(--text-secondary); margin-bottom:30px;">
-                點擊右側按鈕複製關鍵字，<br>至 IG 私訊領取專屬資源。
-            </p>
-            <div class="keyword-item">
-                <span>💰 原創存錢系統 PDF</span>
-                <button class="keyword-btn" onclick="copyText('財務/ 2026')">財務/ 2026</button>
-            </div>
-            <div class="keyword-item">
-                <span>💧 獲取離職底氣計算機</span>
-                <button class="keyword-btn" onclick="copyText('預備金')">預備金</button>
-            </div>
-            <div class="keyword-item">
-                <span>🌊 收入不穩專用「蓄水池」</span>
-                <button class="keyword-btn" onclick="copyText('蓄水池')">蓄水池</button>
-            </div>
-            <div class="keyword-item">
-                <span>📊 各類預算盤點表格</span>
-                <button class="keyword-btn" onclick="copyText('表格')">表格</button>
-            </div>
+            <a href="tools.html" class="money-tools-cta">
+                找到適合我的免費工具 <i class="fas fa-arrow-right"></i>
+            </a>
         </div>
     </section>
 
-    <section class="section fade-in" style="padding-top: 20px;">
-        <h2 style="font-family:'Playfair Display'; margin-bottom:10px;">Selected Tools</h2>
+    <section class="section fade-in" style="padding-top: 30px;">
+        <h2 class="physical-tools-heading" style="font-family:'Playfair Display';">Tools for Real Life</h2>
+        <p class="physical-tools-subtitle">數位工具幫妳看清楚；實體工具陪妳把方法放進每天真的會過的生活裡。</p>
         <div class="product-grid">
             <a href="https://myship.7-11.com.tw/general/detail/GM2502152714662?utm_source=ig&utm_medium=social" target="_blank" class="product-card">
                 <img src="product1.jpg" alt="Bear 原創記帳本" class="p-image">
                 <div class="p-info">
                     <div class="p-title"> Bear原創記帳本</div>
-                    <div class="p-desc">有些整理，真的要寫下來才會看清楚。這本不是要妳完美，是陪妳把混亂慢慢攤開。</div>
+                    <div class="p-desc">有些整理，真的要寫下來才會看清楚。這本可以陪妳把混亂慢慢攤開。</div>
                     <div class="p-price">View Details <i class="fas fa-arrow-right" style="font-size:0.8em;"></i></div>
                 </div>
             </a>
@@ -579,7 +712,7 @@
                 <img src="product2.jpg" alt="韓系質感書衣" class="p-image">
                 <div class="p-info">
                     <div class="p-title">韓系質感書衣</div>
-                    <div class="p-desc">不是只有保護記帳本，也是在提醒自己：那些想慢慢走到的地方，值得被好好收著。</div>
+                    <div class="p-desc">值得被好好收藏</div>
                     <div class="p-price">View Details <i class="fas fa-arrow-right" style="font-size:0.8em;"></i></div>
                 </div>
             </a>
@@ -592,11 +725,18 @@
                 </div>
             </a>
         </div>
+
+        <div style="margin-top:32px;">
+            <a href="https://myship.7-11.com.tw/general/detail/GM2502152714662?utm_source=ig&utm_medium=social"
+               target="_blank" rel="noopener" class="btn-support">
+                查看全部實體工具 <i class="fas fa-arrow-right" style="margin-left:6px;"></i>
+            </a>
+        </div>
     </section>
 
     <section class="section fade-in">
         <p style="margin-bottom:25px; font-weight:600; color:var(--text-primary); letter-spacing:1px;">
-            (如果妳想知道這套方法為什麼會誕生) 可以先看這支 👇
+            如果妳想知道 Bear 的這套方法，為什麼會從真實生活裡長出來，可以先看這支 👇
         </p>
         <div class="video-container">
             <a href="https://www.instagram.com/p/DUStl0QEmYI/" target="_blank" class="fallback-link">
@@ -612,7 +752,7 @@
 
     <section class="section fade-in" style="padding-bottom: 20px;">
         <h2 style="font-family:'Playfair Display'; margin-bottom:10px;">Love Letters</h2>
-        <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:30px;">她們不是一下就變完美，而是開始比較不內耗，也比較不會一直逼自己。</p>
+        <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:30px;">她們開始比較不內耗，也比較不會一直逼自己。</p>
         <div class="reviews-container">
             <div class="review-card"><img src="review1.jpg" alt="Review 1" class="review-img"></div>
             <div class="review-card"><img src="review2.jpg" alt="Review 2" class="review-img"></div>
@@ -624,7 +764,7 @@
 
     <section class="section fade-in" style="padding-bottom: 0;">
         <div class="philosophy-text">
-            <p>我不是在教妳怎麼變得更厲害，<br>我是想陪妳慢慢不再那麼累。<br><br>
+            <p>比起教你怎麼變得更厲害，<br>我可以陪妳慢慢不再那麼累。<br><br>
             存錢不是為了限制渴望，<br>而是為了把選擇權一點一點拿回來。</p>
         </div>
     </section>
