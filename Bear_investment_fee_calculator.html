@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bear 投資費用差距計算器</title>
+  <title>Bear 定期定額複利計算器</title>
   <style>
     :root{
       --bg:#f7f0ea;
@@ -18,7 +18,9 @@
       --cream:#fff8f4;
       --chip:#f5e7df;
       --shadow:0 18px 50px rgba(102,72,61,.10);
-      --success:#7b675f;
+      --principal:#c8b6ae;
+      --asset:#b77b6b;
+      --grid:#eaded8;
     }
 
     *{box-sizing:border-box}
@@ -145,8 +147,7 @@
       gap:15px;
     }
 
-    .field label,
-    .plan label{
+    .field label{
       display:block;
       font-size:13px;
       color:var(--muted);
@@ -161,9 +162,7 @@
       margin-top:6px;
     }
 
-    .input-wrap{
-      position:relative;
-    }
+    .input-wrap{ position:relative; }
 
     input{
       width:100%;
@@ -263,7 +262,7 @@
     .reference-toggle:hover{transform:none;box-shadow:none}
 
     .reference-content{
-      display:none;
+      display:block;
       padding:0 15px 15px;
       color:var(--muted);
       font-size:12px;
@@ -273,47 +272,6 @@
     .reference-content ul{
       margin:4px 0 8px;
       padding-left:18px;
-    }
-
-    .plans{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:14px;
-      margin-top:4px;
-    }
-
-    .plan{
-      background:linear-gradient(180deg,#fff 0%,#fffaf7 100%);
-      border:1px solid var(--line);
-      border-radius:20px;
-      padding:16px;
-      position:relative;
-      overflow:hidden;
-    }
-
-    .plan:before{
-      content:"";
-      position:absolute;
-      width:92px;
-      height:92px;
-      border-radius:50%;
-      background:rgba(240,219,209,.45);
-      right:-32px;
-      top:-38px;
-    }
-
-    .plan h3{
-      margin:0 0 12px;
-      font-size:16px;
-      position:relative;
-    }
-
-    .plan-note{
-      position:relative;
-      font-size:11.5px;
-      color:#9d8d85;
-      margin-top:7px;
-      line-height:1.5;
     }
 
     .primary-btn{
@@ -340,49 +298,80 @@
 
     .result{display:none}
 
-    .headline{
-      text-align:center;
-      padding:6px 4px 14px;
+    .chart-wrap{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:20px;
+      padding:16px 12px 10px;
+      overflow:hidden;
     }
 
-    .headline .small{
+    .legend{
+      display:flex;
+      flex-wrap:wrap;
+      gap:14px;
+      align-items:center;
+      margin:0 4px 10px;
+      font-size:12px;
+      color:var(--muted);
+      font-weight:800;
+    }
+
+    .legend-item{
+      display:flex;
+      align-items:center;
+      gap:7px;
+    }
+
+    .dot{
+      width:10px;
+      height:10px;
+      border-radius:999px;
+      display:inline-block;
+    }
+
+    .dot.principal{ background:var(--principal); }
+    .dot.asset{ background:var(--asset); }
+
+    canvas{
+      width:100%;
+      height:320px;
+      display:block;
+    }
+
+    .summary{
+      margin-top:18px;
+      text-align:center;
+      padding:10px 4px 2px;
+    }
+
+    .summary-kicker{
       color:var(--muted);
       font-size:13px;
       font-weight:800;
-      margin-bottom:8px;
+      margin-bottom:7px;
     }
 
-    .fee-gap{
-      display:inline-block;
-      margin-bottom:8px;
-      padding:7px 11px;
-      border-radius:999px;
-      background:var(--chip);
-      color:var(--accent-deep);
-      font-size:12px;
-      font-weight:900;
-    }
-
-    .headline .big{
-      font-size:44px;
+    .summary-big{
+      font-size:38px;
       font-weight:950;
       color:var(--accent);
-      line-height:1.08;
-      letter-spacing:-.03em;
+      line-height:1.1;
+      letter-spacing:-.02em;
     }
 
-    .headline .note{
-      margin-top:10px;
+    .summary-note{
+      margin-top:8px;
       color:var(--muted);
       font-size:12.5px;
-      line-height:1.6;
+      line-height:1.65;
     }
 
     .stat-grid{
       display:grid;
       grid-template-columns:repeat(3,minmax(0,1fr));
       gap:10px;
-      margin-top:12px;
+      margin-top:16px;
     }
 
     .stat{
@@ -405,50 +394,31 @@
       font-weight:950;
     }
 
-    .bars{
-      margin-top:20px;
-      padding:16px;
-      border-radius:20px;
+    .milestones{
+      margin-top:16px;
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:10px;
+    }
+
+    .milestone{
       background:var(--cream);
       border:1px solid var(--line);
+      border-radius:16px;
+      padding:13px 12px;
     }
 
-    .bar-row{margin:12px 0 16px}
-    .bar-row:last-child{margin-bottom:2px}
-
-    .bar-top{
-      display:flex;
-      justify-content:space-between;
-      gap:12px;
-      align-items:flex-end;
+    .milestone .y{
       font-size:12px;
-      margin-bottom:8px;
+      color:var(--accent-deep);
+      font-weight:900;
+      margin-bottom:7px;
+    }
+
+    .milestone .m{
+      font-size:12px;
       color:var(--muted);
-    }
-
-    .bar-top strong{
-      color:var(--ink);
-      font-size:15px;
-    }
-
-    .bar-track{
-      height:18px;
-      background:#eee2dc;
-      border-radius:999px;
-      overflow:hidden;
-      box-shadow:inset 0 1px 2px rgba(86,63,54,.06);
-    }
-
-    .bar-fill{
-      height:100%;
-      border-radius:999px;
-      background:linear-gradient(90deg,#d7aa9b,#b77b6b);
-      width:0;
-      transition:width .55s ease;
-    }
-
-    .bar-fill.b{
-      background:linear-gradient(90deg,#9d8278,#735d55);
+      line-height:1.7;
     }
 
     .explain{
@@ -458,7 +428,7 @@
       border-radius:18px;
       padding:16px;
       font-size:14px;
-      line-height:1.8;
+      line-height:1.85;
       color:#665751;
     }
 
@@ -482,11 +452,12 @@
       .wrap{padding:26px 14px 44px}
       h1{font-size:29px}
       .card{padding:18px;border-radius:24px}
-      .grid,.plans,.stat-grid{grid-template-columns:1fr}
+      .grid,.stat-grid,.milestones{grid-template-columns:1fr}
       .rate-group{grid-template-columns:repeat(3,minmax(0,1fr))}
-      .headline .big{font-size:37px}
       .section-head{align-items:flex-start}
       .section-chip{font-size:11px}
+      canvas{height:280px}
+      .summary-big{font-size:34px}
     }
   </style>
 </head>
@@ -495,10 +466,10 @@
     <section class="hero">
       <div class="logo-badge">🐻</div>
       <div class="eyebrow">Bear Money Tools</div>
-      <h1>投資費用差距計算器</h1>
+      <h1>你的錢，30年後會變多少？</h1>
       <div class="sub">
-        每年看起來只差一點點的投資費用，時間拉長後可能差很多。<br>
-        用同一組投資條件，比較兩種費用率最後會差多少。
+        每月固定投入一點，看看時間會把它變成什麼樣子。<br>
+        把「自己投入的本金」和「預估投資資產」畫成曲線給你看。
       </div>
     </section>
 
@@ -539,7 +510,7 @@
     <section class="card">
       <div class="section-head">
         <div class="section-title">② 選一個預期年化報酬率</div>
-        <div class="section-chip">費用前</div>
+        <div class="section-chip">試算假設</div>
       </div>
 
       <div class="rate-group" id="rateGroup">
@@ -568,7 +539,7 @@
           <span>ⓘ 報酬率參考</span>
           <span id="referenceArrow">－</span>
         </button>
-        <div class="reference-content" id="referenceContent" style="display:block;">
+        <div class="reference-content" id="referenceContent">
           <ul>
             <li>銀行一般活存：通常約 1% 以下。</li>
             <li>S&amp;P 500 長期歷史平均：約 10%／年。</li>
@@ -577,92 +548,52 @@
           這些數字只用來幫助理解不同報酬假設，不代表未來一定能達成。
         </div>
       </div>
-    </section>
 
-    <section class="card">
-      <div class="section-head">
-        <div class="section-title">③ 比較投資費用</div>
-        <div class="section-chip">A / B</div>
-      </div>
-
-      <div class="plans">
-        <div class="plan">
-          <h3>方案 A</h3>
-          <label for="feeA">每年總費用率</label>
-          <div class="input-wrap">
-            <input id="feeA" type="number" inputmode="decimal" min="0" max="20" step="0.01" value="0.2">
-            <span class="unit">%</span>
-          </div>
-          <div class="plan-note">預設 0.2%，可自行修改。</div>
-        </div>
-
-        <div class="plan">
-          <h3>方案 B</h3>
-          <label for="feeB">每年總費用率</label>
-          <div class="input-wrap">
-            <input id="feeB" type="number" inputmode="decimal" min="0" max="20" step="0.01" value="1.5">
-            <span class="unit">%</span>
-          </div>
-          <div class="plan-note">預設 1.5%，可自行修改。</div>
-        </div>
-      </div>
-
-      <button class="primary-btn" id="calcBtn">看看長期差多少</button>
+      <button class="primary-btn" id="calcBtn">看看我的錢怎麼長大</button>
     </section>
 
     <section class="card result" id="resultCard">
       <div class="section-head">
-        <div class="section-title">④ 計算結果</div>
-        <div class="section-chip">長期複利試算</div>
+        <div class="section-title">③ 看看你的錢怎麼長大</div>
+        <div class="section-chip">本金 vs 預估資產</div>
       </div>
 
-      <div class="headline">
-        <div class="small">每年費用率只差</div>
-        <div class="fee-gap" id="feeGap">—</div>
-        <div class="small">但 <span id="yearsText">30</span> 年後，期末資產可能差</div>
-        <div class="big" id="difference">—</div>
-        <div class="note" id="differenceNote">—</div>
+      <div class="chart-wrap">
+        <div class="legend">
+          <div class="legend-item"><span class="dot principal"></span>自己投入的本金</div>
+          <div class="legend-item"><span class="dot asset"></span>預估投資資產</div>
+        </div>
+        <canvas id="growthChart"></canvas>
+      </div>
+
+      <div class="summary">
+        <div class="summary-kicker">投資 <span id="summaryYears">30</span> 年後</div>
+        <div class="summary-big" id="finalAsset">—</div>
+        <div class="summary-note" id="summaryNote">—</div>
       </div>
 
       <div class="stat-grid">
         <div class="stat">
-          <div class="k">低費用方案</div>
-          <div class="v" id="lowFeeFinal">—</div>
+          <div class="k">自己投入本金</div>
+          <div class="v" id="totalPrincipal">—</div>
         </div>
         <div class="stat">
-          <div class="k">高費用方案</div>
-          <div class="v" id="highFeeFinal">—</div>
+          <div class="k">預估投資資產</div>
+          <div class="v" id="estimatedAsset">—</div>
         </div>
         <div class="stat">
-          <div class="k">累積投入本金</div>
-          <div class="v" id="contrib">—</div>
+          <div class="k">時間幫你長出來的</div>
+          <div class="v" id="growthAmount">—</div>
         </div>
       </div>
 
-      <div class="bars">
-        <div class="bar-row">
-          <div class="bar-top">
-            <span id="labelA">方案 A</span>
-            <strong id="barValueA">—</strong>
-          </div>
-          <div class="bar-track"><div class="bar-fill" id="barA"></div></div>
-        </div>
-
-        <div class="bar-row">
-          <div class="bar-top">
-            <span id="labelB">方案 B</span>
-            <strong id="barValueB">—</strong>
-          </div>
-          <div class="bar-track"><div class="bar-fill b" id="barB"></div></div>
-        </div>
-      </div>
+      <div class="milestones" id="milestones"></div>
 
       <div class="explain" id="explain">—</div>
 
       <div class="formula">
-        計算方式：用「預期年化報酬率 − 每年總費用率」估算費用後年化報酬，
-        再以月複利估算每月投入的未來價值。這是簡化試算，不代表實際投資報酬，
-        也未納入稅負、交易價差、匯率、追蹤誤差與市場波動。
+        試算假設每月月底固定投入，並用固定年化報酬率換算成月報酬率進行複利。
+        實際投資報酬會隨市場波動，不會像圖中的曲線一樣平滑；本工具僅供理解長期定期定額與複利效果。
       </div>
     </section>
 
@@ -674,23 +605,7 @@
 <script>
   const $ = (id) => document.getElementById(id);
   let selectedRate = 7;
-
-  function futureValueMonthly(monthly, years, annualRate, initial){
-    const n = Math.max(0, Math.round(years * 12));
-    const r = annualRate / 100 / 12;
-
-    let fvInitial;
-    let fvMonthly;
-
-    if (Math.abs(r) < 1e-12){
-      fvInitial = initial;
-      fvMonthly = monthly * n;
-    } else {
-      fvInitial = initial * Math.pow(1 + r, n);
-      fvMonthly = monthly * ((Math.pow(1 + r, n) - 1) / r);
-    }
-    return fvInitial + fvMonthly;
-  }
+  let chartData = [];
 
   function money(n){
     if (!Number.isFinite(n)) return "—";
@@ -710,6 +625,26 @@
 
   function getNum(id){
     return Number($(id).value || 0);
+  }
+
+  function calcValues(monthly, years, annualRate, initial){
+    const months = Math.round(years * 12);
+    const monthlyRate = annualRate / 100 / 12;
+    let asset = initial;
+    const points = [{year:0, principal:initial, asset:initial}];
+
+    for(let m=1; m<=months; m++){
+      asset = asset * (1 + monthlyRate) + monthly;
+      if(m % 12 === 0 || m === months){
+        const y = m / 12;
+        points.push({
+          year:y,
+          principal:initial + monthly * m,
+          asset:asset
+        });
+      }
+    }
+    return points;
   }
 
   document.querySelectorAll(".rate-btn").forEach(btn=>{
@@ -737,81 +672,173 @@
     $("referenceArrow").textContent = open ? "＋" : "－";
   });
 
+  function drawChart(points){
+    const canvas = $("growthChart");
+    const rect = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = Math.max(320, rect.width) * dpr;
+    canvas.height = Math.max(240, rect.height) * dpr;
+
+    const ctx = canvas.getContext("2d");
+    ctx.scale(dpr, dpr);
+
+    const W = canvas.width / dpr;
+    const H = canvas.height / dpr;
+
+    const pad = {left:58, right:18, top:18, bottom:40};
+    const innerW = W - pad.left - pad.right;
+    const innerH = H - pad.top - pad.bottom;
+
+    ctx.clearRect(0,0,W,H);
+
+    const maxY = Math.max(...points.map(p=>Math.max(p.asset,p.principal)),1);
+    const niceMax = maxY * 1.10;
+    const maxX = Math.max(...points.map(p=>p.year),1);
+
+    const x = year => pad.left + (year / maxX) * innerW;
+    const y = val => pad.top + innerH - (val / niceMax) * innerH;
+
+    // grid
+    ctx.strokeStyle = "#eaded8";
+    ctx.lineWidth = 1;
+    ctx.font = "11px -apple-system, BlinkMacSystemFont, PingFang TC, sans-serif";
+    ctx.fillStyle = "#9a8a82";
+    ctx.textAlign = "right";
+    ctx.textBaseline = "middle";
+
+    for(let i=0;i<=4;i++){
+      const gy = pad.top + innerH * (i/4);
+      ctx.beginPath();
+      ctx.moveTo(pad.left, gy);
+      ctx.lineTo(W-pad.right, gy);
+      ctx.stroke();
+
+      const value = niceMax * (1 - i/4);
+      ctx.fillText(formatAxis(value), pad.left-8, gy);
+    }
+
+    ctx.textAlign = "center";
+    ctx.textBaseline = "top";
+    const tickCount = Math.min(6, Math.max(3, Math.floor(maxX/5)+1));
+    for(let i=0;i<tickCount;i++){
+      const yr = maxX * i/(tickCount-1);
+      const gx = x(yr);
+      ctx.beginPath();
+      ctx.moveTo(gx,pad.top);
+      ctx.lineTo(gx,pad.top+innerH);
+      ctx.stroke();
+      ctx.fillText(Math.round(yr)+"年", gx, pad.top+innerH+10);
+    }
+
+    drawLine(points, "principal", "#c8b6ae", 3);
+    drawLine(points, "asset", "#b77b6b", 4);
+
+    function drawLine(data,key,color,width){
+      ctx.beginPath();
+      data.forEach((p,i)=>{
+        const px=x(p.year), py=y(p[key]);
+        if(i===0) ctx.moveTo(px,py);
+        else ctx.lineTo(px,py);
+      });
+      ctx.strokeStyle=color;
+      ctx.lineWidth=width;
+      ctx.lineCap="round";
+      ctx.lineJoin="round";
+      ctx.stroke();
+    }
+
+    function formatAxis(v){
+      if(v>=100000000) return (v/100000000).toFixed(1)+"億";
+      if(v>=10000) return Math.round(v/10000)+"萬";
+      return Math.round(v).toLocaleString("zh-TW");
+    }
+  }
+
+  function milestoneYears(totalYears){
+    if(totalYears <= 5) return [1, Math.max(2, Math.round(totalYears/2)), totalYears];
+    if(totalYears <= 15) return [5, 10, totalYears];
+    return [
+      Math.min(10,totalYears),
+      Math.min(20,totalYears),
+      totalYears
+    ].filter((v,i,a)=>a.indexOf(v)===i);
+  }
+
+  function findPoint(points, year){
+    return points.reduce((best,p)=>Math.abs(p.year-year)<Math.abs(best.year-year)?p:best,points[0]);
+  }
+
   function calculate(){
     const monthly = getNum("monthly");
     const years = getNum("years");
     const initial = getNum("initial");
-    const feeA = getNum("feeA");
-    const feeB = getNum("feeB");
-    const gross = selectedRate;
+    const annualRate = selectedRate;
 
-    if (monthly < 0 || years <= 0 || initial < 0 || feeA < 0 || feeB < 0){
+    if(monthly < 0 || years <= 0 || initial < 0){
       alert("請確認輸入的數字是否正確。");
       return;
     }
 
-    if (!Number.isFinite(gross)){
+    if(!Number.isFinite(annualRate)){
       alert("請選擇或輸入預期年化報酬率。");
       return;
     }
 
-    const netA = gross - feeA;
-    const netB = gross - feeB;
+    chartData = calcValues(monthly, years, annualRate, initial);
+    const last = chartData[chartData.length-1];
+    const totalPrincipal = last.principal;
+    const finalAsset = last.asset;
+    const growth = finalAsset - totalPrincipal;
 
-    if (netA <= -100 || netB <= -100){
-      alert("費用後年化報酬率不可低於 -100%。");
-      return;
-    }
+    $("summaryYears").textContent = years;
+    $("finalAsset").textContent = moneyShort(finalAsset);
+    $("summaryNote").textContent =
+      `以每月 ${moneyShort(monthly)}、年化報酬率 ${annualRate}% 試算。`;
 
-    const fvA = futureValueMonthly(monthly, years, netA, initial);
-    const fvB = futureValueMonthly(monthly, years, netB, initial);
-    const totalContrib = initial + monthly * years * 12;
-    const diff = Math.abs(fvA - fvB);
-    const feeGap = Math.abs(feeA - feeB);
+    $("totalPrincipal").textContent = moneyShort(totalPrincipal);
+    $("estimatedAsset").textContent = moneyShort(finalAsset);
+    $("growthAmount").textContent = moneyShort(growth);
 
-    const lowFeeIsA = feeA <= feeB;
-    const lowFeeFinal = lowFeeIsA ? fvA : fvB;
-    const highFeeFinal = lowFeeIsA ? fvB : fvA;
-    const lowFeeLabel = lowFeeIsA ? "A" : "B";
-    const highFeeLabel = lowFeeIsA ? "B" : "A";
-
-    $("feeGap").textContent = feeGap.toFixed(2).replace(/\.00$/,"") + "%";
-    $("yearsText").textContent = years;
-    $("difference").textContent = moneyShort(diff);
-    $("differenceNote").textContent =
-      `同樣投入、同樣報酬假設，只改變每年費用率。`;
-
-    $("lowFeeFinal").textContent = moneyShort(lowFeeFinal);
-    $("highFeeFinal").textContent = moneyShort(highFeeFinal);
-    $("contrib").textContent = moneyShort(totalContrib);
-
-    $("labelA").textContent = `方案 A｜費用 ${feeA}%｜費用後報酬 ${netA.toFixed(2).replace(/\.00$/,"")}%`;
-    $("labelB").textContent = `方案 B｜費用 ${feeB}%｜費用後報酬 ${netB.toFixed(2).replace(/\.00$/,"")}%`;
-    $("barValueA").textContent = moneyShort(fvA);
-    $("barValueB").textContent = moneyShort(fvB);
-
-    const max = Math.max(fvA, fvB, 1);
-    $("barA").style.width = Math.max(4, fvA / max * 100) + "%";
-    $("barB").style.width = Math.max(4, fvB / max * 100) + "%";
+    const mWrap = $("milestones");
+    mWrap.innerHTML = "";
+    milestoneYears(years).forEach(y=>{
+      const p = findPoint(chartData,y);
+      const div = document.createElement("div");
+      div.className = "milestone";
+      div.innerHTML =
+        `<div class="y">第 ${Math.round(p.year)} 年</div>` +
+        `<div class="m">投入本金：<strong>${moneyShort(p.principal)}</strong><br>` +
+        `預估資產：<strong>${moneyShort(p.asset)}</strong></div>`;
+      mWrap.appendChild(div);
+    });
 
     $("explain").innerHTML =
-      `你一共投入約 <strong>${money(totalContrib)}</strong>。<br>` +
-      `在其他條件都相同的情況下，低費用方案 ${lowFeeLabel} 與高費用方案 ${highFeeLabel} ` +
-      `每年費用率只差 <strong>${feeGap.toFixed(2).replace(/\.00$/,"")}%</strong>，` +
-      `${years} 年後的期末資產就可能相差約 <strong>${money(diff)}</strong>。` +
-      `<br><br>這個差距不只是「少付掉的費用」，也包含那些錢原本可以繼續產生的複利。` +
-      `<br><br>重點不是一定要選費用最低的商品，而是比較投資標的時，除了報酬，也別忘了長期持有成本。`;
+      `你自己投入的本金約為 <strong>${money(totalPrincipal)}</strong>，` +
+      `在年化報酬率 <strong>${annualRate}%</strong> 的試算下，` +
+      `${years} 年後預估投資資產約為 <strong>${money(finalAsset)}</strong>。` +
+      `<br><br>其中約 <strong>${money(growth)}</strong> 並不是你另外存進去的錢，` +
+      `而是原本投入的資產隨著時間參與複利後，試算出來的成長。` +
+      `<br><br>前面的時間看起來可能長得很慢，但時間拉長後，資產曲線才會慢慢和本金拉開。`;
 
     $("resultCard").style.display = "block";
-    $("resultCard").scrollIntoView({behavior:"smooth", block:"start"});
+    requestAnimationFrame(()=>{
+      drawChart(chartData);
+      $("resultCard").scrollIntoView({behavior:"smooth", block:"start"});
+    });
   }
 
   $("calcBtn").addEventListener("click", calculate);
 
-  ["monthly","years","initial","feeA","feeB","customRate"].forEach(id=>{
+  ["monthly","years","initial","customRate"].forEach(id=>{
     $(id).addEventListener("keydown", e=>{
       if(e.key === "Enter") calculate();
     });
+  });
+
+  window.addEventListener("resize", ()=>{
+    if(chartData.length && $("resultCard").style.display === "block"){
+      drawChart(chartData);
+    }
   });
 </script>
 </body>
