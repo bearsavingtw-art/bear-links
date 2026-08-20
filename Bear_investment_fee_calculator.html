@@ -7,65 +7,73 @@
   <style>
     :root{
       --bg:#f7f0ea;
-      --bg2:#f2e6de;
+      --bg2:#f1e4dc;
       --card:#fffdfb;
       --ink:#4b3d37;
-      --muted:#8d7c74;
-      --line:#eadcd4;
-      --accent:#b87b6b;
-      --accent-deep:#8d5f53;
-      --accent-soft:#efd9cf;
-      --cream:#fff8f3;
-      --chip:#f6e9e1;
+      --muted:#8e7d75;
+      --line:#eadbd2;
+      --accent:#b77b6b;
+      --accent-deep:#8f6256;
+      --accent-soft:#f0dbd1;
+      --cream:#fff8f4;
+      --chip:#f5e7df;
       --shadow:0 18px 50px rgba(102,72,61,.10);
+      --success:#7b675f;
     }
+
     *{box-sizing:border-box}
     html{scroll-behavior:smooth}
+
     body{
       margin:0;
+      min-height:100vh;
       font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
       color:var(--ink);
       background:
-        radial-gradient(circle at 15% 10%, rgba(255,255,255,.9) 0 7%, transparent 24%),
-        radial-gradient(circle at 85% 12%, rgba(221,191,178,.34) 0 8%, transparent 25%),
+        radial-gradient(circle at 15% 8%, rgba(255,255,255,.95) 0 7%, transparent 23%),
+        radial-gradient(circle at 87% 14%, rgba(221,191,178,.30) 0 9%, transparent 28%),
         linear-gradient(180deg,var(--bg) 0%,var(--bg2) 100%);
-      min-height:100vh;
     }
+
     body:before{
       content:"";
       position:fixed;
       inset:0;
       pointer-events:none;
-      opacity:.22;
+      opacity:.18;
       background-image:
-        linear-gradient(rgba(255,255,255,.45) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,.45) 1px, transparent 1px);
+        linear-gradient(rgba(255,255,255,.55) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.55) 1px, transparent 1px);
       background-size:24px 24px;
-      mask-image:linear-gradient(to bottom, rgba(0,0,0,.8), transparent 70%);
+      mask-image:linear-gradient(to bottom, rgba(0,0,0,.75), transparent 70%);
     }
+
     .wrap{
-      max-width:820px;
+      max-width:840px;
       margin:0 auto;
       padding:34px 18px 56px;
       position:relative;
     }
+
     .hero{
       text-align:center;
-      padding:18px 16px 10px;
+      padding:16px 16px 10px;
     }
+
     .logo-badge{
-      width:64px;
-      height:64px;
+      width:66px;
+      height:66px;
       margin:0 auto 12px;
       border-radius:22px;
       display:grid;
       place-items:center;
-      background:rgba(255,253,251,.86);
-      border:1px solid rgba(184,123,107,.16);
+      font-size:35px;
+      background:rgba(255,253,251,.88);
+      border:1px solid rgba(183,123,107,.15);
       box-shadow:0 10px 30px rgba(102,72,61,.10);
-      font-size:34px;
-      backdrop-filter:blur(12px);
+      backdrop-filter:blur(10px);
     }
+
     .eyebrow{
       display:inline-flex;
       align-items:center;
@@ -73,14 +81,14 @@
       margin-bottom:10px;
       padding:7px 11px;
       border-radius:999px;
-      background:rgba(255,253,251,.72);
-      border:1px solid rgba(184,123,107,.15);
+      background:rgba(255,253,251,.75);
+      border:1px solid rgba(183,123,107,.14);
       color:var(--accent-deep);
       font-size:12px;
       font-weight:800;
       letter-spacing:.08em;
-      text-transform:uppercase;
     }
+
     h1{
       margin:0;
       font-size:34px;
@@ -88,22 +96,25 @@
       letter-spacing:.01em;
       font-weight:900;
     }
+
     .sub{
       margin:12px auto 0;
       color:var(--muted);
       font-size:15px;
       line-height:1.75;
-      max-width:590px;
+      max-width:600px;
     }
+
     .card{
-      background:rgba(255,253,251,.92);
-      border:1px solid rgba(234,220,212,.92);
+      background:rgba(255,253,251,.94);
+      border:1px solid rgba(234,219,210,.94);
       border-radius:28px;
       box-shadow:var(--shadow);
       padding:24px;
       margin-top:20px;
-      backdrop-filter:blur(16px);
+      backdrop-filter:blur(14px);
     }
+
     .section-head{
       display:flex;
       align-items:center;
@@ -111,11 +122,13 @@
       gap:12px;
       margin-bottom:18px;
     }
+
     .section-title{
       font-size:19px;
       font-weight:900;
       margin:0;
     }
+
     .section-chip{
       font-size:12px;
       font-weight:800;
@@ -125,39 +138,53 @@
       padding:7px 10px;
       white-space:nowrap;
     }
+
     .grid{
       display:grid;
       grid-template-columns:repeat(2,minmax(0,1fr));
       gap:15px;
     }
-    label{
+
+    .field label,
+    .plan label{
       display:block;
       font-size:13px;
       color:var(--muted);
       margin-bottom:8px;
       font-weight:800;
     }
+
+    .hint{
+      font-size:11.5px;
+      color:#9d8d85;
+      line-height:1.55;
+      margin-top:6px;
+    }
+
     .input-wrap{
       position:relative;
     }
+
     input{
       width:100%;
       border:1px solid var(--line);
-      background:rgba(255,255,255,.96);
+      background:rgba(255,255,255,.98);
       border-radius:16px;
       padding:14px 48px 14px 14px;
       font-size:17px;
-      font-weight:700;
+      font-weight:750;
       color:var(--ink);
       outline:none;
       transition:.2s ease;
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.6);
     }
-    input:hover{border-color:#dbc5ba}
+
+    input:hover{border-color:#dbc3b8}
+
     input:focus{
       border-color:var(--accent);
-      box-shadow:0 0 0 4px rgba(184,123,107,.12);
+      box-shadow:0 0 0 4px rgba(183,123,107,.12);
     }
+
     .unit{
       position:absolute;
       right:14px;
@@ -168,12 +195,93 @@
       font-weight:700;
       pointer-events:none;
     }
+
+    .rate-group{
+      display:grid;
+      grid-template-columns:repeat(6,minmax(0,1fr));
+      gap:9px;
+      margin-top:4px;
+    }
+
+    .rate-btn{
+      border:1px solid var(--line);
+      background:#fff;
+      color:var(--ink);
+      border-radius:14px;
+      padding:12px 6px;
+      font-size:14px;
+      font-weight:900;
+      cursor:pointer;
+      transition:.18s ease;
+      box-shadow:none;
+      margin:0;
+    }
+
+    .rate-btn:hover{
+      transform:translateY(-1px);
+      border-color:#d6b9ad;
+    }
+
+    .rate-btn.active{
+      background:linear-gradient(135deg,var(--accent) 0%,#c99283 100%);
+      color:#fff;
+      border-color:transparent;
+      box-shadow:0 8px 18px rgba(183,123,107,.20);
+    }
+
+    .custom-rate{
+      display:none;
+      margin-top:11px;
+      max-width:260px;
+    }
+
+    .reference-box{
+      margin-top:15px;
+      border:1px solid var(--line);
+      border-radius:18px;
+      background:var(--cream);
+      overflow:hidden;
+    }
+
+    .reference-toggle{
+      width:100%;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      border:none;
+      background:transparent;
+      color:var(--ink);
+      padding:14px 15px;
+      margin:0;
+      border-radius:0;
+      box-shadow:none;
+      font-size:13px;
+      font-weight:900;
+      cursor:pointer;
+    }
+
+    .reference-toggle:hover{transform:none;box-shadow:none}
+
+    .reference-content{
+      display:none;
+      padding:0 15px 15px;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.7;
+    }
+
+    .reference-content ul{
+      margin:4px 0 8px;
+      padding-left:18px;
+    }
+
     .plans{
       display:grid;
       grid-template-columns:1fr 1fr;
       gap:14px;
-      margin-top:16px;
+      margin-top:4px;
     }
+
     .plan{
       background:linear-gradient(180deg,#fff 0%,#fffaf7 100%);
       border:1px solid var(--line);
@@ -182,22 +290,33 @@
       position:relative;
       overflow:hidden;
     }
+
     .plan:before{
       content:"";
       position:absolute;
-      width:90px;
-      height:90px;
+      width:92px;
+      height:92px;
       border-radius:50%;
-      background:rgba(239,217,207,.42);
-      right:-30px;
-      top:-35px;
+      background:rgba(240,219,209,.45);
+      right:-32px;
+      top:-38px;
     }
+
     .plan h3{
       margin:0 0 12px;
       font-size:16px;
       position:relative;
     }
-    button{
+
+    .plan-note{
+      position:relative;
+      font-size:11.5px;
+      color:#9d8d85;
+      margin-top:7px;
+      line-height:1.5;
+    }
+
+    .primary-btn{
       width:100%;
       border:none;
       border-radius:18px;
@@ -208,46 +327,64 @@
       padding:15px 16px;
       margin-top:18px;
       cursor:pointer;
-      box-shadow:0 10px 24px rgba(184,123,107,.26);
+      box-shadow:0 10px 24px rgba(183,123,107,.26);
       transition:.2s ease;
     }
-    button:hover{transform:translateY(-1px);box-shadow:0 14px 28px rgba(184,123,107,.30)}
-    button:active{transform:translateY(0)}
+
+    .primary-btn:hover{
+      transform:translateY(-1px);
+      box-shadow:0 14px 28px rgba(183,123,107,.30);
+    }
+
+    .primary-btn:active{transform:translateY(0)}
+
     .result{display:none}
+
     .headline{
       text-align:center;
-      padding:4px 4px 12px;
+      padding:6px 4px 14px;
     }
+
     .headline .small{
       color:var(--muted);
       font-size:13px;
       font-weight:800;
       margin-bottom:8px;
     }
-    .headline .big{
-      font-size:42px;
-      font-weight:950;
-      color:var(--accent);
-      line-height:1.1;
-      letter-spacing:-.03em;
-    }
-    .headline .note{
+
+    .fee-gap{
       display:inline-block;
-      margin-top:10px;
+      margin-bottom:8px;
       padding:7px 11px;
       border-radius:999px;
       background:var(--chip);
       color:var(--accent-deep);
       font-size:12px;
-      font-weight:800;
-      line-height:1.5;
+      font-weight:900;
     }
+
+    .headline .big{
+      font-size:44px;
+      font-weight:950;
+      color:var(--accent);
+      line-height:1.08;
+      letter-spacing:-.03em;
+    }
+
+    .headline .note{
+      margin-top:10px;
+      color:var(--muted);
+      font-size:12.5px;
+      line-height:1.6;
+    }
+
     .stat-grid{
       display:grid;
       grid-template-columns:repeat(3,minmax(0,1fr));
       gap:10px;
       margin-top:12px;
     }
+
     .stat{
       background:linear-gradient(180deg,#fff 0%,#f9eee8 100%);
       border:1px solid var(--line);
@@ -255,16 +392,19 @@
       padding:15px 12px;
       text-align:center;
     }
+
     .stat .k{
       font-size:12px;
       color:var(--muted);
       margin-bottom:7px;
       font-weight:800;
     }
+
     .stat .v{
       font-size:20px;
       font-weight:950;
     }
+
     .bars{
       margin-top:20px;
       padding:16px;
@@ -272,8 +412,10 @@
       background:var(--cream);
       border:1px solid var(--line);
     }
+
     .bar-row{margin:12px 0 16px}
     .bar-row:last-child{margin-bottom:2px}
+
     .bar-top{
       display:flex;
       justify-content:space-between;
@@ -283,10 +425,12 @@
       margin-bottom:8px;
       color:var(--muted);
     }
+
     .bar-top strong{
       color:var(--ink);
       font-size:15px;
     }
+
     .bar-track{
       height:18px;
       background:#eee2dc;
@@ -294,16 +438,19 @@
       overflow:hidden;
       box-shadow:inset 0 1px 2px rgba(86,63,54,.06);
     }
+
     .bar-fill{
       height:100%;
       border-radius:999px;
-      background:linear-gradient(90deg,#d7aa9b,#b87b6b);
+      background:linear-gradient(90deg,#d7aa9b,#b77b6b);
       width:0;
       transition:width .55s ease;
     }
+
     .bar-fill.b{
-      background:linear-gradient(90deg,#9e8176,#765e56);
+      background:linear-gradient(90deg,#9d8278,#735d55);
     }
+
     .explain{
       margin-top:16px;
       background:#fff;
@@ -314,6 +461,7 @@
       line-height:1.8;
       color:#665751;
     }
+
     .formula{
       margin-top:13px;
       font-size:11.5px;
@@ -321,6 +469,7 @@
       line-height:1.75;
       padding:0 2px;
     }
+
     .footer{
       text-align:center;
       color:#9b8d86;
@@ -328,12 +477,14 @@
       padding:20px 8px 0;
       line-height:1.7;
     }
-    @media (max-width:620px){
+
+    @media (max-width:680px){
       .wrap{padding:26px 14px 44px}
       h1{font-size:29px}
       .card{padding:18px;border-radius:24px}
       .grid,.plans,.stat-grid{grid-template-columns:1fr}
-      .headline .big{font-size:36px}
+      .rate-group{grid-template-columns:repeat(3,minmax(0,1fr))}
+      .headline .big{font-size:37px}
       .section-head{align-items:flex-start}
       .section-chip{font-size:11px}
     }
@@ -346,19 +497,19 @@
       <div class="eyebrow">Bear Money Tools</div>
       <h1>投資費用差距計算器</h1>
       <div class="sub">
-        每年只差一點點的費用，時間拉長後可能差很多。<br>
-        輸入你的投資條件，看看 A、B 兩種費用率最後差多少。
+        每年看起來只差一點點的投資費用，時間拉長後可能差很多。<br>
+        用同一組投資條件，比較兩種費用率最後會差多少。
       </div>
     </section>
 
     <section class="card">
       <div class="section-head">
-        <div class="section-title">① 輸入投資條件</div>
-        <div class="section-chip">A / B 費用率比較</div>
+        <div class="section-title">① 你打算怎麼投資？</div>
+        <div class="section-chip">基本條件</div>
       </div>
 
       <div class="grid">
-        <div>
+        <div class="field">
           <label for="monthly">每月投入金額</label>
           <div class="input-wrap">
             <input id="monthly" type="number" inputmode="decimal" min="0" step="100" value="10000">
@@ -366,29 +517,72 @@
           </div>
         </div>
 
-        <div>
-          <label for="years">投資年數</label>
+        <div class="field">
+          <label for="years">投資時間</label>
           <div class="input-wrap">
             <input id="years" type="number" inputmode="decimal" min="1" step="1" value="30">
             <span class="unit">年</span>
           </div>
         </div>
 
-        <div>
-          <label for="returnRate">預期年化報酬率（費用前）</label>
-          <div class="input-wrap">
-            <input id="returnRate" type="number" inputmode="decimal" min="-99" max="100" step="0.1" value="7">
-            <span class="unit">%</span>
-          </div>
-        </div>
-
-        <div>
-          <label for="initial">目前已有本金（可不填）</label>
+        <div class="field" style="grid-column:1 / -1;">
+          <label for="initial">目前已投資資產價值（可不填）</label>
           <div class="input-wrap">
             <input id="initial" type="number" inputmode="decimal" min="0" step="1000" value="0">
             <span class="unit">元</span>
           </div>
+          <div class="hint">填目前股票、ETF、基金等投資的現值，不是累積投入成本。</div>
         </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-head">
+        <div class="section-title">② 選一個預期年化報酬率</div>
+        <div class="section-chip">費用前</div>
+      </div>
+
+      <div class="rate-group" id="rateGroup">
+        <button type="button" class="rate-btn" data-rate="1">1%</button>
+        <button type="button" class="rate-btn" data-rate="3">3%</button>
+        <button type="button" class="rate-btn" data-rate="5">5%</button>
+        <button type="button" class="rate-btn active" data-rate="7">7%</button>
+        <button type="button" class="rate-btn" data-rate="10">10%</button>
+        <button type="button" class="rate-btn" data-rate="custom">自訂</button>
+      </div>
+
+      <div class="custom-rate" id="customRateWrap">
+        <label for="customRate">自訂年化報酬率</label>
+        <div class="input-wrap">
+          <input id="customRate" type="number" inputmode="decimal" min="-99" max="100" step="0.1" value="7">
+          <span class="unit">%</span>
+        </div>
+      </div>
+
+      <div class="hint" style="margin-top:12px;">
+        不知道怎麼選？可先用 5%～7% 做較保守的長期試算。歷史報酬不代表未來報酬。
+      </div>
+
+      <div class="reference-box">
+        <button type="button" class="reference-toggle" id="referenceToggle">
+          <span>ⓘ 報酬率參考</span>
+          <span id="referenceArrow">－</span>
+        </button>
+        <div class="reference-content" id="referenceContent" style="display:block;">
+          <ul>
+            <li>銀行一般活存：通常約 1% 以下。</li>
+            <li>S&amp;P 500 長期歷史平均：約 10%／年。</li>
+            <li>台股大盤長期報酬會依統計期間、是否含息而不同，因此不放單一固定數字。</li>
+          </ul>
+          這些數字只用來幫助理解不同報酬假設，不代表未來一定能達成。
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-head">
+        <div class="section-title">③ 比較投資費用</div>
+        <div class="section-chip">A / B</div>
       </div>
 
       <div class="plans">
@@ -399,6 +593,7 @@
             <input id="feeA" type="number" inputmode="decimal" min="0" max="20" step="0.01" value="0.2">
             <span class="unit">%</span>
           </div>
+          <div class="plan-note">預設 0.2%，可自行修改。</div>
         </div>
 
         <div class="plan">
@@ -408,32 +603,35 @@
             <input id="feeB" type="number" inputmode="decimal" min="0" max="20" step="0.01" value="1.5">
             <span class="unit">%</span>
           </div>
+          <div class="plan-note">預設 1.5%，可自行修改。</div>
         </div>
       </div>
 
-      <button id="calcBtn">幫我算算看</button>
+      <button class="primary-btn" id="calcBtn">看看長期差多少</button>
     </section>
 
     <section class="card result" id="resultCard">
       <div class="section-head">
-        <div class="section-title">② 計算結果</div>
+        <div class="section-title">④ 計算結果</div>
         <div class="section-chip">長期複利試算</div>
       </div>
 
       <div class="headline">
-        <div class="small">光是費用率不同，期末資產可能差</div>
+        <div class="small">每年費用率只差</div>
+        <div class="fee-gap" id="feeGap">—</div>
+        <div class="small">但 <span id="yearsText">30</span> 年後，期末資產可能差</div>
         <div class="big" id="difference">—</div>
         <div class="note" id="differenceNote">—</div>
       </div>
 
       <div class="stat-grid">
         <div class="stat">
-          <div class="k">方案 A 最終資產</div>
-          <div class="v" id="finalA">—</div>
+          <div class="k">低費用方案</div>
+          <div class="v" id="lowFeeFinal">—</div>
         </div>
         <div class="stat">
-          <div class="k">方案 B 最終資產</div>
-          <div class="v" id="finalB">—</div>
+          <div class="k">高費用方案</div>
+          <div class="v" id="highFeeFinal">—</div>
         </div>
         <div class="stat">
           <div class="k">累積投入本金</div>
@@ -475,6 +673,7 @@
 
 <script>
   const $ = (id) => document.getElementById(id);
+  let selectedRate = 7;
 
   function futureValueMonthly(monthly, years, annualRate, initial){
     const n = Math.max(0, Math.round(years * 12));
@@ -490,7 +689,6 @@
       fvInitial = initial * Math.pow(1 + r, n);
       fvMonthly = monthly * ((Math.pow(1 + r, n) - 1) / r);
     }
-
     return fvInitial + fvMonthly;
   }
 
@@ -514,16 +712,46 @@
     return Number($(id).value || 0);
   }
 
+  document.querySelectorAll(".rate-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      document.querySelectorAll(".rate-btn").forEach(b=>b.classList.remove("active"));
+      btn.classList.add("active");
+
+      if(btn.dataset.rate === "custom"){
+        $("customRateWrap").style.display = "block";
+        selectedRate = getNum("customRate");
+      } else {
+        $("customRateWrap").style.display = "none";
+        selectedRate = Number(btn.dataset.rate);
+      }
+    });
+  });
+
+  $("customRate").addEventListener("input", ()=>{
+    selectedRate = getNum("customRate");
+  });
+
+  $("referenceToggle").addEventListener("click", ()=>{
+    const open = $("referenceContent").style.display === "block";
+    $("referenceContent").style.display = open ? "none" : "block";
+    $("referenceArrow").textContent = open ? "＋" : "－";
+  });
+
   function calculate(){
     const monthly = getNum("monthly");
     const years = getNum("years");
-    const gross = getNum("returnRate");
     const initial = getNum("initial");
     const feeA = getNum("feeA");
     const feeB = getNum("feeB");
+    const gross = selectedRate;
 
     if (monthly < 0 || years <= 0 || initial < 0 || feeA < 0 || feeB < 0){
       alert("請確認輸入的數字是否正確。");
+      return;
+    }
+
+    if (!Number.isFinite(gross)){
+      alert("請選擇或輸入預期年化報酬率。");
       return;
     }
 
@@ -539,18 +767,22 @@
     const fvB = futureValueMonthly(monthly, years, netB, initial);
     const totalContrib = initial + monthly * years * 12;
     const diff = Math.abs(fvA - fvB);
-    const better = fvA >= fvB ? "A" : "B";
-    const worse = better === "A" ? "B" : "A";
-    const betterFee = better === "A" ? feeA : feeB;
-    const worseFee = worse === "A" ? feeA : feeB;
     const feeGap = Math.abs(feeA - feeB);
 
+    const lowFeeIsA = feeA <= feeB;
+    const lowFeeFinal = lowFeeIsA ? fvA : fvB;
+    const highFeeFinal = lowFeeIsA ? fvB : fvA;
+    const lowFeeLabel = lowFeeIsA ? "A" : "B";
+    const highFeeLabel = lowFeeIsA ? "B" : "A";
+
+    $("feeGap").textContent = feeGap.toFixed(2).replace(/\.00$/,"") + "%";
+    $("yearsText").textContent = years;
     $("difference").textContent = moneyShort(diff);
     $("differenceNote").textContent =
-      `方案 ${better} 的費用率較低／結果較高，兩者每年費用率相差 ${feeGap.toFixed(2).replace(/\.00$/,"")}%`;
+      `同樣投入、同樣報酬假設，只改變每年費用率。`;
 
-    $("finalA").textContent = moneyShort(fvA);
-    $("finalB").textContent = moneyShort(fvB);
+    $("lowFeeFinal").textContent = moneyShort(lowFeeFinal);
+    $("highFeeFinal").textContent = moneyShort(highFeeFinal);
     $("contrib").textContent = moneyShort(totalContrib);
 
     $("labelA").textContent = `方案 A｜費用 ${feeA}%｜費用後報酬 ${netA.toFixed(2).replace(/\.00$/,"")}%`;
@@ -562,17 +794,13 @@
     $("barA").style.width = Math.max(4, fvA / max * 100) + "%";
     $("barB").style.width = Math.max(4, fvB / max * 100) + "%";
 
-    const pctOfContrib = totalContrib > 0 ? diff / totalContrib * 100 : 0;
-
     $("explain").innerHTML =
       `你一共投入約 <strong>${money(totalContrib)}</strong>。<br>` +
-      `在其他條件都一樣的情況下，方案 ${better} 與方案 ${worse} 只因每年費用率相差 ` +
-      `<strong>${feeGap.toFixed(2).replace(/\.00$/,"")}%</strong>，` +
+      `在其他條件都相同的情況下，低費用方案 ${lowFeeLabel} 與高費用方案 ${highFeeLabel} ` +
+      `每年費用率只差 <strong>${feeGap.toFixed(2).replace(/\.00$/,"")}%</strong>，` +
       `${years} 年後的期末資產就可能相差約 <strong>${money(diff)}</strong>。` +
-      (totalContrib > 0
-        ? `<br>這個差額約等於你累積投入本金的 <strong>${pctOfContrib.toFixed(1)}%</strong>。`
-        : "") +
-      `<br><br>重點不是「一定要選最低費用的商品」，而是比較投資標的時，除了報酬，也別忘了長期持有成本。`;
+      `<br><br>這個差距不只是「少付掉的費用」，也包含那些錢原本可以繼續產生的複利。` +
+      `<br><br>重點不是一定要選費用最低的商品，而是比較投資標的時，除了報酬，也別忘了長期持有成本。`;
 
     $("resultCard").style.display = "block";
     $("resultCard").scrollIntoView({behavior:"smooth", block:"start"});
@@ -580,7 +808,7 @@
 
   $("calcBtn").addEventListener("click", calculate);
 
-  ["monthly","years","returnRate","initial","feeA","feeB"].forEach(id=>{
+  ["monthly","years","initial","feeA","feeB","customRate"].forEach(id=>{
     $(id).addEventListener("keydown", e=>{
       if(e.key === "Enter") calculate();
     });
