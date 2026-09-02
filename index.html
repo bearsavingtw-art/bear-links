@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bear.saving | 存錢不靠意志力，預算分配做好就不用逼自己！</title>
-    
+
     <meta name="description" content="Bear.saving 存錢不靠意志力，預算分配做好就不用逼自己，陪妳從內耗、失控與一直重來裡，慢慢找到不那麼累的理財方式。用記帳工具、財務診療與真實經驗，幫妳把選擇權拿回來。">
     <meta name="keywords" content="理財, 存錢, 自由接案, 緊急預備金, 記帳本, 財務系統, Bear.saving">
     <meta name="author" content="Bear.saving">
@@ -23,15 +23,15 @@
     <meta name="twitter:image" content="https://bearsavingtw-art.github.io/bear-links/logo.png">
     <link rel="icon" href="favicon.png" type="image/png">
     <link rel="apple-touch-icon" href="favicon.png">
-    
+
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#fcfbf9">
-    
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Noto+Serif+TC:wght@400;600;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    
+
     <style>
         :root {
             --bg-color: #fcfbf9;
@@ -47,7 +47,9 @@
         }
 
         * { box-sizing: border-box; }
-        
+
+        html { scroll-behavior: smooth; }
+
         body {
             background-color: var(--bg-color);
             color: var(--text-primary);
@@ -64,13 +66,70 @@
             z-index: 1000; transition: 0.3s;
         }
         nav.scrolled { background: rgba(252, 251, 249, 0.95); box-shadow: 0 2px 20px rgba(0,0,0,0.05); padding: 15px 30px; }
-        
+
         .nav-logo {
             font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 600;
             color: var(--text-primary); text-decoration: none; letter-spacing: 1px;
         }
         .nav-icons a { color: var(--text-primary); margin-left: 20px; font-size: 1.1rem; transition: 0.3s; }
         .nav-icons a:hover { color: var(--accent); }
+
+        /* ===== Section Tab Nav (2026) ===== */
+        .section-nav {
+            position: sticky;
+            top: 0;
+            z-index: 1001;
+            background: rgba(252, 251, 249, 0.97);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(176, 141, 133, 0.15);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+        }
+        .section-nav-inner {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: flex;
+            gap: 8px;
+            padding: 10px 16px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+            scroll-snap-type: x proximity;
+        }
+        .section-nav-inner::-webkit-scrollbar { display: none; }
+        .section-nav a {
+            flex: 0 0 auto;
+            scroll-snap-align: center;
+            padding: 7px 15px;
+            border-radius: 50px;
+            font-family: 'Noto Serif TC', serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            line-height: 1.35;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            white-space: nowrap;
+            border: 1px solid transparent;
+            transition: all 0.25s;
+        }
+        .section-nav a:hover {
+            color: var(--text-primary);
+            background: rgba(176, 141, 133, 0.08);
+        }
+        .section-nav a.active {
+            color: #fff;
+            background: var(--accent);
+            border-color: var(--accent);
+            box-shadow: 0 4px 12px rgba(176, 141, 133, 0.3);
+        }
+        /* 讓錨點捲動時，標題不會被置頂頁籤列蓋住 */
+        .section[id] { scroll-margin-top: 78px; }
+
+        @media (max-width: 640px) {
+            .section-nav-inner { padding: 8px 12px; gap: 6px; }
+            .section-nav a { padding: 7px 13px; font-size: 0.8rem; }
+        }
 
         /* Hero Section */
         .hero {
@@ -82,7 +141,7 @@
             object-fit: cover; z-index: -1; filter: brightness(0.9);
         }
         .hero-content { opacity: 0; transform: translateY(30px); animation: fadeUp 1.5s ease forwards 0.5s; padding: 20px; }
-        
+
         .hero h1 {
             font-family: 'Playfair Display', serif; font-size: 2.5rem; color: #fff;
             margin-bottom: 10px; text-shadow: 0 2px 10px rgba(0,0,0,0.2); letter-spacing: 1px;
@@ -123,7 +182,7 @@
 
         /* 通用區塊 */
         .section { padding: 80px 20px; max-width: 900px; margin: 0 auto; text-align: center; }
-        
+
         .philosophy-text {
             font-size: 1.1rem; color: var(--text-secondary);
             margin-bottom: 20px; position: relative; max-width: 600px; margin: 0 auto 40px;
@@ -179,7 +238,7 @@
         .trilogy-title { font-size: 1.2rem; font-weight: 700; color: var(--text-primary); margin-bottom: 3px; }
         .trilogy-subtitle { font-size: 0.85rem; color: var(--text-secondary); letter-spacing: 1px; }
         .trilogy-desc { font-size: 0.95rem; color: #666; line-height: 1.6; margin: 5px 0 10px; }
-        
+
         .trilogy-btn {
             display: inline-flex; align-items: center; justify-content: center; gap: 8px;
             padding: 12px 20px; border-radius: 50px; font-weight: 600; font-size: 0.9rem;
@@ -193,12 +252,12 @@
         .btn-step-3:hover { background: var(--accent); }
 
         /* 系統優勢強調 */
-        .feature-grid { 
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+        .feature-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px; margin-bottom: 40px; max-width: 800px; margin-left: auto; margin-right: auto;
         }
-        .feature-card { 
-            background: #fff; padding: 25px 20px; border-radius: 15px; 
+        .feature-card {
+            background: #fff; padding: 25px 20px; border-radius: 15px;
             text-align: center; border: 1px solid #eee; transition: 0.3s; box-shadow: var(--card-shadow);
         }
         .feature-card:hover { border-color: var(--accent); transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.06); }
@@ -247,7 +306,7 @@
         .video-container { width: 100%; max-width: 380px; margin: 0 auto 50px; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.08); position: relative; min-height: 500px; background: #fff; display: flex; justify-content: center; align-items: center; }
         .fallback-link { position: absolute; text-align: center; z-index: 1; color: var(--text-secondary); text-decoration: none; font-size: 0.9rem; }
         .instagram-media { position: relative; z-index: 2; min-width: 100% !important; margin: 0 !important; }
-        
+
         .reviews-container { display: flex; gap: 20px; overflow-x: auto; padding: 20px 10px 40px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
         .reviews-container::-webkit-scrollbar { display: none; }
         .review-card { flex: 0 0 280px; scroll-snap-align: center; border-radius: 15px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.05); transition: 0.3s; }
@@ -569,16 +628,31 @@
         </div>
     </header>
 
-    
-    
-    <section class="section fade-in" style="padding-bottom: 10px;">
+    <nav class="section-nav" id="sectionNav" aria-label="頁面區塊導覽">
+        <div class="section-nav-inner">
+            <a href="#news">最新消息</a>
+            <a href="#start">從這開始</a>
+            <a href="#why">為什麼這麼難</a>
+            <a href="#system">三步驟系統</a>
+            <a href="#different">為什麼不一樣</a>
+            <a href="#tools">免費工具</a>
+            <a href="#shop">實體工具</a>
+            <a href="#reviews">見證分享</a>
+            <a href="#faq">常見問題</a>
+            <a href="#contact">聯絡・售後</a>
+        </div>
+    </nav>
+
+
+
+    <section id="news" class="section fade-in" style="padding-bottom: 10px;">
         <h2 style="font-family:'Playfair Display'; margin-bottom: 25px;">Latest News</h2>
         <div class="news-box">
             <div class="news-item news-item-support">
                 <i class="fas fa-tools news-icon" style="color: var(--danger);"></i>
                 <div>
                     <span class="news-title-text" style="color: var(--danger);">【售後工單】商品異常與退換貨</span>
-                    <span class="news-desc">遇到缺件或瑕疵？<a href="https://lin.ee/NCICo8D" target="_blank" style="color: var(--danger); font-weight: 600; text-decoration: underline;">👉 點此官方LINE聯繫</a>，我會盡快幫妳處理。也可以私訊官方LINE👉</span>
+                    <span class="news-desc">遇到缺件或瑕疵？<a href="https://lin.ee/NCICo8D" target="_blank" style="color: var(--danger); font-weight: 600; text-decoration: underline;">👉 點此官方LINE聯繫</a>，我會盡快幫妳處理。</span>
                 </div>
             </div>
             <div class="news-item">
@@ -605,7 +679,7 @@
         </div>
     </section>
 
-<section class="section fade-in" style="padding-bottom: 0;">
+<section id="start" class="section fade-in" style="padding-bottom: 0;">
         <h2 style="font-family:'Playfair Display'; margin-bottom: 25px;">Start Here</h2>
         <div class="news-box">
             <div class="news-item">
@@ -640,7 +714,7 @@
     </section>
 
 
-    <section class="section fade-in" style="padding-top: 50px; padding-bottom: 20px;">
+    <section id="statement" class="section fade-in" style="padding-top: 50px; padding-bottom: 20px;">
         <div class="statement-box">
             <div class="statement-title">妳不需要更厲害。<br>先不逼自己就可以。</div>
             <div class="statement-desc">
@@ -652,7 +726,7 @@
         </div>
     </section>
 
-    <section class="section fade-in" style="padding-top: 40px; padding-bottom: 0;">
+    <section id="why" class="section fade-in" style="padding-top: 40px; padding-bottom: 0;">
         <h2 style="font-family:'Playfair Display'; margin-bottom:5px;">Why It Feels So Hard</h2>
         <p style="color:var(--text-secondary); font-size:0.95rem; margin-bottom:30px; font-weight:600;">很多時候，只是這些狀態真的很難靠意志力一直逼自己。</p>
         <div class="feature-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
@@ -674,10 +748,10 @@
         </div>
     </section>
 
-    <section class="section fade-in" style="padding-top: 40px; padding-bottom: 0;">
+    <section id="system" class="section fade-in" style="padding-top: 40px; padding-bottom: 0;">
         <h2 style="font-family:'Playfair Display'; margin-bottom:5px;">The Bear System</h2>
         <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:30px;">不需要妳一次變好，而是陪妳一步一步把選擇權拿回來。</p>
-        
+
         <div class="system-trilogy">
             <div class="trilogy-card card-step-1">
                 <div class="trilogy-header">
@@ -717,7 +791,7 @@
         </div>
     </section>
 
-    <section class="section fade-in" style="padding-top: 50px;">
+    <section id="different" class="section fade-in" style="padding-top: 50px;">
         <h2 style="font-family:'Playfair Display'; margin-bottom:5px;">Why This Feels Different</h2>
         <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:30px;">讓人覺得很累、很容易放棄的地方，熊幫忙你一個一個拆開。</p>
 
@@ -747,7 +821,7 @@
         <div style="margin-top: 38px;"></div>
     </section>
 
-    <section class="section fade-in" style="padding-top: 35px; padding-bottom: 30px;">
+    <section id="tools" class="section fade-in" style="padding-top: 35px; padding-bottom: 30px;">
         <div class="money-tools-home">
             <div class="money-tools-eyebrow">
                 <i class="fas fa-sparkles"></i> FREE DIGITAL TOOLS
@@ -780,7 +854,7 @@
         </div>
     </section>
 
-    <section class="section fade-in" style="padding-top: 30px;">
+    <section id="shop" class="section fade-in" style="padding-top: 30px;">
         <h2 class="physical-tools-heading" style="font-family:'Playfair Display';">Tools for Real Life</h2>
         <p class="physical-tools-subtitle">數位工具幫妳看清楚；實體工具陪妳把方法放進每天真的會過的生活裡。</p>
         <div class="product-grid">
@@ -818,7 +892,7 @@
         </div>
     </section>
 
-    <section class="section fade-in">
+    <section id="story" class="section fade-in">
         <p style="margin-bottom:25px; font-weight:600; color:var(--text-primary); letter-spacing:1px;">
             如果妳想知道 Bear 的這套方法，為什麼會從真實生活裡長出來，可以先看這支 👇
         </p>
@@ -827,14 +901,14 @@
                 <i class="fab fa-instagram" style="font-size: 2rem; display:block; margin-bottom:10px;"></i>
                 影片載入中...<br>若無畫面請點此前往 IG 觀看
             </a>
-            <blockquote class="instagram-media" 
-                data-instgrm-permalink="https://www.instagram.com/p/DUStl0QEmYI/?utm_source=ig_embed&amp;utm_campaign=loading" 
+            <blockquote class="instagram-media"
+                data-instgrm-permalink="https://www.instagram.com/p/DUStl0QEmYI/?utm_source=ig_embed&amp;utm_campaign=loading"
                 data-instgrm-version="14">
             </blockquote>
         </div>
     </section>
 
-    <section class="section fade-in" style="padding-bottom: 20px;">
+    <section id="reviews" class="section fade-in" style="padding-bottom: 20px;">
         <h2 style="font-family:'Playfair Display'; margin-bottom:10px;">Love Letters</h2>
         <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:30px;">她們開始比較不內耗，也比較不會一直逼自己。</p>
         <div class="reviews-container">
@@ -846,16 +920,16 @@
         </div>
     </section>
 
-    <section class="section fade-in" style="padding-bottom: 0;">
+    <section id="philosophy" class="section fade-in" style="padding-bottom: 0;">
         <div class="philosophy-text">
             <p>比起教你怎麼變得更厲害，<br>我可以陪妳慢慢不再那麼累。<br><br>
             存錢不是為了限制渴望，<br>而是為了把選擇權一點一點拿回來。</p>
         </div>
     </section>
 
-    <section class="section fade-in" style="padding-top: 0;">
+    <section id="faq" class="section fade-in" style="padding-top: 0;">
         <h2 style="font-family:'Playfair Display'; margin-bottom:30px;">Q & A</h2>
-        
+
         <div class="faq-container">
 
             <div class="faq-category-title">系統運作與安全</div>
@@ -952,7 +1026,7 @@
         </div>
     </section>
 
-    <section class="section fade-in" style="padding-top: 20px;">
+    <section id="contact" class="section fade-in" style="padding-top: 20px;">
         <h2 style="font-family:'Playfair Display'; margin-bottom:30px;">Connect & Support</h2>
         <div class="social-container">
             <div class="social-row">
@@ -960,16 +1034,16 @@
                 <a href="https://www.threads.com/@bear.saving" target="_blank" class="social-btn"><i class="fa-brands fa-threads"></i> Threads</a>
                 <a href="https://www.facebook.com/profile.php?id=61580631092861" target="_blank" class="social-btn"><i class="fab fa-facebook-f"></i> Facebook</a>
             </div>
-            
+
             <div class="email-box" style="border-left-color: var(--danger); background: #fffafa;">
                 <div style="font-weight:600; color:var(--text-primary); margin-bottom:8px; font-size: 1.05rem;">
                     <i class="fas fa-tools" style="margin-right:5px; color: var(--danger);"></i> 售後服務與問題回報
                 </div>
                 <div style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:15px; line-height: 1.6;">
-                    遇到缺件、瑕疵或異常狀況？請點擊下方填寫售後工單。系統會自動為妳建檔，我們將於平日 14:00-17:00 批次處理並回覆，絕不漏接妳的需求。
+                    遇到缺件、瑕疵或異常狀況？請點擊下方私訊官方LINE。系統會自動為妳建檔，我們將於平日 14:00-17:00 批次處理並回覆，絕不漏接妳的需求。
                 </div>
-                <a href="https://docs.google.com/forms/d/e/1FAIpQLSeMwIoPGsWcBYe4AEH3hgWa0tBcMgwRWZ68J9y_8FxNSYAwLQ/viewform?usp=publish-editor" target="_blank" class="btn-support">
-                    填寫售後工單 <i class="fas fa-external-link-alt" style="margin-left: 5px; font-size: 0.85rem;"></i>
+                <a href="https://lin.ee/NCICo8D" target="_blank" class="btn-support">
+                    官方LINE連結 <i class="fas fa-external-link-alt" style="margin-left: 5px; font-size: 0.85rem;"></i>
                 </a>
             </div>
 
@@ -1011,6 +1085,50 @@
                 parent.classList.toggle('active');
             });
         });
+
+        /* ===== 區塊頁籤：捲動高亮 + 點擊平滑捲動 + 自動置中 ===== */
+        (function() {
+            const bar = document.querySelector('.section-nav-inner');
+            const links = Array.prototype.slice.call(document.querySelectorAll('.section-nav a'));
+            if (!bar || !links.length) return;
+
+            const linkFor = {};
+            const sections = [];
+            links.forEach(a => {
+                const id = a.getAttribute('href').slice(1);
+                const sec = document.getElementById(id);
+                if (sec) { linkFor[id] = a; sections.push(sec); }
+            });
+
+            function setActive(id) {
+                const a = linkFor[id];
+                if (!a) return; // 沒有對應頁籤的區塊（如引言、故事）就維持前一個高亮
+                links.forEach(x => x.classList.toggle('active', x === a));
+                const target = a.offsetLeft - (bar.clientWidth / 2) + (a.offsetWidth / 2);
+                bar.scrollTo({ left: target, behavior: 'smooth' });
+            }
+
+            const spy = new IntersectionObserver(entries => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) setActive(entry.target.id);
+                });
+            }, { rootMargin: '-45% 0px -50% 0px', threshold: 0 });
+            sections.forEach(sec => spy.observe(sec));
+            if (links[0]) links[0].classList.add('active');
+
+            links.forEach(a => {
+                a.addEventListener('click', e => {
+                    const id = a.getAttribute('href').slice(1);
+                    const sec = document.getElementById(id);
+                    if (!sec) return;
+                    e.preventDefault();
+                    const y = sec.getBoundingClientRect().top + window.pageYOffset - 78;
+                    window.scrollTo(0, y); // 平滑效果交給 CSS 的 scroll-behavior
+                    setActive(id);
+                    if (history.replaceState) history.replaceState(null, '', '#' + id);
+                });
+            });
+        })();
 
         window.onload = function() {
             if (window.instgrm) { window.instgrm.Embeds.process(); }
