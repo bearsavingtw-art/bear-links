@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>預算上班天數換算</title>
 <meta name="description" content="把每個月的預算換算成上班天數，看看你一個月有幾天是在幫未來的自己上班。Bear Money Tools by @bear.saving">
+<link rel="icon" href="favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;600;700&family=Noto+Sans+TC:wght@300;400;500&family=Gowun+Batang:wght@400;700&display=swap">
@@ -215,10 +217,16 @@
 
   .foot { margin-top: 56px; text-align: center; font-size: 12px; color: var(--ink-faint); font-weight: 300; }
   .foot a { color: var(--rose-deep); text-decoration: none; }
+  .back {
+    display: inline-flex; align-items: center; gap: 6px; margin-bottom: 26px;
+    font-size: 13px; color: var(--ink-soft); text-decoration: none;
+  }
+  .back:hover { color: var(--rose-deep); }
 </style>
 </head>
 <body>
 <main class="sheet">
+  <a class="back" href="tools.html">← 回 Bear Money Tools</a>
   <div class="eyebrow">Bear Money Tools</div>
   <h1>預算上班天數換算</h1>
   <p class="lede">把這個月的每一筆預算，換成你要上幾天班。<br>看看一個月裡，有幾天是在幫未來的自己上班。</p>
@@ -292,7 +300,7 @@
   </section>
 
   <p class="foot">資料只存在你自己的瀏覽器裡，不會上傳。<br>
-    Made by <a href="https://www.instagram.com/bear.saving/" target="_blank" rel="noopener">@bear.saving</a> · Bear Money Tools</p>
+    Made by <a href="https://www.instagram.com/bear.saving/" target="_blank" rel="noopener">@bear.saving</a> · <a href="tools.html">Bear Money Tools</a></p>
 </main>
 
 <script>
