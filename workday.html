@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>預算上班天數換算</title>
+<meta name="description" content="把每個月的預算換算成上班天數，看看你一個月有幾天是在幫未來的自己上班。Bear Money Tools by @bear.saving">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;600;700&family=Noto+Sans+TC:wght@300;400;500&family=Gowun+Batang:wght@400;700&display=swap">
+<style>
+  :root {
+    --bg: #F3ECE1;
+    --paper: #FCF9F3;
+    --field: #FFFFFF;
+    --ink: #4B403A;
+    --ink-soft: #877a6e;
+    --ink-faint: #A99A8B;
+    --rose: #C08B8B;
+    --rose-deep: #A2655F;
+    --rose-wash: #EFE0DC;
+    --line: #DED2C1;
+    --line-soft: #EAE0D2;
+    --empty: #E9E0D3;
+
+    --c-fixed: #C08B8B;
+    --c-var: #D6A566;
+    --c-pre: #A9A27A;
+    --c-emer: #8EA3B8;
+    --c-save: #7F9F7A;
+    --c-learn: #A893B8;
+
+    --serif: "Noto Serif TC", "Songti TC", serif;
+    --sans: "Noto Sans TC", -apple-system, "PingFang TC", sans-serif;
+    --latin: "Gowun Batang", "Noto Serif TC", serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #241F1B; --paper: #2E2823; --field: #35302A; --ink: #ECE2D6;
+      --ink-soft: #AEA093; --ink-faint: #837567;
+      --rose: #D3A1A1; --rose-deep: #E4BABA; --rose-wash: #3E322F;
+      --line: #453C33; --line-soft: #382F27; --empty: #3A332C;
+      --c-fixed: #CF9C9C; --c-var: #DDB070; --c-pre: #B5AE86;
+      --c-emer: #9BB0C5; --c-save: #8DAE88; --c-learn: #B6A2C6;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #241F1B; --paper: #2E2823; --field: #35302A; --ink: #ECE2D6;
+    --ink-soft: #AEA093; --ink-faint: #837567;
+    --rose: #D3A1A1; --rose-deep: #E4BABA; --rose-wash: #3E322F;
+    --line: #453C33; --line-soft: #382F27; --empty: #3A332C;
+    --c-fixed: #CF9C9C; --c-var: #DDB070; --c-pre: #B5AE86;
+    --c-emer: #9BB0C5; --c-save: #8DAE88; --c-learn: #B6A2C6;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: var(--sans); line-height: 1.7;
+    -webkit-font-smoothing: antialiased; overflow-x: hidden;
+  }
+  .sheet { max-width: 700px; margin: 0 auto; padding: 60px 20px 92px; }
+
+  .eyebrow {
+    font-family: var(--latin); font-size: 12px; letter-spacing: 0.22em;
+    text-transform: uppercase; color: var(--rose-deep); text-align: center; margin-bottom: 18px;
+  }
+  h1 {
+    font-family: var(--serif); font-weight: 600; font-size: 30px; letter-spacing: 0.1em;
+    text-align: center; text-wrap: balance; margin: 0 0 14px;
+  }
+  .lede { max-width: 30em; margin: 0 auto; text-align: center; font-weight: 300; color: var(--ink-soft); font-size: 15px; }
+  .rule { width: 42px; height: 1px; background: var(--rose); margin: 28px auto 0; }
+
+  section { margin-top: 46px; }
+  .sec-head {
+    display: flex; align-items: baseline; gap: 13px;
+    padding-bottom: 12px; border-bottom: 1px solid var(--line); margin-bottom: 18px;
+  }
+  .sec-num { font-family: var(--latin); font-size: 25px; color: var(--rose); line-height: 1; flex: none; }
+  .sec-title { font-family: var(--serif); font-weight: 600; font-size: 19px; letter-spacing: 0.05em; margin: 0; }
+  .sec-note { margin: 0 0 16px; font-weight: 300; font-size: 14px; color: var(--ink-soft); }
+
+  /* ---------- form bits ---------- */
+  .row3 { display: grid; grid-template-columns: 0.8fr 1.4fr 0.8fr; gap: 12px; }
+  @media (max-width: 520px) { .row3 { grid-template-columns: 1fr 1fr; } .row3 .wide { grid-column: 1 / -1; order: -1; } }
+  .fld { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+  .fld > label { font-size: 11px; letter-spacing: 0.1em; color: var(--ink-faint); font-weight: 500; }
+  .field {
+    width: 100%; min-width: 0; background: var(--field); border: 1px solid var(--line);
+    border-radius: 8px; padding: 10px 11px; font: inherit; font-size: 15px; color: var(--ink);
+    transition: border-color .12s, box-shadow .12s;
+  }
+  .field::placeholder { color: var(--ink-faint); }
+  .field:focus { outline: none; border-color: var(--rose); box-shadow: 0 0 0 3px var(--rose-wash); }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .daily {
+    margin-top: 12px; font-size: 14px; color: var(--ink-soft); font-weight: 300;
+  }
+  .daily b { font-family: var(--serif); font-weight: 600; color: var(--rose-deep); font-size: 17px; }
+
+  .seg {
+    display: flex; background: var(--paper); border: 1px solid var(--line);
+    border-radius: 999px; padding: 4px; gap: 4px; margin-bottom: 14px;
+  }
+  .seg button {
+    flex: 1; border: 0; background: transparent; font: inherit; font-size: 14px; color: var(--ink-soft);
+    padding: 8px 10px; border-radius: 999px; cursor: pointer;
+  }
+  .seg button[aria-pressed="true"] { background: var(--rose); color: #fff; font-weight: 500; }
+  .seg.small { display: inline-flex; margin: 0; }
+  .seg.small button { font-size: 12.5px; padding: 5px 12px; flex: none; }
+
+  .pools { display: flex; flex-direction: column; gap: 12px; }
+  .pool {
+    background: var(--paper); border: 1px solid var(--line); border-radius: 12px;
+    padding: 14px 14px 12px; border-left: 5px solid var(--pc);
+  }
+  .pool-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
+  .pool-name { font-family: var(--serif); font-weight: 600; font-size: 16px; }
+  .pool-sub { font-size: 12px; color: var(--ink-faint); margin-left: 6px; font-weight: 400; font-family: var(--sans); }
+  .pool-total { font-variant-numeric: tabular-nums; font-size: 14px; color: var(--ink-soft); white-space: nowrap; }
+  .pool-total b { color: var(--ink); font-weight: 500; }
+  .item { display: grid; grid-template-columns: 14px 1fr 112px 28px; gap: 8px; align-items: center; margin-top: 6px; }
+  .dot { width: 10px; height: 10px; border-radius: 3px; background: var(--pc); }
+  .item .field { padding: 7px 9px; font-size: 14px; }
+  .rm {
+    border: 0; background: transparent; color: var(--ink-faint); font-size: 18px; cursor: pointer;
+    width: 28px; height: 28px; border-radius: 6px; line-height: 1;
+  }
+  .rm:hover { background: var(--rose-wash); color: var(--rose-deep); }
+  .add {
+    margin-top: 8px; border: 1px dashed var(--line); background: transparent; color: var(--ink-soft);
+    font: inherit; font-size: 13px; padding: 5px 12px; border-radius: 8px; cursor: pointer;
+  }
+  .add:hover { border-color: var(--rose); color: var(--rose-deep); }
+
+  .tools { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 18px; }
+  .ghost {
+    border: 1px solid var(--line); background: var(--paper); color: var(--ink-soft);
+    font: inherit; font-size: 13px; padding: 6px 14px; border-radius: 999px; cursor: pointer;
+  }
+  .ghost:hover { border-color: var(--rose); color: var(--rose-deep); }
+
+  /* ---------- result card ---------- */
+  .card {
+    background: var(--paper); border: 1px solid var(--line); border-radius: 18px;
+    padding: 26px 20px 18px; box-shadow: 0 10px 30px -18px rgba(75,64,58,.35);
+  }
+  .card-eyebrow { font-family: var(--latin); font-size: 11px; letter-spacing: .2em; color: var(--rose-deep); text-align: center; text-transform: uppercase; }
+  .headline {
+    font-family: var(--serif); font-weight: 600; text-align: center; font-size: 21px;
+    letter-spacing: .04em; margin: 10px 0 4px; text-wrap: balance; line-height: 1.5;
+  }
+  .headline .big { font-size: 40px; color: var(--c-save); padding: 0 4px; font-variant-numeric: tabular-nums; }
+  .subline { text-align: center; font-size: 13.5px; color: var(--ink-soft); font-weight: 300; margin: 0 0 18px; }
+  .subline b { font-weight: 500; color: var(--ink); }
+
+  .viewbar { display: flex; justify-content: center; margin-bottom: 12px; }
+  .grid { display: grid; gap: 5px; }
+  .cell {
+    position: relative; aspect-ratio: 3 / 4; border-radius: 6px; overflow: hidden;
+    display: flex; background: var(--empty);
+  }
+  .cell > i { display: block; height: 100%; }
+  .cell > i + i { box-shadow: inset 1px 0 0 var(--paper); }
+  .cell > i.unalloc {
+    background: repeating-linear-gradient(135deg, var(--empty) 0 4px, var(--line-soft) 4px 8px);
+  }
+  .cell span {
+    position: absolute; left: 0; right: 0; bottom: 2px; text-align: center;
+    font-family: var(--latin); font-size: 10px; color: rgba(255,255,255,.92);
+    text-shadow: 0 0 3px rgba(0,0,0,.25); pointer-events: none;
+  }
+  .grid-cap { display: flex; justify-content: space-between; font-size: 11px; color: var(--ink-faint); margin-top: 6px; }
+
+  .legend { margin-top: 18px; display: flex; flex-direction: column; gap: 2px; }
+  .lg {
+    display: grid; grid-template-columns: 12px 1fr auto 62px; gap: 10px; align-items: center;
+    font-size: 14px; padding: 5px 2px; border-bottom: 1px dashed var(--line-soft);
+  }
+  .lg:last-child { border-bottom: 0; }
+  .lg .sw { width: 12px; height: 12px; border-radius: 3px; }
+  .lg .amt { color: var(--ink-faint); font-variant-numeric: tabular-nums; font-size: 12.5px; }
+  .lg .d { text-align: right; font-family: var(--serif); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .lg.group { font-weight: 500; }
+  .lg.child { padding-left: 14px; font-size: 13px; color: var(--ink-soft); }
+  .lg.child .d { font-weight: 500; font-size: 13px; }
+
+  .warn {
+    margin-top: 14px; background: var(--rose-wash); border-radius: 10px; padding: 10px 13px;
+    font-size: 13.5px; color: var(--ink);
+  }
+  .card-foot {
+    margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--line-soft);
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 11.5px; color: var(--ink-faint);
+  }
+  .card-foot .brand { font-family: var(--latin); letter-spacing: .08em; color: var(--rose-deep); }
+  .shot-hint { text-align: center; font-size: 12.5px; color: var(--ink-faint); margin-top: 10px; }
+
+  /* ---------- price calc ---------- */
+  .price-box { background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 18px; }
+  .price-in { display: grid; grid-template-columns: 1fr 1.4fr; gap: 12px; }
+  @media (max-width: 520px) { .price-in { grid-template-columns: 1fr; } }
+  .price-out { margin-top: 16px; text-align: center; min-height: 92px; }
+  .price-out .big { font-family: var(--serif); font-weight: 600; font-size: 38px; color: var(--rose-deep); font-variant-numeric: tabular-nums; }
+  .price-out .unit { font-family: var(--serif); font-size: 18px; margin-left: 4px; }
+  .price-out p { margin: 4px 0 0; font-size: 14px; color: var(--ink-soft); font-weight: 300; }
+  .price-out p b { color: var(--ink); font-weight: 500; }
+  .price-q {
+    margin-top: 14px; font-family: var(--serif); font-size: 15px; text-align: center;
+    color: var(--ink); background: var(--rose-wash); border-radius: 10px; padding: 12px 14px;
+  }
+
+  .foot { margin-top: 56px; text-align: center; font-size: 12px; color: var(--ink-faint); font-weight: 300; }
+  .foot a { color: var(--rose-deep); text-decoration: none; }
+</style>
+</head>
+<body>
+<main class="sheet">
+  <div class="eyebrow">Bear Money Tools</div>
+  <h1>預算上班天數換算</h1>
+  <p class="lede">把這個月的每一筆預算，換成你要上幾天班。<br>看看一個月裡，有幾天是在幫未來的自己上班。</p>
+  <div class="rule"></div>
+
+  <!-- 01 收入 -->
+  <section>
+    <div class="sec-head"><span class="sec-num">01</span><h2 class="sec-title">這個月的收入</h2></div>
+    <p class="sec-note">接案或收入不固定也沒關係，一樣用 22 天來算就好。</p>
+    <div class="row3">
+      <div class="fld"><label for="month">月份</label>
+        <select id="month" class="field"></select></div>
+      <div class="fld wide"><label for="income">月收入（元）</label>
+        <input id="income" class="field num" type="number" inputmode="numeric" min="0" placeholder="例如 40000"></div>
+      <div class="fld"><label for="days">上班天數</label>
+        <input id="days" class="field num" type="number" inputmode="numeric" min="1" max="31"></div>
+    </div>
+    <div class="daily" id="daily"></div>
+  </section>
+
+  <!-- 02 預算 -->
+  <section>
+    <div class="sec-head"><span class="sec-num">02</span><h2 class="sec-title">你的預算分配</h2></div>
+    <div class="seg" role="group" aria-label="分類方式">
+      <button type="button" data-mode="six">六大資金池</button>
+      <button type="button" data-mode="three">簡單三分類</button>
+    </div>
+    <p class="sec-note" id="modeNote"></p>
+    <div class="pools" id="pools"></div>
+    <div class="tools">
+      <button type="button" class="ghost" id="loadBear">看 Bear 的 10 月範例</button>
+      <button type="button" class="ghost" id="clearAll">清空，填我自己的</button>
+    </div>
+  </section>
+
+  <!-- 03 結果 -->
+  <section>
+    <div class="sec-head"><span class="sec-num">03</span><h2 class="sec-title">你的上班日曆</h2></div>
+    <div class="card" id="card">
+      <div class="card-eyebrow" id="cardMonth"></div>
+      <div class="headline" id="headline"></div>
+      <p class="subline" id="subline"></p>
+      <div class="viewbar" id="viewbar">
+        <div class="seg small" role="group" aria-label="日曆顯示">
+          <button type="button" data-view="pool">依資金池</button>
+          <button type="button" data-view="item">依細項</button>
+        </div>
+      </div>
+      <div class="grid" id="grid"></div>
+      <div class="grid-cap"><span>第 1 天</span><span id="capEnd"></span></div>
+      <div class="legend" id="legend"></div>
+      <div id="warn"></div>
+      <div class="card-foot"><span>每一格 = 一天的薪水</span><span class="brand">@bear.saving</span></div>
+    </div>
+    <p class="shot-hint">截圖這張卡片，就可以分享到限動</p>
+  </section>
+
+  <!-- 04 值幾天班 -->
+  <section>
+    <div class="sec-head"><span class="sec-num">04</span><h2 class="sec-title">這東西值幾天班？</h2></div>
+    <p class="sec-note">想買東西的時候，先換算一下。</p>
+    <div class="price-box">
+      <div class="price-in">
+        <div class="fld"><label for="price">價格（元）</label>
+          <input id="price" class="field num" type="number" inputmode="numeric" min="0" placeholder="例如 5000"></div>
+        <div class="fld"><label for="what">想買什麼（可不填）</label>
+          <input id="what" class="field" type="text" maxlength="20" placeholder="例如 新包包"></div>
+      </div>
+      <div class="price-out" id="priceOut"></div>
+    </div>
+  </section>
+
+  <p class="foot">資料只存在你自己的瀏覽器裡，不會上傳。<br>
+    Made by <a href="https://www.instagram.com/bear.saving/" target="_blank" rel="noopener">@bear.saving</a> · Bear Money Tools</p>
+</main>
+
+<script>
+(() => {
+  const STORE = 'bear-workday-calc-v1';
+
+  const SIX_DEF = [
+    { key: 'fixed', name: '固定支出', sub: '必要',     color: '--c-fixed', future: false, fun: false },
+    { key: 'var',   name: '變動支出', sub: '現金控管', color: '--c-var',   future: false, fun: false },
+    { key: 'pre',   name: '預存支出', sub: '無痛基金', color: '--c-pre',   future: false, fun: false },
+    { key: 'emer',  name: '緊急預備', sub: '防範未然', color: '--c-emer',  future: true,  fun: false },
+    { key: 'save',  name: '儲蓄基金', sub: '底氣來源', color: '--c-save',  future: true,  fun: false },
+    { key: 'learn', name: '學習成長', sub: '投資大腦', color: '--c-learn', future: true,  fun: false },
+  ];
+  const THREE_DEF = [
+    { key: 'life', name: '生活必要', sub: '房租、吃飯、交通…', color: '--c-fixed', future: false, fun: false },
+    { key: 'fun',  name: '可以亂花的錢', sub: '不用內疚的錢', color: '--c-var', future: false, fun: true },
+    { key: 'keep', name: '存起來', sub: '給未來的自己', color: '--c-save', future: true, fun: false },
+  ];
+  const FUN_ITEM = /娛樂|社交|亂花|自由|零用/;
+
+  const blankSix = () => ({
+    fixed: [{ n: '居住水電', a: '' }, { n: '交通通訊', a: '' }, { n: '保險', a: '' }],
+    var:   [{ n: '伙食餐費', a: '' }, { n: '日常雜支', a: '' }, { n: '社交娛樂', a: '' }],
+    pre:   [{ n: '年費／紅包／旅遊', a: '' }],
+    emer:  [{ n: '緊急預備金', a: '' }],
+    save:  [{ n: '儲蓄', a: '' }],
+    learn: [{ n: '課程／書', a: '' }],
+  });
+  const blankThree = () => ({ life: [{ n: '生活必要', a: '' }], fun: [{ n: '可以亂花的錢', a: '' }], keep: [{ n: '存起來', a: '' }] });
+
+  const bearExample = () => ({
+    mode: 'six', view: 'pool', month: 10, income: 48900, days: 22,
+    six: {
+      fixed: [{ n: '居住水電', a: 14225 }, { n: '交通通訊', a: 2000 }, { n: '學貸／保險', a: 7799 }, { n: '雲端／訂閱', a: 1508 }],
+      var:   [{ n: '伙食餐費', a: 8600 }, { n: '日常雜支', a: 2500 }, { n: '社交娛樂', a: 1000 }],
+      pre:   [{ n: '預存', a: 0 }],
+      emer:  [{ n: '緊急預備金（已存滿）', a: 0 }],
+      save:  [{ n: '儲蓄', a: 11268 }],
+      learn: [{ n: '課程／書', a: 0 }],
+    },
+    three: { life: [{ n: '生活必要', a: 36632 }], fun: [{ n: '可以亂花的錢', a: 1000 }], keep: [{ n: '存起來', a: 11268 }] },
+    price: 5000, what: '',
+  });
+
+  let S;
+  try { S = JSON.parse(localStorage.getItem(STORE)); } catch (e) { S = null; }
+  if (!S || !S.six || !S.three) S = bearExample();
+  const save = () => { try { localStorage.setItem(STORE, JSON.stringify(S)); } catch (e) {} };
+
+  const $ = id => document.getElementById(id);
+  const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+  const amt = x => { const v = parseFloat(x); return isFinite(v) && v > 0 ? v : 0; };
+  const money = v => Math.round(v).toLocaleString('zh-TW');
+  const dfmt = d => { const r = Math.round(d * 10) / 10; return (Number.isInteger(r) ? r : r.toFixed(1)); };
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const defs = () => S.mode === 'six' ? SIX_DEF : THREE_DEF;
+  const data = () => S.mode === 'six' ? S.six : S.three;
+  const daily = () => { const i = amt(S.income), d = amt(S.days); return i && d ? i / d : 0; };
+
+  // ---------- header inputs ----------
+  const monthSel = $('month');
+  for (let m = 1; m <= 12; m++) monthSel.insertAdjacentHTML('beforeend', `<option value="${m}">${m} 月</option>`);
+  monthSel.value = S.month; $('income').value = S.income || ''; $('days').value = S.days || 22;
+  $('price').value = S.price || ''; $('what').value = S.what || '';
+
+  monthSel.addEventListener('change', e => { S.month = +e.target.value; update(); });
+  $('income').addEventListener('input', e => { S.income = e.target.value; update(); });
+  $('days').addEventListener('input', e => { S.days = e.target.value; update(); });
+  $('price').addEventListener('input', e => { S.price = e.target.value; update(); });
+  $('what').addEventListener('input', e => { S.what = e.target.value; update(); });
+
+  document.querySelectorAll('[data-mode]').forEach(b => b.addEventListener('click', () => { S.mode = b.dataset.mode; buildPools(); update(); }));
+  document.querySelectorAll('[data-view]').forEach(b => b.addEventListener('click', () => { S.view = b.dataset.view; update(); }));
+
+  $('loadBear').addEventListener('click', () => {
+    const p = S.price, w = S.what; S = bearExample(); S.price = p || 5000; S.what = w || '';
+    syncHeader(); buildPools(); update();
+  });
+  $('clearAll').addEventListener('click', () => {
+    if (!confirm('要清空所有金額，改填你自己的嗎？')) return;
+    S.income = ''; S.six = blankSix(); S.three = blankThree();
+    syncHeader(); buildPools(); update(); $('income').focus();
+  });
+  function syncHeader() { monthSel.value = S.month; $('income').value = S.income || ''; $('days').value = S.days || 22; $('price').value = S.price || ''; $('what').value = S.what || ''; }
+
+  // ---------- pools ----------
+  function buildPools() {
+    $('modeNote').textContent = S.mode === 'six'
+      ? '每個資金池都可以自己加細項，名稱也可以改。沒有的就留空。'
+      : '最簡單的分法：生活要花的、可以亂花的、存起來的。';
+    const box = $('pools'); box.innerHTML = '';
+    defs().forEach(def => {
+      const items = data()[def.key];
+      const el = document.createElement('div');
+      el.className = 'pool'; el.style.setProperty('--pc', `var(${def.color})`);
+      el.innerHTML = `<div class="pool-head"><div class="pool-name">${def.name}<span class="pool-sub">${def.sub}</span></div>
+        <div class="pool-total" data-total="${def.key}"></div></div><div class="items"></div>
+        ${S.mode === 'six' ? '<button type="button" class="add">＋ 加一個細項</button>' : ''}`;
+      const list = el.querySelector('.items');
+      items.forEach((it, idx) => {
+        const row = document.createElement('div'); row.className = 'item';
+        const single = S.mode === 'three';
+        row.innerHTML = `<span class="dot" style="opacity:${shade(idx, items.length)}"></span>
+          <input class="field" type="text" maxlength="16" value="${esc(it.n)}" aria-label="細項名稱" ${single ? 'readonly tabindex="-1" style="border-color:transparent;background:transparent;padding-left:0"' : ''}>
+          <input class="field num" type="number" inputmode="numeric" min="0" placeholder="0" value="${it.a === '' || it.a === 0 ? '' : it.a}" aria-label="${esc(it.n)} 金額">
+          ${!single && items.length > 1 ? '<button type="button" class="rm" aria-label="刪除">×</button>' : '<span></span>'}`;
+        const [nIn, aIn] = row.querySelectorAll('input');
+        nIn.addEventListener('input', () => { it.n = nIn.value; update(); });
+        aIn.addEventListener('input', () => { it.a = aIn.value; update(); });
+        const rm = row.querySelector('.rm');
+        if (rm) rm.addEventListener('click', () => { items.splice(idx, 1); buildPools(); update(); });
+        list.appendChild(row);
+      });
+      const add = el.querySelector('.add');
+      if (add) add.addEventListener('click', () => {
+        items.push({ n: '', a: '' }); buildPools(); update();
+        const ins = box.querySelectorAll(`.pool`)[defs().indexOf(def)].querySelectorAll('.item input[type=text]');
+        ins[ins.length - 1].focus();
+      });
+      box.appendChild(el);
+    });
+  }
+  const shade = (i, n) => n <= 1 ? 1 : (1 - (i / n) * 0.6).toFixed(2);
+
+  // ---------- render ----------
+  function update() {
+    save();
+    document.querySelectorAll('[data-mode]').forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === S.mode));
+    document.querySelectorAll('[data-view]').forEach(b => b.setAttribute('aria-pressed', b.dataset.view === (S.view || 'pool')));
+    $('viewbar').style.display = S.mode === 'six' ? '' : 'none';
+
+    const D = daily(), days = Math.max(1, Math.min(31, Math.round(amt(S.days)) || 22)), income = amt(S.income);
+    $('daily').innerHTML = D ? `你一天的薪水大約是 <b>${money(D)}</b> 元` : '填入月收入後，就會算出你一天的薪水。';
+
+    // pool totals + segments
+    const pools = defs().map(def => {
+      const items = data()[def.key].map((it, i, arr) => ({ name: it.n || '未命名', a: amt(it.a), op: shade(i, arr.length) }));
+      return { def, items, total: items.reduce((s, x) => s + x.a, 0) };
+    });
+    pools.forEach(p => {
+      const t = document.querySelector(`[data-total="${p.def.key}"]`);
+      if (t) t.innerHTML = p.total ? `<b>${money(p.total)}</b> 元 ${D ? '· ' + dfmt(p.total / D) + ' 天' : ''}` : '';
+    });
+    const allocated = pools.reduce((s, p) => s + p.total, 0);
+    const byItem = S.mode === 'six' && S.view === 'item';
+    const segs = [];
+    pools.forEach(p => {
+      const color = css(p.def.color);
+      if (byItem) p.items.forEach(it => it.a && segs.push({ a: it.a, color, op: it.op }));
+      else if (p.total) segs.push({ a: p.total, color, op: 1 });
+    });
+
+    // grid
+    const cols = days <= 11 ? days : Math.min(11, Math.ceil(days / 2));
+    const grid = $('grid'); grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+    const cells = [];
+    if (D) {
+      let pos = 0; const spans = segs.map(s => { const st = pos; pos += s.a / D; return { ...s, st, en: pos }; });
+      for (let c = 0; c < days; c++) {
+        let html = '', used = 0;
+        spans.forEach(s => {
+          const w = Math.max(0, Math.min(c + 1, s.en) - Math.max(c, s.st));
+          if (w > 0.0001) { html += `<i style="width:${w * 100}%;background:${s.color};opacity:${s.op}"></i>`; used += w; }
+        });
+        if (used < 0.999) html += `<i class="unalloc" style="width:${(1 - used) * 100}%"></i>`;
+        cells.push(`<div class="cell">${html}<span>${c + 1}</span></div>`);
+      }
+    } else {
+      for (let c = 0; c < days; c++) cells.push(`<div class="cell"><i class="unalloc" style="width:100%"></i><span>${c + 1}</span></div>`);
+    }
+    grid.innerHTML = cells.join('');
+    $('capEnd').textContent = `第 ${days} 天`;
+    $('cardMonth').textContent = `${S.month} 月 · 一個月 ${days} 天班`;
+
+    // headline
+    const futureAmt = pools.filter(p => p.def.future).reduce((s, p) => s + p.total, 0);
+    if (D && allocated) {
+      $('headline').innerHTML = `一個月 ${days} 天班<br>有<span class="big">${dfmt(futureAmt / D)}</span>天<br>是在幫未來的自己上班`;
+      let top = null;
+      pools.forEach(p => p.items.forEach(it => { if (!top || it.a > top.a) top = it; }));
+      $('subline').innerHTML = top && top.a ? `花最多天的是「<b>${esc(top.name)}</b>」，要上 <b>${dfmt(top.a / D)}</b> 天班` : '';
+    } else {
+      $('headline').innerHTML = '填好收入和預算<br>就會看到你的上班日曆';
+      $('subline').textContent = '';
+    }
+
+    // legend
+    const lg = [];
+    if (D) pools.forEach(p => {
+      if (!p.total) return;
+      const color = css(p.def.color);
+      lg.push(`<div class="lg group"><span class="sw" style="background:${color}"></span><span>${p.def.name}</span><span class="amt">${money(p.total)}</span><span class="d">${dfmt(p.total / D)} 天</span></div>`);
+      if (S.mode === 'six' && (byItem || p.items.filter(x => x.a).length > 1)) {
+        p.items.forEach(it => it.a && lg.push(`<div class="lg child"><span class="sw" style="background:${color};opacity:${byItem ? it.op : 0.45}"></span><span>${esc(it.name)}</span><span class="amt">${money(it.a)}</span><span class="d">${dfmt(it.a / D)} 天</span></div>`));
+      }
+    });
+    if (D && allocated < income - 0.5) {
+      lg.push(`<div class="lg group"><span class="sw unalloc" style="background:repeating-linear-gradient(135deg,var(--empty) 0 3px,var(--line) 3px 6px)"></span><span>還沒分配</span><span class="amt">${money(income - allocated)}</span><span class="d">${dfmt((income - allocated) / D)} 天</span></div>`);
+    }
+    $('legend').innerHTML = lg.join('');
+    $('warn').innerHTML = D && allocated > income + 0.5
+      ? `<div class="warn">預算比收入多了 <b>${money(allocated - income)}</b> 元，等於多出 <b>${dfmt((allocated - income) / D)}</b> 天班。日曆只畫得下 ${days} 天，要回頭調一下喔。</div>` : '';
+
+    // price
+    const price = amt(S.price), out = $('priceOut');
+    if (price && D) {
+      const pd = price / D, hours = pd * 8;
+      const what = S.what && S.what.trim() ? `「${esc(S.what.trim())}」` : '這個東西';
+      let funAmt = 0, funName = '';
+      if (S.mode === 'three') { funAmt = pools.find(p => p.def.fun).total; funName = '可以亂花的錢'; }
+      else pools.forEach(p => p.items.forEach(it => { if (FUN_ITEM.test(it.name) && it.a) { funAmt += it.a; funName = funName || it.name; } }));
+      let extra = '';
+      if (funAmt) {
+        extra = price <= funAmt
+          ? `<p>在你這個月「${esc(funName)}」的 ${dfmt(funAmt / D)} 天裡面，還付得起。</p>`
+          : `<p>你這個月「${esc(funName)}」只有 <b>${dfmt(funAmt / D)}</b> 天，不夠的要從別的天數扣。</p>`;
+      }
+      out.innerHTML = `<div><span class="big">${dfmt(pd)}</span><span class="unit">天班</span></div>
+        <p>${what}要 ${money(price)} 元，大約是 <b>${pd < 1 ? Math.round(hours * 10) / 10 + ' 小時' : dfmt(pd) + ' 天'}</b>的工作。</p>${extra}
+        <div class="price-q">如果老闆說，這 ${dfmt(pd)} 天不給你薪水，直接給你${what}，你要不要？</div>`;
+    } else {
+      out.innerHTML = `<p>${D ? '輸入價格，看看它要你上幾天班。' : '先在上面填好月收入。'}</p>`;
+    }
+  }
+
+  buildPools(); update();
+})();
+</script>
+</body>
+</html>
