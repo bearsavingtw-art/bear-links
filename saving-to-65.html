@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>存到 65 歲有多少</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+/* Layout: one narrow column like a Bear.saving worksheet page — inputs card, big result, comparison chips, growth chart */
+:root {
+  --paper: #FBF8F2;
+  --card: #FFFFFF;
+  --ink: #3E332B;
+  --muted: #8A7D72;
+  --umber: #8C7768;      /* worksheet title bar */
+  --rose: #F3E2DE;       /* soft highlight */
+  --sage: #E5EEE6;       /* second highlight */
+  --accent: #B5675A;     /* numbers that matter */
+  --line: #E7DED3;
+  --chart-a: #8C7768;
+  --chart-b: #D9A79C;
+  --serif: "Noto Serif TC", "Songti TC", serif;
+  --sans: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #1F1B18; --card: #2A2420; --ink: #F1E9E1; --muted: #B3A69A; --umber: #A8927F;
+    --rose: #4A3530; --sage: #2F3A31; --accent: #E59C8C; --line: #3D3530; --chart-a: #C9B3A0; --chart-b: #E59C8C;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #1F1B18; --card: #2A2420; --ink: #F1E9E1; --muted: #B3A69A; --umber: #A8927F;
+  --rose: #4A3530; --sage: #2F3A31; --accent: #E59C8C; --line: #3D3530; --chart-a: #C9B3A0; --chart-b: #E59C8C;
+  color-scheme: dark;
+}
+body { background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 20px 40px; }
+.wrap { max-width: 560px; margin-inline: auto; display: grid; gap: 16px; }
+.brand { font-size: 12px; letter-spacing: .18em; color: var(--muted); }
+h1 { font-family: var(--serif); font-size: clamp(26px, 7vw, 34px); line-height: 1.25; margin: 4px 0 0; text-wrap: balance; }
+.lede { color: var(--muted); margin: 0; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.bar { background: var(--umber); color: #fff; font-size: 13px; letter-spacing: .08em; padding: 8px 16px; }
+.body { padding: 16px; display: grid; gap: 14px; }
+.field { display: grid; gap: 6px; }
+.field label { font-size: 13px; color: var(--muted); }
+.row { display: flex; align-items: center; gap: 8px; }
+input[type=number] { width: 100%; min-width: 0; font: 600 20px var(--sans); color: var(--ink); background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font-variant-numeric: tabular-nums; }
+input[type=number]:focus { outline: 2px solid var(--umber); outline-offset: 1px; }
+.unit { color: var(--muted); white-space: nowrap; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { font: 500 14px var(--sans); color: var(--ink); background: var(--paper); border: 1px solid var(--line); border-radius: 999px; padding: 7px 14px; cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--umber); color: #fff; border-color: var(--umber); }
+.chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.hint { font-size: 12px; color: var(--muted); margin: 0; }
+.result { padding: 20px 16px; display: grid; gap: 4px; background: var(--rose); }
+.result .k { font-size: 14px; }
+.big { font-family: var(--serif); font-size: clamp(36px, 11vw, 52px); color: var(--accent); line-height: 1.15; font-variant-numeric: tabular-nums; }
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 14px 16px; }
+.split div { display: grid; }
+.split .v { font: 700 18px var(--sans); font-variant-numeric: tabular-nums; }
+.split .l { font-size: 12px; color: var(--muted); }
+.cmp { display: grid; gap: 10px; padding: 0 16px 16px; }
+.cmp .item { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; display: grid; gap: 2px; }
+.cmp .t { font-size: 13px; color: var(--muted); }
+.cmp .v { font: 700 18px var(--sans); font-variant-numeric: tabular-nums; }
+.cmp .d { font-size: 13px; }
+.chart-wrap { padding: 8px 12px 14px; }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--muted); padding: 0 4px 6px; }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
+svg { width: 100%; height: auto; display: block; }
+.note { font-size: 12px; color: var(--muted); line-height: 1.7; margin: 0; }
+.cta { background: var(--sage); border-radius: 12px; padding: 14px 16px; font-size: 14px; }
+</style>
+
+
+<style>*{box-sizing:border-box}body{margin:0}</style>
+</head>
+<body>
+<div class="wrap">
+  <div>
+    <div class="brand">BEAR.SAVING｜存錢試算</div>
+    <h1>照你現在的存錢速度，<br>存到 65 歲會有多少？</h1>
+    <p class="lede">輸入你現在的情況，看看時間幫你累積了多少。</p>
+  </div>
+
+  <div class="card">
+    <div class="bar">你的現在</div>
+    <form class="body" id="f" novalidate>
+      <div class="two">
+        <div class="field"><label for="age">現在幾歲</label><div class="row"><input id="age" type="number" inputmode="numeric" min="15" max="64" value="30"><span class="unit">歲</span></div></div>
+        <div class="field"><label for="retire">打算幾歲退休</label><div class="row"><input id="retire" type="number" inputmode="numeric" min="30" max="80" value="65"><span class="unit">歲</span></div></div>
+      </div>
+      <div class="field"><label for="monthly">每個月存多少</label><div class="row"><input id="monthly" type="number" inputmode="numeric" min="0" step="500" value="5000"><span class="unit">元</span></div></div>
+      <div class="field"><label for="now">現在已經存了多少（沒有就填 0）</label><div class="row"><input id="now" type="number" inputmode="numeric" min="0" step="10000" value="0"><span class="unit">元</span></div></div>
+      <div class="field">
+        <label id="rlab">假設每年的報酬</label>
+        <div class="chips" role="group" aria-labelledby="rlab">
+          <button type="button" class="chip" data-r="0" aria-pressed="false">0%　只存不投資</button>
+          <button type="button" class="chip" data-r="2" aria-pressed="false">2%</button>
+          <button type="button" class="chip" data-r="5" aria-pressed="false">5%</button>
+          <button type="button" class="chip" data-r="7" aria-pressed="true">7%</button>
+        </div>
+        <p class="hint">報酬只是假設，用來示範時間的力量，不是預測，也不是推薦任何投資。</p>
+      </div>
+    </form>
+  </div>
+
+  <div class="card" aria-live="polite">
+    <div class="result">
+      <div class="k" id="rk">存到 65 歲，大約會有</div>
+      <div class="big" id="total">—</div>
+    </div>
+    <div class="split">
+      <div><span class="v" id="principal">—</span><span class="l">你自己存進去的</span></div>
+      <div><span class="v" id="growth">—</span><span class="l">時間幫你多出來的</span></div>
+    </div>
+    <div class="cmp">
+      <div class="item"><span class="t" id="lateT">如果晚 10 年才開始</span><span class="v" id="late">—</span><span class="d" id="lateD"></span></div>
+      <div class="item"><span class="t">如果每個月多存 1,000</span><span class="v" id="more">—</span><span class="d" id="moreD"></span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="bar">每一年累積多少</div>
+    <div class="chart-wrap">
+      <div class="legend"><span><i style="background:var(--chart-a)"></i>從現在開始</span><span><i style="background:var(--chart-b)"></i>晚 10 年才開始</span></div>
+      <svg id="chart" viewBox="0 0 520 260" role="img" aria-label="從現在開始與晚 10 年開始，每一年累積金額的比較"></svg>
+    </div>
+  </div>
+
+  <div class="cta">存錢不用等準備好，現在就開始，才是 CP 值最高的。今天先存一筆小的，就算開始了。</div>
+  <p class="note">試算方式：每個月月底存入，年報酬換算成每月複利，存到你填的退休年齡。沒有計算通膨與稅費，實際結果會不同。這是 Bear.saving「晚 10 年存錢差多少」那集的小工具。</p>
+</div>
+
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  let rate = 7;
+
+  function fv(monthly, now, months, annual) {
+    const r = annual / 100 / 12;
+    if (months <= 0) return now;
+    if (r === 0) return now + monthly * months;
+    const g = Math.pow(1 + r, months);
+    return now * g + monthly * (g - 1) / r;
+  }
+  function wan(x) {
+    if (!isFinite(x)) return '—';
+    if (Math.abs(x) >= 1e4) {
+      const w = x / 1e4;
+      const s = w >= 1000 ? Math.round(w).toLocaleString('en-US') : w.toLocaleString('en-US', { maximumFractionDigits: 1 });
+      return s + ' 萬';
+    }
+    return Math.round(x).toLocaleString('en-US') + ' 元';
+  }
+  function num(id, lo, hi) {
+    const v = Number($(id).value);
+    if (!isFinite(v)) return lo;
+    return Math.min(hi, Math.max(lo, v));
+  }
+
+  function draw(age, retire, monthly, now) {
+    const svg = $('chart');
+    const W = 520, H = 260, L = 54, R = 70, T = 16, B = 30;
+    const years = retire - age;
+    const a = [], b = [];
+    for (let y = 0; y <= years; y++) {
+      a.push(fv(monthly, now, y * 12, rate));
+      b.push(y < 10 ? now : fv(monthly, now, (y - 10) * 12, rate));
+    }
+    const max = Math.max(a[a.length - 1], 1);
+    const x = (i) => L + (W - L - R) * (years ? i / years : 0);
+    const y = (v) => H - B - (H - T - B) * (v / max);
+    const path = (arr) => arr.map((v, i) => (i ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(v).toFixed(1)).join(' ');
+    const area = (arr) => path(arr) + ` L ${x(arr.length - 1).toFixed(1)} ${H - B} L ${x(0).toFixed(1)} ${H - B} Z`;
+    let g = '';
+    for (let k = 0; k <= 4; k++) {
+      const v = max * k / 4, yy = y(v).toFixed(1);
+      g += `<line x1="${L}" x2="${W - R}" y1="${yy}" y2="${yy}" stroke="var(--line)" stroke-width="1"/>`;
+      g += `<text x="${L - 6}" y="${(+yy + 4).toFixed(1)}" text-anchor="end" font-size="11" fill="var(--muted)">${k ? wan(v).replace(' 萬', '萬') : '0'}</text>`;
+    }
+    const step = years > 30 ? 10 : 5;
+    for (let i = 0; i <= years; i += step) g += `<text x="${x(i).toFixed(1)}" y="${H - 10}" text-anchor="middle" font-size="11" fill="var(--muted)">${age + i}歲</text>`;
+    g += `<path d="${area(a)}" fill="var(--chart-a)" fill-opacity=".14"/>`;
+    g += `<path d="${path(a)}" fill="none" stroke="var(--chart-a)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>`;
+    g += `<path d="${path(b)}" fill="none" stroke="var(--chart-b)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="6 4"/>`;
+    const la = a[a.length - 1], lb = b[b.length - 1];
+    g += `<circle cx="${x(years)}" cy="${y(la)}" r="4" fill="var(--chart-a)"/><circle cx="${x(years)}" cy="${y(lb)}" r="4" fill="var(--chart-b)"/>`;
+    const ya = y(la), yb = Math.max(y(lb), ya + 16);
+    g += `<text x="${x(years) + 8}" y="${ya + 4}" font-size="12" font-weight="700" fill="var(--ink)">${wan(la)}</text>`;
+    g += `<text x="${x(years) + 8}" y="${yb + 4}" font-size="12" fill="var(--muted)">${wan(lb)}</text>`;
+    svg.innerHTML = g;
+  }
+
+  function update() {
+    const age = Math.round(num('age', 15, 64));
+    let retire = Math.round(num('retire', 30, 80));
+    if (retire <= age) retire = age + 1;
+    const monthly = num('monthly', 0, 1e7);
+    const now = num('now', 0, 1e10);
+    const months = (retire - age) * 12;
+    const total = fv(monthly, now, months, rate);
+    const principal = now + monthly * months;
+    $('rk').textContent = `存到 ${retire} 歲，大約會有`;
+    $('total').textContent = wan(total);
+    $('principal').textContent = wan(principal);
+    $('growth').textContent = wan(Math.max(0, total - principal));
+    const late = retire - age > 10 ? fv(monthly, now, months - 120, rate) : now;
+    $('late').textContent = wan(late);
+    $('lateD').textContent = total > 0 ? `少了 ${wan(total - late)}，只有現在開始的 ${Math.round(late / total * 100)}%` : '';
+    const more = fv(monthly + 1000, now, months, rate);
+    $('more').textContent = wan(more);
+    $('moreD').textContent = `多了 ${wan(more - total)}`;
+    draw(age, retire, monthly, now);
+  }
+
+  document.querySelectorAll('.chip').forEach((c) => c.addEventListener('click', () => {
+    document.querySelectorAll('.chip').forEach((o) => o.setAttribute('aria-pressed', 'false'));
+    c.setAttribute('aria-pressed', 'true');
+    rate = Number(c.dataset.r);
+    update();
+  }));
+  ['age', 'retire', 'monthly', 'now'].forEach((id) => $(id).addEventListener('input', update));
+  $('f').addEventListener('submit', (e) => e.preventDefault());
+  update();
+})();
+</script>
+
+</body>
+</html>
