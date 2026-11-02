@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="裸辭前要先存多少錢？輸入你的生活費，算出休息、找工作和保費需要的裸辭基金。">
+  <title>裸辭基金計算器｜Bear.saving</title>
+  <style>
+    :root{
+      --bg:#f8f3ef;
+      --card:#fffdfb;
+      --text:#3f3631;
+      --muted:#7d7069;
+      --accent:#b77b76;
+      --accent-dark:#8d5c58;
+      --accent-soft:#f2dfdc;
+      --line:#eadfd9;
+      --good:#52735e;
+      --good-soft:#e6f0e8;
+      --warn:#9b6d37;
+      --warn-soft:#f7ead9;
+      --low:#9a5656;
+      --low-soft:#f6e1e1;
+      --shadow:0 14px 38px rgba(91,66,54,.10);
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      background:
+        radial-gradient(circle at top left, #fff9f5 0, transparent 32rem),
+        var(--bg);
+      color:var(--text);
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+      line-height:1.65;
+    }
+
+    .wrap{
+      width:min(760px, calc(100% - 28px));
+      margin:32px auto 56px;
+    }
+
+    .hero{
+      padding:30px 24px;
+      border-radius:24px;
+      background:linear-gradient(145deg,#fffdfb,#f7eae6);
+      box-shadow:var(--shadow);
+      border:1px solid rgba(183,123,118,.18);
+      margin-bottom:18px;
+    }
+
+    .eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:6px 11px;
+      border-radius:999px;
+      background:var(--accent-soft);
+      color:var(--accent-dark);
+      font-size:13px;
+      font-weight:700;
+      letter-spacing:.04em;
+    }
+
+    h1{
+      margin:14px 0 8px;
+      font-size:clamp(28px,6vw,44px);
+      line-height:1.2;
+      letter-spacing:-.03em;
+    }
+
+    .lead{
+      margin:0;
+      color:var(--muted);
+      font-size:16px;
+    }
+
+    .card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:22px;
+      padding:22px;
+      box-shadow:0 8px 24px rgba(91,66,54,.06);
+      margin-top:18px;
+    }
+
+    .card h2{
+      margin:0 0 16px;
+      font-size:21px;
+    }
+
+    .group-title{
+      margin:22px 0 12px;
+      padding-top:16px;
+      border-top:1px dashed var(--line);
+      font-size:15px;
+      color:var(--accent-dark);
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:15px;
+    }
+
+    .field.full{grid-column:1/-1}
+
+    label{
+      display:block;
+      margin-bottom:7px;
+      font-size:14px;
+      font-weight:700;
+    }
+
+    .hint{
+      display:block;
+      margin-top:6px;
+      color:var(--muted);
+      font-size:12px;
+      font-weight:400;
+    }
+
+    .input-wrap{
+      position:relative;
+    }
+
+    input{
+      width:100%;
+      appearance:none;
+      border:1px solid #d9cbc4;
+      border-radius:13px;
+      background:#fff;
+      color:var(--text);
+      padding:14px 54px 14px 14px;
+      font-size:17px;
+      outline:none;
+      transition:.2s ease;
+    }
+
+    input:focus{
+      border-color:var(--accent);
+      box-shadow:0 0 0 4px rgba(183,123,118,.13);
+    }
+
+    .unit{
+      position:absolute;
+      right:14px;
+      top:50%;
+      transform:translateY(-50%);
+      color:var(--muted);
+      font-size:14px;
+      pointer-events:none;
+    }
+
+    button{
+      width:100%;
+      margin-top:18px;
+      border:0;
+      border-radius:14px;
+      padding:15px 18px;
+      background:var(--accent);
+      color:white;
+      font-size:17px;
+      font-weight:800;
+      cursor:pointer;
+      transition:.2s ease;
+    }
+
+    button:hover{background:var(--accent-dark); transform:translateY(-1px)}
+    button:active{transform:translateY(0)}
+
+    .alert{
+      margin-top:16px;
+      padding:13px 15px;
+      border-radius:14px;
+      background:var(--warn-soft);
+      border:1px solid #ead0aa;
+      color:#6e4d25;
+      font-size:14px;
+    }
+
+    .result{
+      display:none;
+      margin-top:18px;
+      border-radius:18px;
+      padding:20px;
+      border:1px solid var(--line);
+    }
+
+    .result.show{display:block}
+    .result.good{background:var(--good-soft); border-color:#bed4c4}
+    .result.mid{background:var(--warn-soft); border-color:#ead0aa}
+    .result.low{background:var(--low-soft); border-color:#e4bbbb}
+
+    .result-title{
+      margin:0 0 6px;
+      font-size:21px;
+    }
+
+    .big-number{
+      margin:8px 0 2px;
+      font-size:clamp(30px,8vw,46px);
+      font-weight:900;
+      letter-spacing:-.03em;
+    }
+
+    .receipt{
+      margin-top:14px;
+      padding:16px 16px 12px;
+      border-radius:12px;
+      background:#fff;
+      font-size:14px;
+      box-shadow:0 4px 14px rgba(91,66,54,.06);
+    }
+
+    .receipt-row{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      padding:6px 0;
+      border-bottom:1px dashed #eadfd9;
+    }
+
+    .receipt-row span:first-child{color:var(--muted)}
+    .receipt-row span:last-child{font-weight:700; white-space:nowrap}
+
+    .receipt-row.total{
+      border-bottom:0;
+      border-top:2px solid var(--text);
+      margin-top:4px;
+      padding-top:10px;
+      font-size:16px;
+    }
+
+    .receipt-row.total span{color:var(--text); font-weight:900}
+
+    .comparison{
+      margin:14px 0 0;
+      font-weight:700;
+    }
+
+    .progress-track{
+      position:relative;
+      height:12px;
+      margin-top:12px;
+      background:rgba(255,255,255,.68);
+      border-radius:999px;
+      overflow:visible;
+    }
+
+    .progress-bar{
+      height:100%;
+      width:0;
+      border-radius:999px;
+      background:currentColor;
+      transition:width .55s ease;
+    }
+
+    .milestone{
+      position:absolute;
+      top:-5px;
+      width:2px;
+      height:22px;
+      background:var(--text);
+      opacity:.5;
+    }
+
+    .milestone-label{
+      position:absolute;
+      top:20px;
+      transform:translateX(-50%);
+      font-size:11px;
+      color:var(--muted);
+      white-space:nowrap;
+    }
+
+    .paths{
+      display:grid;
+      gap:11px;
+      margin-top:30px;
+    }
+
+    .path{
+      padding:14px 15px;
+      border-radius:14px;
+      background:rgba(255,255,255,.72);
+      font-size:14px;
+    }
+
+    .path strong.num{
+      display:block;
+      font-size:24px;
+      letter-spacing:-.02em;
+      color:var(--accent-dark);
+    }
+
+    .bear-tip{
+      margin-top:14px;
+      padding:14px 15px;
+      border-radius:14px;
+      background:#fff;
+      border:1px solid var(--accent-soft);
+      font-size:14px;
+    }
+
+    .bear-tip strong{color:var(--accent-dark)}
+
+    .recommend{
+      display:none;
+      margin-top:17px;
+    }
+
+    .recommend.show{display:block}
+
+    .resource-list{
+      display:grid;
+      gap:11px;
+      margin-top:14px;
+    }
+
+    .resource{
+      display:block;
+      padding:14px 15px;
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:#fff;
+      color:var(--text);
+      text-decoration:none;
+      transition:.2s ease;
+    }
+
+    .resource:hover{
+      border-color:var(--accent);
+      transform:translateY(-1px);
+      box-shadow:0 8px 18px rgba(91,66,54,.07);
+    }
+
+    .resource strong{
+      display:block;
+      color:var(--accent-dark);
+      margin-bottom:2px;
+    }
+
+    .note{
+      margin-top:16px;
+      padding:14px 15px;
+      border-left:4px solid var(--accent);
+      border-radius:10px;
+      background:#faf5f2;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    .note ul{margin:6px 0 6px; padding-left:20px}
+
+    footer{
+      text-align:center;
+      color:var(--muted);
+      font-size:12px;
+      margin-top:18px;
+    }
+
+    @media (max-width:620px){
+      .wrap{margin-top:16px}
+      .hero,.card{border-radius:18px}
+      .grid{grid-template-columns:1fr}
+      .field.full{grid-column:auto}
+      .hero{padding:24px 19px}
+      .card{padding:19px}
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="hero">
+      <div class="eyebrow">Bear.saving｜財務小工具</div>
+      <h1>裸辭基金計算器</h1>
+      <p class="lead">
+        裸辭需要的錢，除了休息那幾個月的生活費，
+        還有找工作的時間、自己繳的保費，和不能動的緊急預備金。
+        輸入你的數字，算出你的裸辭基金。
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>輸入你的資料</h2>
+
+      <div class="grid">
+        <div class="field">
+          <label for="living">
+            每月生活費
+            <span class="hint">房租、吃飯、交通、帳單全部加起來</span>
+          </label>
+          <div class="input-wrap">
+            <input id="living" type="number" min="0.1" step="0.1" inputmode="decimal" value="2.5">
+            <span class="unit">萬元</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="premium">
+            健保＋國民年金
+            <span class="hint">健保第 6 類 826＋國保 1,329（2026 年）</span>
+          </label>
+          <div class="input-wrap">
+            <input id="premium" type="number" min="0" step="1" inputmode="numeric" value="2155">
+            <span class="unit">元/月</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="rest">
+            想休息幾個月
+            <span class="hint">旅行、休養、想清楚下一步的時間</span>
+          </label>
+          <div class="input-wrap">
+            <input id="rest" type="number" min="0" step="1" inputmode="numeric" value="3">
+            <span class="unit">個月</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="search">
+            找工作預留幾個月
+            <span class="hint">25–44 歲平均約 5 個月（主計總處 2025）</span>
+          </label>
+          <div class="input-wrap">
+            <input id="search" type="number" min="0" step="1" inputmode="numeric" value="5">
+            <span class="unit">個月</span>
+          </div>
+        </div>
+
+        <div class="field full">
+          <label for="emergency">
+            緊急預備金
+            <span class="hint">生病、意外用的錢，裸辭期間也不動它；建議 6 個月生活費</span>
+          </label>
+          <div class="input-wrap">
+            <input id="emergency" type="number" min="0" step="1" inputmode="numeric" value="6">
+            <span class="unit">個月</span>
+          </div>
+        </div>
+      </div>
+
+      <h3 class="group-title">你現在的進度</h3>
+      <div class="grid">
+        <div class="field">
+          <label for="savings">
+            目前存款
+            <span class="hint">沒有就填 0</span>
+          </label>
+          <div class="input-wrap">
+            <input id="savings" type="number" min="0" step="0.1" inputmode="decimal" placeholder="例如：8">
+            <span class="unit">萬元</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="monthly">每月可以存</label>
+          <div class="input-wrap">
+            <input id="monthly" type="number" min="0" step="0.1" inputmode="decimal" value="1.5">
+            <span class="unit">萬元</span>
+          </div>
+        </div>
+      </div>
+
+      <button id="calculateBtn" type="button">算出我的裸辭基金</button>
+
+      <div class="alert">
+        <strong>先知道：</strong>主動辭職領不到失業給付。失業給付只發給非自願離職的人，所以這段時間的收入要先當作 0 元來算。
+      </div>
+
+      <section id="result" class="result" aria-live="polite">
+        <h3 id="resultTitle" class="result-title">你的裸辭基金</h3>
+        <div id="totalValue" class="big-number"></div>
+        <div id="receipt" class="receipt"></div>
+        <div id="comparison" class="comparison"></div>
+        <div class="progress-track" aria-hidden="true">
+          <div id="progressBar" class="progress-bar"></div>
+          <div id="milestone" class="milestone"></div>
+          <div id="milestoneLabel" class="milestone-label">第一個 10 萬</div>
+        </div>
+        <div id="paths" class="paths"></div>
+        <div class="bear-tip">
+          <strong>Bear 的經驗：</strong>我離職前存了 2 年，存到 30 萬。最難的是第一個 10 萬，一直存、一直被打回原形；過了 10 萬那個門檻，後面就快很多。
+        </div>
+      </section>
+
+      <section id="recommend" class="recommend">
+        <h2>先從「看清楚錢去哪裡」開始</h2>
+        <p>
+          想存得快一點，先找出每個月可以多留下來的錢。
+          記帳一段時間，分清楚固定支出、變動支出和真正想留下來的錢，
+          APP 或紙本都可以，選你願意持續使用的方式最重要。
+        </p>
+
+        <div class="resource-list">
+          <a class="resource" href="https://myship.7-11.com.tw/general/detail/GM2502152714662?utm_source=ig&amp;utm_medium=social" target="_blank" rel="noopener noreferrer">
+            <strong>紙本記帳工具賣場</strong>
+            喜歡手寫、想用紙本整理財務的人可以從這裡開始。
+          </a>
+
+          <a class="resource" href="https://drive.google.com/file/d/1kB0xr1XLYX4X5fnKg04Z1wgnm1gdq4SF/view?usp=drive_link" target="_blank" rel="noopener noreferrer">
+            <strong>免費財務整理表格</strong>
+            預算分配與財務整理資源；開啟前記得先登入 Google 雲端。
+          </a>
+
+          <a class="resource" href="https://drive.google.com/file/d/17Z-uV6pGjC4XR0z7VKciwd5AnAop9zsI/view?usp=drive_link" target="_blank" rel="noopener noreferrer">
+            <strong>記帳以外的理財祕笈</strong>
+            除了記錄花費，也一起整理更完整的理財觀念；開啟前記得先登入 Google 雲端。
+          </a>
+        </div>
+      </section>
+
+      <div class="note">
+        <strong>提醒：</strong>
+        <ul>
+          <li>找工作的時間因產業、年資和景氣差很多，可以依自己的情況調整。</li>
+          <li>健保、國保金額以健保署和勞保局最新公告為準；有家人可以依附投保的話，保費會不一樣。</li>
+          <li>如果離職後有接案或兼職收入，可以從每月生活費裡先扣掉。</li>
+        </ul>
+        這個工具只適合當作規劃參考，想清楚再走，走得比較穩。
+      </div>
+    </section>
+
+    <footer>© Bear.saving｜先看見自己的進度，再慢慢走向想過的生活。</footer>
+  </main>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+
+    function formatWan(value) {
+      return new Intl.NumberFormat('zh-TW', {
+        maximumFractionDigits: 1,
+        minimumFractionDigits: 0
+      }).format(value) + ' 萬元';
+    }
+
+    function showError(message) {
+      const result = $('result');
+      result.className = 'result show low';
+      $('resultTitle').textContent = '請再確認輸入資料';
+      $('totalValue').textContent = '';
+      $('receipt').innerHTML = message;
+      $('comparison').textContent = '';
+      $('paths').innerHTML = '';
+      $('progressBar').style.width = '0%';
+      $('recommend').classList.remove('show');
+    }
+
+    function addMonths(n) {
+      const d = new Date();
+      d.setMonth(d.getMonth() + n);
+      return `${d.getFullYear()} 年 ${d.getMonth() + 1} 月`;
+    }
+
+    function calculate() {
+      const living = Number($('living').value);
+      const premium = Number($('premium').value || 0) / 10000;
+      const rest = Number($('rest').value || 0);
+      const search = Number($('search').value || 0);
+      const emergency = Number($('emergency').value || 0);
+      const savings = Number($('savings').value || 0);
+      const monthly = Number($('monthly').value || 0);
+
+      if (!Number.isFinite(living) || living <= 0) {
+        return showError('請輸入每月生活費。');
+      }
+      if ([premium, rest, search, emergency, savings, monthly].some((v) => !Number.isFinite(v) || v < 0)) {
+        return showError('數字不能小於 0。');
+      }
+      if (rest + search <= 0) {
+        return showError('休息和找工作的月數，至少要有一個大於 0。');
+      }
+
+      const months = rest + search;
+      const perMonth = living + premium;
+      const gap = perMonth * months;
+      const reserve = living * emergency;
+      const total = gap + reserve;
+      const ratio = total > 0 ? savings / total : 1;
+      const remain = Math.max(0, total - savings);
+
+      const result = $('result');
+      result.className = 'result show ' + (ratio >= 1 ? 'good' : ratio >= 0.5 ? 'mid' : 'low');
+      $('resultTitle').textContent = '你的裸辭基金';
+      $('totalValue').textContent = formatWan(total);
+
+      $('receipt').innerHTML =
+        `<div class="receipt-row"><span>每月生活費</span><span>${formatWan(living)}</span></div>` +
+        `<div class="receipt-row"><span>＋ 健保＋國民年金</span><span>${new Intl.NumberFormat('zh-TW').format(Math.round(premium * 10000))} 元</span></div>` +
+        `<div class="receipt-row"><span>× 休息 ${rest} 個月＋找工作 ${search} 個月</span><span>${formatWan(gap)}</span></div>` +
+        `<div class="receipt-row"><span>＋ 緊急預備金 ${emergency} 個月</span><span>${formatWan(reserve)}</span></div>` +
+        `<div class="receipt-row"><span>失業給付（主動離職）</span><span>0 元</span></div>` +
+        `<div class="receipt-row total"><span>合計</span><span>${formatWan(total)}</span></div>`;
+
+      $('comparison').textContent = ratio >= 1
+        ? '你已經存到裸辭基金了！'
+        : `你目前存到 ${(ratio * 100).toFixed(0)}%，還差 ${formatWan(remain)}`;
+
+      const bar = $('progressBar');
+      bar.style.width = Math.min(ratio * 100, 100) + '%';
+      bar.style.color = ratio >= 1 ? 'var(--good)' : ratio >= 0.5 ? 'var(--warn)' : 'var(--low)';
+
+      // the first 100k is the hardest part, mark it on the bar when it fits
+      const showMilestone = total > 12;
+      const pos = Math.min(10 / total * 100, 100);
+      $('milestone').style.display = $('milestoneLabel').style.display = showMilestone ? 'block' : 'none';
+      $('milestone').style.left = pos + '%';
+      $('milestoneLabel').style.left = pos + '%';
+
+      let paths = '';
+      if (ratio < 1) {
+        if (monthly > 0) {
+          const need = Math.ceil(remain / monthly);
+          const years = Math.floor(need / 12), rem = need % 12;
+          const span = [years ? `${years} 年` : '', rem ? `${rem} 個月` : ''].filter(Boolean).join(' ');
+          paths += `<div class="path">照每月存 ${formatWan(monthly)}，大約還要<strong class="num">${span}</strong>${addMonths(need)} 左右存到。</div>`;
+          if (savings < 10) {
+            const to10 = Math.ceil((10 - savings) / monthly);
+            paths += `<div class="path">先瞄準第一個 10 萬：大約 <strong>${to10} 個月</strong>後就會到，過了這關，後面會越存越順。</div>`;
+          }
+        } else {
+          paths += `<div class="path">輸入每月可以存多少，就能算出幾個月後存到。</div>`;
+        }
+      } else {
+        const extra = savings - total;
+        paths += `<div class="path">裸辭基金之外，你還多了<strong class="num">${formatWan(extra)}</strong>可以留著當下一段生活的底氣。</div>`;
+      }
+      paths += `<div class="path">裸辭基金可以撐你<strong class="num">${months} 個月</strong>不領薪水的生活，緊急預備金 ${formatWan(reserve)} 留著不動。</div>`;
+      $('paths').innerHTML = paths;
+
+      $('recommend').classList.toggle('show', ratio < 0.5);
+      result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    $('calculateBtn').addEventListener('click', calculate);
+
+    ['living', 'premium', 'rest', 'search', 'emergency', 'savings', 'monthly'].forEach(id => {
+      $(id).addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') calculate();
+      });
+    });
+  </script>
+</body>
+</html>
