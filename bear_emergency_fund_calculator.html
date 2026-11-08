@@ -432,6 +432,24 @@
       outline-offset: 3px;
     }
 
+    .home-link {
+      display: block;
+      margin-top: 18px;
+      padding: 14px;
+      border: 1.5px solid var(--accent);
+      border-radius: 999px;
+      background: var(--surface);
+      color: var(--accent-deep);
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: .06em;
+      text-align: center;
+      text-decoration: none;
+      transition: background .2s;
+    }
+
+    .home-link:hover { background: var(--accent-soft); }
+
     footer {
       margin-top: 22px;
       text-align: center;
@@ -562,6 +580,8 @@
         <button id="again" class="ghost" type="button">重新檢測</button>
       </div>
     </section>
+
+    <a class="home-link" href="https://bearsavingtw-art.github.io/bear-links/">回到官方網站</a>
 
     <footer>© Bear.saving｜試算結果僅供規劃參考</footer>
   </main>
