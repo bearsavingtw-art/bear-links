@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light">
+  <title>離職底氣計算器｜Bear.saving</title>
+  <meta name="description" content="輸入生活基本金額和收入性質，算出妳的緊急預備金，還有存到它需要多久。">
+  <meta property="og:title" content="離職底氣計算器｜Bear.saving">
+  <meta property="og:description" content="輸入生活基本金額和收入性質，算出妳的緊急預備金，還有存到它需要多久。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://bearsavingtw-art.github.io/bear-links/bear_emergency_fund_calculator.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Noto+Serif+TC:wght@400;600;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #fcfbf9;
+      --surface: #ffffff;
+      --warm: #fdf9f5;
+      --text: #5a4d41;
+      --muted: #7d7166;
+      --accent: #b08d85;
+      --accent-deep: #8c6a62;
+      --accent-soft: #f5eeeb;
+      --line: #ece6e1;
+      --danger: #b5544f;
+      --shadow: 0 12px 35px rgba(90, 77, 65, 0.07);
+      --sans: Montserrat, "Noto Serif TC", serif;
+      --serif: "Playfair Display", "Noto Serif TC", serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .topbar {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 56px;
+      padding: 0 20px;
+      background: var(--surface);
+      box-shadow: 0 1px 0 var(--line);
+    }
+
+    .topbar a { color: var(--text); text-decoration: none; }
+
+    .back {
+      position: absolute;
+      left: 20px;
+      font-size: 13px;
+      color: var(--muted) !important;
+    }
+
+    .back:hover { color: var(--accent-deep) !important; }
+
+    .brand {
+      font-family: var(--serif);
+      font-size: 17px;
+      font-weight: 600;
+    }
+
+    main {
+      width: min(480px, calc(100% - 32px));
+      margin: 36px auto 56px;
+    }
+
+    .step { animation: rise .45s ease both; }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: none; }
+    }
+
+    .card {
+      position: relative;
+      padding: 36px 30px 32px;
+      background: var(--surface);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .head { text-align: center; margin-bottom: 28px; }
+
+    .eyebrow {
+      margin: 0 0 4px;
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 17px;
+      color: var(--accent-deep);
+    }
+
+    h1 {
+      margin: 0;
+      font-family: var(--serif);
+      font-size: clamp(26px, 7vw, 32px);
+      font-weight: 700;
+      line-height: 1.3;
+      letter-spacing: .03em;
+    }
+
+    h1:focus { outline: none; }
+
+    .lead {
+      margin: 10px 0 0;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .field { margin: 0 0 26px; padding: 0; border: 0; min-width: 0; }
+
+    .q {
+      display: block;
+      padding: 0;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .q .n {
+      margin-right: 6px;
+      font-family: var(--serif);
+      font-style: italic;
+      color: var(--accent-deep);
+    }
+
+    .hint {
+      margin: 4px 0 0;
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--muted);
+    }
+
+    .money {
+      position: relative;
+      margin-top: 10px;
+    }
+
+    .money input {
+      width: 100%;
+      padding: 14px 44px 14px 16px;
+      border: 1.5px solid var(--line);
+      border-radius: 13px;
+      background: var(--warm);
+      color: var(--text);
+      font: 500 17px var(--sans);
+      outline: none;
+      transition: border-color .2s, box-shadow .2s, background .2s;
+      appearance: textfield;
+      -moz-appearance: textfield;
+    }
+
+    .money input::-webkit-outer-spin-button,
+    .money input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+    .money input::placeholder { color: #a79c92; font-weight: 400; }
+
+    .money input:focus {
+      border-color: var(--accent);
+      background: var(--surface);
+      box-shadow: 0 0 0 4px rgba(176, 141, 133, .16);
+    }
+
+    .money input[aria-invalid="true"] { border-color: var(--danger); }
+
+    .money .unit {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 14px;
+      color: var(--muted);
+      pointer-events: none;
+    }
+
+    .error {
+      margin: 7px 0 0;
+      font-size: 13px;
+      color: var(--danger);
+    }
+
+    .options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .option { position: relative; cursor: pointer; }
+
+    .option input {
+      position: absolute;
+      opacity: 0;
+      inset: 0;
+      margin: 0;
+      cursor: pointer;
+    }
+
+    .option span {
+      display: block;
+      height: 100%;
+      padding: 14px 15px;
+      border: 1.5px solid var(--line);
+      border-radius: 13px;
+      background: var(--warm);
+      transition: border-color .2s, background .2s;
+    }
+
+    .option b { display: block; font-size: 16px; font-weight: 600; }
+    .option small { display: block; font-size: 13px; color: var(--muted); }
+
+    .option:hover span { border-color: var(--accent); }
+
+    .option input:checked + span {
+      border-color: var(--accent-deep);
+      background: var(--accent-soft);
+      box-shadow: inset 0 0 0 .5px var(--accent-deep);
+    }
+
+    .option input:focus-visible + span {
+      box-shadow: 0 0 0 4px rgba(176, 141, 133, .25);
+    }
+
+    .primary {
+      display: block;
+      width: 100%;
+      margin-top: 6px;
+      padding: 16px;
+      border: 0;
+      border-radius: 999px;
+      background: var(--text);
+      color: #fff;
+      font: 600 16px var(--sans);
+      letter-spacing: .06em;
+      cursor: pointer;
+      transition: background .2s, transform .2s;
+    }
+
+    .primary:hover { background: #453a30; transform: translateY(-1px); }
+    .primary:active { transform: none; }
+
+    /* the report is a slip with a tear line between total and details */
+    .slip-total { text-align: center; }
+
+    .label { margin: 0; font-size: 14px; font-weight: 500; color: var(--muted); }
+
+    .amount {
+      margin: 2px 0 0;
+      font-size: clamp(40px, 12vw, 52px);
+      font-weight: 700;
+      line-height: 1.25;
+      letter-spacing: -.02em;
+      color: var(--accent-deep);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .months {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 6px;
+      margin: 20px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .months li {
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      background: linear-gradient(90deg, #dcc5be calc(var(--p, 0) * 100%), var(--accent-soft) 0);
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 600;
+      animation: fill .35s ease both;
+      animation-delay: calc(var(--i) * 45ms + 150ms);
+    }
+
+    @keyframes fill {
+      from { opacity: 0; transform: scale(.7); }
+      to { opacity: 1; transform: none; }
+    }
+
+    .caption { margin: 9px 0 0; font-size: 13px; color: var(--muted); }
+
+    .tear {
+      position: relative;
+      height: 1px;
+      margin: 26px -30px;
+      border-top: 2px dashed var(--line);
+    }
+
+    .tear::before, .tear::after {
+      content: "";
+      position: absolute;
+      top: -12px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--bg);
+    }
+
+    .tear::before { left: -11px; }
+    .tear::after { right: -11px; }
+
+    .rows { margin: 0; }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 7px 0;
+      font-size: 14px;
+    }
+
+    .row dt { color: var(--muted); }
+    .row dd { margin: 0; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+    .forecast {
+      margin-top: 20px;
+      padding: 18px 18px 16px;
+      border-radius: 14px;
+      background: var(--warm);
+      border: 1px solid var(--line);
+    }
+
+    .forecast h2 { margin: 0; font-size: 14px; font-weight: 600; color: var(--accent-deep); }
+
+    .duration {
+      margin: 2px 0 0;
+      font-size: 28px;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+
+    .forecast p { margin: 2px 0 0; font-size: 14px; }
+    .forecast .duration { font-size: 28px; }
+
+    .row.strong { font-size: 16px; }
+    .row.strong dt { color: var(--text); font-weight: 600; }
+    .row.strong dd { color: var(--accent-deep); font-weight: 700; }
+
+    .whatif {
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px dashed var(--line);
+    }
+
+    .whatif label { display: block; font-size: 14px; color: var(--muted); }
+    .whatif b { color: var(--text); font-variant-numeric: tabular-nums; }
+
+    .whatif input {
+      display: block;
+      width: 100%;
+      height: 32px;
+      margin: 2px 0 0;
+      accent-color: var(--accent-deep);
+      cursor: pointer;
+    }
+
+    .whatif p { font-weight: 600; color: var(--accent-deep); }
+
+    .forecast .first-goal {
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px dashed var(--line);
+    }
+
+    .next { margin-top: 24px; }
+
+    .next h2 { margin: 0 0 10px; font-size: 14px; font-weight: 600; color: var(--muted); }
+
+    .next a {
+      display: block;
+      padding: 13px 40px 13px 16px;
+      margin-top: 8px;
+      position: relative;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      color: var(--text);
+      text-decoration: none;
+      transition: border-color .2s, background .2s;
+    }
+
+    .next a:hover { border-color: var(--accent); background: var(--warm); }
+    .next a::after {
+      content: "→";
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--accent-deep);
+    }
+
+    .next b { display: block; font-size: 15px; font-weight: 600; }
+    .next small { display: block; font-size: 13px; line-height: 1.5; color: var(--muted); }
+
+    .closing {
+      margin: 28px 0 0;
+      text-align: center;
+      font-family: var(--serif);
+      font-size: 17px;
+      font-weight: 600;
+    }
+
+    .ghost {
+      display: block;
+      margin: 18px auto 0;
+      padding: 11px 30px;
+      border: 1.5px solid var(--accent);
+      border-radius: 999px;
+      background: transparent;
+      color: var(--accent-deep);
+      font: 600 14px var(--sans);
+      cursor: pointer;
+      transition: background .2s;
+    }
+
+    .ghost:hover { background: var(--accent-soft); }
+
+    :is(.primary, .ghost, a):focus-visible {
+      outline: 2px solid var(--accent-deep);
+      outline-offset: 3px;
+    }
+
+    footer {
+      margin-top: 22px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    @media (max-width: 480px) {
+      main { margin-top: 20px; }
+      .card { padding: 30px 22px 26px; }
+      .tear { margin-left: -22px; margin-right: -22px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="back" href="tools.html">← 工具庫</a>
+    <a class="brand" href="./">Bear.saving</a>
+  </header>
+
+  <main>
+    <section id="step1" class="step">
+      <form id="form" class="card" novalidate>
+        <div class="head">
+          <p class="eyebrow">Freedom Fund</p>
+          <h1>離職底氣計算器</h1>
+          <p class="lead">Bear.saving 存錢系統</p>
+        </div>
+
+        <div class="field">
+          <label class="q" for="expense"><span class="n">1.</span>生活基本金額多少錢？</label>
+          <p class="hint">每個月「沒花會死掉的錢」<br>房租、吃飯、保險、電話費</p>
+          <div class="money">
+            <input id="expense" type="number" min="0" step="any" inputmode="numeric" placeholder="例：25000" aria-describedby="expenseError">
+            <span class="unit">元</span>
+          </div>
+          <p id="expenseError" class="error" role="alert" hidden>請輸入生活基本金額喔！</p>
+        </div>
+
+        <fieldset class="field">
+          <legend class="q"><span class="n">2.</span>妳的工作收入性質？</legend>
+          <div class="options">
+            <label class="option">
+              <input type="radio" name="income" value="6" data-label="穩定" checked>
+              <span><b>穩定</b><small>一般上班族</small></span>
+            </label>
+            <label class="option">
+              <input type="radio" name="income" value="12" data-label="不穩定">
+              <span><b>不穩定</b><small>業務／SOHO</small></span>
+            </label>
+          </div>
+        </fieldset>
+
+        <div class="field">
+          <label class="q" for="saving"><span class="n">3.</span>每月預計能存多少錢？</label>
+          <p class="hint">算出妳需要多久可以「獲得自由」</p>
+          <div class="money">
+            <input id="saving" type="number" min="0" step="any" inputmode="numeric" placeholder="例：5000">
+            <span class="unit">元</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="q" for="saved"><span class="n">4.</span>目前已經存了多少？</label>
+          <p class="hint">算出妳走到哪裡了，沒有就留白</p>
+          <div class="money">
+            <input id="saved" type="number" min="0" step="any" inputmode="numeric" placeholder="例：30000">
+            <span class="unit">元</span>
+          </div>
+        </div>
+
+        <button class="primary" type="submit">開始計算離職底氣</button>
+      </form>
+    </section>
+
+    <section id="step2" class="step" hidden>
+      <div class="card">
+        <div class="head">
+          <p class="eyebrow">Diagnosis</p>
+          <h1 id="reportTitle" tabindex="-1">診療報告</h1>
+        </div>
+
+        <div class="slip-total">
+          <p class="label">妳的緊急預備金總額</p>
+          <p id="total" class="amount"></p>
+          <ol id="months" class="months" aria-hidden="true"></ol>
+          <p id="caption" class="caption"></p>
+        </div>
+
+        <div class="tear" aria-hidden="true"></div>
+
+        <dl class="rows">
+          <div class="row"><dt>每月基本開銷</dt><dd id="rowExpense"></dd></div>
+          <div class="row"><dt>收入性質</dt><dd id="rowType"></dd></div>
+          <div class="row"><dt>建議準備</dt><dd id="rowMonths"></dd></div>
+          <div class="row" id="savedRow" hidden><dt>目前已存</dt><dd id="rowSaved"></dd></div>
+          <div class="row strong" id="remainRow" hidden><dt>還差</dt><dd id="rowRemain"></dd></div>
+        </dl>
+
+        <div id="forecast" class="forecast">
+          <h2>存錢進度預測</h2>
+          <p id="duration" class="duration"></p>
+          <p id="forecastText"></p>
+          <div class="whatif">
+            <label for="whatif">拖拉看看，每月存 <b id="whatifValue"></b></label>
+            <input id="whatif" type="range" step="100">
+            <p id="whatifResult" aria-live="polite"></p>
+          </div>
+          <p id="firstGoal" class="first-goal" hidden></p>
+        </div>
+
+        <div id="done" class="forecast" hidden>
+          <h2>底氣已經存滿了</h2>
+          <p id="doneAmount" class="duration"></p>
+          <p>接下來存的每一塊錢，都可以放進下一個目標。</p>
+        </div>
+
+        <nav class="next" aria-labelledby="nextTitle">
+          <h2 id="nextTitle">下一步</h2>
+          <div id="nextLinks"></div>
+        </nav>
+
+        <p class="closing">存好這筆錢，<br>妳就擁有了拒絕的權力。💪</p>
+        <button id="again" class="ghost" type="button">重新檢測</button>
+      </div>
+    </section>
+
+    <footer>© Bear.saving｜試算結果僅供規劃參考</footer>
+  </main>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const money = (n) => '$' + Math.round(n).toLocaleString('en-US');
+
+    function formatDuration(totalMonths) {
+      const years = Math.floor(totalMonths / 12);
+      const months = totalMonths % 12;
+      return [years ? `${years} 年` : '', months ? `${months} 個月` : ''].filter(Boolean).join(' ');
+    }
+
+    function targetDate(monthsFromNow) {
+      const now = new Date();
+      const d = new Date(now.getFullYear(), now.getMonth() + monthsFromNow, 1);
+      return `${d.getFullYear()} 年 ${d.getMonth() + 1} 月`;
+    }
+
+    function show(step) {
+      $('step1').hidden = step !== 1;
+      $('step2').hidden = step !== 2;
+      window.scrollTo(0, 0);
+    }
+
+    function setExpenseError(on) {
+      $('expenseError').hidden = !on;
+      if (on) $('expense').setAttribute('aria-invalid', 'true');
+      else $('expense').removeAttribute('aria-invalid');
+    }
+
+    function renderMonths(count, covered) {
+      const list = $('months');
+      list.textContent = '';
+      for (let i = 0; i < count; i++) {
+        const li = document.createElement('li');
+        li.style.setProperty('--i', i);
+        li.style.setProperty('--p', Math.min(1, Math.max(0, covered - i)));
+        li.textContent = i + 1;
+        list.appendChild(li);
+      }
+    }
+
+    function countUp(element, target) {
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        element.textContent = money(target);
+        return;
+      }
+      const start = performance.now();
+      const duration = 650;
+      const token = (element.dataset.run = String(start));
+      element.textContent = money(0);
+      requestAnimationFrame(function tick(now) {
+        if (element.dataset.run !== token) return;
+        const t = Math.min(1, (now - start) / duration);
+        element.textContent = money(target * (1 - Math.pow(1 - t, 3)));
+        if (t < 1) requestAnimationFrame(tick);
+      });
+    }
+
+    const NEXT_TOOLS = {
+      start: [
+        ['Bear_1percent_saving_calculator.html', '先存 1% 就好', '把第一步縮小一點，看看每月、一年和五年可以留下多少。'],
+        ['envelopes.html', '新手無腦存袋法', '領薪水後照比例分流，餘額一眼就看得見。']
+      ],
+      halfway: [
+        ['rocket.html', '三階段火箭存錢目標法', '拆開短期緩衝、中期目標與長期累積，知道現在先顧哪一層。']
+      ],
+      done: [
+        ['Bear_time.html', '財務緩衝時間計算器', '算算目前的錢可以支撐多久。'],
+        ['rocket.html', '三階段火箭存錢目標法', '把接下來存的錢，分到中期和長期目標。']
+      ]
+    };
+
+    function renderNext(group) {
+      const box = $('nextLinks');
+      box.textContent = '';
+      NEXT_TOOLS[group].forEach(([href, name, copy]) => {
+        const link = document.createElement('a');
+        link.href = href;
+        const title = document.createElement('b');
+        title.textContent = name;
+        const text = document.createElement('small');
+        text.textContent = copy;
+        link.append(title, text);
+        box.appendChild(link);
+      });
+    }
+
+    let plan = null;
+
+    function renderForecast(monthly) {
+      const need = Math.ceil(plan.remain / monthly);
+      const diff = plan.baseNeed - need;
+      $('duration').textContent = formatDuration(need);
+      $('forecastText').textContent =
+        `每個月存 ${money(monthly)}，大約 ${targetDate(need)} 就能存到這筆底氣！`;
+      $('whatifValue').textContent = money(monthly);
+      $('whatifResult').textContent =
+        diff > 0 ? `提早 ${formatDuration(diff)}存到` :
+        diff < 0 ? `多花 ${formatDuration(-diff)}存到` :
+        '往右拖，看每月多存一點能提早多久';
+
+      const toFirst = 100000 - plan.saved;
+      const showFirst = toFirst > 0 && plan.total > 100000;
+      $('firstGoal').hidden = !showFirst;
+      if (showFirst) {
+        $('firstGoal').textContent = `先瞄準第一個 10 萬：大約 ${formatDuration(Math.ceil(toFirst / monthly))}後就會到。`;
+      }
+    }
+
+    function calculate(event) {
+      event.preventDefault();
+      const expense = Number($('expense').value);
+      const saving = Number($('saving').value);
+
+      if (!Number.isFinite(expense) || expense <= 0) {
+        setExpenseError(true);
+        $('expense').focus();
+        return;
+      }
+      setExpenseError(false);
+
+      const choice = document.querySelector('input[name="income"]:checked');
+      const multiplier = Number(choice.value);
+      const totalNeeded = expense * multiplier;
+
+      const savedInput = Number($('saved').value);
+      const saved = Number.isFinite(savedInput) && savedInput > 0 ? savedInput : 0;
+      const remain = Math.max(0, totalNeeded - saved);
+      const covered = Math.min(multiplier, saved / expense);
+      const ratio = saved / totalNeeded;
+      const isDone = remain === 0;
+
+      countUp($('total'), totalNeeded);
+      renderMonths(multiplier, covered);
+      $('caption').textContent = saved > 0
+        ? `妳的存款可以撐 ${(Math.floor(covered * 10) / 10)} 個月，已完成 ${Math.floor(Math.min(1, ratio) * 100)}%`
+        : `一格是一個月的生活，一共 ${multiplier} 個月`;
+      $('rowExpense').textContent = money(expense);
+      $('rowType').textContent = choice.dataset.label;
+      $('rowMonths').textContent = `${multiplier} 個月預備金`;
+      $('savedRow').hidden = saved <= 0;
+      $('remainRow').hidden = saved <= 0 || isDone;
+      $('rowSaved').textContent = money(saved);
+      $('rowRemain').textContent = money(remain);
+
+      $('done').hidden = !isDone;
+      if (isDone) {
+        const extra = saved - totalNeeded;
+        $('doneAmount').textContent = extra > 0 ? `還多出 ${money(extra)}` : '剛好存滿';
+      }
+
+      const hasPlan = !isDone && Number.isFinite(saving) && saving > 0;
+      $('forecast').hidden = !hasPlan;
+      if (hasPlan) {
+        plan = { remain, saved, total: totalNeeded, baseNeed: Math.ceil(remain / saving) };
+        const slider = $('whatif');
+        slider.min = 100;
+        slider.max = Math.ceil(Math.max(saving * 3, 20000) / 100) * 100;
+        slider.value = saving;
+        renderForecast(saving);
+      }
+
+      renderNext(isDone ? 'done' : ratio >= 0.5 ? 'halfway' : 'start');
+
+      show(2);
+      $('reportTitle').focus({ preventScroll: true });
+    }
+
+    function reset() {
+      $('form').reset();
+      setExpenseError(false);
+      show(1);
+      $('expense').focus({ preventScroll: true });
+    }
+
+    $('form').addEventListener('submit', calculate);
+    $('again').addEventListener('click', reset);
+    $('whatif').addEventListener('input', (event) => renderForecast(Number(event.target.value)));
+    $('expense').addEventListener('input', () => setExpenseError(false));
+  </script>
+</body>
+</html>
